@@ -138,13 +138,49 @@ function RegisterPage() {
               <Select value={form.country} onValueChange={(v) => update("country", v)}>
                 <SelectTrigger><SelectValue placeholder="Choisissez votre pays" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="FR">France</SelectItem>
-                  <SelectItem value="CA">Canada</SelectItem>
-                  <SelectItem value="BE">Belgique</SelectItem>
-                  <SelectItem value="CH">Suisse</SelectItem>
-                  <SelectItem value="LU">Luxembourg</SelectItem>
-                  <SelectItem value="HT">Haïti</SelectItem>
-                  <SelectItem value="OTHER">Autre</SelectItem>
+                  {/* Caraïbes */}
+                  <SelectItem value="HT">🇭🇹 Haïti</SelectItem>
+                  <SelectItem value="GP">🇬🇵 Guadeloupe</SelectItem>
+                  <SelectItem value="MQ">🇲🇶 Martinique</SelectItem>
+                  <SelectItem value="GF">🇬🇫 Guyane française</SelectItem>
+                  <SelectItem value="RE">🇷🇪 La Réunion</SelectItem>
+                  <SelectItem value="DO">🇩🇴 République Dominicaine</SelectItem>
+                  <SelectItem value="CU">🇨🇺 Cuba</SelectItem>
+                  <SelectItem value="JM">🇯🇲 Jamaïque</SelectItem>
+                  <SelectItem value="TT">🇹🇹 Trinidad et Tobago</SelectItem>
+                  {/* Afrique francophone */}
+                  <SelectItem value="SN">🇸🇳 Sénégal</SelectItem>
+                  <SelectItem value="CI">🇨🇮 Côte d'Ivoire</SelectItem>
+                  <SelectItem value="CM">🇨🇲 Cameroun</SelectItem>
+                  <SelectItem value="ML">🇲🇱 Mali</SelectItem>
+                  <SelectItem value="BF">🇧🇫 Burkina Faso</SelectItem>
+                  <SelectItem value="GN">🇬🇳 Guinée</SelectItem>
+                  <SelectItem value="TG">🇹🇬 Togo</SelectItem>
+                  <SelectItem value="BJ">🇧🇯 Bénin</SelectItem>
+                  <SelectItem value="NE">🇳🇪 Niger</SelectItem>
+                  <SelectItem value="CD">🇨🇩 Congo (RDC)</SelectItem>
+                  <SelectItem value="CG">🇨🇬 Congo (Brazzaville)</SelectItem>
+                  <SelectItem value="GA">🇬🇦 Gabon</SelectItem>
+                  <SelectItem value="MG">🇲🇬 Madagascar</SelectItem>
+                  <SelectItem value="MU">🇲🇺 Maurice</SelectItem>
+                  <SelectItem value="DZ">🇩🇿 Algérie</SelectItem>
+                  <SelectItem value="MA">🇲🇦 Maroc</SelectItem>
+                  <SelectItem value="TN">🇹🇳 Tunisie</SelectItem>
+                  {/* Europe */}
+                  <SelectItem value="FR">🇫🇷 France</SelectItem>
+                  <SelectItem value="BE">🇧🇪 Belgique</SelectItem>
+                  <SelectItem value="CH">🇨🇭 Suisse</SelectItem>
+                  <SelectItem value="LU">🇱🇺 Luxembourg</SelectItem>
+                  {/* Amérique du Nord */}
+                  <SelectItem value="CA">🇨🇦 Canada</SelectItem>
+                  <SelectItem value="US">🇺🇸 États-Unis</SelectItem>
+                  <SelectItem value="MX">🇲🇽 Mexique</SelectItem>
+                  {/* Amérique du Sud */}
+                  <SelectItem value="BR">🇧🇷 Brésil</SelectItem>
+                  <SelectItem value="CO">🇨🇴 Colombie</SelectItem>
+                  <SelectItem value="VE">🇻🇪 Venezuela</SelectItem>
+                  {/* Autre */}
+                  <SelectItem value="OTHER">🌍 Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
