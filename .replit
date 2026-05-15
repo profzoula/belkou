@@ -36,3 +36,10 @@ externalPort = 80
 [[ports]]
 localPort = 8080
 externalPort = 8080
+
+[userenv]
+
+[userenv.shared]
+ADMIN_USERNAME = "Prof Zoula"
+ADMIN_PASSWORD = "@#Laica2017"
+ADMIN_SESSION_SECRET = "55aa2e05e25cf3bc660677e5020d158041c97e86318dae2dd0e09d5c91579431"
