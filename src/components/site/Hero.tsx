@@ -1,17 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Star, Video, Calendar, Clock, CheckCircle2, Zap } from "lucide-react";
+import { ArrowRight, Star, CheckCircle2, Zap } from "lucide-react";
 import { Countdown } from "./Countdown";
 
 const pills = [
   { icon: CheckCircle2, label: "Exécution étape par étape" },
   { icon: Zap,          label: "Résultats dès la semaine 1" },
-];
-
-const schedule = [
-  { icon: Video,    text: "Zoom en direct" },
-  { icon: Calendar, text: "Début : 30 mai" },
-  { icon: Calendar, text: "Sam & Dim" },
-  { icon: Clock,    text: "10h PM · 2h/session" },
 ];
 
 export function Hero() {
@@ -94,20 +87,6 @@ export function Hero() {
                 <div key={p.label} className="flex items-center gap-2 rounded-xl border border-border/60 bg-gradient-card px-4 py-2.5 text-xs font-medium text-muted-foreground">
                   <p.icon className="h-4 w-4 text-primary shrink-0" />
                   {p.label}
-                </div>
-              ))}
-            </div>
-
-            {/* Schedule row */}
-            <div
-              className="animate-fade-up flex flex-wrap items-center gap-4 mb-6"
-              style={{ animationDelay: "0.40s" }}
-            >
-              {schedule.map((s, i) => (
-                <div key={s.text} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <s.icon className="h-3.5 w-3.5 text-primary/70" />
-                  {s.text}
-                  {i < schedule.length - 1 && <span className="ml-2 text-border">·</span>}
                 </div>
               ))}
             </div>
