@@ -107,12 +107,20 @@ function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Pa gen kont toujou?{" "}
-            <Link to="/register" className="text-primary hover:underline font-medium">
-              Enskri pou $199
-            </Link>
-          </p>
+          <div className="text-center text-xs text-muted-foreground mt-6 space-y-2">
+            <p>
+              Deja peye men pa gen kont?{" "}
+              <Link to="/signup" className="text-primary hover:underline font-medium">
+                Kreye kont ou isit
+              </Link>
+            </p>
+            <p>
+              Pa gen kont toujou?{" "}
+              <a href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202" target="_blank" rel="noreferrer" className="text-primary hover:underline font-medium">
+                Enskri pou $199
+              </a>
+            </p>
+          </div>
         </div>
       </main>
     </div>
