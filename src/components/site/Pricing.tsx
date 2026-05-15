@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check, Sparkles, ShieldCheck, Clock, Users } from "lucide-react";
+import { Check, Sparkles, ShieldCheck, Clock, Users, BookOpen } from "lucide-react";
 
 const features = [
   "Sessions Zoom en direct — Samedi & Dimanche à 10h PM (2h/session)",
@@ -56,6 +56,15 @@ export function Pricing() {
 
             {/* Divider */}
             <div className="border-t border-border/50 mb-8" />
+
+            {/* Ebook promo */}
+            <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-400/8 px-4 py-3">
+              <BookOpen className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-amber-300">Offre spéciale — 10 premières places</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Recevez gratuitement notre eBook exclusif sur la formation IA.</p>
+              </div>
+            </div>
 
             {/* Features */}
             <ul className="space-y-3.5 mb-8">
