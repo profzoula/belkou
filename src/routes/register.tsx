@@ -9,6 +9,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { ArrowLeft, Rocket } from "lucide-react";
 import { toast } from "sonner";
+import { submitRegistration } from "@/lib/registerFn";
 
 const searchSchema = z.object({
   plan: z.enum(["basic", "premium", "vip"]).optional(),
@@ -57,10 +58,15 @@ function RegisterPage() {
       return;
     }
     setLoading(true);
-    // TODO: Connect to backend (Lovable Cloud) to persist + trigger payment + email.
-    await new Promise((r) => setTimeout(r, 600));
-    setLoading(false);
-    navigate({ to: "/success", search: { plan: form.plan } });
+    try {
+      await submitRegistration({ data: parsed.data });
+      navigate({ to: "/success", search: { plan: form.plan } });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur lors de l'inscription";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
