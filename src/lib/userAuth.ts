@@ -26,7 +26,9 @@ export const studentLogin = createServerFn({ method: "POST" })
     });
 
     if (!res.ok) {
-      return { success: false as const, user: null };
+      const errBody = await res.json().catch(() => ({})) as { error_description?: string; msg?: string };
+      const errMsg = errBody.error_description ?? errBody.msg ?? `HTTP ${res.status}`;
+      return { success: false as const, user: null, errorMsg: errMsg };
     }
 
     const authData = await res.json() as {

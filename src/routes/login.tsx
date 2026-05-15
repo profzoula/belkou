@@ -36,7 +36,8 @@ function LoginPage() {
         sessionStorage.setItem("student_user", JSON.stringify(res.user));
         navigate({ to: "/dashboard" });
       } else {
-        setError("Email ou modpas la pa kòrèk.");
+        const detail = (res as { errorMsg?: string }).errorMsg;
+        setError(detail ? `Erè: ${detail}` : "Email ou modpas la pa kòrèk.");
       }
     } catch {
       setError("Yon erè te fèt. Eseye ankò.");
