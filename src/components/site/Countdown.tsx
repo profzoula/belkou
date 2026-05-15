@@ -21,10 +21,10 @@ export function Countdown() {
   }, []);
 
   const units = [
-    { label: "Jou",    val: tl.jou },
-    { label: "Èdtan",  val: tl.èdtan },
-    { label: "Minit",  val: tl.minit },
-    { label: "Segonn", val: tl.segonn },
+    { label: "Jours",   val: tl.jou },
+    { label: "Heures",  val: tl.èdtan },
+    { label: "Minutes", val: tl.minit },
+    { label: "Secondes",val: tl.segonn },
   ];
 
   return (
