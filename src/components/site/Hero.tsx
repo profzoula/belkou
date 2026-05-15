@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Star, Video, Calendar, Clock, CheckCircle2, Zap } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
 
 const pills = [
   { icon: CheckCircle2, label: "Exécution étape par étape" },
@@ -120,9 +119,12 @@ export function Hero() {
                 Formation en direct · Zoom
               </div>
 
-              <img
-                src={heroBg}
-                alt="BelKou Formation"
+              <video
+                src="/hero-video.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
                 className="w-full h-[400px] xl:h-[460px] object-cover"
               />
 
