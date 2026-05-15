@@ -42,9 +42,9 @@ export function Navbar() {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2">
+          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2">
             Se connecter
-          </a>
+          </Link>
           <Link
             to="/register"
             className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"

@@ -63,8 +63,11 @@ function RegisterPage() {
     }
     setLoading(true);
     try {
-      await submitRegistration({ data: parsed.data });
-      navigate({ to: "/success", search: { plan: form.plan } });
+      const res = await submitRegistration({ data: parsed.data });
+      navigate({
+        to: "/success",
+        search: { plan: form.plan, password: res.tempPassword },
+      });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'inscription";
       toast.error(msg);
