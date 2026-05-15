@@ -13,18 +13,21 @@ function getTimeLeft() {
 }
 
 export function Countdown() {
-  const [tl, setTl] = useState(getTimeLeft);
+  const [mounted, setMounted] = useState(false);
+  const [tl, setTl] = useState({ j: 0, h: 0, m: 0, s: 0 });
 
   useEffect(() => {
+    setMounted(true);
+    setTl(getTimeLeft());
     const id = setInterval(() => setTl(getTimeLeft()), 1000);
     return () => clearInterval(id);
   }, []);
 
   const units = [
-    { label: "Jours",  val: tl.j },
-    { label: "Heures", val: tl.h },
-    { label: "Min",    val: tl.m },
-    { label: "Sec",    val: tl.s },
+    { label: "Jours",   val: tl.j },
+    { label: "Heures",  val: tl.h },
+    { label: "Min",     val: tl.m },
+    { label: "Sec",     val: tl.s },
   ];
 
   return (
@@ -40,7 +43,7 @@ export function Countdown() {
           <div key={u.label} className="flex items-center gap-2">
             <div className="text-center w-9">
               <div className="font-display text-2xl font-bold text-foreground tabular-nums leading-none">
-                {String(u.val).padStart(2, "0")}
+                {mounted ? String(u.val).padStart(2, "0") : "00"}
               </div>
               <div className="text-[9px] text-muted-foreground mt-1">{u.label}</div>
             </div>

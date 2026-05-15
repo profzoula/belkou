@@ -66,7 +66,7 @@ function RegisterPage() {
       const res = await submitRegistration({ data: parsed.data });
       navigate({
         to: "/success",
-        search: { plan: form.plan, password: res.tempPassword },
+        search: { plan: form.plan, password: res.tempPassword, email: form.email },
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Erreur lors de l'inscription";

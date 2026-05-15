@@ -5,8 +5,8 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { CheckCircle2, MessageCircle, Calendar, Mail, Video, Users, KeyRound, LogIn, Copy, Check } from "lucide-react";
 import { useState } from "react";
+import { getZoomLink } from "@/lib/zoomFn";
 
-const ZOOM_LINK     = "https://us05web.zoom.us/j/81878578623?pwd=p4P7bcHRxdIqODdhp6AVybaXuvNJ8U.1";
 const DISCORD_LINK  = "https://discord.gg/VOTRE_CODE";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/";
 
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/success")({
   validateSearch: z.object({
     plan: z.string().optional(),
     password: z.string().optional(),
+    email: z.string().optional(),
   }),
   component: SuccessPage,
 });
@@ -41,7 +42,21 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function SuccessPage() {
-  const { plan, password } = Route.useSearch();
+  const { plan, password, email } = Route.useSearch();
+  const [zoomLoading, setZoomLoading] = useState(false);
+
+  async function openZoom() {
+    if (!email) return;
+    setZoomLoading(true);
+    try {
+      const res = await getZoomLink({ data: { email } });
+      window.open(res.url, "_blank", "noopener");
+    } catch {
+      alert("Aksè refize. Kontakte administratè a.");
+    } finally {
+      setZoomLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen">
@@ -97,10 +112,9 @@ function SuccessPage() {
               <p className="text-sm text-muted-foreground mb-3">
                 Les cours ont lieu <strong className="text-foreground">Samedi & Dimanche à 10h PM</strong>, 2h par session.
               </p>
-              <Button asChild variant="neon" size="sm">
-                <a href={ZOOM_LINK} target="_blank" rel="noreferrer">
-                  <Video className="h-4 w-4 mr-2" />Entrer dans Zoom
-                </a>
+              <Button variant="neon" size="sm" disabled={zoomLoading || !email} onClick={openZoom}>
+                <Video className="h-4 w-4 mr-2" />
+                {zoomLoading ? "Chargement…" : "Entrer dans Zoom"}
               </Button>
             </div>
           </div>

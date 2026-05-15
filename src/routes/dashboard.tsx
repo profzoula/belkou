@@ -1,12 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Video, Users, MessageCircle, Calendar, Clock, LogOut, Sparkles, BookOpen } from "lucide-react";
+import { getZoomLink } from "@/lib/zoomFn";
 
-// ── Mete lyen reyèl ou yo isit ─────────────────────────────────────────────
-const ZOOM_LINK     = "https://us05web.zoom.us/j/81878578623?pwd=p4P7bcHRxdIqODdhp6AVybaXuvNJ8U.1";
 const DISCORD_LINK  = "https://discord.gg/VOTRE_CODE";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/";
-// ────────────────────────────────────────────────────────────────────────────
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -20,6 +18,7 @@ type Student = { id: number; full_name: string; email: string; plan: string };
 function DashboardPage() {
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student | null>(null);
+  const [zoomLoading, setZoomLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -90,11 +89,23 @@ function DashboardPage() {
                 Klike pou antre nan kou a. Asire w ou la alè!
               </p>
             </div>
-            <a href={ZOOM_LINK} target="_blank" rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity shrink-0">
+            <button
+              disabled={zoomLoading}
+              onClick={async () => {
+                setZoomLoading(true);
+                try {
+                  const res = await getZoomLink({ data: { email: student.email } });
+                  window.open(res.url, "_blank", "noopener");
+                } catch {
+                  alert("Aksè refize. Kontakte administratè a.");
+                } finally {
+                  setZoomLoading(false);
+                }
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity shrink-0 disabled:opacity-60">
               <Video className="h-4 w-4" />
-              Entrer dans Zoom
-            </a>
+              {zoomLoading ? "Chargement…" : "Entrer dans Zoom"}
+            </button>
           </div>
 
           {/* ── Orè ── */}
