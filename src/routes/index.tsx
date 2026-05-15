@@ -12,10 +12,10 @@ import { Footer } from "@/components/site/Footer";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "VibeCoding Formation — Apprenez à créer des Apps IA et des SaaS" },
+      { title: "BelKou Formation — Apprenez à créer des Apps IA et des SaaS" },
       { name: "description", content: "Apprenez à utiliser les outils IA pour créer des sites web, des SaaS et des automations. Formation complète en français avec mentorat." },
-      { property: "og:title", content: "VibeCoding Formation" },
-      { property: "og:description", content: "Apprenez VibeCoding & créez des Apps IA rapidement." },
+      { property: "og:title", content: "BelKou Formation" },
+      { property: "og:description", content: "Apprenez BelKou & créez des Apps IA rapidement." },
     ],
   }),
   component: Index,

@@ -8,7 +8,7 @@ import { CheckCircle2, MessageCircle, Calendar, Mail } from "lucide-react";
 export const Route = createFileRoute("/success")({
   head: () => ({
     meta: [
-      { title: "Bienvini! — Vibe Coding Formation" },
+      { title: "Bienvini! — BelKou Formation" },
       { name: "description", content: "Enskripsyon konfime. Antre nan kominote a." },
     ],
   }),

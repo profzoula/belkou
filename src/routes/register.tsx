@@ -18,8 +18,8 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Enskripsyon — Vibe Coding Formation" },
-      { name: "description", content: "Enskri nan fòmasyon Vibe Coding pou aprann kreye AI Apps ak SaaS." },
+      { title: "Enskripsyon — BelKou Formation" },
+      { name: "description", content: "Enskri nan fòmasyon BelKou pou aprann kreye AI Apps ak SaaS." },
     ],
   }),
   validateSearch: searchSchema,

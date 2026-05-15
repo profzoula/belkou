@@ -1,6 +1,6 @@
 const items = [
   { name: "Jeff M.", role: "Etudiant", text: "En 2 semaines, j'ai lancé ma propre page d'accueil et j'ai trouvé mon premier client." },
-  { name: "Sandra L.", role: "Designer", text: "Je n'aurais jamais pensé que je pourrais coder. VibeCoding a changé ma vie." },
+  { name: "Sandra L.", role: "Designer", text: "Je n'aurais jamais pensé que je pourrais coder. BelKou a changé ma vie." },
   { name: "Kervens P.", role: "Entrepreneur", text: "Le meilleur investissement que j'ai fait cette année. Le mentorat est un cadeau." },
 ];
 

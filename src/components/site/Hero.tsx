@@ -24,7 +24,7 @@ export function Hero() {
         </div>
 
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6">
-          Apprenez <span className="text-gradient">VibeCoding</span>
+          Apprenez <span className="text-gradient">BelKou</span>
           <br />
           Créez des Apps IA Rapidement
         </h1>

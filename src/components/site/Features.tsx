@@ -8,7 +8,7 @@ const features = [
   { icon: Wrench, title: "Automatisation", desc: "Automatisez les tâches répétitives avec des workflows." },
   { icon: Bot, title: "Agents IA", desc: "Créez des agents IA qui travaillent pour vous." },
   { icon: DollarSign, title: "Monétisation", desc: "Transformez votre code en argent réel." },
-  { icon: Sparkles, title: "VibeCoding", desc: "Une nouvelle façon de créer des logiciels avec l'IA." },
+  { icon: Sparkles, title: "BelKou", desc: "Une nouvelle façon de créer des logiciels avec l'IA." },
 ];
 
 export function Features() {
