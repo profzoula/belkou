@@ -22,34 +22,48 @@ function generatePassword(length = 8): string {
 export const submitRegistration = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registrationSchema.parse(data))
   .handler(async ({ data }) => {
-    const { Pool } = await import("pg");
-    const { createHash } = await import("node:crypto");
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    try {
-      const result = await pool.query(
-        `INSERT INTO registrations (full_name, email, whatsapp, country, level, plan)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [data.full_name, data.email, data.whatsapp, data.country, data.level, data.plan],
-      );
+    const { getSupabaseAdmin } = await import("./supabaseAdmin");
+    const admin = getSupabaseAdmin();
 
-      const tempPassword = generatePassword();
-      const hash = createHash("sha256")
-        .update(`belkou:${tempPassword}`)
-        .digest("hex");
+    // 1. Insert into registrations table
+    const { error: regError } = await admin.from("registrations").insert({
+      full_name: data.full_name,
+      email: data.email.toLowerCase(),
+      whatsapp: data.whatsapp,
+      country: data.country,
+      level: data.level,
+      plan: data.plan,
+    });
+    if (regError) throw new Error(regError.message);
 
-      await pool.query(
-        `INSERT INTO users (full_name, email, password_hash, plan)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (email) DO UPDATE SET full_name=$1, plan=$4`,
-        [data.full_name, data.email.toLowerCase(), hash, data.plan],
-      );
+    // 2. Create Supabase Auth user with temp password
+    const tempPassword = generatePassword();
+    const { data: authData, error: authError } = await admin.auth.admin.createUser({
+      email: data.email.toLowerCase(),
+      password: tempPassword,
+      email_confirm: true,
+      user_metadata: { full_name: data.full_name, plan: data.plan },
+    });
 
-      return {
-        success: true as const,
-        id: result.rows[0].id as number,
-        tempPassword,
-      };
-    } finally {
-      await pool.end();
+    if (authError) {
+      // If user already exists, update password instead
+      if (authError.message.includes("already been registered") || authError.code === "email_exists") {
+        const { data: listData } = await admin.auth.admin.listUsers();
+        const existing = listData?.users?.find(u => u.email === data.email.toLowerCase());
+        if (existing) {
+          await admin.auth.admin.updateUserById(existing.id, { password: tempPassword });
+        }
+      } else {
+        throw new Error(authError.message);
+      }
     }
+
+    // 3. Upsert into users table for profile data
+    await admin.from("users").upsert({
+      email: data.email.toLowerCase(),
+      full_name: data.full_name,
+      plan: data.plan,
+    }, { onConflict: "email" });
+
+    return { success: true as const, tempPassword };
   });

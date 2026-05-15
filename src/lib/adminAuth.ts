@@ -1,8 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { Pool } from "pg";
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function signToken(username: string): Promise<string> {
   const { createHmac } = await import("node:crypto");
@@ -65,22 +62,17 @@ export const getRegistrations = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const user = await verifyTokenInternal(data.token);
     if (!user) throw new Error("Unauthorized");
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS registrations (
-        id SERIAL PRIMARY KEY,
-        full_name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        whatsapp TEXT,
-        country TEXT,
-        level TEXT,
-        plan TEXT,
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
-    const result = await pool.query(
-      "SELECT * FROM registrations ORDER BY id DESC",
-    );
-    return result.rows as Array<{
+
+    const { getSupabaseAdmin } = await import("./supabaseAdmin");
+    const admin = getSupabaseAdmin();
+
+    const { data: rows, error } = await admin
+      .from("registrations")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
       id: number;
       full_name: string;
       email: string;
@@ -99,6 +91,11 @@ export const deleteRegistration = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const user = await verifyTokenInternal(data.token);
     if (!user) throw new Error("Unauthorized");
-    await pool.query("DELETE FROM registrations WHERE id = $1", [data.id]);
+
+    const { getSupabaseAdmin } = await import("./supabaseAdmin");
+    const admin = getSupabaseAdmin();
+
+    const { error } = await admin.from("registrations").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
     return { success: true as const };
   });
