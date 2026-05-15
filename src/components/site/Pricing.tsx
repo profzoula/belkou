@@ -80,9 +80,7 @@ export function Pricing() {
 
             {/* CTA */}
             <a
-              href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
-              target="_blank"
-              rel="noreferrer"
+              href="/register"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary px-6 py-3.5 text-base font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
             >
               S'inscrire Maintenant →

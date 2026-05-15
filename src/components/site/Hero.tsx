@@ -59,14 +59,12 @@ export function Hero() {
               className="animate-fade-up flex flex-wrap items-center gap-3 mb-8"
               style={{ animationDelay: "0.28s" }}
             >
-              <a
-                href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                to="/register"
                 className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-7 py-3 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
               >
                 Commencer maintenant <ArrowRight className="h-4 w-4" />
-              </a>
+              </Link>
               <a
                 href="#learn"
                 className="inline-flex items-center gap-2 rounded-xl border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:border-primary/40 hover:text-foreground hover:bg-white/4 transition-all"

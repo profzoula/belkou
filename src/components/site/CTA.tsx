@@ -30,9 +30,7 @@ export function CTA() {
             </p>
 
             <a
-              href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
-              target="_blank"
-              rel="noreferrer"
+              href="/register"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
             >
               <Rocket className="h-4 w-4" /> S'inscrire Maintenant
