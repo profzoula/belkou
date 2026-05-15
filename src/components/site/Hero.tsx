@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Star, Video, Calendar, Clock, CheckCircle2, Zap } from "lucide-react";
+import { Countdown } from "./Countdown";
 
 const pills = [
   { icon: CheckCircle2, label: "Exécution étape par étape" },
@@ -99,7 +100,7 @@ export function Hero() {
 
             {/* Schedule row */}
             <div
-              className="animate-fade-up flex flex-wrap items-center gap-4"
+              className="animate-fade-up flex flex-wrap items-center gap-4 mb-6"
               style={{ animationDelay: "0.40s" }}
             >
               {schedule.map((s, i) => (
@@ -110,6 +111,9 @@ export function Hero() {
                 </div>
               ))}
             </div>
+
+            {/* Countdown */}
+            <Countdown />
           </div>
 
           {/* ── RIGHT: Image card ── */}
