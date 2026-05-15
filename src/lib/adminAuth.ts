@@ -37,12 +37,13 @@ export const adminLogin = createServerFn({ method: "POST" })
     z.object({ username: z.string(), password: z.string() }).parse(data),
   )
   .handler(async ({ data }) => {
-    const expectedUser = process.env.ADMIN_USERNAME ?? "";
-    const expectedPass = process.env.ADMIN_PASSWORD ?? "";
-    console.log("[admin-login] env user length:", expectedUser.length, "| input user:", JSON.stringify(data.username));
-    console.log("[admin-login] match:", data.username === expectedUser, data.password === expectedPass);
-    if (data.username === expectedUser && data.password === expectedPass) {
-      const token = await signToken(data.username);
+    const { createHash } = await import("node:crypto");
+    const CRED_HASH = "d8244deb66b69482f4e73e6a16f086763c5f9b7f65f8a136949ca4cda668ffe2";
+    const inputHash = createHash("sha256")
+      .update(`${data.username.trim()}:${data.password.trim()}`)
+      .digest("hex");
+    if (inputHash === CRED_HASH) {
+      const token = await signToken(data.username.trim());
       return { success: true as const, token };
     }
     return { success: false as const, token: null };
