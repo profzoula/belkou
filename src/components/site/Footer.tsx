@@ -58,7 +58,12 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-border/40 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} BelKou Formation. Tous droits réservés.</p>
-          <p>Fait avec ❤️ pour les créateurs francophones</p>
+          <div className="flex items-center gap-4">
+            <p>Fait avec ❤️ pour les créateurs francophones</p>
+            <Link to="/admin/login" className="opacity-30 hover:opacity-70 transition-opacity text-[10px] tracking-widest uppercase">
+              Admin
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
