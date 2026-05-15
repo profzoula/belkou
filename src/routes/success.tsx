@@ -95,7 +95,7 @@ function SuccessPage() {
             <div className="flex-1">
               <div className="font-semibold mb-1">Rejoignez le cours Zoom</div>
               <p className="text-sm text-muted-foreground mb-3">
-                Les cours ont lieu <strong className="text-foreground">2 fois par semaine à 10h PM</strong>, 2h par session.
+                Les cours ont lieu <strong className="text-foreground">Samedi & Dimanche à 10h PM</strong>, 2h par session.
               </p>
               <Button asChild variant="neon" size="sm">
                 <a href={ZOOM_LINK} target="_blank" rel="noreferrer">

@@ -47,7 +47,7 @@ export function Learn() {
               <div className="flex flex-wrap gap-2">
                 {[
                   "🎥 Zoom en direct",
-                  "📅 2× / semaine",
+                  "📅 Sam & Dim",
                   "🕙 10h PM",
                   "⏱ 2h / session",
                 ].map((tag) => (
