@@ -45,12 +45,14 @@ export function Navbar() {
           <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2">
             Se connecter
           </Link>
-          <Link
-            to="/register"
+          <a
+            href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
           >
             S'inscrire →
-          </Link>
+          </a>
         </div>
 
         {/* Mobile hamburger */}
@@ -74,13 +76,15 @@ export function Navbar() {
               </a>
             ))}
             <div className="mt-3 pt-3 border-t border-border">
-              <Link
-                to="/register"
+              <a
+                href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
+                target="_blank"
+                rel="noreferrer"
                 onClick={() => setOpen(false)}
                 className="flex w-full items-center justify-center rounded-xl bg-gradient-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
               >
                 S'inscrire Maintenant
-              </Link>
+              </a>
             </div>
           </nav>
         </div>

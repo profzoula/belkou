@@ -70,13 +70,14 @@ export function Pricing() {
             </ul>
 
             {/* CTA */}
-            <Link
-              to="/register"
-              search={{ plan: "premium" }}
+            <a
+              href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
+              target="_blank"
+              rel="noreferrer"
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary px-6 py-3.5 text-base font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
             >
               S'inscrire Maintenant →
-            </Link>
+            </a>
 
             {/* Trust signals */}
             <div className="mt-6 flex flex-wrap items-center justify-center gap-5">

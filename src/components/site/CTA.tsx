@@ -29,12 +29,14 @@ export function CTA() {
               Rejoignez la cohorte aujourd'hui. Les places sont limitées et se remplissent vite.
             </p>
 
-            <Link
-              to="/register"
+            <a
+              href="https://buy.stripe.com/9B6aEZ792gOh96ja7G4F202"
+              target="_blank"
+              rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-8 py-3.5 text-base font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
             >
               <Rocket className="h-4 w-4" /> S'inscrire Maintenant
-            </Link>
+            </a>
 
             {/* Trust signals */}
             <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
