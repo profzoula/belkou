@@ -143,7 +143,7 @@ function SuccessPage() {
             <div>
               <div className="font-semibold mb-1">Date de la formation</div>
               <p className="text-sm text-muted-foreground">
-                La prochaine cohorte commence le 1er du mois prochain.
+                La prochaine cohorte commence le <strong className="text-foreground">30 mai</strong>.
               </p>
             </div>
           </div>

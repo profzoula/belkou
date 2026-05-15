@@ -8,6 +8,7 @@ const pills = [
 
 const schedule = [
   { icon: Video,    text: "Zoom en direct" },
+  { icon: Calendar, text: "Début : 30 mai" },
   { icon: Calendar, text: "Sam & Dim" },
   { icon: Clock,    text: "10h PM · 2h/session" },
 ];

@@ -37,10 +37,11 @@ function DashboardPage() {
   if (!student) return null;
 
   const schedule = [
-    { icon: Calendar, label: "Jou", value: "Samdi & Dimanch" },
-    { icon: Clock,    label: "Lè",  value: "10h PM (Haiti)" },
-    { icon: Video,    label: "Duré", value: "2h / sesyon" },
-    { icon: BookOpen, label: "Peryòd", value: "4 semèn" },
+    { icon: Calendar, label: "Kòmansman", value: "30 Me 2026" },
+    { icon: Calendar, label: "Jou",       value: "Samdi & Dimanch" },
+    { icon: Clock,    label: "Lè",        value: "10h PM (Haiti)" },
+    { icon: Video,    label: "Duré",      value: "2h / sesyon" },
+    { icon: BookOpen, label: "Peryòd",    value: "4 semèn" },
   ];
 
   return (
