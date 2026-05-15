@@ -1,36 +1,46 @@
 import { Brain, Code2, Zap, Bot, DollarSign, Wrench, Sparkles, Layers } from "lucide-react";
 
 const features = [
-  { icon: Brain, title: "Prompt Engineering", desc: "Maîtrisez les prompts pour obtenir des résultats professionnels avec l'IA." },
-  { icon: Code2, title: "Cursor & Bolt.new", desc: "Construisez des applications avec des éditeurs intégrant l'IA." },
-  { icon: Zap, title: "Replit AI", desc: "Lancez des projets sans configuration complexe." },
-  { icon: Layers, title: "APIs & SaaS", desc: "Connectez les services, créez votre propre SaaS." },
-  { icon: Wrench, title: "Automatisation", desc: "Automatisez les tâches répétitives avec des workflows." },
-  { icon: Bot, title: "Agents IA", desc: "Créez des agents IA qui travaillent pour vous." },
-  { icon: DollarSign, title: "Monétisation", desc: "Transformez votre code en argent réel." },
-  { icon: Sparkles, title: "BelKou", desc: "Une nouvelle façon de créer des logiciels avec l'IA." },
+  { icon: Brain, title: "Prompt Engineering", desc: "Maîtrisez les prompts pour produire des résultats professionnels avec l'IA.", color: "text-primary" },
+  { icon: Code2, title: "Cursor & Bolt.new", desc: "Construisez des applications complètes avec les meilleurs éditeurs IA.", color: "text-accent" },
+  { icon: Zap, title: "Replit AI", desc: "Déployez des projets rapidement sans configuration complexe.", color: "text-primary" },
+  { icon: Layers, title: "APIs & SaaS", desc: "Connectez des services, créez votre propre produit SaaS.", color: "text-secondary" },
+  { icon: Wrench, title: "Automatisation", desc: "Automatisez les tâches répétitives avec des workflows intelligents.", color: "text-accent" },
+  { icon: Bot, title: "Agents IA", desc: "Créez des agents IA autonomes qui travaillent pour vous.", color: "text-primary" },
+  { icon: DollarSign, title: "Monétisation", desc: "Transformez vos créations en revenus réels dès le premier mois.", color: "text-secondary" },
+  { icon: Sparkles, title: "Méthode BelKou", desc: "Une approche moderne et rapide pour lancer sans friction.", color: "text-accent" },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="py-24 md:py-32">
+    <section id="features" className="py-24 md:py-32 border-t border-border/40">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">Ce que vous apprendrez</p>
-          <h2 className="text-4xl md:text-6xl font-bold">Tout ce dont vous avez besoin<br />pour <span className="text-gradient">vibrer en codant</span></h2>
+
+        {/* Header */}
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <span className="chip mb-4 inline-flex">Ce que vous apprendrez</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            Tout ce qu'il faut pour{" "}
+            <span className="text-gradient">réussir avec l'IA</span>
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            8 modules pratiques pour maîtriser les outils IA modernes et lancer votre projet.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {features.map((f) => (
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className="group relative rounded-2xl bg-gradient-card border border-border p-6 hover:border-primary/50 hover:shadow-glow transition-all duration-500"
+              className="group feature-card rounded-2xl p-6 cursor-default"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-primary shadow-glow mb-4 group-hover:scale-110 transition-transform">
-                <f.icon className="h-5 w-5 text-primary-foreground" />
+              <div className={`mb-4 inline-grid h-11 w-11 place-items-center rounded-xl bg-white/5 border border-white/8 group-hover:border-primary/30 transition-colors`}>
+                <f.icon className={`h-5 w-5 ${f.color}`} />
               </div>
-              <h3 className="font-display text-lg font-semibold mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground">{f.desc}</p>
+              <h3 className="font-display font-semibold text-base mb-1.5 text-foreground">{f.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
