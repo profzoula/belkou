@@ -1,54 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Check, Crown, Zap } from "lucide-react";
+import { Check, Sparkles, ShieldCheck, Clock, Users } from "lucide-react";
 
-const plans = [
-  {
-    name: "Basic",
-    price: "29",
-    period: "paiement unique",
-    desc: "Pour démarrer votre apprentissage",
-    features: [
-      "Accès complet à la formation",
-      "Groupe WhatsApp communautaire",
-      "Templates pour commencer",
-      "Certificat de completion",
-    ],
-    highlight: false,
-    badge: null,
-    btnClass: "border border-border/70 bg-white/5 text-foreground hover:bg-white/8 hover:border-primary/40",
-  },
-  {
-    name: "Premium",
-    price: "99",
-    period: "paiement unique",
-    desc: "Pour ceux qui veulent aller loin",
-    features: [
-      "Tout ce qui est dans Basic",
-      "Code source complet des projets",
-      "Mentorat privé hebdomadaire",
-      "Bibliothèque de prompts bonus",
-      "Support prioritaire 24/7",
-    ],
-    highlight: true,
-    badge: "Le plus populaire",
-    btnClass: "bg-gradient-primary text-primary-foreground shadow-glow hover:opacity-90",
-  },
-  {
-    name: "VIP",
-    price: "299",
-    period: "paiement unique",
-    desc: "Session 1-on-1 avec le fondateur",
-    features: [
-      "Tout ce qui est dans Premium",
-      "Session 1-on-1 chaque semaine",
-      "Revue de votre projet personnel",
-      "Accès à vie + mises à jour futures",
-      "Branding & stratégie de lancement",
-    ],
-    highlight: false,
-    badge: null,
-    btnClass: "border border-secondary/50 bg-secondary/10 text-secondary-foreground hover:bg-secondary/20 hover:border-secondary/70",
-  },
+const features = [
+  "Accès complet à la formation (4 semaines)",
+  "Code source complet des projets",
+  "Groupe WhatsApp communautaire",
+  "Mentorat privé hebdomadaire",
+  "Bibliothèque de prompts bonus",
+  "Support prioritaire 24/7",
+  "Certificat de completion",
+  "Accès à vie + mises à jour futures",
+];
+
+const trust = [
+  { icon: ShieldCheck, label: "Remboursement 7 jours" },
+  { icon: Clock,       label: "Accès immédiat" },
+  { icon: Users,       label: "500+ étudiants" },
 ];
 
 export function Pricing() {
@@ -57,75 +24,69 @@ export function Pricing() {
       <div className="container mx-auto px-6">
 
         {/* Header */}
-        <div className="max-w-xl mx-auto text-center mb-16">
+        <div className="max-w-xl mx-auto text-center mb-14">
           <span className="chip mb-4 inline-flex">Tarifs</span>
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Choisissez{" "}
-            <span className="text-gradient">votre plan</span>
+            Un seul plan,{" "}
+            <span className="text-gradient">tout inclus</span>
           </h2>
           <p className="text-muted-foreground">
-            Garantie de remboursement 7 jours — sans questions.
+            Pas de niveaux confus. Tout le monde reçoit la même formation complète.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl mx-auto items-start">
-          {plans.map((p) => (
-            <div
-              key={p.name}
-              className={`relative rounded-2xl p-7 transition-all duration-300 ${
-                p.highlight
-                  ? "bg-gradient-card border-2 border-primary shadow-glow md:-translate-y-2"
-                  : "bg-gradient-card border border-border/60 hover:border-border"
-              }`}
-            >
-              {/* Badge */}
-              {p.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground shadow-glow">
-                  <Crown className="h-3 w-3" /> {p.badge}
-                </div>
-              )}
+        {/* Single card */}
+        <div className="max-w-lg mx-auto">
+          <div className="relative rounded-3xl border-2 border-primary bg-gradient-card shadow-glow p-8 md:p-10">
 
-              {/* Plan name + desc */}
-              <div className="mb-5">
-                <div className="flex items-center gap-2 mb-1">
-                  {p.highlight && <Zap className="h-4 w-4 text-primary" />}
-                  <h3 className="font-display text-xl font-bold">{p.name}</h3>
-                </div>
-                <p className="text-sm text-muted-foreground">{p.desc}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-6 pb-6 border-b border-border/50">
-                <div className="flex items-end gap-1">
-                  <span className="text-4xl font-display font-bold text-gradient-orange">${p.price}</span>
-                  <span className="text-muted-foreground text-sm mb-1">USD</span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">{p.period}</p>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-3 mb-7">
-                {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-3 text-sm">
-                    <div className="h-5 w-5 rounded-full bg-primary/15 border border-primary/30 grid place-items-center shrink-0 mt-0.5">
-                      <Check className="h-3 w-3 text-primary" />
-                    </div>
-                    <span className="text-foreground/85">{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <Link
-                to="/register"
-                search={{ plan: p.name.toLowerCase() }}
-                className={`flex w-full items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition-all ${p.btnClass}`}
-              >
-                Choisir {p.name}
-              </Link>
+            {/* Top badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full bg-gradient-primary px-5 py-1.5 text-xs font-bold text-primary-foreground shadow-glow">
+              <Sparkles className="h-3 w-3" /> Formation complète
             </div>
-          ))}
+
+            {/* Price block */}
+            <div className="text-center mb-8 pt-2">
+              <div className="flex items-end justify-center gap-2 mb-1">
+                <span className="text-6xl md:text-7xl font-display font-bold text-gradient-orange leading-none">$199</span>
+                <span className="text-muted-foreground mb-2 text-sm">USD</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Paiement unique — accès à vie</p>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/50 mb-8" />
+
+            {/* Features */}
+            <ul className="space-y-3.5 mb-8">
+              {features.map((f) => (
+                <li key={f} className="flex items-center gap-3 text-sm">
+                  <div className="h-5 w-5 rounded-full bg-primary/15 border border-primary/35 grid place-items-center shrink-0">
+                    <Check className="h-3 w-3 text-primary" />
+                  </div>
+                  <span className="text-foreground/90">{f}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <Link
+              to="/register"
+              search={{ plan: "premium" }}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-primary px-6 py-3.5 text-base font-semibold text-primary-foreground shadow-glow hover:opacity-90 transition-opacity"
+            >
+              S'inscrire Maintenant →
+            </Link>
+
+            {/* Trust signals */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-5">
+              {trust.map((t) => (
+                <div key={t.label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <t.icon className="h-3.5 w-3.5 text-primary/70" />
+                  {t.label}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
