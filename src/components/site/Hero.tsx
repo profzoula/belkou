@@ -19,12 +19,6 @@ export function Hero() {
 
           {/* ── LEFT: Text side ── */}
           <div>
-            {/* Ebook promo banner */}
-            <div className="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-1.5 text-xs font-semibold text-amber-300" style={{ animationDelay: "0.0s" }}>
-              <BookOpen className="h-3.5 w-3.5 shrink-0" />
-              🎁 Les 10 premiers inscrits reçoivent un eBook gratuit sur la formation !
-            </div>
-
             {/* Social proof badge */}
             <div className="animate-fade-up mb-7 flex items-center gap-3" style={{ animationDelay: "0.05s" }}>
               <div className="flex -space-x-2">

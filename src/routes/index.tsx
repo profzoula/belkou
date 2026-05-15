@@ -8,6 +8,7 @@ import { Testimonials } from "@/components/site/Testimonials";
 import { FAQ } from "@/components/site/FAQ";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
+import { Ticker } from "@/components/site/Ticker";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,6 +28,7 @@ function Index() {
       <Navbar />
       <main>
         <Hero />
+        <Ticker />
         <Features />
         <Learn />
         <Pricing />
