@@ -13,6 +13,6 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    server: { port: 5000 },
+    server: { port: 5000, allowedHosts: true },
   },
 });
