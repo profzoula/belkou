@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { ArrowLeft, Rocket } from "lucide-react";
+import { ArrowLeft, Rocket, Monitor, BookOpen, Check } from "lucide-react";
 import { toast } from "sonner";
 import { submitRegistration } from "@/lib/registerFn";
 
 const searchSchema = z.object({
-  plan: z.enum(["basic", "premium", "vip"]).optional(),
+  plan: z.string().optional(),
 });
 
 export const Route = createFileRoute("/register")({
@@ -35,8 +35,12 @@ const formSchema = z.object({
   plan: z.string().min(1),
 });
 
+const requirements = [
+  { icon: Monitor,   label: "Un PC ou ordinateur portable est obligatoire" },
+  { icon: BookOpen,  label: "Le livre (eBook) sera acheté ensemble durant le cours" },
+];
+
 function RegisterPage() {
-  const { plan } = Route.useSearch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -45,7 +49,7 @@ function RegisterPage() {
     whatsapp: "",
     country: "",
     level: "",
-    plan: plan ?? "premium",
+    plan: "premium",
   });
 
   const update = (k: string, v: string) => setForm((s) => ({ ...s, [k]: v }));
@@ -73,21 +77,50 @@ function RegisterPage() {
     <div className="min-h-screen">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-2xl">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8">
+        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>
 
-        <div className="mb-10">
-          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-3">S'inscrire</p>
-          <h1 className="text-4xl md:text-5xl font-bold">Rejoignez la <span className="text-gradient">cohorte</span></h1>
-          <p className="text-muted-foreground mt-3">Remplissez ce formulaire et vous recevrez le lien WhatsApp et les détails de paiement.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <span className="chip mb-3 inline-flex">Inscription</span>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">
+            Rejoignez la <span className="text-gradient">cohorte</span>
+          </h1>
+          <p className="text-muted-foreground">
+            Remplissez ce formulaire — vous recevrez les détails de paiement et le lien WhatsApp par email.
+          </p>
         </div>
 
+        {/* Price summary */}
+        <div className="mb-6 rounded-2xl border-2 border-primary/50 bg-primary/6 px-6 py-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Formation BelKou — Accès complet</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Paiement unique · Accès à vie · Zoom 2× / semaine</p>
+          </div>
+          <div className="shrink-0 text-3xl font-display font-bold text-gradient-orange">$199</div>
+        </div>
+
+        {/* Requirements notice */}
+        <div className="mb-6 rounded-xl border border-border/60 bg-gradient-card p-4 space-y-2.5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Ce qu'il vous faut</p>
+          {requirements.map((r) => (
+            <div key={r.label} className="flex items-start gap-3 text-sm">
+              <div className="h-5 w-5 rounded-full bg-primary/15 border border-primary/30 grid place-items-center shrink-0 mt-0.5">
+                <r.icon className="h-3 w-3 text-primary" />
+              </div>
+              <span className="text-foreground/85">{r.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Form */}
         <form onSubmit={submit} className="space-y-5 rounded-2xl bg-gradient-card border border-border p-6 md:p-8">
           <div className="space-y-2">
             <Label htmlFor="full_name">Nom complet</Label>
             <Input id="full_name" value={form.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Jean Pierre" />
           </div>
+
           <div className="grid md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -110,6 +143,7 @@ function RegisterPage() {
                   <SelectItem value="BE">Belgique</SelectItem>
                   <SelectItem value="CH">Suisse</SelectItem>
                   <SelectItem value="LU">Luxembourg</SelectItem>
+                  <SelectItem value="HT">Haïti</SelectItem>
                   <SelectItem value="OTHER">Autre</SelectItem>
                 </SelectContent>
               </Select>
@@ -127,38 +161,22 @@ function RegisterPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Plan</Label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: "basic", label: "Basic", price: "$29" },
-                { id: "premium", label: "Premium", price: "$99" },
-                { id: "vip", label: "VIP", price: "$299" },
-              ].map((p) => (
-                <button
-                  type="button"
-                  key={p.id}
-                  onClick={() => update("plan", p.id)}
-                  className={`rounded-xl border p-3 text-center transition-all ${
-                    form.plan === p.id
-                      ? "border-primary bg-primary/10 shadow-glow"
-                      : "border-border hover:border-primary/50"
-                  }`}
-                >
-                  <div className="font-semibold">{p.label}</div>
-                  <div className="text-sm text-gradient-orange font-bold">{p.price}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <Button type="submit" variant="hero" size="xl" className="w-full" disabled={loading}>
-            <Rocket /> {loading ? "Inscription en cours..." : "Compléter l'inscription"}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-primary text-primary-foreground shadow-glow font-semibold rounded-xl h-12 text-base hover:opacity-90 transition-opacity gap-2"
+          >
+            <Rocket className="h-4 w-4" />
+            {loading ? "Inscription en cours..." : "Compléter l'inscription — $199"}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Après avoir cliqué, vous serez redirigé vers la page de paiement et les détails de confirmation.
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+            {["Remboursement 7 jours", "Accès immédiat", "Support WhatsApp"].map((t) => (
+              <div key={t} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Check className="h-3 w-3 text-primary/70" /> {t}
+              </div>
+            ))}
+          </div>
         </form>
       </main>
       <Footer />
