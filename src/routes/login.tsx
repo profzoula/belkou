@@ -39,8 +39,9 @@ function LoginPage() {
         const detail = (res as { errorMsg?: string }).errorMsg;
         setError(detail ? `Erè: ${detail}` : "Email ou modpas la pa kòrèk.");
       }
-    } catch {
-      setError("Yon erè te fèt. Eseye ankò.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Erè sèvè: ${msg}`);
     } finally {
       setLoading(false);
     }
