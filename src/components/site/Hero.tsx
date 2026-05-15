@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Rocket, ArrowRight, Star } from "lucide-react";
+import { Rocket, ArrowRight, Star, Video, Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroBg from "@/assets/hero-bg.jpg";
 
@@ -7,6 +7,12 @@ const stats = [
   { value: "500+", label: "Étudiants formés" },
   { value: "20+", label: "Outils IA couverts" },
   { value: "4.9/5", label: "Note moyenne" },
+];
+
+const schedule = [
+  { icon: Video,    label: "En direct sur Zoom" },
+  { icon: Calendar, label: "2 jours par semaine" },
+  { icon: Clock,    label: "10h PM · 2h par session" },
 ];
 
 export function Hero() {
@@ -99,6 +105,22 @@ export function Hero() {
             <span className="text-sm text-muted-foreground">
               <span className="text-foreground font-semibold">500+</span> étudiants satisfaits
             </span>
+          </div>
+
+          {/* Schedule banner */}
+          <div
+            className="animate-fade-up mb-6 rounded-2xl border border-primary/25 bg-primary/6 px-6 py-4 max-w-lg mx-auto"
+            style={{ animationDelay: "0.48s" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Format des cours</p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {schedule.map((s) => (
+                <div key={s.label} className="flex items-center gap-2 text-sm font-medium text-foreground/90">
+                  <s.icon className="h-4 w-4 text-primary shrink-0" />
+                  {s.label}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Stats */}

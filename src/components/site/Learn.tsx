@@ -40,9 +40,23 @@ export function Learn() {
                 <span className="text-gradient-orange">complet</span>
               </h2>
             </div>
-            <p className="text-muted-foreground mt-4 md:mt-0 md:max-w-xs text-sm leading-relaxed">
-              4 semaines intensives avec mentorat réel et accès à vie au contenu.
-            </p>
+            <div className="mt-4 md:mt-0 space-y-2">
+              <p className="text-muted-foreground text-sm leading-relaxed md:max-w-xs">
+                4 semaines intensives avec mentorat réel et accès à vie au contenu.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "🎥 Zoom en direct",
+                  "📅 2× / semaine",
+                  "🕙 10h PM",
+                  "⏱ 2h / session",
+                ].map((tag) => (
+                  <span key={tag} className="inline-flex items-center rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-medium text-primary">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Timeline */}

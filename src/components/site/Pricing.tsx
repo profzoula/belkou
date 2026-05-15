@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, Sparkles, ShieldCheck, Clock, Users } from "lucide-react";
 
 const features = [
+  "Sessions Zoom en direct — 2× par semaine à 10h PM (2h/session)",
   "Accès complet à la formation (4 semaines)",
   "Code source complet des projets",
   "Groupe WhatsApp communautaire",
