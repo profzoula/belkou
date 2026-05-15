@@ -39,6 +39,8 @@ export const adminLogin = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const expectedUser = process.env.ADMIN_USERNAME ?? "";
     const expectedPass = process.env.ADMIN_PASSWORD ?? "";
+    console.log("[admin-login] env user length:", expectedUser.length, "| input user:", JSON.stringify(data.username));
+    console.log("[admin-login] match:", data.username === expectedUser, data.password === expectedPass);
     if (data.username === expectedUser && data.password === expectedPass) {
       const token = await signToken(data.username);
       return { success: true as const, token };
