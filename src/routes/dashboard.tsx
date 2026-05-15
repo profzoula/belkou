@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Video, Users, MessageCircle, Calendar, Clock, LogOut, Sparkles, BookOpen } from "lucide-react";
 
 // ── Mete lyen reyèl ou yo isit ─────────────────────────────────────────────
-const ZOOM_LINK     = "https://zoom.us/j/VOTRE_ID_ZOOM";
+const ZOOM_LINK     = "https://us05web.zoom.us/j/81878578623?pwd=p4P7bcHRxdIqODdhp6AVybaXuvNJ8U.1";
 const DISCORD_LINK  = "https://discord.gg/VOTRE_CODE";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/";
 // ────────────────────────────────────────────────────────────────────────────

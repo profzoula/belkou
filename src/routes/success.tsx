@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 import { CheckCircle2, MessageCircle, Calendar, Mail, Video, Users, KeyRound, LogIn, Copy, Check } from "lucide-react";
 import { useState } from "react";
 
-const ZOOM_LINK     = "https://zoom.us/j/VOTRE_ID_ZOOM";
+const ZOOM_LINK     = "https://us05web.zoom.us/j/81878578623?pwd=p4P7bcHRxdIqODdhp6AVybaXuvNJ8U.1";
 const DISCORD_LINK  = "https://discord.gg/VOTRE_CODE";
 const WHATSAPP_LINK = "https://chat.whatsapp.com/";
 
