@@ -7,7 +7,8 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { CheckCircle2, MessageCircle, Calendar, Mail, ArrowRight, CreditCard } from "lucide-react";
 import { getRegistrationStatus, verifyStripeSession } from "@/lib/fns/register";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrl, getWhatsappGroupLabel } from "@/lib/site-config";
+import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   registrationId: z.string().optional(),
@@ -17,12 +18,13 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/success")({
-  head: () => ({
-    meta: [
-      { title: "Inscription confirmée — BelKou" },
-      { name: "description", content: "Votre inscription BelKou est confirmée." },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Inscription confirmée — BelKou",
+      description: "Votre inscription BelKou est confirmée.",
+      path: "/success",
+      noindex: true,
+    }),
   validateSearch: searchSchema,
   component: SuccessPage,
 });
@@ -57,6 +59,7 @@ function SuccessPage() {
   const verifyFn = useServerFn(verifyStripeSession);
   const [status, setStatus] = useState<{ payment_status: string; full_name?: string; plan?: string } | null>(null);
   const [verifiedPaid, setVerifiedPaid] = useState(false);
+  const [verifiedPlan, setVerifiedPlan] = useState<string | undefined>();
 
   useEffect(() => {
     if (!registrationId) return;
@@ -65,7 +68,10 @@ function SuccessPage() {
       if (session_id) {
         try {
           const v = await verifyFn({ data: { sessionId: session_id, registrationId } });
-          if (v.paid) setVerifiedPaid(true);
+          if (v.paid) {
+            setVerifiedPaid(true);
+            if (v.plan) setVerifiedPlan(v.plan);
+          }
         } catch (e) {
           console.error(e);
         }
@@ -84,7 +90,9 @@ function SuccessPage() {
   const isPaid = verifiedPaid || status?.payment_status === "paid" || !!session_id;
   const showManual = manual === "1" || status?.payment_status === "manual_pending";
   const displayPlan = (status?.plan ?? plan)?.toUpperCase();
-  const whatsappUrl = siteConfig.whatsappGroupUrl;
+  const planId = (status?.plan ?? verifiedPlan ?? plan)?.toLowerCase();
+  const whatsappUrl = isPaid ? getWhatsappGroupUrl(planId) : "";
+  const whatsappLabel = getWhatsappGroupLabel(planId);
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,25 +125,35 @@ function SuccessPage() {
             </div>
           )}
 
-          {(isPaid || whatsappUrl) && (
+          {isPaid && whatsappUrl && (
+            <div className="surface rounded-xl p-5 flex gap-4">
+              <div className="icon-box shrink-0 h-10 w-10">
+                <MessageCircle className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="font-semibold text-sm mb-1">Groupe WhatsApp {whatsappLabel}</div>
+                <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
+                  Rejoignez le groupe {whatsappLabel} pour commencer avec les autres étudiants.
+                </p>
+                <Button asChild variant="neon" size="sm">
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                    Rejoindre {whatsappLabel}
+                  </a>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {!isPaid && (
             <div className="surface rounded-xl p-5 flex gap-4">
               <div className="icon-box shrink-0 h-10 w-10">
                 <MessageCircle className="h-4 w-4" />
               </div>
               <div>
                 <div className="font-semibold text-sm mb-1">Groupe WhatsApp</div>
-                <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
-                  {isPaid
-                    ? "Rejoignez la communauté pour commencer avec les autres étudiants."
-                    : "Après paiement, vous recevrez le lien du groupe."}
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Après paiement, vous recevrez le lien du groupe Premium VibeCode ou VIP VibeCode selon votre plan.
                 </p>
-                {whatsappUrl && isPaid && (
-                  <Button asChild variant="neon" size="sm">
-                    <a href={whatsappUrl} target="_blank" rel="noreferrer">
-                      Rejoindre le groupe
-                    </a>
-                  </Button>
-                )}
               </div>
             </div>
           )}

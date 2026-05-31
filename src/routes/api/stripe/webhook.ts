@@ -3,7 +3,7 @@ import { getDb } from "@/server/env";
 import { updateRegistrationPayment, getRegistrationByStripeSession } from "@/server/db";
 import { verifyWebhook } from "@/server/stripe";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 
 export const Route = createFileRoute("/api/stripe/webhook")({
   server: {
@@ -26,20 +26,22 @@ export const Route = createFileRoute("/api/stripe/webhook")({
             const email = session.customer_email ?? session.customer_details?.email;
 
             if (registrationId) {
+              const record = await getRegistrationByStripeSession(db, session.id);
+              const wasPaid = record?.payment_status === "paid";
+
               await updateRegistrationPayment(db, registrationId, {
                 payment_status: "paid",
                 stripe_session_id: session.id,
               });
 
-              const record = await getRegistrationByStripeSession(db, session.id);
-              if (record && email) {
+              if (record && email && !wasPaid) {
                 await sendEmail({
                   to: email,
-                  subject: "Peman konfime — BelKou",
+                  subject: "Paiement confirmé — BelKou",
                   html: paymentConfirmedEmail(
                     record.full_name,
                     record.plan,
-                    siteConfig.whatsappGroupUrl,
+                    getWhatsappGroupUrl(record.plan),
                     siteConfig.cohortStartDate,
                   ),
                 });

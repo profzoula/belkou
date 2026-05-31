@@ -11,6 +11,8 @@ import {
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
+import { defaultDescription, defaultTitle, absoluteUrl } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 
 function NotFoundComponent() {
   return (
@@ -74,17 +76,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BelKou" },
-      { name: "description", content: "Formation BelKou — Apprenez à créer des Apps IA et des SaaS." },
-      { name: "author", content: "BelKou" },
-      { property: "og:title", content: "BelKou" },
-      { property: "og:description", content: "Formation BelKou — Apprenez à créer des Apps IA et des SaaS." },
+      { title: defaultTitle },
+      { name: "description", content: defaultDescription },
+      { name: "author", content: siteConfig.name },
+      { name: "theme-color", content: "#4f46e5" },
+      { property: "og:title", content: defaultTitle },
+      { property: "og:description", content: defaultDescription },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/og-image.svg" },
+      { property: "og:url", content: absoluteUrl("/") },
+      { property: "og:image", content: absoluteUrl("/og-image.svg") },
+      { property: "og:locale", content: "fr_FR" },
+      { property: "og:site_name", content: siteConfig.name },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@BelKou" },
+      { name: "twitter:site", content: siteConfig.social.twitter },
     ],
     links: [
+      { rel: "canonical", href: absoluteUrl("/") },
       { rel: "icon", href: "/favicon/favicon.ico", sizes: "48x48" },
       { rel: "icon", href: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { rel: "icon", href: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },

@@ -6,9 +6,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { adminLogout, getAdminDashboard } from "@/lib/fns/admin";
 import { siteConfig } from "@/lib/site-config";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Dashboard admin — BelKou" }] }),
+  head: () =>
+    seoHead({
+      title: "Dashboard admin — BelKou",
+      path: "/admin",
+      noindex: true,
+    }),
   component: AdminDashboardPage,
 });
 

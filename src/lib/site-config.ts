@@ -1,9 +1,18 @@
 export const siteConfig = {
   name: "BelKou",
+  siteUrl: import.meta.env.VITE_SITE_URL ?? "https://belkou.online",
   logo: "/favicon/logo.png",
   tagline: "Formation apps IA & SaaS en français",
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? "profzoula@gmail.com",
-  whatsappGroupUrl: import.meta.env.VITE_WHATSAPP_GROUP_URL ?? "",
+  whatsappGroups: {
+    premium:
+      import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ??
+      import.meta.env.VITE_WHATSAPP_GROUP_URL ??
+      "https://chat.whatsapp.com/J4iP9lv5gYlHrWiLXHuNgD",
+    vip:
+      import.meta.env.VITE_WHATSAPP_GROUP_VIP ??
+      "https://chat.whatsapp.com/GqWxIE5pfafFOB3krHd0uA",
+  },
   cohortStartDate: import.meta.env.VITE_COHORT_START_DATE ?? "15 juin 2026",
   location: "USA · En ligne",
   stats: {
@@ -34,3 +43,12 @@ export const siteConfig = {
 } as const;
 
 export type PlanId = "premium" | "vip";
+
+export function getWhatsappGroupUrl(plan: PlanId | string | undefined): string {
+  if (plan === "vip") return siteConfig.whatsappGroups.vip;
+  return siteConfig.whatsappGroups.premium;
+}
+
+export function getWhatsappGroupLabel(plan: PlanId | string | undefined): string {
+  return plan === "vip" ? "VIP VibeCode" : "Premium VibeCode";
+}

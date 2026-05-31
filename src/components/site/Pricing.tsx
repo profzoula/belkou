@@ -6,7 +6,7 @@ import { siteConfig } from "@/lib/site-config";
 
 const premiumFeatures = [
   "Accès complet à la formation",
-  "Groupe WhatsApp",
+  "Groupe WhatsApp Premium VibeCode",
   "Code source complet",
   "Templates et ressources",
   "Support communautaire",
@@ -29,7 +29,7 @@ const plans = [
     desc: "Tout le Premium + accompagnement personnel sur votre projet",
     features: [
       "Tout ce qui est inclus dans Premium",
-      "Groupe WhatsApp VIP",
+      "Groupe WhatsApp VIP VibeCode",
       "Ebook gratuit",
       "Assistance personnelle du formateur",
       "Aide directe pendant la réalisation de votre projet",

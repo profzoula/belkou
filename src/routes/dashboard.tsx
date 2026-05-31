@@ -6,11 +6,16 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({
-    meta: [{ title: "Mon espace — BelKou" }],
-  }),
+  head: () =>
+    seoHead({
+      title: "Mon espace — BelKou",
+      description: "Espace étudiant BelKou — accédez à votre formation.",
+      path: "/dashboard",
+      noindex: true,
+    }),
   component: DashboardPage,
 });
 

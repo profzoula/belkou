@@ -34,8 +34,9 @@ export function Hero({ studentCount }: HeroProps) {
             </h1>
 
             <p className="max-w-lg text-[15px] text-muted-foreground mb-8 leading-relaxed">
-              Formation BelKou en français : du prompt engineering au lancement de votre
-              premier produit, avec mentorat et communauté active.
+              Vous n&apos;avez pas besoin d&apos;être développeur. Apprenez à créer, lancer et
+              vendre votre premier produit digital avec l&apos;IA et une communauté qui avance
+              avec vous.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 mb-8">

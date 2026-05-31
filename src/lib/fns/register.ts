@@ -1,10 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { registrationSchema } from "@/lib/schemas/registration";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb } from "@/server/env";
-import { saveRegistration, setStripeSessionId, updateRegistrationPayment } from "@/server/db";
+import { getRegistrationById, saveRegistration, setStripeSessionId, updateRegistrationPayment } from "@/server/db";
 import { createCheckoutSession } from "@/server/stripe";
-import { registrationPendingEmail, sendEmail } from "@/server/email";
+import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
+import type { PlanId } from "@/lib/site-config";
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -101,15 +102,39 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { getCheckoutSession } = await import("@/server/stripe");
     const db = await getDb();
+    const record = await getRegistrationById(db, data.registrationId);
     const session = await getCheckoutSession(data.sessionId);
+
     if (!session || session.payment_status !== "paid") {
-      return { paid: false as const };
+      return { paid: false as const, plan: record?.plan };
     }
-    if (session.metadata?.registrationId === data.registrationId) {
+
+    const plan = (session.metadata?.plan ?? record?.plan) as PlanId | undefined;
+
+    if (session.metadata?.registrationId === data.registrationId && record) {
+      const wasPaid = record.payment_status === "paid";
       await updateRegistrationPayment(db, data.registrationId, {
         payment_status: "paid",
         stripe_session_id: session.id,
       });
+
+      if (!wasPaid) {
+        try {
+          await sendEmail({
+            to: record.email,
+            subject: "Paiement confirmé — BelKou",
+            html: paymentConfirmedEmail(
+              record.full_name,
+              record.plan,
+              getWhatsappGroupUrl(record.plan),
+              siteConfig.cohortStartDate,
+            ),
+          });
+        } catch (error) {
+          console.error("Payment confirmation email error:", error);
+        }
+      }
     }
-    return { paid: true as const };
+
+    return { paid: true as const, plan: plan ?? record?.plan };
   });

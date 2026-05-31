@@ -39,7 +39,7 @@ export async function createCheckoutSession(params: {
     mode: "payment",
     customer_email: params.email,
     line_items: [lineItem],
-    success_url: `${env.SITE_URL}/success?registrationId=${params.registrationId}&session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${env.SITE_URL}/success?registrationId=${params.registrationId}&plan=${params.plan}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${env.SITE_URL}/register?plan=${params.plan}`,
     metadata: {
       registrationId: params.registrationId,

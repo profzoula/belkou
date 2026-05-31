@@ -9,17 +9,16 @@ import { FAQ } from "@/components/site/FAQ";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
 import { getStudentCount } from "@/lib/fns/stats";
+import { seoHead, defaultTitle, defaultDescription, courseJsonLd, organizationJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/site/JsonLd";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "BelKou — Apprenez à créer des Apps IA et des SaaS" },
-      { name: "description", content: "Apprenez à utiliser les outils IA pour créer des sites web, des SaaS et des automatisations. Formation complète en français avec mentorat." },
-      { property: "og:title", content: "BelKou" },
-      { property: "og:description", content: "Formation BelKou — créez des Apps IA rapidement." },
-      { property: "og:image", content: "/og-image.svg" },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: defaultTitle,
+      description: defaultDescription,
+      path: "/",
+    }),
   loader: () => getStudentCount(),
   component: Index,
 });
@@ -29,6 +28,7 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={[organizationJsonLd(), courseJsonLd()]} />
       <Navbar />
       <main>
         <Hero studentCount={studentCount} />

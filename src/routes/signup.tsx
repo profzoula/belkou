@@ -8,14 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({
-    meta: [
-      { title: "Créer un compte — BelKou" },
-      { name: "description", content: "Créez votre compte étudiant BelKou." },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Créer un compte — BelKou",
+      description: "Créez votre compte étudiant BelKou pour accéder à votre espace de formation.",
+      path: "/signup",
+      noindex: true,
+    }),
   component: SignupPage,
 });
 

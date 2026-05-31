@@ -17,16 +17,16 @@ export type ServerEnv = z.infer<typeof envSchema>;
 
 function fromProcessEnv(): Record<string, string | undefined> {
   return {
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-    RESEND_API_KEY: process.env.RESEND_API_KEY,
-    EMAIL_FROM: process.env.EMAIL_FROM,
-    SITE_URL: process.env.SITE_URL ?? process.env.VITE_SITE_URL,
-    STRIPE_PRICE_PREMIUM: process.env.STRIPE_PRICE_PREMIUM ?? process.env.VITE_STRIPE_PRICE_PREMIUM,
-    STRIPE_PRICE_VIP: process.env.STRIPE_PRICE_VIP ?? process.env.VITE_STRIPE_PRICE_VIP,
-    ADMIN_USERNAME: process.env.ADMIN_USERNAME,
-    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY?.trim(),
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET?.trim(),
+    RESEND_API_KEY: process.env.RESEND_API_KEY?.trim(),
+    EMAIL_FROM: process.env.EMAIL_FROM?.trim(),
+    SITE_URL: (process.env.SITE_URL ?? process.env.VITE_SITE_URL)?.trim(),
+    STRIPE_PRICE_PREMIUM: (process.env.STRIPE_PRICE_PREMIUM ?? process.env.VITE_STRIPE_PRICE_PREMIUM)?.trim(),
+    STRIPE_PRICE_VIP: (process.env.STRIPE_PRICE_VIP ?? process.env.VITE_STRIPE_PRICE_VIP)?.trim(),
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME?.trim(),
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD?.trim(),
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
   };
 }
 

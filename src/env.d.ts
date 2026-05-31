@@ -2,6 +2,8 @@
 
 interface ImportMetaEnv {
   readonly VITE_CONTACT_EMAIL?: string;
+  readonly VITE_WHATSAPP_GROUP_PREMIUM?: string;
+  readonly VITE_WHATSAPP_GROUP_VIP?: string;
   readonly VITE_WHATSAPP_GROUP_URL?: string;
   readonly VITE_COHORT_START_DATE?: string;
   readonly VITE_STATS_STUDENTS_BASE?: string;

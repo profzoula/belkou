@@ -8,7 +8,7 @@
   <rect width="1200" height="630" fill="#fafafa"/>
   <rect x="80" y="80" width="1040" height="470" rx="24" fill="url(#g)" opacity="0.08"/>
   <text x="100" y="280" font-family="system-ui,sans-serif" font-size="72" font-weight="700" fill="#111">BelKou</text>
-  <text x="100" y="360" font-family="system-ui,sans-serif" font-size="36" fill="#555">Formation apps IA &amp; SaaS en français</text>
+  <text x="100" y="360" font-family="system-ui,sans-serif" font-size="32" fill="#555">Créez, lancez et vendez avec l'IA — en français</text>
   <rect x="100" y="400" width="280" height="56" rx="12" fill="#4f46e5"/>
   <text x="240" y="437" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" font-weight="600" fill="#fff">belkou.online</text>
 </svg>

@@ -9,14 +9,14 @@ import {
 } from "@/lib/admin-auth";
 import { getDb } from "@/server/env";
 import { getRegistrationStats, listRegistrations } from "@/server/db";
-import { getServerEnv } from "@/server/env";
+import { getServerEnvResolved } from "@/server/env";
 
 function isSecureRequest(): boolean {
   return getRequestHeader("x-forwarded-proto") === "https" || process.env.NODE_ENV === "production";
 }
 
 async function requireAdmin(): Promise<void> {
-  const env = getServerEnv();
+  const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) {
     throw new Error("Admin non configuré");
   }
@@ -28,10 +28,15 @@ async function requireAdmin(): Promise<void> {
 
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    z.object({ username: z.string().min(1), password: z.string().min(1) }).parse(data),
+    z
+      .object({
+        username: z.string().trim().min(1),
+        password: z.string().min(1),
+      })
+      .parse(data),
   )
   .handler(async ({ data }) => {
-    const env = getServerEnv();
+    const env = await getServerEnvResolved();
     if (!env.ADMIN_USERNAME || !env.ADMIN_PASSWORD) {
       throw new Error("Admin non configuré sur le serveur");
     }
@@ -75,7 +80,7 @@ export const getAdminDashboard = createServerFn({ method: "GET" }).handler(async
 });
 
 export const checkAdminSession = createServerFn({ method: "GET" }).handler(async () => {
-  const env = getServerEnv();
+  const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) return { authenticated: false as const };
   const admin = await getAdminFromRequest(getRequestHeader("cookie") ?? null, env.ADMIN_PASSWORD);
   return { authenticated: Boolean(admin) };

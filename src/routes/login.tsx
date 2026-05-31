@@ -8,14 +8,16 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "Connexion — BelKou" },
-      { name: "description", content: "Connectez-vous à votre espace étudiant BelKou." },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Connexion — BelKou",
+      description: "Connectez-vous à votre espace étudiant BelKou.",
+      path: "/login",
+      noindex: true,
+    }),
   component: LoginPage,
 });
 

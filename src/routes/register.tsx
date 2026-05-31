@@ -13,18 +13,20 @@ import { z } from "zod";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { siteConfig } from "@/lib/site-config";
+import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   plan: z.enum(["premium", "vip"]).optional(),
 });
 
 export const Route = createFileRoute("/register")({
-  head: () => ({
-    meta: [
-      { title: "Inscription — BelKou" },
-      { name: "description", content: "Inscrivez-vous à la formation BelKou pour apprendre à créer des Apps IA et des SaaS." },
-    ],
-  }),
+  head: () =>
+    seoHead({
+      title: "Inscription — BelKou",
+      description:
+        "Inscrivez-vous à la formation BelKou : apprenez à créer, lancer et vendre votre premier produit digital avec l'IA. Plans Premium et VIP.",
+      path: "/register",
+    }),
   validateSearch: searchSchema,
   component: RegisterPage,
 });

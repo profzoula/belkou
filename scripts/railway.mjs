@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
+import { readFileSync, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { join, dirname, extname, normalize } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Readable } from "node:stream";
@@ -8,6 +8,25 @@ import { Readable } from "node:stream";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const clientRoot = join(root, "dist", "client");
 const workerUrl = pathToFileURL(join(root, "dist", "server", "index.js")).href;
+
+function loadDevVars() {
+  const devVarsPath = join(root, ".dev.vars");
+  if (!existsSync(devVarsPath)) return;
+
+  for (const line of readFileSync(devVarsPath, "utf8").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eq = trimmed.indexOf("=");
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (key && process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadDevVars();
 
 const MIME = {
   ".css": "text/css; charset=utf-8",
@@ -79,6 +98,8 @@ function shouldTryStatic(pathname) {
     pathname.startsWith("/logos/") ||
     pathname === "/favicon.ico" ||
     pathname === "/og-image.svg" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
     Boolean(extname(pathname))
   );
 }
