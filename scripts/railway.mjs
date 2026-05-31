@@ -41,6 +41,7 @@ const MIME = {
   ".woff": "font/woff",
   ".woff2": "font/woff2",
   ".txt": "text/plain; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
   ".webmanifest": "application/manifest+json",
 };
 
@@ -78,16 +79,24 @@ async function sendWebResponse(res, response) {
 }
 
 async function tryStatic(pathname) {
-  const safePath = normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, "");
-  const filePath = join(clientRoot, safePath === "/" ? "index.html" : safePath);
+  const relativePath = normalize(pathname)
+    .replace(/^(\.\.(\/|\\|$))+/, "")
+    .replace(/^[/\\]+/, "");
+  if (!relativePath) return null;
+
+  const filePath = join(clientRoot, relativePath);
   if (!filePath.startsWith(clientRoot) || !existsSync(filePath)) {
     return null;
   }
   const body = await readFile(filePath);
   const type = MIME[extname(filePath)] ?? "application/octet-stream";
+  const cacheControl =
+    relativePath === "robots.txt" || relativePath === "sitemap.xml"
+      ? "public, max-age=3600"
+      : "public, max-age=31536000, immutable";
   return new Response(body, {
     status: 200,
-    headers: { "content-type": type, "cache-control": "public, max-age=31536000, immutable" },
+    headers: { "content-type": type, "cache-control": cacheControl },
   });
 }
 
