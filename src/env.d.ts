@@ -30,6 +30,8 @@ interface CloudflareEnv {
   SITE_URL?: string;
   STRIPE_PRICE_PREMIUM?: string;
   STRIPE_PRICE_VIP?: string;
+  ADMIN_USERNAME?: string;
+  ADMIN_PASSWORD?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 

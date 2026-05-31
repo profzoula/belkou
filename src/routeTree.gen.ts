@@ -15,9 +15,11 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal/privacy'
 import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
 const SuccessRoute = SuccessRouteImport.update({
@@ -50,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
   id: '/legal/terms',
   path: '/legal/terms',
@@ -65,6 +72,11 @@ const LegalCgvRoute = LegalCgvRouteImport.update({
   path: '/legal/cgv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -78,9 +90,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/login': typeof AdminLoginRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -90,9 +104,11 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/login': typeof AdminLoginRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/admin': typeof AdminIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -103,9 +119,11 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/admin/login': typeof AdminLoginRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -117,9 +135,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/success'
+    | '/admin/login'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/admin/'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -129,9 +149,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/success'
+    | '/admin/login'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/admin'
     | '/api/stripe/webhook'
   id:
     | '__root__'
@@ -141,9 +163,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/success'
+    | '/admin/login'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/admin/'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -154,9 +178,11 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   LegalCgvRoute: typeof LegalCgvRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -204,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/terms': {
       id: '/legal/terms'
       path: '/legal/terms'
@@ -225,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalCgvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -242,9 +282,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
+  AdminLoginRoute: AdminLoginRoute,
   LegalCgvRoute: LegalCgvRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

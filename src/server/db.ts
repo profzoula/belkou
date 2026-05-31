@@ -1,4 +1,17 @@
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
+import {
+  supabaseGetById,
+  supabaseGetByStripeSession,
+  supabaseGetCount,
+  supabaseGetStats,
+  supabaseListRegistrations,
+  supabaseSaveRegistration,
+  supabaseSetStripeSessionId,
+  supabaseUpdatePayment,
+  type RegistrationStats,
+} from "@/server/supabase-registrations";
+
+export type { RegistrationStats };
 
 const devStore = new Map<string, RegistrationRecord>();
 
@@ -69,9 +82,11 @@ export async function saveRegistration(
         record.created_at,
       )
       .run();
+    await supabaseSaveRegistration(record);
     return record;
   }
 
+  await supabaseSaveRegistration(record);
   devStore.set(record.id, record);
   console.info("[BelKou dev] Registration saved:", record.id, record.email);
   return record;
@@ -87,9 +102,11 @@ export async function updateRegistrationPayment(
       .prepare(`UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id) WHERE id = ?`)
       .bind(update.payment_status, update.stripe_session_id ?? null, id)
       .run();
+    await supabaseUpdatePayment(id, update);
     return;
   }
 
+  await supabaseUpdatePayment(id, update);
   const existing = devStore.get(id);
   if (existing) {
     devStore.set(id, {
@@ -103,8 +120,10 @@ export async function updateRegistrationPayment(
 export async function getRegistrationById(db: D1Database | null, id: string): Promise<RegistrationRecord | null> {
   if (db) {
     const row = await db.prepare(`SELECT * FROM registrations WHERE id = ?`).bind(id).first();
-    return row ? rowToRecord(row as Record<string, unknown>) : null;
+    return row ? rowToRecord(row as Record<string, unknown>) : await supabaseGetById(id);
   }
+  const fromSb = await supabaseGetById(id);
+  if (fromSb) return fromSb;
   return devStore.get(id) ?? null;
 }
 
@@ -117,8 +136,10 @@ export async function getRegistrationByStripeSession(
       .prepare(`SELECT * FROM registrations WHERE stripe_session_id = ?`)
       .bind(sessionId)
       .first();
-    return row ? rowToRecord(row as Record<string, unknown>) : null;
+    return row ? rowToRecord(row as Record<string, unknown>) : await supabaseGetByStripeSession(sessionId);
   }
+  const fromSb = await supabaseGetByStripeSession(sessionId);
+  if (fromSb) return fromSb;
   for (const record of devStore.values()) {
     if (record.stripe_session_id === sessionId) return record;
   }
@@ -128,8 +149,10 @@ export async function getRegistrationByStripeSession(
 export async function setStripeSessionId(db: D1Database | null, id: string, sessionId: string) {
   if (db) {
     await db.prepare(`UPDATE registrations SET stripe_session_id = ? WHERE id = ?`).bind(sessionId, id).run();
+    await supabaseSetStripeSessionId(id, sessionId);
     return;
   }
+  await supabaseSetStripeSessionId(id, sessionId);
   const existing = devStore.get(id);
   if (existing) devStore.set(id, { ...existing, stripe_session_id: sessionId });
 }
@@ -138,7 +161,38 @@ export async function getRegistrationCount(db: D1Database | null): Promise<numbe
   if (db) {
     await initDb(db);
     const row = await db.prepare(`SELECT COUNT(*) as total FROM registrations`).first<{ total: number }>();
-    return row?.total ?? 0;
+    return row?.total ?? (await supabaseGetCount());
   }
+  const sbCount = await supabaseGetCount();
+  if (sbCount > 0) return sbCount;
   return devStore.size;
+}
+
+export async function listRegistrations(db: D1Database | null): Promise<RegistrationRecord[]> {
+  if (db) {
+    await initDb(db);
+    const { results } = await db
+      .prepare(`SELECT * FROM registrations ORDER BY created_at DESC`)
+      .all<Record<string, unknown>>();
+    return (results ?? []).map(rowToRecord);
+  }
+
+  const fromSb = await supabaseListRegistrations();
+  if (fromSb.length > 0) return fromSb;
+
+  return [...devStore.values()].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+}
+
+export async function getRegistrationStats(db: D1Database | null): Promise<RegistrationStats> {
+  const rows = await listRegistrations(db);
+  return {
+    total: rows.length,
+    paid: rows.filter((r) => r.payment_status === "paid").length,
+    pending: rows.filter((r) => r.payment_status === "pending").length,
+    manual_pending: rows.filter((r) => r.payment_status === "manual_pending").length,
+    premium: rows.filter((r) => r.plan === "premium").length,
+    vip: rows.filter((r) => r.plan === "vip").length,
+  };
 }

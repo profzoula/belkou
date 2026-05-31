@@ -8,6 +8,9 @@ const envSchema = z.object({
   SITE_URL: z.string().default("https://belkou.online"),
   STRIPE_PRICE_PREMIUM: z.string().optional(),
   STRIPE_PRICE_VIP: z.string().optional(),
+  ADMIN_USERNAME: z.string().optional(),
+  ADMIN_PASSWORD: z.string().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof envSchema>;
@@ -21,6 +24,9 @@ function fromProcessEnv(): Record<string, string | undefined> {
     SITE_URL: process.env.SITE_URL ?? process.env.VITE_SITE_URL,
     STRIPE_PRICE_PREMIUM: process.env.STRIPE_PRICE_PREMIUM ?? process.env.VITE_STRIPE_PRICE_PREMIUM,
     STRIPE_PRICE_VIP: process.env.STRIPE_PRICE_VIP ?? process.env.VITE_STRIPE_PRICE_VIP,
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   };
 }
 
@@ -57,6 +63,9 @@ export async function getServerEnvResolved(): Promise<ServerEnv> {
       SITE_URL: cf.SITE_URL,
       STRIPE_PRICE_PREMIUM: cf.STRIPE_PRICE_PREMIUM,
       STRIPE_PRICE_VIP: cf.STRIPE_PRICE_VIP,
+      ADMIN_USERNAME: cf.ADMIN_USERNAME,
+      ADMIN_PASSWORD: cf.ADMIN_PASSWORD,
+      SUPABASE_SERVICE_ROLE_KEY: cf.SUPABASE_SERVICE_ROLE_KEY,
     });
   }
   return getServerEnv();
