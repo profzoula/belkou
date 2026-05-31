@@ -1,0 +1,14 @@
+{
+  "name": "BelKou",
+  "short_name": "BelKou",
+  "icons": [
+    {
+      "src": "/favicon/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#4f46e5",
+  "background_color": "#fafafa",
+  "display": "standalone"
+}
