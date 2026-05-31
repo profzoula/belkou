@@ -41,7 +41,7 @@ function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex items-center justify-center site-container py-8">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-grid place-items-center h-12 w-12 rounded-xl bg-primary/10 text-primary mb-4">

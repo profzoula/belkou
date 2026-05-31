@@ -14,8 +14,8 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="section-divider py-20 md:py-24 bg-card">
-      <div className="container mx-auto px-6">
+    <section id="features" className="section-divider py-16 sm:py-20 md:py-24 bg-card">
+      <div className="site-container">
         <SectionHeader
           label="Compétences"
           title="Tout ce qu'il faut pour coder avec l'IA"
@@ -24,17 +24,17 @@ export function Features() {
           className="max-w-xl"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {features.map((f) => (
             <div
               key={f.title}
-              className="surface surface-hover rounded-xl p-5"
+              className="surface surface-hover rounded-xl p-3.5 sm:p-5 min-w-0"
             >
-              <div className="icon-box mb-4">
-                <f.icon className="h-[1.125rem] w-[1.125rem]" />
+              <div className="icon-box mb-3 sm:mb-4 h-9 w-9 sm:h-10 sm:w-10">
+                <f.icon className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
               </div>
-              <h3 className="text-[15px] font-semibold mb-1.5">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+              <h3 className="text-[13px] sm:text-[15px] font-semibold mb-1 sm:mb-1.5 leading-snug">{f.title}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>

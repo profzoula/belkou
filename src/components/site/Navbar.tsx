@@ -12,25 +12,28 @@ const links = [
   { href: "#faq", label: "FAQ" },
 ];
 
-function NavActions({ onNavigate }: { onNavigate?: () => void }) {
+function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?: boolean }) {
   const { user, loading, signOut } = useAuth();
+  const wrapClass = stacked
+    ? "flex flex-col gap-2 w-full [&_button]:w-full [&_a]:w-full [&_button]:touch-target [&_a]:touch-target"
+    : "flex items-center gap-2";
 
   if (loading) {
-    return <div className="h-9 w-24 rounded-lg bg-muted/60 animate-pulse" />;
+    return <div className="h-11 w-24 rounded-lg bg-muted/60 animate-pulse" />;
   }
 
   if (user) {
     return (
-      <div className="flex items-center gap-2">
-        <Button asChild variant="outline" size="sm">
+      <div className={wrapClass}>
+        <Button asChild variant="outline" size={stacked ? "lg" : "sm"}>
           <Link to="/dashboard" onClick={onNavigate}>
             Mon espace
           </Link>
         </Button>
         <Button
           variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
+          size={stacked ? "lg" : "sm"}
+          className={`text-muted-foreground ${stacked ? "w-full" : ""}`}
           onClick={async () => {
             await signOut();
             onNavigate?.();
@@ -44,13 +47,13 @@ function NavActions({ onNavigate }: { onNavigate?: () => void }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Button asChild variant="outline" size="sm">
+    <div className={wrapClass}>
+      <Button asChild variant="outline" size={stacked ? "lg" : "sm"}>
         <Link to="/login" onClick={onNavigate}>
           Connexion
         </Link>
       </Button>
-      <Button asChild variant="hero" size="sm">
+      <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
         <Link to="/register" onClick={onNavigate}>
           S&apos;inscrire
         </Link>
@@ -64,8 +67,8 @@ export function Navbar() {
   const close = () => setOpen(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass">
-      <div className="container mx-auto flex h-[4.25rem] items-center justify-between px-6">
+    <header className="fixed top-0 left-0 right-0 z-50 glass pt-[env(safe-area-inset-top,0px)]">
+      <div className="site-container flex h-14 sm:h-[4.25rem] items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
           <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 rounded-lg object-contain" />
           <span className="text-[15px]">{siteConfig.name}</span>
@@ -89,7 +92,7 @@ export function Navbar() {
 
         <button
           type="button"
-          className="md:hidden grid h-9 w-9 place-items-center rounded-lg border border-border bg-card text-foreground"
+          className="md:hidden grid h-11 w-11 touch-target place-items-center rounded-lg border border-border bg-card text-foreground"
           onClick={() => setOpen(!open)}
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
         >
@@ -98,20 +101,20 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-card px-6 py-4 shadow-md">
+        <div className="md:hidden border-t border-border bg-card site-container py-4 shadow-md max-h-[calc(100dvh-3.5rem)] overflow-y-auto">
           <nav className="flex flex-col gap-1">
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
                 onClick={close}
-                className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
               >
                 {l.label}
               </a>
             ))}
-            <div className="mt-3 flex flex-col gap-2">
-              <NavActions onNavigate={close} />
+            <div className="mt-3 pt-3 border-t border-border">
+              <NavActions onNavigate={close} stacked />
             </div>
           </nav>
         </div>

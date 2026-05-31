@@ -9,8 +9,8 @@ const items = [
 
 export function Testimonials() {
   return (
-    <section className="py-20 md:py-24">
-      <div className="container mx-auto px-6">
+    <section className="py-16 sm:py-20 md:py-24">
+      <div className="site-container">
         <SectionHeader
           label="Témoignages"
           title="Ce que disent nos étudiants"
@@ -18,22 +18,31 @@ export function Testimonials() {
           className="max-w-md"
         />
 
-        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
+        <p className="text-center text-[11px] text-muted-foreground mb-3 md:hidden">
+          Glissez pour voir les témoignages →
+        </p>
+
+        <div className="flex md:grid md:grid-cols-3 gap-3 md:gap-5 max-w-5xl md:mx-auto overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-2 md:pb-0 -mx-1 px-1 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {items.map((t) => (
-            <div key={t.name} className="surface surface-hover rounded-xl p-6 flex flex-col">
-              <div className="flex gap-0.5 mb-4">
+            <div
+              key={t.name}
+              className="surface surface-hover rounded-xl p-3.5 sm:p-5 md:p-6 flex flex-col min-w-[calc(33.333%-0.5rem)] w-[calc(33.333%-0.5rem)] sm:min-w-[200px] sm:w-[200px] md:min-w-0 md:w-auto shrink-0 snap-start min-h-0"
+            >
+              <div className="flex gap-0.5 mb-2 sm:mb-4">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-3.5 w-3.5 fill-primary text-primary" />
+                  <Star key={i} className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-primary text-primary" />
                 ))}
               </div>
-              <p className="text-sm text-foreground/90 leading-relaxed flex-1 mb-6">"{t.text}"</p>
-              <div className="flex items-center gap-3 pt-4 border-t border-border">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-primary-soft text-primary text-sm font-semibold">
+              <p className="text-[10px] sm:text-sm text-foreground/90 leading-snug sm:leading-relaxed flex-1 mb-3 sm:mb-6">
+                &ldquo;{t.text}&rdquo;
+              </p>
+              <div className="flex items-center gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-border mt-auto">
+                <div className="grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-full bg-primary-soft text-primary text-xs sm:text-sm font-semibold">
                   {t.name.charAt(0)}
                 </div>
-                <div>
-                  <div className="text-sm font-semibold">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-semibold truncate">{t.name}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground leading-tight">{t.role}</div>
                 </div>
               </div>
             </div>

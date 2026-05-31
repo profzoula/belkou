@@ -9,8 +9,8 @@ const modules = [
 
 export function Learn() {
   return (
-    <section id="learn" className="py-20 md:py-24">
-      <div className="container mx-auto px-6">
+    <section id="learn" className="py-16 sm:py-20 md:py-24">
+      <div className="site-container">
         <SectionHeader
           label="Parcours"
           title="4 semaines pour lancer votre projet"
@@ -19,18 +19,25 @@ export function Learn() {
           className="max-w-lg"
         />
 
-        <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto">
           {modules.map((m) => (
-            <div key={m.n} className="surface surface-hover rounded-xl p-6 flex gap-4">
+            <div
+              key={m.n}
+              className="surface surface-hover rounded-xl p-3.5 sm:p-6 flex flex-col sm:flex-row gap-3 sm:gap-4 min-w-0"
+            >
               <div className="shrink-0">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-foreground text-background text-sm font-semibold">
+                <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-lg bg-foreground text-background text-xs sm:text-sm font-semibold">
                   {m.n}
                 </div>
               </div>
-              <div>
-                <span className="text-[11px] font-medium uppercase tracking-wide text-primary">{m.week}</span>
-                <h3 className="text-[15px] font-semibold mt-1 mb-1.5">{m.t}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{m.d}</p>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide text-primary">
+                  {m.week}
+                </span>
+                <h3 className="text-[13px] sm:text-[15px] font-semibold mt-0.5 sm:mt-1 mb-1 sm:mb-1.5 leading-snug">
+                  {m.t}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{m.d}</p>
               </div>
             </div>
           ))}

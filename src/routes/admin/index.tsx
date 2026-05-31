@@ -73,7 +73,7 @@ function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="site-container h-14 flex items-center justify-between">
           <div className="flex items-center gap-2 font-semibold text-sm">
             <Users className="h-4 w-4 text-primary" />
             Admin BelKou
@@ -89,7 +89,7 @@ function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
+      <main className="site-container py-6 sm:py-8 overflow-x-auto">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { label: "Inscriptions", value: stats.total },

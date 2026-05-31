@@ -97,7 +97,7 @@ function SuccessPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-[5.5rem] pb-16 max-w-lg text-center">
+      <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-lg text-center">
         <div className="inline-grid place-items-center h-14 w-14 rounded-full bg-primary/10 text-primary mb-5">
           <CheckCircle2 className="h-7 w-7" />
         </div>
@@ -114,11 +114,11 @@ function SuccessPage() {
 
         <div className="space-y-3 text-left">
           {showManual && !isPaid && (
-            <div className="surface rounded-xl p-5 flex gap-4">
-              <div className="icon-box shrink-0 h-10 w-10">
+            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
+              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
                 <CreditCard className="h-4 w-4" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="font-semibold text-sm mb-2">Instructions de paiement</div>
                 <ManualPaymentInfo />
               </div>
@@ -126,16 +126,16 @@ function SuccessPage() {
           )}
 
           {isPaid && whatsappUrl && (
-            <div className="surface rounded-xl p-5 flex gap-4">
-              <div className="icon-box shrink-0 h-10 w-10">
+            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
+              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
                 <MessageCircle className="h-4 w-4" />
               </div>
-              <div>
-                <div className="font-semibold text-sm mb-1">Groupe WhatsApp {whatsappLabel}</div>
-                <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
+              <div className="min-w-0 flex-1">
+                <div className="font-semibold text-sm mb-1 text-center sm:text-left">Groupe WhatsApp {whatsappLabel}</div>
+                <p className="text-sm text-muted-foreground mb-3 leading-relaxed text-center sm:text-left">
                   Rejoignez le groupe {whatsappLabel} pour commencer avec les autres étudiants.
                 </p>
-                <Button asChild variant="neon" size="sm">
+                <Button asChild variant="neon" size="lg" className="w-full sm:w-auto touch-target">
                   <a href={whatsappUrl} target="_blank" rel="noreferrer">
                     Rejoindre {whatsappLabel}
                   </a>
@@ -145,11 +145,11 @@ function SuccessPage() {
           )}
 
           {!isPaid && (
-            <div className="surface rounded-xl p-5 flex gap-4">
-              <div className="icon-box shrink-0 h-10 w-10">
+            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
+              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
                 <MessageCircle className="h-4 w-4" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1 text-center sm:text-left">
                 <div className="font-semibold text-sm mb-1">Groupe WhatsApp</div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Après paiement, vous recevrez le lien du groupe Premium VibeCode ou VIP VibeCode selon votre plan.
@@ -158,11 +158,11 @@ function SuccessPage() {
             </div>
           )}
 
-          <div className="surface rounded-xl p-5 flex gap-4">
-            <div className="icon-box shrink-0 h-10 w-10">
+          <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
+            <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
               <Calendar className="h-4 w-4" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1 text-center sm:text-left">
               <div className="font-semibold text-sm mb-1">Date de la formation</div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Début : <strong className="text-foreground">{siteConfig.cohortStartDate}</strong>
@@ -170,11 +170,11 @@ function SuccessPage() {
             </div>
           </div>
 
-          <div className="surface rounded-xl p-5 flex gap-4">
-            <div className="icon-box shrink-0 h-10 w-10">
+          <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
+            <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
               <Mail className="h-4 w-4" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1 text-center sm:text-left">
               <div className="font-semibold text-sm mb-1">Email de confirmation</div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Un email a été envoyé dans votre boîte avec tous les détails. Si vous ne le voyez pas, vérifiez les spams.
@@ -183,7 +183,7 @@ function SuccessPage() {
           </div>
         </div>
 
-        <Button asChild variant="hero" size="lg" className="mt-8">
+        <Button asChild variant="hero" size="lg" className="mt-8 w-full sm:w-auto touch-target">
           <Link to="/">
             Retour à l'accueil <ArrowRight className="h-4 w-4" />
           </Link>

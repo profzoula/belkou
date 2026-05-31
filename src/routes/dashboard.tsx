@@ -41,7 +41,7 @@ function DashboardPage() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="container mx-auto px-6 pt-[5.5rem] pb-16 max-w-lg text-center">
+        <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-lg text-center">
           <p className="text-muted-foreground">Authentification Supabase non configurée.</p>
         </main>
         <Footer />
@@ -56,7 +56,7 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-[5.5rem] pb-16 max-w-2xl">
+      <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-2xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
             <p className="section-label mb-2">Espace étudiant</p>

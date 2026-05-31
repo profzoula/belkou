@@ -12,8 +12,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
-import { siteConfig } from "@/lib/site-config";
+import { planDetails } from "@/lib/plans";
 import { seoHead } from "@/lib/seo";
+import { PlanDetailsCard } from "@/components/site/PlanDetailsCard";
 
 const searchSchema = z.object({
   plan: z.enum(["premium", "vip"]).optional(),
@@ -83,7 +84,7 @@ function RegisterPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-6 pt-[5.5rem] pb-16 max-w-lg">
+      <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-5xl">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>
@@ -96,7 +97,13 @@ function RegisterPage() {
           </p>
         </div>
 
-        <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
+        <div className="grid lg:grid-cols-[minmax(0,340px)_1fr] gap-6 lg:gap-8 items-start">
+          <PlanDetailsCard
+            planId={form.plan}
+            className="hidden lg:block lg:sticky lg:top-24"
+          />
+
+          <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-4 sm:p-6 md:p-8 min-w-0">
           <div className="space-y-2">
             <Label htmlFor="full_name">Nom complet</Label>
             <Input id="full_name" value={form.full_name} onChange={(e) => update("full_name", e.target.value)} placeholder="Jean Pierre" className="rounded-lg" />
@@ -147,8 +154,8 @@ function RegisterPage() {
             <div className="grid grid-cols-2 gap-3">
               {(
                 [
-                  { id: "premium" as const, label: siteConfig.plans.premium.name, price: `$${siteConfig.plans.premium.price}` },
-                  { id: "vip" as const, label: siteConfig.plans.vip.name, price: `$${siteConfig.plans.vip.price}` },
+                  { id: "premium" as const, label: planDetails.premium.name, price: `$${planDetails.premium.price}` },
+                  { id: "vip" as const, label: planDetails.vip.name, price: `$${planDetails.vip.price}` },
                 ] as const
               ).map((p) => (
                 <button
@@ -168,9 +175,10 @@ function RegisterPage() {
                 </button>
               ))}
             </div>
+            <PlanDetailsCard planId={form.plan} className="lg:hidden mt-3" />
           </div>
 
-          <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+          <Button type="submit" variant="hero" size="lg" className="w-full touch-target" disabled={loading}>
             {loading ? "Inscription en cours..." : "Compléter l'inscription"} <ArrowRight />
           </Button>
 
@@ -178,6 +186,7 @@ function RegisterPage() {
             Pas de remboursement. Vérifiez vos informations avant de soumettre.
           </p>
         </form>
+        </div>
       </main>
       <Footer />
     </div>
