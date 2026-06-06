@@ -1,5 +1,6 @@
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import {
+  supabaseGetByEmail,
   supabaseGetById,
   supabaseGetByStripeSession,
   supabaseGetCount,
@@ -7,6 +8,7 @@ import {
   supabaseListRegistrations,
   supabaseSaveRegistration,
   supabaseSetStripeSessionId,
+  supabaseUpdateGrant,
   supabaseUpdatePayment,
   type RegistrationStats,
 } from "@/server/supabase-registrations";
@@ -53,11 +55,12 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
 export async function saveRegistration(
   db: D1Database | null,
   data: RegistrationInput,
+  options?: { payment_status?: RegistrationRecord["payment_status"] },
 ): Promise<RegistrationRecord> {
   const record: RegistrationRecord = {
     ...data,
     id: crypto.randomUUID(),
-    payment_status: "pending",
+    payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
     created_at: new Date().toISOString(),
   };
@@ -90,6 +93,58 @@ export async function saveRegistration(
   devStore.set(record.id, record);
   console.info("[BelKou dev] Registration saved:", record.id, record.email);
   return record;
+}
+
+export async function getRegistrationByEmail(
+  db: D1Database | null,
+  email: string,
+): Promise<RegistrationRecord | null> {
+  const normalized = email.trim().toLowerCase();
+
+  if (db) {
+    await initDb(db);
+    const row = await db
+      .prepare(`SELECT * FROM registrations WHERE lower(email) = ? ORDER BY created_at DESC LIMIT 1`)
+      .bind(normalized)
+      .first();
+    if (row) return rowToRecord(row as Record<string, unknown>);
+  }
+
+  const fromSb = await supabaseGetByEmail(normalized);
+  if (fromSb) return fromSb;
+
+  for (const record of devStore.values()) {
+    if (record.email.toLowerCase() === normalized) return record;
+  }
+  return null;
+}
+
+export async function updateRegistrationGrant(
+  db: D1Database | null,
+  id: string,
+  update: {
+    plan: RegistrationRecord["plan"];
+    payment_status: RegistrationRecord["payment_status"];
+  },
+): Promise<RegistrationRecord | null> {
+  if (db) {
+    await db
+      .prepare(`UPDATE registrations SET plan = ?, payment_status = ? WHERE id = ?`)
+      .bind(update.plan, update.payment_status, id)
+      .run();
+    await supabaseUpdateGrant(id, update);
+    return getRegistrationById(db, id);
+  }
+
+  await supabaseUpdateGrant(id, update);
+  const existing = devStore.get(id);
+  if (existing) {
+    const next = { ...existing, plan: update.plan, payment_status: update.payment_status };
+    devStore.set(id, next);
+    return next;
+  }
+
+  return supabaseGetById(id);
 }
 
 export async function updateRegistrationPayment(

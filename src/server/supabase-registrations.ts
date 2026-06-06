@@ -52,6 +52,40 @@ export async function supabaseSaveRegistration(record: RegistrationRecord): Prom
   if (error) console.error("[BelKou] Supabase save registration:", error.message);
 }
 
+export async function supabaseGetByEmail(email: string): Promise<RegistrationRecord | null> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return null;
+
+  const { data, error } = await sb
+    .from("registrations")
+    .select("*")
+    .ilike("email", email.trim())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return rowToRecord(data);
+}
+
+export async function supabaseUpdateGrant(
+  id: string,
+  update: {
+    plan: RegistrationRecord["plan"];
+    payment_status: RegistrationRecord["payment_status"];
+  },
+): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+
+  const { error } = await sb
+    .from("registrations")
+    .update({ plan: update.plan, payment_status: update.payment_status })
+    .eq("id", id);
+
+  if (error) console.error("[BelKou] Supabase update grant:", error.message);
+}
+
 export async function supabaseUpdatePayment(
   id: string,
   update: { payment_status: RegistrationRecord["payment_status"]; stripe_session_id?: string | null },

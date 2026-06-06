@@ -7,9 +7,40 @@ import {
   createAdminToken,
   getAdminFromRequest,
 } from "@/lib/admin-auth";
-import { getDb } from "@/server/env";
-import { getRegistrationStats, listRegistrations } from "@/server/db";
-import { getServerEnvResolved } from "@/server/env";
+import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
+import { getDb, getServerEnvResolved } from "@/server/env";
+import { registrationSchema } from "@/lib/schemas/registration";
+import {
+  getRegistrationByEmail,
+  getRegistrationById,
+  getRegistrationStats,
+  listRegistrations,
+  saveRegistration,
+  updateRegistrationGrant,
+  updateRegistrationPayment,
+} from "@/server/db";
+import { paymentConfirmedEmail, sendEmail } from "@/server/email";
+
+async function sendPaymentConfirmed(
+  fullName: string,
+  email: string,
+  plan: "premium" | "vip",
+) {
+  try {
+    await sendEmail({
+      to: email,
+      subject: "Paiement confirmé — BelKou",
+      html: paymentConfirmedEmail(
+        fullName,
+        plan,
+        getWhatsappGroupUrl(plan),
+        siteConfig.cohortStartDate,
+      ),
+    });
+  } catch (error) {
+    console.error("Payment confirmation email error:", error);
+  }
+}
 
 function isSecureRequest(): boolean {
   return getRequestHeader("x-forwarded-proto") === "https" || process.env.NODE_ENV === "production";
@@ -78,6 +109,125 @@ export const getAdminDashboard = createServerFn({ method: "GET" }).handler(async
     })),
   };
 });
+
+export const adminAddCashRegistration = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registration: registrationSchema,
+        sendEmail: z.boolean().optional().default(true),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const db = await getDb();
+
+    const existing = await getRegistrationByEmail(db, data.registration.email);
+    if (existing) {
+      throw new Error(
+        "Cet email est déjà inscrit. Utilisez « Marquer payé » sur l'inscription existante.",
+      );
+    }
+
+    const record = await saveRegistration(db, data.registration, { payment_status: "paid" });
+
+    if (data.sendEmail) {
+      await sendPaymentConfirmed(record.full_name, record.email, record.plan);
+    }
+
+    return {
+      ok: true as const,
+      registration: {
+        id: record.id,
+        email: record.email,
+        full_name: record.full_name,
+        plan: record.plan,
+        payment_status: record.payment_status,
+      },
+    };
+  });
+
+export const adminMarkCashPaid = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registrationId: z.string().uuid(),
+        sendEmail: z.boolean().optional().default(true),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const db = await getDb();
+    const record = await getRegistrationById(db, data.registrationId);
+
+    if (!record) {
+      throw new Error("Inscription introuvable");
+    }
+
+    if (record.payment_status === "paid") {
+      throw new Error("Cette inscription est déjà marquée comme payée");
+    }
+
+    await updateRegistrationPayment(db, record.id, { payment_status: "paid" });
+
+    if (data.sendEmail) {
+      await sendPaymentConfirmed(record.full_name, record.email, record.plan);
+    }
+
+    return { ok: true as const };
+  });
+
+export const adminGrantFreeVip = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registrationId: z.string().uuid().optional(),
+        email: z.string().email().optional(),
+        sendEmail: z.boolean().optional().default(true),
+      })
+      .refine((d) => d.registrationId || d.email, {
+        message: "registrationId ou email requis",
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const db = await getDb();
+
+    const record = data.registrationId
+      ? await getRegistrationById(db, data.registrationId)
+      : await getRegistrationByEmail(db, data.email!);
+
+    if (!record) {
+      throw new Error("Inscription introuvable");
+    }
+
+    const updated = await updateRegistrationGrant(db, record.id, {
+      plan: "vip",
+      payment_status: "paid",
+    });
+
+    if (!updated) {
+      throw new Error("Mise à jour impossible");
+    }
+
+    if (data.sendEmail) {
+      await sendPaymentConfirmed(updated.full_name, updated.email, "vip");
+    }
+
+    return {
+      ok: true as const,
+      registration: {
+        id: updated.id,
+        email: updated.email,
+        full_name: updated.full_name,
+        plan: updated.plan,
+        payment_status: updated.payment_status,
+      },
+    };
+  });
 
 export const checkAdminSession = createServerFn({ method: "GET" }).handler(async () => {
   const env = await getServerEnvResolved();
