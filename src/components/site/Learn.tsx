@@ -13,8 +13,8 @@ export function Learn() {
       <div className="site-container">
         <SectionHeader
           label="Parcours"
-          title="4 semaines pour lancer votre projet"
-          description="Un parcours structuré pour passer de zéro à votre premier produit en ligne."
+          title="8 semaines pour lancer votre projet"
+          description="Un parcours structuré en 4 phases — sur 8 semaines (ou 6 en intensif) — pour passer de zéro à votre premier produit en ligne."
           align="center"
           className="max-w-lg"
         />

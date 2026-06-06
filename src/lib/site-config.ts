@@ -20,6 +20,20 @@ export const siteConfig = {
     tools: "20+",
     rating: "4.9",
   },
+  formation: {
+    durationRecommended: "8 semaines",
+    durationIntensive: "6 semaines (intensif)",
+    schedule: "2 à 3 jours par semaine",
+    sessionLength: "2h à 3h par session",
+    objectives: [
+      "Créer des applications web modernes avec l'IA",
+      "Utiliser les outils IA pour coder plus vite",
+      "Comprendre les bases du frontend et du backend",
+      "Créer des projets réels",
+      "Déployer vos applications en ligne",
+      "Travailler comme un développeur assisté par l'IA",
+    ],
+  },
   plans: {
     premium: { name: "Premium", price: 199, priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "" },
     vip: { name: "VIP", price: 290, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },

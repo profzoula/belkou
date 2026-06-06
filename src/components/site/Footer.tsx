@@ -20,6 +20,7 @@ export function Footer() {
             <h4 className="text-sm font-semibold mb-3">Navigation</h4>
             <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
               <li><a href="#features" className="hover:text-foreground transition-colors">Fonctionnalités</a></li>
+              <li><a href="#objectifs" className="hover:text-foreground transition-colors">Objectifs</a></li>
               <li><a href="#learn" className="hover:text-foreground transition-colors">Parcours</a></li>
               <li><a href="#pricing" className="hover:text-foreground transition-colors">Tarifs</a></li>
               <li><a href="#faq" className="hover:text-foreground transition-colors">FAQ</a></li>

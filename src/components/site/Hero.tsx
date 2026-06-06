@@ -30,7 +30,7 @@ export function Hero({ studentCount }: HeroProps) {
             <h1 className="text-[1.625rem] sm:text-[2rem] md:text-[2.625rem] font-semibold leading-[1.15] mb-4 sm:mb-5">
               Apprenez à créer des{" "}
               <span className="text-gradient">apps IA & SaaS</span>
-              {" "}en 4 semaines
+              {" "}en 8 semaines
             </h1>
 
             <p className="max-w-lg text-sm sm:text-[15px] text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
@@ -95,7 +95,7 @@ export function Hero({ studentCount }: HeroProps) {
                   <p className="pl-4">stack: [<span className="text-emerald-600">"Cursor"</span>, <span className="text-emerald-600">"Replit"</span>],</p>
                   <p className="pl-4">deploy: <span className="text-emerald-600">"production"</span></p>
                   <p>{"});"}</p>
-                  <p className="mt-3 text-muted-foreground">// ✓ App lancée en 4 semaines</p>
+                  <p className="mt-3 text-muted-foreground">// ✓ App déployée en 8 semaines</p>
                 </div>
               </div>
             </div>
