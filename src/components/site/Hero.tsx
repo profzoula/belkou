@@ -59,10 +59,10 @@ export function Hero({ studentCount }: HeroProps) {
             automatisations avec une communauté qui avance avec vous.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12 sm:mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4 sm:mb-5">
             <Button asChild variant="hero" size="lg" className="w-full sm:w-auto touch-target px-8">
               <Link to="/register">
-                Commencer maintenant <ArrowRight className="h-4 w-4 shrink-0" />
+                S&apos;inscrire à la formation <ArrowRight className="h-4 w-4 shrink-0" />
               </Link>
             </Button>
             <Button asChild variant="soft" size="lg" className="w-full sm:w-auto touch-target px-8">
@@ -71,6 +71,18 @@ export function Hero({ studentCount }: HeroProps) {
               </a>
             </Button>
           </div>
+
+          <p className="text-sm text-muted-foreground mb-12 sm:mb-16">
+            Pas encore prêt à vous inscrire ?{" "}
+            <Link to="/signup" className="font-semibold text-primary hover:underline">
+              Sign up
+            </Link>
+            {" "}pour créer un compte gratuit ou{" "}
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              Login
+            </Link>
+            {" "}si vous en avez déjà un.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto mb-12 sm:mb-16 animate-fade-up [animation-delay:100ms]">

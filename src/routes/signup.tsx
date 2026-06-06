@@ -56,18 +56,19 @@ function SignupPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg">
+      <main className="site-container site-page-top pb-12 sm:pb-16">
+        <div className="mx-auto w-full max-w-sm sm:max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>
 
         <div className="mb-8">
-          <p className="section-label mb-3">Inscription</p>
-          <h1 className="text-2xl md:text-3xl font-semibold">Créer un compte</h1>
+          <p className="section-label mb-3">Sign up</p>
+          <h1 className="text-2xl md:text-3xl font-semibold">Créez votre compte gratuit</h1>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Créez votre compte pour accéder à la formation. Pour acheter un plan, utilisez{" "}
+            Pas encore prêt à payer ? Créez un compte maintenant. Quand vous serez prêt,{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">
-              la page d&apos;inscription
+              inscrivez-vous à la formation
             </Link>
             .
           </p>
@@ -128,6 +129,7 @@ function SignupPage() {
             </p>
           </form>
         )}
+        </div>
       </main>
       <Footer />
     </div>

@@ -50,20 +50,16 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
 
   return (
     <div className={wrapClass}>
-      {!stacked && (
-        <Button asChild variant="ghost" size="sm" className="text-muted-foreground hidden lg:inline-flex">
-          <Link to="/login" onClick={onNavigate}>
-            Connexion
-          </Link>
-        </Button>
-      )}
-      {stacked && (
-        <Button asChild variant="outline" size="lg">
-          <Link to="/login" onClick={onNavigate}>
-            Connexion
-          </Link>
-        </Button>
-      )}
+      <Button asChild variant="ghost" size={stacked ? "lg" : "sm"} className="text-muted-foreground">
+        <Link to="/login" onClick={onNavigate}>
+          Login
+        </Link>
+      </Button>
+      <Button asChild variant={stacked ? "hero" : "outline"} size={stacked ? "lg" : "sm"}>
+        <Link to="/signup" onClick={onNavigate}>
+          Sign up
+        </Link>
+      </Button>
       <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
         <Link to="/register" onClick={onNavigate}>
           S&apos;inscrire
