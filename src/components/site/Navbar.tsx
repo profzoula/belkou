@@ -55,14 +55,9 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
           Login
         </Link>
       </Button>
-      <Button asChild variant={stacked ? "hero" : "outline"} size={stacked ? "lg" : "sm"}>
+      <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
         <Link to="/signup" onClick={onNavigate}>
           Sign up
-        </Link>
-      </Button>
-      <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
-        <Link to="/register" onClick={onNavigate}>
-          S&apos;inscrire
         </Link>
       </Button>
     </div>
