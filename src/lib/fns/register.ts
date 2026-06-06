@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb } from "@/server/env";
-import { getRegistrationById, saveRegistration, setStripeSessionId, updateRegistrationPayment } from "@/server/db";
+import { getRegistrationByEmail, getRegistrationById, saveRegistration, setStripeSessionId, updateRegistrationPayment } from "@/server/db";
+import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 import { createCheckoutSession } from "@/server/stripe";
 import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
 import type { PlanId } from "@/lib/site-config";
@@ -29,6 +30,19 @@ export const submitRegistration = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registrationSchema.parse(data))
   .handler(async ({ data }) => {
     const db = await getDb();
+
+    // Rate limiting
+    const allowed = checkRateLimit(`register:${data.email}`, RATE_LIMITS.register.limit, RATE_LIMITS.register.windowMs);
+    if (!allowed) {
+      throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
+    }
+
+    // Check for duplicate email
+    const existing = await getRegistrationByEmail(db, data.email);
+    if (existing) {
+      throw new Error("Cet email est déjà inscrit. Connectez-vous ou utilisez un autre email.");
+    }
+
     const record = await saveRegistration(db, data);
     const planConfig = siteConfig.plans[data.plan];
     const manualHtml = manualPaymentHtml();

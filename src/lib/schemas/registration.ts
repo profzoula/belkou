@@ -16,4 +16,5 @@ export type RegistrationRecord = RegistrationInput & {
   payment_status: "pending" | "paid" | "manual_pending";
   stripe_session_id: string | null;
   created_at: string;
+  updated_at: string | null;
 };

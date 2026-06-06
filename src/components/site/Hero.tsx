@@ -75,11 +75,11 @@ export function Hero({ studentCount }: HeroProps) {
           <p className="text-sm text-muted-foreground mb-12 sm:mb-16">
             Pas encore prêt à vous inscrire ?{" "}
             <Link to="/signup" className="font-semibold text-primary hover:underline">
-              Sign up
+              S'inscrire
             </Link>
             {" "}pour créer un compte gratuit ou{" "}
             <Link to="/login" className="font-semibold text-primary hover:underline">
-              Login
+              Connexion
             </Link>
             {" "}si vous en avez déjà un.
           </p>

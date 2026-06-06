@@ -29,6 +29,7 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
     payment_status: row.payment_status as RegistrationRecord["payment_status"],
     stripe_session_id: row.stripe_session_id ? String(row.stripe_session_id) : null,
     created_at: String(row.created_at),
+    updated_at: row.updated_at ? String(row.updated_at) : null,
   };
 }
 
@@ -47,6 +48,7 @@ export async function supabaseSaveRegistration(record: RegistrationRecord): Prom
     payment_status: record.payment_status,
     stripe_session_id: record.stripe_session_id,
     created_at: record.created_at,
+    updated_at: record.updated_at,
   });
 
   if (error) console.error("[BelKou] Supabase save registration:", error.message);
@@ -80,7 +82,7 @@ export async function supabaseUpdateGrant(
 
   const { error } = await sb
     .from("registrations")
-    .update({ plan: update.plan, payment_status: update.payment_status })
+    .update({ plan: update.plan, payment_status: update.payment_status, updated_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) console.error("[BelKou] Supabase update grant:", error.message);
@@ -93,7 +95,7 @@ export async function supabaseUpdatePayment(
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
-  const payload: Record<string, string | null> = { payment_status: update.payment_status };
+  const payload: Record<string, string | null> = { payment_status: update.payment_status, updated_at: new Date().toISOString() };
   if (update.stripe_session_id !== undefined) {
     payload.stripe_session_id = update.stripe_session_id;
   }

@@ -56,7 +56,7 @@ function LoginPage() {
         </Link>
 
         <div className="mb-8">
-          <p className="section-label mb-3">Login</p>
+          <p className="section-label mb-3">Connexion</p>
           <h1 className="text-2xl md:text-3xl font-semibold">Accédez à votre espace</h1>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
             Connectez-vous pour accéder à la formation après votre inscription.
@@ -98,10 +98,15 @@ function LoginPage() {
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
               {loading ? "Connexion..." : "Se connecter"} <ArrowRight className="h-4 w-4" />
             </Button>
+            <div className="text-center">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
+                Mot de passe oublié ?
+              </Link>
+            </div>
             <p className="text-xs text-center text-muted-foreground">
               Pas encore de compte ?{" "}
               <Link to="/signup" className="text-primary font-medium hover:underline">
-                Sign up
+                S'inscrire
               </Link>
             </p>
           </form>

@@ -20,6 +20,7 @@ import {
   updateRegistrationPayment,
 } from "@/server/db";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
+import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 
 async function sendPaymentConfirmed(
   fullName: string,
@@ -67,6 +68,11 @@ export const adminLogin = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
+    const allowed = checkRateLimit(`admin-login:${data.username}`, RATE_LIMITS.adminLogin.limit, RATE_LIMITS.adminLogin.windowMs);
+    if (!allowed) {
+      throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
+    }
+
     const env = await getServerEnvResolved();
     if (!env.ADMIN_USERNAME || !env.ADMIN_PASSWORD) {
       throw new Error("Admin non configuré sur le serveur");

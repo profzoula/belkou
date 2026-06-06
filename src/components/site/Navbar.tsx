@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Menu, Moon, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,6 +16,17 @@ const links = [
 
 function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?: boolean }) {
   const { user, loading, signOut } = useAuth();
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("belkou-theme", next ? "dark" : "light");
+  };
   const wrapClass = stacked
     ? "flex flex-col gap-2 w-full [&_button]:w-full [&_a]:w-full [&_button]:touch-target [&_a]:touch-target"
     : "flex items-center gap-2";
@@ -50,14 +61,21 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
 
   return (
     <div className={wrapClass}>
+      <button
+        onClick={toggleDark}
+        className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
+        aria-label={dark ? "Mode clair" : "Mode sombre"}
+      >
+        {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </button>
       <Button asChild variant="ghost" size={stacked ? "lg" : "sm"} className="text-muted-foreground">
         <Link to="/login" onClick={onNavigate}>
-          Login
+          Connexion
         </Link>
       </Button>
       <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
         <Link to="/signup" onClick={onNavigate}>
-          Sign up
+          S'inscrire
         </Link>
       </Button>
     </div>

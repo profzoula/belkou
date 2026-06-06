@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { LogOut, Plus, RefreshCw, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, LogOut, Plus, RefreshCw, Search, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,30 @@ const emptyForm = {
   plan: "premium" as "premium" | "vip",
 };
 
+const ROWS_PER_PAGE = 20;
+
+function exportCSV(registrations: Array<Record<string, unknown>>) {
+  const headers = ["Date", "Nom", "Email", "WhatsApp", "Pays", "Niveau", "Plan", "Statut"];
+  const rows = registrations.map((r) => [
+    r.created_at,
+    r.full_name,
+    r.email,
+    r.whatsapp,
+    r.country,
+    r.level,
+    r.plan,
+    r.payment_status,
+  ]);
+  const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `belkou-inscriptions-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function AdminDashboardPage() {
   const navigate = useNavigate();
   const dashboardFn = useServerFn(getAdminDashboard);
@@ -62,6 +86,17 @@ function AdminDashboardPage() {
   const [form, setForm] = useState(emptyForm);
   const [sendEmailOnAdd, setSendEmailOnAdd] = useState(true);
   const [data, setData] = useState<Awaited<ReturnType<typeof getAdminDashboard>> | null>(null);
+
+  // Search, filter, pagination state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [planFilter, setPlanFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, planFilter, statusFilter]);
 
   const load = async () => {
     setLoading(true);
@@ -140,6 +175,32 @@ function AdminDashboardPage() {
     }
   };
 
+  // Client-side filtered registrations
+  const filteredRegistrations = useMemo(() => {
+    if (!data) return [];
+    return data.registrations.filter((r) => {
+      // Search by name or email
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = r.full_name.toLowerCase().includes(query);
+        const matchesEmail = r.email.toLowerCase().includes(query);
+        if (!matchesName && !matchesEmail) return false;
+      }
+      // Filter by plan
+      if (planFilter !== "all" && r.plan !== planFilter) return false;
+      // Filter by status
+      if (statusFilter !== "all" && r.payment_status !== statusFilter) return false;
+      return true;
+    });
+  }, [data, searchQuery, planFilter, statusFilter]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredRegistrations.length / ROWS_PER_PAGE));
+  const paginatedRegistrations = useMemo(() => {
+    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    return filteredRegistrations.slice(start, start + ROWS_PER_PAGE);
+  }, [filteredRegistrations, currentPage]);
+
   if (loading || !data) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center text-sm text-muted-foreground">
@@ -162,6 +223,13 @@ function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <Button variant="hero" size="sm" onClick={() => setShowAddForm((v) => !v)}>
               <Plus className="h-4 w-4" /> Paiement cash
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportCSV(registrations as unknown as Array<Record<string, unknown>>)}
+            >
+              <Download className="h-4 w-4" /> Exporter CSV
             </Button>
             <Button variant="outline" size="sm" onClick={load}>
               <RefreshCw className="h-4 w-4" /> Actualiser
@@ -308,8 +376,48 @@ function AdminDashboardPage() {
         <div className="surface rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <h2 className="font-semibold text-sm">Inscriptions récentes</h2>
-            <span className="text-xs text-muted-foreground">{registrations.length} total</span>
+            <span className="text-xs text-muted-foreground">
+              {filteredRegistrations.length === registrations.length
+                ? `${registrations.length} total`
+                : `${filteredRegistrations.length} / ${registrations.length} résultats`}
+            </span>
           </div>
+
+          {/* Search & Filters */}
+          <div className="px-5 py-3 border-b border-border flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="admin_search"
+                placeholder="Rechercher par nom ou email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 rounded-lg h-9 text-sm"
+              />
+            </div>
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger className="rounded-lg h-9 w-[150px] text-sm">
+                <SelectValue placeholder="Plan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les plans</SelectItem>
+                <SelectItem value="premium">Premium</SelectItem>
+                <SelectItem value="vip">VIP</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="rounded-lg h-9 w-[180px] text-sm">
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="paid">Payé</SelectItem>
+                <SelectItem value="pending">En attente</SelectItem>
+                <SelectItem value="manual_pending">Paiement manuel</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -324,14 +432,16 @@ function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {registrations.length === 0 ? (
+                {paginatedRegistrations.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-5 py-10 text-center text-muted-foreground">
-                      Aucune inscription pour le moment.
+                      {filteredRegistrations.length === 0 && registrations.length > 0
+                        ? "Aucun résultat pour ces filtres."
+                        : "Aucune inscription pour le moment."}
                     </td>
                   </tr>
                 ) : (
-                  registrations.map((r) => (
+                  paginatedRegistrations.map((r) => (
                     <tr key={r.id} className="border-b border-border/60 last:border-0">
                       <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">
                         {new Date(r.created_at).toLocaleDateString("fr-FR")}
@@ -382,6 +492,35 @@ function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {filteredRegistrations.length > ROWS_PER_PAGE && (
+            <div className="px-5 py-3 border-t border-border flex items-center justify-between text-sm">
+              <span className="text-xs text-muted-foreground">
+                Page {currentPage} sur {totalPages}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4" /> Précédent
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Suivant <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         <p className="mt-6 text-center">

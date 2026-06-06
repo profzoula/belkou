@@ -120,6 +120,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="fr">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var theme = localStorage.getItem('belkou-theme');
+            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+              document.documentElement.classList.add('dark');
+            }
+          })();
+        `}} />
       </head>
       <body>
         {children}

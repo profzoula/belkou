@@ -21,14 +21,15 @@ const INIT_SQL = `
 CREATE TABLE IF NOT EXISTS registrations (
   id TEXT PRIMARY KEY,
   full_name TEXT NOT NULL,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   whatsapp TEXT NOT NULL,
   country TEXT NOT NULL,
   level TEXT NOT NULL,
   plan TEXT NOT NULL,
   payment_status TEXT NOT NULL DEFAULT 'pending',
   stripe_session_id TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  updated_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_registrations_email ON registrations(email);
 `;
@@ -37,7 +38,7 @@ export async function initDb(db: D1Database) {
   await db.exec(INIT_SQL);
 }
 
-function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
+export function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
   return {
     id: String(row.id),
     full_name: String(row.full_name),
@@ -49,6 +50,7 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
     payment_status: row.payment_status as RegistrationRecord["payment_status"],
     stripe_session_id: row.stripe_session_id ? String(row.stripe_session_id) : null,
     created_at: String(row.created_at),
+    updated_at: row.updated_at ? String(row.updated_at) : null,
   };
 }
 
@@ -63,14 +65,15 @@ export async function saveRegistration(
     payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
     created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   if (db) {
     await initDb(db);
     await db
       .prepare(
-        `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, payment_status, stripe_session_id, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, payment_status, stripe_session_id, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         record.id,
@@ -83,6 +86,7 @@ export async function saveRegistration(
         record.payment_status,
         record.stripe_session_id,
         record.created_at,
+        record.updated_at,
       )
       .run();
     await supabaseSaveRegistration(record);
@@ -102,7 +106,6 @@ export async function getRegistrationByEmail(
   const normalized = email.trim().toLowerCase();
 
   if (db) {
-    await initDb(db);
     const row = await db
       .prepare(`SELECT * FROM registrations WHERE lower(email) = ? ORDER BY created_at DESC LIMIT 1`)
       .bind(normalized)
@@ -129,8 +132,8 @@ export async function updateRegistrationGrant(
 ): Promise<RegistrationRecord | null> {
   if (db) {
     await db
-      .prepare(`UPDATE registrations SET plan = ?, payment_status = ? WHERE id = ?`)
-      .bind(update.plan, update.payment_status, id)
+      .prepare(`UPDATE registrations SET plan = ?, payment_status = ?, updated_at = ? WHERE id = ?`)
+      .bind(update.plan, update.payment_status, new Date().toISOString(), id)
       .run();
     await supabaseUpdateGrant(id, update);
     return getRegistrationById(db, id);
@@ -154,8 +157,8 @@ export async function updateRegistrationPayment(
 ) {
   if (db) {
     await db
-      .prepare(`UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id) WHERE id = ?`)
-      .bind(update.payment_status, update.stripe_session_id ?? null, id)
+      .prepare(`UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id), updated_at = ? WHERE id = ?`)
+      .bind(update.payment_status, update.stripe_session_id ?? null, new Date().toISOString(), id)
       .run();
     await supabaseUpdatePayment(id, update);
     return;
@@ -241,13 +244,32 @@ export async function listRegistrations(db: D1Database | null): Promise<Registra
 }
 
 export async function getRegistrationStats(db: D1Database | null): Promise<RegistrationStats> {
-  const rows = await listRegistrations(db);
-  return {
-    total: rows.length,
-    paid: rows.filter((r) => r.payment_status === "paid").length,
-    pending: rows.filter((r) => r.payment_status === "pending").length,
-    manual_pending: rows.filter((r) => r.payment_status === "manual_pending").length,
-    premium: rows.filter((r) => r.plan === "premium").length,
-    vip: rows.filter((r) => r.plan === "vip").length,
-  };
+  if (db) {
+    await initDb(db);
+    const row = await db
+      .prepare(
+        `SELECT
+          COUNT(*) as total,
+          SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid,
+          SUM(CASE WHEN payment_status = 'pending' THEN 1 ELSE 0 END) as pending,
+          SUM(CASE WHEN payment_status = 'manual_pending' THEN 1 ELSE 0 END) as manual_pending,
+          SUM(CASE WHEN plan = 'premium' THEN 1 ELSE 0 END) as premium,
+          SUM(CASE WHEN plan = 'vip' THEN 1 ELSE 0 END) as vip
+        FROM registrations`,
+      )
+      .first<Record<string, number>>();
+
+    if (row) {
+      return {
+        total: row.total ?? 0,
+        paid: row.paid ?? 0,
+        pending: row.pending ?? 0,
+        manual_pending: row.manual_pending ?? 0,
+        premium: row.premium ?? 0,
+        vip: row.vip ?? 0,
+      };
+    }
+  }
+
+  return (await supabaseGetStats()) ?? { total: 0, paid: 0, pending: 0, manual_pending: 0, premium: 0, vip: 0 };
 }
