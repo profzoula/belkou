@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, dirname, extname, normalize } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -78,16 +78,32 @@ async function sendWebResponse(res, response) {
   Readable.fromWeb(response.body).pipe(res);
 }
 
-async function tryStatic(pathname) {
+async function resolveStaticPath(pathname) {
   const relativePath = normalize(pathname)
     .replace(/^(\.\.(\/|\\|$))+/, "")
     .replace(/^[/\\]+/, "");
   if (!relativePath) return null;
 
   const filePath = join(clientRoot, relativePath);
-  if (!filePath.startsWith(clientRoot) || !existsSync(filePath)) {
-    return null;
+  if (!filePath.startsWith(clientRoot)) return null;
+  if (existsSync(filePath)) return filePath;
+
+  const assetsDir = join(clientRoot, "assets");
+  const fileName = relativePath.split(/[/\\]/).pop() ?? "";
+  if (fileName.startsWith("styles-") && fileName.endsWith(".css") && existsSync(assetsDir)) {
+    const fallback = readdirSync(assetsDir).find(
+      (name) => name.startsWith("styles-") && name.endsWith(".css"),
+    );
+    if (fallback) return join(assetsDir, fallback);
   }
+
+  return null;
+}
+
+async function tryStatic(pathname) {
+  const filePath = await resolveStaticPath(pathname);
+  if (!filePath) return null;
+  const relativePath = filePath.slice(clientRoot.length + 1).replace(/\\/g, "/");
   const body = await readFile(filePath);
   const type = MIME[extname(filePath)] ?? "application/octet-stream";
   const cacheControl =
