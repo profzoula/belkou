@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: defaultTitle },
       { name: "description", content: defaultDescription },
       { name: "author", content: siteConfig.name },
-      { name: "theme-color", content: "#4f46e5" },
+      { name: "theme-color", content: "#ea580c" },
       { property: "og:title", content: defaultTitle },
       { property: "og:description", content: defaultDescription },
       { property: "og:type", content: "website" },
@@ -101,7 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Urbanist:wght@600;700;800&display=swap",
       },
       {
         rel: "stylesheet",

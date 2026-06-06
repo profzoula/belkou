@@ -8,114 +8,99 @@ type HeroProps = {
   studentCount: number;
 };
 
+const avatars = [
+  "bg-orange-200 text-orange-700",
+  "bg-orange-100 text-orange-600",
+  "bg-amber-100 text-amber-700",
+];
+
 export function Hero({ studentCount }: HeroProps) {
   const studentLabel = String(studentCount);
 
   const stats = [
-    { n: studentLabel, l: "Étudiants", highlight: true },
-    { n: siteConfig.stats.tools, l: "Outils IA" },
-    { n: siteConfig.stats.rating, l: "Satisfaction" },
+    { n: studentLabel, l: "Étudiants formés", suffix: "+" },
+    { n: "8", l: "Semaines de formation", suffix: "" },
+    { n: siteConfig.stats.rating, l: "Note de satisfaction", suffix: "/5" },
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-mesh pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 md:pb-20">
+    <section className="relative overflow-hidden bg-gradient-mesh site-page-top pb-12 sm:pb-16 md:pb-24">
       <div className="site-container">
-        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
-          <div className="animate-fade-up min-w-0">
-            <div className="badge mb-4 sm:mb-6 max-w-full">
-              <span className="badge-dot shrink-0" />
-              <span className="truncate">Cohorte 2026 — Places limitées</span>
-            </div>
-
-            <h1 className="text-[1.625rem] sm:text-[2rem] md:text-[2.625rem] font-semibold leading-[1.15] mb-4 sm:mb-5">
-              Apprenez à créer des{" "}
-              <span className="text-gradient">apps IA & SaaS</span>
-              {" "}en 8 semaines
-            </h1>
-
-            <p className="max-w-lg text-sm sm:text-[15px] text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-              Vous n&apos;avez pas besoin d&apos;être développeur. Apprenez à créer, lancer et
-              vendre votre premier produit digital avec l&apos;IA et une communauté qui avance
-              avec vous.
-            </p>
-
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-6 sm:mb-8">
-              <Button asChild variant="hero" size="lg" className="w-full touch-target h-auto min-h-11 px-2 sm:px-7 text-xs sm:text-sm whitespace-normal">
-                <Link to="/register">
-                  Commencer maintenant <ArrowRight className="h-4 w-4 shrink-0" />
-                </Link>
-              </Button>
-              <Button asChild variant="neon" size="lg" className="w-full touch-target h-auto min-h-11 px-2 sm:px-7 text-xs sm:text-sm whitespace-normal">
-                <a href="#learn">
-                  <Play className="h-4 w-4 shrink-0" /> Voir le programme
-                </a>
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-primary text-primary shrink-0" />
-                4.9/5 ·{" "}
-                <span className="text-primary font-semibold">{studentLabel}</span> étudiants
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 sm:hidden surface rounded-xl p-3">
-              {stats.map((s) => (
-                <div key={s.l} className="text-center min-w-0">
-                  <div
-                    className={
-                      s.highlight
-                        ? "text-sm font-semibold text-primary truncate"
-                        : "text-sm font-semibold truncate"
-                    }
-                  >
-                    {s.n}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">{s.l}</div>
+        <div className="max-w-3xl mx-auto text-center animate-fade-up">
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 badge mb-6 sm:mb-8">
+            <div className="avatar-stack">
+              {avatars.map((cls, i) => (
+                <div
+                  key={i}
+                  className={`grid h-7 w-7 place-items-center text-[10px] font-bold ${cls}`}
+                >
+                  {["J", "M", "W"][i]}
                 </div>
               ))}
             </div>
+            <span>
+              <span className="font-semibold text-foreground">{studentLabel}+</span>{" "}
+              étudiants satisfaits
+            </span>
+            <span className="hidden sm:inline-flex items-center gap-1 text-foreground font-semibold">
+              <Star className="h-3.5 w-3.5 fill-primary text-primary" />
+              4.9
+            </span>
           </div>
 
-          <div className="relative animate-fade-up [animation-delay:120ms] min-w-0">
-            <div className="surface rounded-2xl overflow-hidden shadow-lg">
-              <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-3 sm:px-4 py-3 min-w-0">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400/80 shrink-0" />
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80 shrink-0" />
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80 shrink-0" />
-                <span className="ml-1 sm:ml-2 text-[10px] sm:text-xs font-mono text-muted-foreground truncate">
-                  belkou-app.tsx
-                </span>
-              </div>
-              <div className="overflow-x-auto">
-                <div className="p-4 sm:p-5 font-mono text-[10px] sm:text-[11px] leading-relaxed bg-[oklch(0.985_0.006_264)] min-w-[17rem]">
-                  <p><span className="text-primary">const</span> app = <span className="text-[oklch(0.45_0.15_290)]">createSaaS</span>({"{"}</p>
-                  <p className="pl-4">name: <span className="text-emerald-600">"Mon Projet IA"</span>,</p>
-                  <p className="pl-4">stack: [<span className="text-emerald-600">"Cursor"</span>, <span className="text-emerald-600">"Replit"</span>],</p>
-                  <p className="pl-4">deploy: <span className="text-emerald-600">"production"</span></p>
-                  <p>{"});"}</p>
-                  <p className="mt-3 text-muted-foreground">// ✓ App déployée en 8 semaines</p>
-                </div>
-              </div>
-            </div>
+          <h1 className="font-display text-[2rem] sm:text-[2.75rem] md:text-[3.25rem] lg:text-[3.5rem] font-bold leading-[1.08] mb-5 sm:mb-6 text-balance">
+            Créez, lancez et{" "}
+            <span className="text-gradient">vendez</span>
+            {" "}vos apps IA en 8 semaines
+          </h1>
 
-            <div className="absolute -bottom-4 -left-2 sm:-left-4 surface rounded-xl px-3 sm:px-4 py-3 shadow-md hidden sm:block">
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {stats.map((s) => (
-                  <div key={s.l} className="text-center min-w-[3.5rem] sm:min-w-[4.5rem]">
-                    <div
-                      className={
-                        s.highlight
-                          ? "text-sm sm:text-base font-semibold text-primary"
-                          : "text-sm sm:text-base font-semibold"
-                      }
-                    >
-                      {s.n}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">{s.l}</div>
-                  </div>
-                ))}
+          <p className="max-w-xl mx-auto text-sm sm:text-base text-muted-foreground mb-8 sm:mb-10 leading-relaxed">
+            Pas besoin d&apos;être développeur. Apprenez à construire des apps IA, des SaaS et des
+            automatisations avec une communauté qui avance avec vous.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12 sm:mb-16">
+            <Button asChild variant="hero" size="lg" className="w-full sm:w-auto touch-target px-8">
+              <Link to="/register">
+                Commencer maintenant <ArrowRight className="h-4 w-4 shrink-0" />
+              </Link>
+            </Button>
+            <Button asChild variant="soft" size="lg" className="w-full sm:w-auto touch-target px-8">
+              <a href="#learn">
+                <Play className="h-4 w-4 shrink-0" /> Voir le programme
+              </a>
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-3xl mx-auto mb-12 sm:mb-16 animate-fade-up [animation-delay:100ms]">
+          {stats.map((s) => (
+            <div key={s.l} className="stat-card">
+              <div className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+                {s.n}
+                <span className="text-primary">{s.suffix}</span>
+              </div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">{s.l}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-4xl mx-auto animate-fade-up [animation-delay:180ms]">
+          <div className="surface rounded-2xl overflow-hidden shadow-lg border border-border">
+            <div className="flex items-center gap-2 border-b border-border bg-muted/50 px-4 py-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-400/80 shrink-0" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80 shrink-0" />
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80 shrink-0" />
+              <span className="ml-2 text-[11px] font-mono text-muted-foreground">belkou-app.tsx</span>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="p-5 sm:p-6 font-mono text-[11px] sm:text-xs leading-relaxed bg-gray-50 min-w-[17rem]">
+                <p><span className="text-primary">const</span> app = <span className="text-orange-600">createSaaS</span>({"{"}</p>
+                <p className="pl-4">name: <span className="text-emerald-600">&quot;Mon Projet IA&quot;</span>,</p>
+                <p className="pl-4">stack: [<span className="text-emerald-600">&quot;Cursor&quot;</span>, <span className="text-emerald-600">&quot;Replit&quot;</span>],</p>
+                <p className="pl-4">deploy: <span className="text-emerald-600">&quot;production&quot;</span></p>
+                <p>{"});"}</p>
+                <p className="mt-3 text-muted-foreground">// ✓ App déployée en 8 semaines</p>
               </div>
             </div>
           </div>

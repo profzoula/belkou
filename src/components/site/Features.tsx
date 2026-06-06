@@ -14,26 +14,29 @@ const features = [
 
 export function Features() {
   return (
-    <section id="features" className="section-divider py-16 sm:py-20 md:py-24 bg-card">
+    <section id="features" className="section-divider py-16 sm:py-20 md:py-28">
       <div className="site-container">
         <SectionHeader
           label="Compétences"
           title="Tout ce qu'il faut pour coder avec l'IA"
           description="8 modules pratiques couvrant la stack moderne du développement assisté par intelligence artificielle."
-          align="center"
           className="max-w-xl"
         />
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {features.map((f) => (
+        <p className="text-center text-xs text-muted-foreground -mt-6 mb-8 sm:mb-10">
+          Conçu pour les équipes et entrepreneurs qui veulent lancer vite.
+        </p>
+
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 max-w-5xl mx-auto">
+          {features.map((f, i) => (
             <div
               key={f.title}
-              className="surface surface-hover rounded-xl p-3.5 sm:p-5 min-w-0"
+              className={`surface surface-hover rounded-2xl p-4 sm:p-6 min-w-0 ${i === features.length - 1 ? "brand-feature lg:col-span-1" : ""}`}
             >
-              <div className="icon-box mb-3 sm:mb-4 h-9 w-9 sm:h-10 sm:w-10">
-                <f.icon className="h-4 w-4 sm:h-[1.125rem] sm:w-[1.125rem]" />
+              <div className="icon-box mb-4 h-10 w-10">
+                <f.icon className="h-[1.125rem] w-[1.125rem]" />
               </div>
-              <h3 className="text-[13px] sm:text-[15px] font-semibold mb-1 sm:mb-1.5 leading-snug">{f.title}</h3>
+              <h3 className="text-sm sm:text-base font-semibold mb-2 leading-snug">{f.title}</h3>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}

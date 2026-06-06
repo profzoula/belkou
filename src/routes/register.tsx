@@ -84,7 +84,7 @@ function RegisterPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-5xl">
+      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-5xl">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>

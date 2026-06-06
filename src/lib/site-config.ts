@@ -15,6 +15,13 @@ export const siteConfig = {
   },
   cohortStartDate: import.meta.env.VITE_COHORT_START_DATE ?? "15 juin 2026",
   location: "USA · En ligne",
+  promo: {
+    enabled: true,
+    spotsLimit: 50,
+    message:
+      "Ebook gratuit offert aux 50 premières inscriptions — places limitées !",
+    messageShort: "Ebook gratuit — 50 premières places",
+  },
   stats: {
     studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 2684),
     tools: "20+",

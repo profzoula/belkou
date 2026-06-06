@@ -97,7 +97,7 @@ function SuccessPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container pt-20 sm:pt-[5.5rem] pb-12 sm:pb-16 max-w-lg text-center">
+      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg text-center">
         <div className="inline-grid place-items-center h-14 w-14 rounded-full bg-primary/10 text-primary mb-5">
           <CheckCircle2 className="h-7 w-7" />
         </div>
@@ -135,7 +135,7 @@ function SuccessPage() {
                 <p className="text-sm text-muted-foreground mb-3 leading-relaxed text-center sm:text-left">
                   Rejoignez le groupe {whatsappLabel} pour commencer avec les autres étudiants.
                 </p>
-                <Button asChild variant="neon" size="lg" className="w-full sm:w-auto touch-target">
+                <Button asChild variant="soft" size="lg" className="w-full sm:w-auto touch-target">
                   <a href={whatsappUrl} target="_blank" rel="noreferrer">
                     Rejoindre {whatsappLabel}
                   </a>

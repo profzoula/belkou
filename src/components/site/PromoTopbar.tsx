@@ -1,0 +1,33 @@
+import { Link } from "@tanstack/react-router";
+import { siteConfig } from "@/lib/site-config";
+
+export function PromoTopbar() {
+  if (!siteConfig.promo.enabled) return null;
+
+  return (
+    <div className="promo-topbar">
+      <div className="site-container flex h-7 sm:h-8 items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs leading-none">
+        <p className="truncate">
+          <span className="sm:hidden">
+            <span className="promo-highlight">Ebook gratuit</span>
+            <span className="promo-spots"> — 50 premières places</span>
+          </span>
+          <span className="hidden sm:inline">
+            <span className="promo-highlight">Ebook gratuit</span>
+            <span className="promo-spots"> offert aux 50 premières inscriptions</span>
+            <span> — places limitées !</span>
+          </span>
+        </p>
+        <span className="opacity-60 shrink-0" aria-hidden>
+          ·
+        </span>
+        <Link
+          to="/register"
+          className="promo-cta shrink-0 font-semibold whitespace-nowrap hover:underline underline-offset-2"
+        >
+          S&apos;inscrire →
+        </Link>
+      </div>
+    </div>
+  );
+}
