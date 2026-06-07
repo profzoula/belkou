@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
@@ -60,82 +58,94 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16">
-        <div className="mx-auto w-full max-w-sm sm:max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Retour
-        </Link>
+    <AuthSplitLayout>
+      <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Sign in to your account</h1>
 
-        <div className="mb-8">
-          <p className="section-label mb-3">Connexion</p>
-          <h1 className="text-2xl md:text-3xl font-semibold">Accédez à votre espace</h1>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Connectez-vous pour accéder à la formation après votre inscription.
-          </p>
-        </div>
+      {!isSupabaseConfigured ? (
+        <p className="mt-6 text-sm text-slate-500">
+          Supabase n&apos;est pas configuré. Ajoutez{" "}
+          <code className="text-slate-800">VITE_SUPABASE_URL</code> et{" "}
+          <code className="text-slate-800">VITE_SUPABASE_ANON_KEY</code>.
+        </p>
+      ) : (
+        <div className="mt-8 space-y-6">
+          {oauthError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {oauthError}
+            </div>
+          ) : null}
 
-        {!isSupabaseConfigured ? (
-          <div className="surface rounded-2xl p-6 text-sm text-muted-foreground">
-            Supabase n&apos;est pas encore configuré. Ajoutez{" "}
-            <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
-            <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code> dans vos variables d&apos;environnement.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {oauthError ? (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                {oauthError}
-              </div>
-            ) : null}
-            <GoogleAuthButton label="Se connecter avec Google" disabled={loading} />
-            <AuthDivider />
-            <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
+          <form onSubmit={submit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@email.com"
-                className="rounded-lg"
+                placeholder="you@example.com"
+                className="h-11 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-blue-500"
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="rounded-lg"
+                className="h-11 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-blue-500"
                 required
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Connexion..." : "Se connecter"} <ArrowRight className="h-4 w-4" />
+
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loading}
+              className="h-11 w-full rounded-lg bg-[#2563eb] text-base font-semibold text-white shadow-sm hover:bg-[#1d4ed8]"
+            >
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
-            <div className="text-center">
-              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
-                Mot de passe oublié ?
-              </Link>
-            </div>
-            <p className="text-xs text-center text-muted-foreground">
-              Pas encore de compte ?{" "}
-              <Link to="/signup" className="text-primary font-medium hover:underline">
-                S'inscrire
-              </Link>
-            </p>
           </form>
-          </div>
-        )}
+
+          <AuthDivider />
+
+          <GoogleAuthButton label="Continue with Google" disabled={loading} variant="dark" />
+
+          <p className="text-center text-sm text-slate-600">
+            Don&apos;t have an account?{" "}
+            <Link to="/signup" className="font-medium text-slate-900 underline underline-offset-2 hover:text-blue-600">
+              Sign up
+            </Link>
+          </p>
+
+          <p className="text-center text-sm">
+            <Link to="/forgot-password" className="text-slate-500 hover:text-slate-800 hover:underline">
+              Forgot password?
+            </Link>
+          </p>
+
+          <p className="text-center text-xs leading-relaxed text-slate-400">
+            By signing in, you agree to the{" "}
+            <Link to="/legal/terms" className="underline underline-offset-2 hover:text-slate-600">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/legal/privacy" className="underline underline-offset-2 hover:text-slate-600">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
-      </main>
-      <Footer />
-    </div>
+      )}
+    </AuthSplitLayout>
   );
 }
