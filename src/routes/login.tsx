@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,14 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const message = new URLSearchParams(window.location.search).get("error");
+    if (message) {
+      toast.error(decodeURIComponent(message));
+      window.history.replaceState({}, "", "/login");
+    }
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
