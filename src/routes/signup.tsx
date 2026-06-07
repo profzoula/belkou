@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
-import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/signup")({
@@ -26,6 +24,7 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -33,6 +32,16 @@ function SignupPage() {
     const supabase = getSupabase();
     if (!supabase) {
       toast.error("Authentification non configurée.");
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas.");
       return;
     }
 
@@ -56,48 +65,40 @@ function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16">
-        <div className="mx-auto w-full max-w-sm sm:max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Retour
+    <AuthSplitLayout>
+      <p className="section-label mb-3">Sign up</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Create your account
+      </h1>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        Compte gratuit pour votre espace étudiant. Prêt à rejoindre la formation ?{" "}
+        <Link to="/register" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+          S&apos;inscrire à BelKou
         </Link>
+        .
+      </p>
 
-        <div className="mb-8">
-          <p className="section-label mb-3">Sign up</p>
-          <h1 className="text-2xl md:text-3xl font-semibold">Créez votre compte gratuit</h1>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Pas encore prêt à payer ? Créez un compte maintenant. Quand vous serez prêt,{" "}
-            <Link to="/register" className="text-primary font-medium hover:underline">
-              inscrivez-vous à la formation
-            </Link>
-            .
-          </p>
-        </div>
-
-        {!isSupabaseConfigured ? (
-          <div className="surface rounded-2xl p-6 text-sm text-muted-foreground">
-            Supabase n&apos;est pas encore configuré. Ajoutez{" "}
-            <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
-            <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code> dans vos variables d&apos;environnement.
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <GoogleAuthButton label="S'inscrire avec Google" disabled={loading} />
-            <AuthDivider />
-            <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
+      {!isSupabaseConfigured ? (
+        <p className="mt-6 text-sm text-muted-foreground">
+          Supabase n&apos;est pas configuré. Ajoutez{" "}
+          <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
+          <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
+        </p>
+      ) : (
+        <div className="mt-8 space-y-6">
+          <form onSubmit={submit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Nom complet</Label>
+              <Label htmlFor="full_name">Full name</Label>
               <Input
                 id="full_name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Jean Pierre"
-                className="rounded-lg"
+                className="h-11 rounded-lg"
                 required
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -105,39 +106,69 @@ function SignupPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@email.com"
-                className="rounded-lg"
+                placeholder="you@example.com"
+                className="h-11 rounded-lg"
                 required
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="8 caractères minimum"
-                className="rounded-lg"
+                placeholder="••••••••"
+                className="h-11 rounded-lg"
                 minLength={8}
                 required
               />
             </div>
-            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Création..." : "Créer mon compte"} <ArrowRight className="h-4 w-4" />
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm_password">Confirm password</Label>
+              <Input
+                id="confirm_password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-11 rounded-lg"
+                minLength={8}
+                required
+              />
+            </div>
+
+            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full rounded-lg">
+              {loading ? "Creating account..." : "Sign up"}
             </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              Déjà un compte ?{" "}
-              <Link to="/login" className="text-primary font-medium hover:underline">
-                Se connecter
-              </Link>
-            </p>
           </form>
-          </div>
-        )}
+
+          <AuthDivider />
+
+          <GoogleAuthButton label="Continue with Google" disabled={loading} variant="dark" />
+
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link to="/login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+              Sign in
+            </Link>
+          </p>
+
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            By signing up, you agree to the{" "}
+            <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </div>
-      </main>
-      <Footer />
-    </div>
+      )}
+    </AuthSplitLayout>
   );
 }

@@ -55,7 +55,7 @@ export function GoogleAuthButton({
       size="lg"
       className={
         variant === "dark"
-          ? "h-11 w-full rounded-lg border-0 bg-[#171717] text-white hover:bg-[#262626] hover:text-white"
+          ? "h-11 w-full rounded-lg border border-border bg-foreground text-background hover:bg-foreground/90 hover:text-background"
           : "w-full touch-target gap-2.5 rounded-lg bg-card hover:bg-accent"
       }
       disabled={disabled || loading}
@@ -70,9 +70,9 @@ export function GoogleAuthButton({
 export function AuthDivider() {
   return (
     <div className="relative flex items-center gap-3 py-1">
-      <div className="h-px flex-1 bg-slate-200" />
-      <span className="shrink-0 text-sm text-slate-500">Or</span>
-      <div className="h-px flex-1 bg-slate-200" />
+      <div className="h-px flex-1 bg-border" />
+      <span className="shrink-0 text-sm text-muted-foreground">Or</span>
+      <div className="h-px flex-1 bg-border" />
     </div>
   );
 }

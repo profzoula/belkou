@@ -59,59 +59,53 @@ function LoginPage() {
 
   return (
     <AuthSplitLayout>
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Sign in to your account</h1>
+      <p className="section-label mb-3">Connexion</p>
+      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Sign in to your account
+      </h1>
 
       {!isSupabaseConfigured ? (
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-muted-foreground">
           Supabase n&apos;est pas configuré. Ajoutez{" "}
-          <code className="text-slate-800">VITE_SUPABASE_URL</code> et{" "}
-          <code className="text-slate-800">VITE_SUPABASE_ANON_KEY</code>.
+          <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
+          <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       ) : (
         <div className="mt-8 space-y-6">
           {oauthError ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {oauthError}
             </div>
           ) : null}
 
           <form onSubmit={submit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                Email
-              </Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="h-11 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-blue-500"
+                className="h-11 rounded-lg"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-slate-700">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-lg border-slate-200 bg-white shadow-sm focus-visible:ring-blue-500"
+                className="h-11 rounded-lg"
                 required
               />
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              disabled={loading}
-              className="h-11 w-full rounded-lg bg-[#2563eb] text-base font-semibold text-white shadow-sm hover:bg-[#1d4ed8]"
-            >
+            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full rounded-lg">
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
@@ -120,26 +114,26 @@ function LoginPage() {
 
           <GoogleAuthButton label="Continue with Google" disabled={loading} variant="dark" />
 
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link to="/signup" className="font-medium text-slate-900 underline underline-offset-2 hover:text-blue-600">
+            <Link to="/signup" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
               Sign up
             </Link>
           </p>
 
           <p className="text-center text-sm">
-            <Link to="/forgot-password" className="text-slate-500 hover:text-slate-800 hover:underline">
+            <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground hover:underline">
               Forgot password?
             </Link>
           </p>
 
-          <p className="text-center text-xs leading-relaxed text-slate-400">
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
             By signing in, you agree to the{" "}
-            <Link to="/legal/terms" className="underline underline-offset-2 hover:text-slate-600">
+            <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link to="/legal/privacy" className="underline underline-offset-2 hover:text-slate-600">
+            <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
               Privacy Policy
             </Link>
             .
