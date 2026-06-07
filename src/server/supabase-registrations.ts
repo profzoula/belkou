@@ -33,21 +33,11 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
   };
 }
 
-export async function supabaseSaveRegistration(record: RegistrationRecord): Promise<void> {
-  const sb = getSupabaseAdmin();
-  if (!sb) {
-    const isProd = process.env.NODE_ENV === "production";
-    if (isProd) {
-      throw new Error("Base de données non configurée (SUPABASE_SERVICE_ROLE_KEY manquant).");
-    }
-    console.warn("[BelKou] Supabase admin not configured — registration not persisted.");
-    return;
-  }
-
-  const { error } = await sb.from("registrations").upsert({
+function registrationPayload(record: RegistrationRecord, includeUpdatedAt: boolean) {
+  const base = {
     id: record.id,
     full_name: record.full_name,
-    email: record.email,
+    email: record.email.trim().toLowerCase(),
     whatsapp: record.whatsapp,
     country: record.country,
     level: record.level,
@@ -55,13 +45,70 @@ export async function supabaseSaveRegistration(record: RegistrationRecord): Prom
     payment_status: record.payment_status,
     stripe_session_id: record.stripe_session_id,
     created_at: record.created_at,
-    updated_at: record.updated_at ?? new Date().toISOString(),
-  });
+  };
+  if (!includeUpdatedAt) return base;
+  return { ...base, updated_at: record.updated_at ?? new Date().toISOString() };
+}
 
-  if (error) {
-    console.error("[BelKou] Supabase save registration:", error.message);
+async function runSupabaseWrite(
+  sb: SupabaseClient,
+  mode: "insert" | "update",
+  record: RegistrationRecord,
+  existingId?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  for (const includeUpdatedAt of [true, false]) {
+    const payload = registrationPayload(record, includeUpdatedAt);
+    const result =
+      mode === "update" && existingId
+        ? await sb.from("registrations").update(payload).eq("id", existingId)
+        : await sb.from("registrations").insert(payload);
+
+    if (!result.error) return { ok: true };
+    const message = result.error.message;
+    if (includeUpdatedAt && message.includes("updated_at")) {
+      continue;
+    }
+    return { ok: false, error: message };
+  }
+  return { ok: false, error: "unknown" };
+}
+
+export async function supabaseSaveRegistration(record: RegistrationRecord): Promise<string> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd) {
+      throw new Error("Base de données non configurée (SUPABASE_SERVICE_ROLE_KEY manquant).");
+    }
+    console.warn("[BelKou] Supabase admin not configured — registration not persisted.");
+    return record.id;
+  }
+
+  const normalized = { ...record, email: record.email.trim().toLowerCase() };
+  const existing = await supabaseGetByEmail(normalized.email);
+  const targetId = existing?.id ?? normalized.id;
+  const toWrite = existing ? { ...normalized, id: targetId, created_at: existing.created_at } : normalized;
+
+  const write = existing
+    ? await runSupabaseWrite(sb, "update", toWrite, existing.id)
+    : await runSupabaseWrite(sb, "insert", toWrite);
+
+  if (!write.ok) {
+    console.error("[BelKou] Supabase save registration:", write.error);
+    if (write.error?.includes("duplicate key") || write.error?.includes("unique")) {
+      const retry = await supabaseGetByEmail(normalized.email);
+      if (retry) {
+        await runSupabaseWrite(sb, "update", { ...normalized, id: retry.id, created_at: retry.created_at }, retry.id);
+        return retry.id;
+      }
+      throw new Error(
+        "Cet email est déjà inscrit. Réessayez — vous serez redirigé vers le paiement.",
+      );
+    }
     throw new Error("Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.");
   }
+
+  return targetId;
 }
 
 export async function supabaseUpdateRegistrationDetails(
@@ -71,28 +118,44 @@ export async function supabaseUpdateRegistrationDetails(
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
-  const { error } = await sb
+  const payload = { ...data, email: data.email.trim().toLowerCase() };
+  let { error } = await sb
     .from("registrations")
-    .update({ ...data, updated_at: new Date().toISOString() })
+    .update({ ...payload, updated_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (error) console.error("[BelKou] Supabase update registration:", error.message);
+  if (error?.message.includes("updated_at")) {
+    ({ error } = await sb.from("registrations").update(payload).eq("id", id));
+  }
+
+  if (error) {
+    console.error("[BelKou] Supabase update registration:", error.message);
+    throw new Error("Impossible de mettre à jour votre inscription. Réessayez ou contactez le support.");
+  }
 }
 
 export async function supabaseGetByEmail(email: string): Promise<RegistrationRecord | null> {
   const sb = getSupabaseAdmin();
   if (!sb) return null;
 
+  const normalized = email.trim().toLowerCase();
+
+  // ilike = case-insensitive; limit(1) avoids maybeSingle() errors when duplicates exist
   const { data, error } = await sb
     .from("registrations")
     .select("*")
-    .eq("email", email.trim().toLowerCase())
+    .ilike("email", normalized)
     .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
 
-  if (error || !data) return null;
-  return rowToRecord(data);
+  if (error) {
+    console.error("[BelKou] Supabase get by email:", error.message);
+    return null;
+  }
+
+  const row = data?.[0];
+  if (!row) return null;
+  return rowToRecord(row as Record<string, unknown>);
 }
 
 export async function supabaseUpdateGrant(

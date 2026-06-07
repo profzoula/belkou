@@ -137,14 +137,18 @@ export async function saveRegistration(
         record.updated_at,
       )
       .run();
-    await supabaseSaveRegistration(record);
+    const persistedId = await supabaseSaveRegistration(record);
+    if (persistedId !== record.id) {
+      return { ...(await getRegistrationById(db, persistedId)) ?? { ...record, id: persistedId } };
+    }
     return record;
   }
 
-  await supabaseSaveRegistration(record);
-  devStore.set(record.id, record);
-  console.info("[BelKou dev] Registration saved:", record.id, record.email);
-  return record;
+  const persistedId = await supabaseSaveRegistration(record);
+  const finalRecord = persistedId !== record.id ? { ...record, id: persistedId } : record;
+  devStore.set(finalRecord.id, finalRecord);
+  console.info("[BelKou dev] Registration saved:", finalRecord.id, finalRecord.email);
+  return finalRecord;
 }
 
 export async function getRegistrationByEmail(
