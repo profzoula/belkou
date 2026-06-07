@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
+import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
@@ -26,7 +27,6 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = getSupabase();
@@ -46,11 +46,12 @@ function SignupPage() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: getAuthCallbackUrl(),
       },
     });
     setLoading(false);
@@ -60,7 +61,28 @@ function SignupPage() {
       return;
     }
 
-    toast.success("Compte créé. Vérifiez votre email si la confirmation est activée.");
+    if (!data.user) {
+      toast.error("Impossible de créer le compte. Réessayez.");
+      return;
+    }
+
+    const alreadyRegistered = data.user.identities?.length === 0;
+    const needsEmailConfirmation =
+      alreadyRegistered || Boolean(!data.user.email_confirmed_at && !data.session);
+
+    if (needsEmailConfirmation) {
+      if (alreadyRegistered) {
+        toast.info("Un compte existe déjà avec cet email. Renvoyez la confirmation si besoin.");
+      }
+      const params = new URLSearchParams({
+        check_email: "1",
+        email,
+      });
+      window.location.replace(`/login?${params.toString()}`);
+      return;
+    }
+
+    toast.success("Compte créé avec succès.");
     window.location.href = "/dashboard";
   };
 
@@ -143,6 +165,9 @@ function SignupPage() {
             <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full rounded-lg">
               {loading ? "Creating account..." : "Sign up"}
             </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Après l&apos;inscription, vérifiez votre <strong>Gmail</strong> pour confirmer votre compte.
+            </p>
           </form>
 
           <AuthDivider />

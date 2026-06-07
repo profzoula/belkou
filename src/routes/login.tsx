@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
@@ -25,13 +26,26 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const message = new URLSearchParams(window.location.search).get("error");
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get("error");
+    const checkEmail = params.get("check_email");
+    const emailParam = params.get("email");
+
+    if (checkEmail === "1" && emailParam) {
+      setPendingEmail(decodeURIComponent(emailParam));
+      setEmail(decodeURIComponent(emailParam));
+    }
+
     if (message) {
       const decoded = decodeURIComponent(message);
       setOauthError(decoded);
       toast.error(decoded);
+    }
+
+    if (message || checkEmail) {
       window.history.replaceState({}, "", "/login");
     }
   }, []);
@@ -49,6 +63,12 @@ function LoginPage() {
     setLoading(false);
 
     if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("email not confirmed") || msg.includes("not confirmed")) {
+        setPendingEmail(email);
+        toast.error("Confirmez votre email dans Gmail avant de vous connecter.");
+        return;
+      }
       toast.error(error.message === "Invalid login credentials" ? "Email ou mot de passe incorrect." : error.message);
       return;
     }
@@ -72,6 +92,8 @@ function LoginPage() {
         </p>
       ) : (
         <div className="mt-8 space-y-6">
+          {pendingEmail ? <EmailConfirmationNotice email={pendingEmail} /> : null}
+
           {oauthError ? (
             <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {oauthError}

@@ -38,3 +38,21 @@ export async function signInWithGoogle() {
 
   return { error: error ?? null };
 }
+
+/** Resend signup confirmation email (Supabase Auth + your SMTP). */
+export async function resendSignupConfirmation(email: string) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return { error: new Error("Authentification non configurée.") };
+  }
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: getAuthCallbackUrl(),
+    },
+  });
+
+  return { error: error ?? null };
+}
