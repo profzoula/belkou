@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 type AuthContextValue = {
   user: User | null;
@@ -17,6 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(isSupabaseConfigured);
 
   useEffect(() => {
+    const supabase = getSupabase();
     if (!supabase) {
       setLoading(false);
       return;
@@ -44,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       configured: isSupabaseConfigured,
       signOut: async () => {
+        const supabase = getSupabase();
         if (supabase) await supabase.auth.signOut();
       },
     }),

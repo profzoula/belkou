@@ -1,9 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -18,10 +18,17 @@ export const Route = createFileRoute("/auth/callback")({
 });
 
 function AuthCallbackPage() {
-  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    const supabase = getSupabase();
     if (!supabase) {
       setError("Authentification non configurée.");
       return;
@@ -29,7 +36,6 @@ function AuthCallbackPage() {
 
     const finish = async () => {
       const params = new URLSearchParams(window.location.search);
-      const code = params.get("code");
       const oauthError = params.get("error_description") ?? params.get("error");
 
       if (oauthError) {
@@ -37,6 +43,7 @@ function AuthCallbackPage() {
         return;
       }
 
+      const code = params.get("code");
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
@@ -58,24 +65,24 @@ function AuthCallbackPage() {
     };
 
     finish().catch(() => setError("Connexion impossible. Réessayez."));
-  }, [navigate]);
+  }, [mounted]);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="site-container site-page-top pb-12 sm:pb-16">
         <div className="mx-auto max-w-sm text-center">
-          {!isSupabaseConfigured || error ? (
+          {!mounted || (!error && isSupabaseConfigured) ? (
+            <div className="surface rounded-2xl p-8 flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Connexion en cours...</p>
+            </div>
+          ) : (
             <div className="surface rounded-2xl p-8">
               <p className="text-sm text-destructive mb-4">{error ?? "Configuration manquante."}</p>
               <Link to="/login" className="text-sm text-primary font-medium hover:underline">
                 Retour à la connexion
               </Link>
-            </div>
-          ) : (
-            <div className="surface rounded-2xl p-8 flex flex-col items-center gap-3">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Connexion en cours...</p>
             </div>
           )}
         </div>
