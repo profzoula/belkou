@@ -4,6 +4,7 @@ import { updateRegistrationPayment, getRegistrationByStripeSession } from "@/ser
 import { verifyWebhook } from "@/server/stripe";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
+import { earnAffiliateCommission } from "@/server/affiliates";
 
 export const Route = createFileRoute("/api/stripe/webhook")({
   server: {
@@ -45,6 +46,10 @@ export const Route = createFileRoute("/api/stripe/webhook")({
                     siteConfig.cohortStartDate,
                   ),
                 });
+              }
+
+              if (!wasPaid) {
+                await earnAffiliateCommission(registrationId);
               }
             }
           }

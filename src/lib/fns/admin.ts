@@ -182,6 +182,9 @@ export const adminMarkCashPaid = createServerFn({ method: "POST" })
       await sendPaymentConfirmed(record.full_name, record.email, record.plan);
     }
 
+    const { earnAffiliateCommission } = await import("@/server/affiliates");
+    await earnAffiliateCommission(record.id);
+
     return { ok: true as const };
   });
 
@@ -222,6 +225,9 @@ export const adminGrantFreeVip = createServerFn({ method: "POST" })
     if (data.sendEmail) {
       await sendPaymentConfirmed(updated.full_name, updated.email, "vip");
     }
+
+    const { earnAffiliateCommission } = await import("@/server/affiliates");
+    await earnAffiliateCommission(updated.id);
 
     return {
       ok: true as const,

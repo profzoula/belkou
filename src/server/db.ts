@@ -51,6 +51,7 @@ export function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
     plan: row.plan as RegistrationRecord["plan"],
     payment_status: row.payment_status as RegistrationRecord["payment_status"],
     stripe_session_id: row.stripe_session_id ? String(row.stripe_session_id) : null,
+    referral_code: row.referral_code ? String(row.referral_code) : null,
     created_at: String(row.created_at),
     updated_at: row.updated_at ? String(row.updated_at) : null,
   };
@@ -112,6 +113,7 @@ export async function saveRegistration(
     id: crypto.randomUUID(),
     payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
+    referral_code: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

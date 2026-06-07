@@ -16,6 +16,12 @@ export const registrationSchema = z.object({
   country: z.string().min(1, "Choisissez un pays"),
   level: z.string().min(1, "Choisissez un niveau"),
   plan: z.enum(["premium", "vip"]),
+  referral_code: z
+    .string()
+    .trim()
+    .max(20)
+    .optional()
+    .transform((v) => (v ? v.toUpperCase().replace(/[^A-Z0-9]/g, "") : undefined)),
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
@@ -24,6 +30,7 @@ export type RegistrationRecord = RegistrationInput & {
   id: string;
   payment_status: "pending" | "paid" | "manual_pending";
   stripe_session_id: string | null;
+  referral_code: string | null;
   created_at: string;
   updated_at: string | null;
 };

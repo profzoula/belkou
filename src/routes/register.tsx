@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,11 @@ import { submitRegistration } from "@/lib/fns/register";
 import { planDetails } from "@/lib/plans";
 import { seoHead } from "@/lib/seo";
 import { PlanDetailsCard } from "@/components/site/PlanDetailsCard";
+import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
 
 const searchSchema = z.object({
   plan: z.enum(["premium", "vip"]).optional(),
+  ref: z.string().optional(),
 });
 
 export const Route = createFileRoute("/register")({
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
-  const { plan } = Route.useSearch();
+  const { plan, ref } = Route.useSearch();
   const navigate = useNavigate();
   const submitFn = useServerFn(submitRegistration);
   const [loading, setLoading] = useState(false);
@@ -44,7 +46,16 @@ function RegisterPage() {
     country: "",
     level: "",
     plan: plan ?? "premium",
+    referral_code: "",
   });
+
+  useEffect(() => {
+    if (ref) saveReferralCode(ref);
+    const stored = getStoredReferralCode();
+    if (stored) {
+      setForm((s) => ({ ...s, referral_code: stored }));
+    }
+  }, [ref]);
 
   const update = (k: string, v: string) => setForm((s) => ({ ...s, [k]: v }));
 
@@ -156,6 +167,20 @@ function RegisterPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="referral_code">Code affilié (optionnel)</Label>
+            <Input
+              id="referral_code"
+              value={form.referral_code}
+              onChange={(e) => update("referral_code", e.target.value.toUpperCase())}
+              placeholder="Ex: ZOUL3K9A"
+              className="rounded-lg font-mono uppercase tracking-wider"
+            />
+            <p className="text-xs text-muted-foreground">
+              Si un ami vous a parrainé, entrez son code ici pour qu&apos;il reçoive sa commission.
+            </p>
           </div>
 
           <div className="space-y-2">

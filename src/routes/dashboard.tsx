@@ -23,6 +23,7 @@ import { getStudentDashboard } from "@/lib/fns/dashboard";
 import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrl } from "@/lib/site-config";
 import { pricingPlans } from "@/lib/plans";
 import { seoHead } from "@/lib/seo";
+import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
 
 type StudentRegistration = {
   id: string;
@@ -109,6 +110,12 @@ function DashboardPage() {
       <main className="site-container site-page-top pb-12 sm:pb-16 max-w-5xl">
         <DashboardHeader name={name} email={user.email ?? ""} onSignOut={handleSignOut} />
 
+        {session?.access_token ? (
+          <div className="mb-8 sm:mb-10">
+            <AffiliatePanel accessToken={session.access_token} />
+          </div>
+        ) : null}
+
         {registration === undefined ? (
           <div className="surface rounded-2xl p-8 text-center text-sm text-muted-foreground">
             Chargement de votre espace...
@@ -163,9 +170,10 @@ function OnboardingDashboard({ name }: { name: string }) {
               Bienvenue {name} — il ne reste qu&apos;une étape
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Votre compte est prêt. Choisissez un plan pour rejoindre la cohorte du{" "}
-              <strong className="text-foreground">{siteConfig.cohortStartDate}</strong> et accéder à
-              la formation complète.
+              Votre compte est prêt. Vous pouvez déjà parrainer des amis avec votre code affilié ci-dessus
+              — pas besoin d&apos;être inscrit à la formation. Pour rejoindre la cohorte du{" "}
+              <strong className="text-foreground">{siteConfig.cohortStartDate}</strong>, choisissez un plan
+              ci-dessous.
             </p>
           </div>
           <Button asChild variant="hero" size="lg" className="shrink-0 touch-target">

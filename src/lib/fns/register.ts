@@ -15,6 +15,7 @@ import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 import { createCheckoutSession } from "@/server/stripe";
 import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
 import type { PlanId } from "@/lib/site-config";
+import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -89,6 +90,17 @@ export const submitRegistration = createServerFn({ method: "POST" })
       resumed = true;
     } else {
       record = await saveRegistration(db, data);
+    }
+
+    if (data.referral_code) {
+      const attribution = await attributeReferral({
+        registrationId: record.id,
+        referredEmail: data.email,
+        referralCode: data.referral_code,
+      });
+      if (!attribution.ok && attribution.reason === "self_referral") {
+        console.warn("[BelKou] Self-referral blocked:", data.email);
+      }
     }
 
     const planConfig = siteConfig.plans[data.plan];
@@ -177,6 +189,8 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
         } catch (error) {
           console.error("Payment confirmation email error:", error);
         }
+
+        await earnAffiliateCommission(data.registrationId);
       }
     }
 
