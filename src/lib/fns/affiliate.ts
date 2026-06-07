@@ -17,6 +17,7 @@ import {
   persistAffiliate,
 } from "@/server/affiliates";
 import { getServerEnvResolved } from "@/server/env";
+import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export const getAffiliateDashboard = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
@@ -79,8 +80,14 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       }
     }
 
-    const stats = await getAffiliateStats(affiliateRecord?.id ?? user.id, code, user.id);
+    const stats = await getAffiliateStats(
+      affiliateRecord?.id ?? user.id,
+      code,
+      user.id,
+      data.accessToken,
+    );
     const env = await getServerEnvResolved();
+    const hasAdmin = Boolean(getSupabaseAdmin());
     const siteUrl = (env.SITE_URL ?? process.env.VITE_SITE_URL ?? "https://belkou.online").replace(
       /\/$/,
       "",
@@ -95,6 +102,8 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
         signupCommissionUsd: AFFILIATE_SIGNUP_COMMISSION_USD,
         minWithdrawalUsd: AFFILIATE_MIN_WITHDRAWAL_USD,
         stats,
+        statsWarning:
+          stats.referrals === 0 && !hasAdmin ? ("server_config" as const) : undefined,
       },
     };
   });

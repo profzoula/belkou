@@ -45,7 +45,10 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
       },
     })
       .then(setData)
-      .catch(() => setData({ affiliate: null }))
+      .catch((err) => {
+        console.error("[BelKou] affiliate dashboard:", err);
+        setData({ affiliate: null, error: "load_failed" as const });
+      })
       .finally(() => setLoading(false));
   };
 
@@ -78,7 +81,8 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
         }
       : null;
 
-  const affiliate = data?.affiliate ?? (loading ? null : clientFallback);
+  const loadFailed = data?.error === "load_failed";
+  const affiliate = data?.affiliate ?? (loading || loadFailed ? null : clientFallback);
   const canWithdraw =
     affiliate &&
     affiliate.stats.balanceUsd >= (affiliate.minWithdrawalUsd ?? AFFILIATE_MIN_WITHDRAWAL_USD) &&
@@ -142,9 +146,15 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
       <div className="surface rounded-2xl p-6 text-sm text-muted-foreground leading-relaxed">
         <p className="font-medium text-foreground mb-1">Programme affilié</p>
         <p>
-          Impossible de générer votre code pour le moment. Déconnectez-vous puis reconnectez-vous.
-          Si le problème persiste, contactez le support BelKou.
+          {loadFailed
+            ? "Impossible de charger vos commissions. Actualisez la page ou reconnectez-vous."
+            : "Impossible de générer votre code pour le moment. Déconnectez-vous puis reconnectez-vous."}
         </p>
+        {loadFailed ? (
+          <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => void loadDashboard()}>
+            Réessayer
+          </Button>
+        ) : null}
       </div>
     );
   }
@@ -178,6 +188,14 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
       </div>
 
       <div className="p-5 sm:p-6 space-y-5">
+        {"statsWarning" in affiliate && affiliate.statsWarning === "server_config" ? (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+            Les commissions existent dans Supabase mais le serveur ne peut pas les lire. Ajoutez{" "}
+            <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> sur Railway, puis exécutez{" "}
+            <code className="font-mono">migrations/supabase_affiliates_rls_read.sql</code> dans Supabase.
+          </div>
+        ) : null}
+
         <div className="grid sm:grid-cols-3 gap-3">
           <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 text-center">
             <div className="text-2xl font-bold text-foreground">{affiliate.stats.referrals}</div>

@@ -110,11 +110,19 @@ function isMissingTableError(message: string): boolean {
 }
 
 async function checkAffiliateTables(sb: SupabaseClient): Promise<boolean> {
-  if (affiliateTablesAvailable !== null) return affiliateTablesAvailable;
+  if (affiliateTablesAvailable === true) return true;
 
   const { error } = await sb.from("affiliates").select("id").limit(1);
-  affiliateTablesAvailable = !error || !isMissingTableError(error.message);
-  return affiliateTablesAvailable;
+  if (!error) {
+    affiliateTablesAvailable = true;
+    return true;
+  }
+  if (isMissingTableError(error.message)) {
+    affiliateTablesAvailable = false;
+    return false;
+  }
+  console.warn("[BelKou] affiliate table check:", error.message);
+  return false;
 }
 
 async function getAffiliateCodeFromMetadata(sb: SupabaseClient, userId: string): Promise<string | null> {
@@ -352,12 +360,15 @@ async function listReferralsForAffiliateUser(
   sb: SupabaseClient,
   userId: string,
   affiliateCode?: string,
+  options?: { useAdminMetadata?: boolean },
 ): Promise<AffiliateReferralRecord[]> {
   const codes = new Set<string>();
   if (affiliateCode) codes.add(normalizeCode(affiliateCode));
 
-  const metaCode = await getAffiliateCodeFromMetadata(sb, userId);
-  if (metaCode) codes.add(metaCode);
+  if (options?.useAdminMetadata !== false) {
+    const metaCode = await getAffiliateCodeFromMetadata(sb, userId);
+    if (metaCode) codes.add(metaCode);
+  }
 
   const { data: affiliateRows } = await sb
     .from("affiliates")
@@ -388,7 +399,8 @@ async function listReferralsForAffiliateUser(
       .select("*")
       .in("affiliate_id", affiliateIds)
       .order("created_at", { ascending: false });
-    if (!error) appendRows(data);
+    if (error) console.warn("[BelKou] referrals by affiliate_id:", error.message);
+    else appendRows(data);
   }
 
   for (const code of codes) {
@@ -398,10 +410,38 @@ async function listReferralsForAffiliateUser(
       .select("*")
       .eq("referral_code", code)
       .order("created_at", { ascending: false });
-    if (!error) appendRows(data);
+    if (error) console.warn("[BelKou] referrals by referral_code:", error.message);
+    else appendRows(data);
   }
 
   return results.sort((a, b) => b.created_at.localeCompare(a.created_at));
+}
+
+function buildStatsFromReferrals(
+  referralsList: AffiliateReferralRecord[],
+  userId: string | undefined,
+  affiliateCode: string | undefined,
+): Promise<AffiliateStats> {
+  const pending = referralsList.filter((r) => r.status === "pending").length;
+  const earned = referralsList.filter((r) => r.status === "earned").length;
+  const paidOut = referralsList.filter((r) => r.status === "paid_out").length;
+  const grossBalance = referralsList
+    .filter((r) => r.status === "earned")
+    .reduce((sum, r) => sum + Number(r.amount_usd), 0);
+
+  return applyWithdrawalBalance(
+    {
+      referrals: referralsList.length,
+      pending,
+      earned,
+      earnedUsd: grossBalance,
+      paidOut,
+      balanceUsd: grossBalance,
+      referralsList: referralsList.slice(0, 10),
+    },
+    userId,
+    affiliateCode,
+  );
 }
 
 export async function getOrCreateAffiliate(params: {
@@ -739,6 +779,7 @@ export async function getAffiliateStats(
   affiliateId: string,
   affiliateCode?: string,
   userId?: string,
+  accessToken?: string,
 ): Promise<AffiliateStats> {
   const empty: AffiliateStats = {
     referrals: 0,
@@ -753,39 +794,48 @@ export async function getAffiliateStats(
     referralsList: [],
   };
 
-  const sb = getSupabaseAdmin();
-  if (!sb) return empty;
+  const adminSb = getSupabaseAdmin();
+  const resolvedCode = affiliateCode ? normalizeCode(affiliateCode) : "";
 
-  if (await checkAffiliateTables(sb) && userId) {
-    const dbAffiliate = await getAffiliateByUserId(userId);
-    const resolvedCode = dbAffiliate?.code ?? (affiliateCode ? normalizeCode(affiliateCode) : "");
-    const referralsList = await listReferralsForAffiliateUser(sb, userId, resolvedCode || affiliateCode);
+  if (userId) {
+    let referralsList: AffiliateReferralRecord[] = [];
 
-    const pending = referralsList.filter((r) => r.status === "pending").length;
-    const earned = referralsList.filter((r) => r.status === "earned").length;
-    const paidOut = referralsList.filter((r) => r.status === "paid_out").length;
-    const grossBalance = referralsList
-      .filter((r) => r.status === "earned")
-      .reduce((sum, r) => sum + Number(r.amount_usd), 0);
+    if (adminSb && (await checkAffiliateTables(adminSb))) {
+      referralsList = await listReferralsForAffiliateUser(
+        adminSb,
+        userId,
+        resolvedCode || affiliateCode,
+      );
+    }
 
-    return applyWithdrawalBalance(
-      {
-        referrals: referralsList.length,
-        pending,
-        earned,
-        earnedUsd: grossBalance,
-        paidOut,
-        balanceUsd: grossBalance,
-        referralsList: referralsList.slice(0, 10),
-      },
-      userId,
-      resolvedCode || affiliateCode,
-    );
+    if (referralsList.length === 0 && accessToken) {
+      const { getSupabaseAsUser } = await import("@/server/supabase-user-client");
+      const userSb = getSupabaseAsUser(accessToken);
+      if (userSb) {
+        const viaUser = await listReferralsForAffiliateUser(
+          userSb,
+          userId,
+          resolvedCode || affiliateCode,
+          { useAdminMetadata: false },
+        );
+        if (viaUser.length > 0) referralsList = viaUser;
+      }
+    }
+
+    if (referralsList.length > 0) {
+      return buildStatsFromReferrals(referralsList, userId, resolvedCode || affiliateCode);
+    }
   }
 
-  if (affiliateCode) {
-    const regStats = await getStatsFromRegistrations(sb, normalizeCode(affiliateCode));
-    return applyWithdrawalBalance(regStats, userId, affiliateCode);
+  if (adminSb && resolvedCode) {
+    const regStats = await getStatsFromRegistrations(adminSb, resolvedCode);
+    if (regStats.referrals > 0) {
+      return applyWithdrawalBalance(regStats, userId, affiliateCode);
+    }
+  }
+
+  if (!adminSb && !accessToken) {
+    console.error("[BelKou] getAffiliateStats: no Supabase admin or user token");
   }
 
   return empty;

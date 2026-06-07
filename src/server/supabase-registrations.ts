@@ -11,7 +11,9 @@ export function getSupabaseAdmin(): SupabaseClient | null {
     process.env.VITE_SUPABASE_URL ??
     process.env.SUPABASE_URL ??
     (typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined);
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     client = null;
     return null;
