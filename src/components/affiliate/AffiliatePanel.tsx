@@ -3,13 +3,17 @@ import { useServerFn } from "@tanstack/react-start";
 import { Copy, DollarSign, Link2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { affiliateCodeForUser } from "@/lib/affiliate-code";
+import { AFFILIATE_COMMISSION_USD } from "@/lib/affiliate-config";
 import { getAffiliateDashboard } from "@/lib/fns/affiliate";
+import { useAuth } from "@/hooks/use-auth";
 
 type AffiliatePanelProps = {
   accessToken: string;
 };
 
 export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
+  const { user } = useAuth();
   const dashboardFn = useServerFn(getAffiliateDashboard);
   const [data, setData] = useState<Awaited<ReturnType<typeof getAffiliateDashboard>> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +25,19 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
       .finally(() => setLoading(false));
   }, [accessToken, dashboardFn]);
 
-  const affiliate = data?.affiliate;
+  const siteUrl = (import.meta.env.VITE_SITE_URL ?? "https://belkou.online").replace(/\/$/, "");
+
+  const clientFallback =
+    user?.id && user.email
+      ? {
+          code: affiliateCodeForUser(user),
+          link: `${siteUrl}/register?ref=${affiliateCodeForUser(user)}`,
+          commissionUsd: AFFILIATE_COMMISSION_USD,
+          stats: { referrals: 0, pending: 0, earned: 0, paidOut: 0, balanceUsd: 0, referralsList: [] },
+        }
+      : null;
+
+  const affiliate = data?.affiliate ?? clientFallback;
 
   const copy = async (text: string, label: string) => {
     try {

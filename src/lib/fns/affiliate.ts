@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { AFFILIATE_COMMISSION_USD } from "@/lib/affiliate-config";
+import { affiliateCodeForUser } from "@/lib/affiliate-code";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import {
   getAffiliateByCode,
   getAffiliateStats,
-  getOrCreateAffiliate,
+  persistAffiliate,
 } from "@/server/affiliates";
 import { getServerEnvResolved } from "@/server/env";
 
@@ -17,29 +19,30 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       return { affiliate: null as const, error: "not_authenticated" as const };
     }
 
+    const code = affiliateCodeForUser(user);
     const fullName =
       (user.user_metadata?.full_name as string | undefined) ??
       (user.user_metadata?.name as string | undefined) ??
       user.email.split("@")[0];
 
-    const affiliate = await getOrCreateAffiliate({
+    void persistAffiliate({
       userId: user.id,
-      email: user.email,
+      email: normalizeRegistrationEmail(user.email),
       fullName,
-    });
+      code,
+    }).catch((err) => console.warn("[BelKou] persist affiliate:", err));
 
-    if (!affiliate) {
-      return { affiliate: null as const, error: "create_failed" as const };
-    }
-
-    const stats = await getAffiliateStats(affiliate.id, affiliate.code);
+    const stats = await getAffiliateStats(user.id, code);
     const env = await getServerEnvResolved();
-    const siteUrl = env.SITE_URL.replace(/\/$/, "");
+    const siteUrl = (env.SITE_URL ?? process.env.VITE_SITE_URL ?? "https://belkou.online").replace(
+      /\/$/,
+      "",
+    );
 
     return {
       affiliate: {
-        code: affiliate.code,
-        link: `${siteUrl}/register?ref=${affiliate.code}`,
+        code,
+        link: `${siteUrl}/register?ref=${code}`,
         commissionUsd: AFFILIATE_COMMISSION_USD,
         stats,
       },

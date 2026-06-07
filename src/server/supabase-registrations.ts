@@ -7,7 +7,10 @@ let client: SupabaseClient | null | undefined;
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (client !== undefined) return client;
 
-  const url = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  const url =
+    process.env.VITE_SUPABASE_URL ??
+    process.env.SUPABASE_URL ??
+    (typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     client = null;

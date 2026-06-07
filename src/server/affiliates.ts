@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { affiliateCodeForUser } from "@/lib/affiliate-code";
 import { AFFILIATE_COMMISSION_USD } from "@/lib/affiliate-config";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
@@ -122,7 +123,7 @@ async function saveAffiliateCodeToMetadata(sb: SupabaseClient, userId: string, c
   return !error;
 }
 
-async function findAffiliateByCodeInMetadata(sb: SupabaseClient, code: string): Promise<AffiliateRecord | null> {
+async function findAffiliateInUserList(sb: SupabaseClient, code: string): Promise<AffiliateRecord | null> {
   const normalized = normalizeCode(code);
   if (!normalized) return null;
 
@@ -134,8 +135,9 @@ async function findAffiliateByCodeInMetadata(sb: SupabaseClient, code: string): 
     if (error || !data.users.length) break;
 
     for (const user of data.users) {
-      const userCode = user.user_metadata?.affiliate_code;
-      if (typeof userCode === "string" && normalizeCode(userCode) === normalized) {
+      if (!user.email) continue;
+      const userCode = affiliateCodeForUser(user);
+      if (userCode === normalized) {
         return metadataToAffiliate(user, userCode);
       }
     }
@@ -168,7 +170,7 @@ async function getOrCreateAffiliateFromMetadata(params: {
     const saved = await saveAffiliateCodeToMetadata(sb, params.userId, code);
     if (!saved) continue;
 
-    const duplicate = await findAffiliateByCodeInMetadata(sb, code);
+    const duplicate = await findAffiliateInUserList(sb, code);
     if (duplicate && duplicate.user_id !== params.userId) continue;
 
     return metadataToAffiliate(data.user, code);
@@ -189,7 +191,34 @@ export async function getAffiliateByCode(code: string): Promise<AffiliateRecord 
     if (!error && data) return rowToAffiliate(data);
   }
 
-  return findAffiliateByCodeInMetadata(sb, normalized);
+  return findAffiliateInUserList(sb, normalized);
+}
+
+export async function persistAffiliate(params: {
+  userId: string;
+  email: string;
+  fullName: string;
+  code: string;
+}): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+
+  const email = normalizeRegistrationEmail(params.email);
+  const code = normalizeCode(params.code);
+
+  await saveAffiliateCodeToMetadata(sb, params.userId, code);
+
+  if (!(await checkAffiliateTables(sb))) return;
+
+  const existing = await getAffiliateByUserId(params.userId);
+  if (existing) return;
+
+  await sb.from("affiliates").insert({
+    user_id: params.userId,
+    email,
+    full_name: params.fullName.trim(),
+    code,
+  });
 }
 
 export async function getAffiliateByUserId(userId: string): Promise<AffiliateRecord | null> {
