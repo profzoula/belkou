@@ -9,7 +9,7 @@ const items = [
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="py-16 sm:py-20 md:py-28">
+    <section id="testimonials" className="site-section-anchor py-16 sm:py-20 md:py-28">
       <div className="site-container">
         <SectionHeader
           label="Témoignages"
@@ -22,11 +22,11 @@ export function Testimonials() {
           Glissez pour voir les témoignages →
         </p>
 
-        <div className="flex md:grid md:grid-cols-3 gap-4 md:gap-5 max-w-5xl md:mx-auto overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-2 md:pb-0 -mx-1 px-1 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="scroll-carousel md:grid md:grid-cols-3 md:gap-5 max-w-5xl md:mx-auto md:overflow-visible md:pb-0">
           {items.map((t) => (
             <div
               key={t.name}
-              className="quote-card surface-hover rounded-2xl p-5 sm:p-6 flex flex-col min-w-[calc(33.333%-0.5rem)] w-[calc(33.333%-0.5rem)] sm:min-w-[220px] sm:w-[220px] md:min-w-0 md:w-auto shrink-0 snap-start min-h-0"
+              className="quote-card surface-hover rounded-2xl p-5 sm:p-6 flex flex-col w-[min(100%,18rem)] min-w-[85vw] sm:min-w-[220px] sm:w-[220px] md:min-w-0 md:w-auto min-h-0"
             >
               <div className="flex gap-0.5 mb-4">
                 {Array.from({ length: 5 }).map((_, i) => (

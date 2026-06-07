@@ -10,9 +10,9 @@ type HeroProps = {
 };
 
 const avatars = [
-  "bg-orange-200 text-orange-700",
-  "bg-orange-100 text-orange-600",
-  "bg-amber-100 text-amber-700",
+  "bg-orange-200 dark:bg-orange-500/25 text-orange-700 dark:text-orange-300",
+  "bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300",
+  "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300",
 ];
 
 function CodePreview() {
@@ -24,19 +24,20 @@ function CodePreview() {
         <span className="h-2 w-2 rounded-full bg-emerald-400/80 shrink-0" />
         <span className="ml-1.5 text-[10px] font-mono text-muted-foreground">belkou-app.tsx</span>
       </div>
-      <div className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed bg-gray-50">
+      <div className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed bg-muted/30 dark:bg-muted/50 text-foreground">
         <p>
-          <span className="text-primary">const</span> app = <span className="text-orange-600">createSaaS</span>({"{"}
+          <span className="text-primary">const</span> app ={" "}
+          <span className="text-orange-600 dark:text-orange-400">createSaaS</span>({"{"}
         </p>
         <p className="pl-4">
-          name: <span className="text-emerald-600">&quot;Mon Projet IA&quot;</span>,
+          name: <span className="text-emerald-600 dark:text-emerald-400">&quot;Mon Projet IA&quot;</span>,
         </p>
         <p className="pl-4">
-          stack: [<span className="text-emerald-600">&quot;Cursor&quot;</span>,{" "}
-          <span className="text-emerald-600">&quot;Replit&quot;</span>],
+          stack: [<span className="text-emerald-600 dark:text-emerald-400">&quot;Cursor&quot;</span>,{" "}
+          <span className="text-emerald-600 dark:text-emerald-400">&quot;Replit&quot;</span>],
         </p>
         <p className="pl-4">
-          deploy: <span className="text-emerald-600">&quot;production&quot;</span>
+          deploy: <span className="text-emerald-600 dark:text-emerald-400">&quot;production&quot;</span>
         </p>
         <p>{"});"}</p>
         <p className="mt-2.5 text-muted-foreground">// ✓ App déployée en 8 semaines</p>
@@ -124,14 +125,17 @@ export function Hero({ studentCount }: HeroProps) {
           </div>
 
           {/* Objectifs — dwat, sticky */}
-          <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-3 animate-fade-up [animation-delay:60ms] lg:sticky lg:top-28">
+          <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-3 animate-fade-up [animation-delay:60ms] lg:sticky lg:top-[calc(var(--site-header-height)+1rem)]">
             <FormationObjectivesPanel />
           </div>
 
           {/* Stats */}
-          <div className="order-3 lg:col-start-1 lg:row-start-2 grid grid-cols-3 gap-2 sm:gap-3 animate-fade-up [animation-delay:100ms]">
-            {stats.map((s) => (
-              <div key={s.l} className="stat-card text-left! py-3 sm:py-4 px-2 sm:px-4">
+          <div className="order-3 lg:col-start-1 lg:row-start-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 animate-fade-up [animation-delay:100ms]">
+            {stats.map((s, i) => (
+              <div
+                key={s.l}
+                className={`stat-card text-left! py-3 sm:py-4 px-3 sm:px-4 ${i === 2 ? "col-span-2 sm:col-span-1" : ""}`}
+              >
                 <div className="font-display text-xl sm:text-2xl font-bold text-foreground">
                   {s.n}
                   <span className="text-primary">{s.suffix}</span>

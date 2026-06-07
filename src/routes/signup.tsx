@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
+import { claimSignupReferral } from "@/lib/fns/affiliate";
+import { getStoredReferralCode, normalizeReferralCode } from "@/lib/referral-storage";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
@@ -22,11 +25,19 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
+  const claimReferralFn = useServerFn(claimSignupReferral);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const stored = getStoredReferralCode();
+    if (stored) setReferralCode(stored);
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = getSupabase();
@@ -45,12 +56,17 @@ function SignupPage() {
       return;
     }
 
+    const referredBy = normalizeReferralCode(referralCode) || getStoredReferralCode();
+
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          ...(referredBy ? { referred_by: referredBy } : {}),
+        },
         emailRedirectTo: getAuthCallbackUrl(),
       },
     });
@@ -80,6 +96,12 @@ function SignupPage() {
       });
       window.location.replace(`/login?${params.toString()}`);
       return;
+    }
+
+    if (data.session?.access_token && referredBy) {
+      void claimReferralFn({
+        data: { accessToken: data.session.access_token, referralCode: referredBy },
+      }).catch(() => undefined);
     }
 
     toast.success("Compte créé avec succès.");
@@ -145,6 +167,17 @@ function SignupPage() {
                 className="h-11 rounded-lg"
                 minLength={8}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="referral_code">Code affilié (optionnel)</Label>
+              <Input
+                id="referral_code"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                placeholder="Ex. JEAN1A2B"
+                className="h-11 rounded-lg font-mono tracking-wide"
               />
             </div>
 

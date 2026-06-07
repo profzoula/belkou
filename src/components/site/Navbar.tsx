@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,13 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
   if (user) {
     return (
       <div className={wrapClass}>
+        <button
+          onClick={toggleDark}
+          className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={dark ? "Mode clair" : "Mode sombre"}
+        >
+          {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
         <Button asChild variant="outline" size={stacked ? "lg" : "sm"}>
           <Link to="/dashboard" onClick={onNavigate}>
             Mon espace
@@ -86,6 +93,13 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)]">
       <PromoTopbar />
@@ -124,7 +138,16 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-card site-container py-4 shadow-md max-h-[calc(100dvh-7rem)] overflow-y-auto">
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          aria-label="Fermer le menu"
+          onClick={close}
+        />
+      )}
+
+      {open && (
+        <div className="relative z-50 md:hidden border-t border-border bg-card site-container py-4 shadow-md max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain">
           <nav className="flex flex-col gap-1">
             {links.map((l) => (
               <a

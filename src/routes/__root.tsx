@@ -124,7 +124,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             var theme = localStorage.getItem('belkou-theme');
-            if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            if (theme !== 'light') {
               document.documentElement.classList.add('dark');
             }
           })();

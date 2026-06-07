@@ -12,7 +12,7 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section id="faq" className="section-divider section-alt py-16 sm:py-20 md:py-28">
+    <section id="faq" className="site-section-anchor section-divider section-alt py-16 sm:py-20 md:py-28">
       <div className="site-container max-w-3xl mx-auto">
         <SectionHeader
           label="FAQ"

@@ -142,7 +142,7 @@ function WebTemplateCard({ template }: { template: (typeof webTemplates)[number]
 
 export function TemplateShowcase() {
   return (
-    <section id="templates" className="section-divider py-16 sm:py-20 md:py-28 bg-gradient-mesh">
+    <section id="templates" className="site-section-anchor section-divider py-16 sm:py-20 md:py-28 bg-gradient-mesh">
       <div className="site-container">
         <AppTypeLabels />
 

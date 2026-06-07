@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Download, LogOut, Plus, RefreshCw, Search, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, DollarSign, Download, LogOut, Plus, RefreshCw, Search, Users } from "lucide-react";
+import { AdminCommissionsTab } from "@/components/admin/AdminCommissionsTab";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ const emptyForm = {
 };
 
 const ROWS_PER_PAGE = 20;
+type AdminTab = "inscriptions" | "commissions";
 
 function exportCSV(registrations: Array<Record<string, unknown>>) {
   const headers = ["Date", "Nom", "Email", "WhatsApp", "Pays", "Niveau", "Plan", "Statut"];
@@ -92,6 +94,7 @@ function AdminDashboardPage() {
   const [planFilter, setPlanFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<AdminTab>("inscriptions");
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -214,34 +217,56 @@ function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="site-container h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-40 border-b border-border bg-card pt-[env(safe-area-inset-top,0px)]">
+        <div className="site-container flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:h-14 sm:py-0">
           <div className="flex items-center gap-2 font-semibold text-sm">
-            <Users className="h-4 w-4 text-primary" />
+            <Users className="h-4 w-4 text-primary shrink-0" />
             Admin BelKou
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="hero" size="sm" onClick={() => setShowAddForm((v) => !v)}>
-              <Plus className="h-4 w-4" /> Paiement cash
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="hero" size="sm" className="touch-target flex-1 sm:flex-none text-xs sm:text-sm" onClick={() => setShowAddForm((v) => !v)}>
+              <Plus className="h-4 w-4 shrink-0" /> <span className="truncate">Cash</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
+              className="touch-target flex-1 sm:flex-none text-xs sm:text-sm"
               onClick={() => exportCSV(registrations as unknown as Array<Record<string, unknown>>)}
             >
-              <Download className="h-4 w-4" /> Exporter CSV
+              <Download className="h-4 w-4 shrink-0" /> <span className="truncate">CSV</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={load}>
-              <RefreshCw className="h-4 w-4" /> Actualiser
+            <Button variant="outline" size="sm" className="touch-target flex-1 sm:flex-none text-xs sm:text-sm" onClick={load}>
+              <RefreshCw className="h-4 w-4 shrink-0" /> <span className="hidden min-[400px]:inline">Actualiser</span>
             </Button>
-            <Button variant="ghost" size="sm" onClick={logout}>
-              <LogOut className="h-4 w-4" /> Déconnexion
+            <Button variant="ghost" size="sm" className="touch-target flex-1 sm:flex-none text-xs sm:text-sm" onClick={logout}>
+              <LogOut className="h-4 w-4 shrink-0" /> <span className="truncate">Sortir</span>
             </Button>
           </div>
         </div>
       </header>
 
       <main className="site-container py-6 sm:py-8 overflow-x-auto">
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={activeTab === "inscriptions" ? "hero" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("inscriptions")}
+          >
+            <Users className="h-4 w-4" /> Inscriptions
+          </Button>
+          <Button
+            variant={activeTab === "commissions" ? "hero" : "outline"}
+            size="sm"
+            onClick={() => setActiveTab("commissions")}
+          >
+            <DollarSign className="h-4 w-4" /> Commissions
+          </Button>
+        </div>
+
+        {activeTab === "commissions" ? (
+          <AdminCommissionsTab />
+        ) : (
+          <>
         {showAddForm && (
           <div className="surface rounded-2xl p-5 sm:p-6 mb-6">
             <h2 className="font-semibold text-sm mb-1">Ajouter une inscription — paiement cash</h2>
@@ -384,8 +409,8 @@ function AdminDashboardPage() {
           </div>
 
           {/* Search & Filters */}
-          <div className="px-5 py-3 border-b border-border flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
+          <div className="px-4 sm:px-5 py-3 border-b border-border flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+            <div className="relative flex-1 min-w-0 w-full sm:min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 id="admin_search"
@@ -396,7 +421,7 @@ function AdminDashboardPage() {
               />
             </div>
             <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="rounded-lg h-9 w-[150px] text-sm">
+              <SelectTrigger className="rounded-lg h-9 w-full sm:w-[150px] text-sm touch-target">
                 <SelectValue placeholder="Plan" />
               </SelectTrigger>
               <SelectContent>
@@ -406,7 +431,7 @@ function AdminDashboardPage() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="rounded-lg h-9 w-[180px] text-sm">
+              <SelectTrigger className="rounded-lg h-9 w-full sm:w-[180px] text-sm touch-target">
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
               <SelectContent>
@@ -418,8 +443,8 @@ function AdminDashboardPage() {
             </Select>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="table-scroll">
+            <table className="w-full text-sm min-w-[640px]">
               <thead>
                 <tr className="border-b border-border text-left text-xs text-muted-foreground">
                   <th className="px-5 py-3 font-medium">Date</th>
@@ -463,7 +488,7 @@ function AdminDashboardPage() {
                             <Button
                               variant="hero"
                               size="sm"
-                              className="text-xs h-8"
+                              className="text-xs min-h-9 sm:touch-target"
                               disabled={actionId === r.id}
                               onClick={() => markCashPaid(r.id, r.full_name)}
                             >
@@ -474,7 +499,7 @@ function AdminDashboardPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-xs h-8"
+                              className="text-xs min-h-9 sm:touch-target"
                               disabled={actionId === r.id}
                               onClick={() => grantVip(r.id, r.email, r.full_name)}
                             >
@@ -522,6 +547,8 @@ function AdminDashboardPage() {
             </div>
           )}
         </div>
+          </>
+        )}
 
         <p className="mt-6 text-center">
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">

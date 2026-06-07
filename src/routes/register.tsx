@@ -120,7 +120,7 @@ function RegisterPage() {
         <div className="grid lg:grid-cols-[minmax(0,340px)_1fr] gap-6 lg:gap-8 items-start">
           <PlanDetailsCard
             planId={form.plan}
-            className="hidden lg:block lg:sticky lg:top-24"
+            className="hidden lg:block lg:sticky lg:top-[calc(var(--site-header-height)+1rem)]"
           />
 
           <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-4 sm:p-6 md:p-8 min-w-0">

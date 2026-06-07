@@ -9,7 +9,7 @@ const modules = [
 
 export function Learn() {
   return (
-    <section id="learn" className="section-divider py-16 sm:py-20 md:py-28">
+    <section id="learn" className="site-section-anchor section-divider py-16 sm:py-20 md:py-28">
       <div className="site-container">
         <SectionHeader
           label="Parcours"

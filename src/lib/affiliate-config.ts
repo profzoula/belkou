@@ -1,2 +1,5 @@
 export const AFFILIATE_COMMISSION_USD = 5;
+export const AFFILIATE_SIGNUP_COMMISSION_USD = 0.05;
+export const AFFILIATE_MIN_WITHDRAWAL_USD = 20;
 export const REFERRAL_STORAGE_KEY = "belkou_ref";
+export const AFFILIATE_SIGNUP_REFERRAL_PREFIX = "signup:";

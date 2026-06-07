@@ -241,6 +241,42 @@ export const adminGrantFreeVip = createServerFn({ method: "POST" })
     };
   });
 
+export const getAdminAffiliateOverview = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getAdminAffiliateOverview: loadOverview } = await import("@/server/affiliates");
+  return loadOverview();
+});
+
+export const adminProcessWithdrawal = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        withdrawalId: z.string().min(1),
+        action: z.enum(["paid", "rejected"]),
+        adminNote: z.string().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { processWithdrawal } = await import("@/server/affiliate-withdrawals");
+    const result = await processWithdrawal({
+      withdrawalId: data.withdrawalId,
+      action: data.action,
+      adminNote: data.adminNote,
+    });
+
+    if (!result.ok) {
+      throw new Error(
+        result.reason === "not_found"
+          ? "Demande introuvable ou déjà traitée"
+          : "Impossible de traiter la demande",
+      );
+    }
+
+    return { ok: true as const };
+  });
+
 export const checkAdminSession = createServerFn({ method: "GET" }).handler(async () => {
   const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) return { authenticated: false as const };

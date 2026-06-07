@@ -1,12 +1,20 @@
+import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { siteConfig } from "@/lib/site-config";
 
 export function PromoTopbar() {
-  if (!siteConfig.promo.enabled) return null;
+  const enabled = siteConfig.promo.enabled;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("no-promo", !enabled);
+    return () => document.documentElement.classList.remove("no-promo");
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
     <div className="promo-topbar">
-      <div className="site-container flex h-7 sm:h-8 items-center justify-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs leading-none">
+      <div className="site-container flex min-h-7 sm:min-h-8 h-auto py-1 sm:py-0 sm:h-8 flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 text-[10px] sm:text-xs leading-tight sm:leading-none">
         <p className="truncate">
           <span className="sm:hidden">
             <span className="promo-highlight">Ebook gratuit</span>

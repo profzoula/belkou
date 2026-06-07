@@ -6,7 +6,7 @@ import { pricingPlans } from "@/lib/plans";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="section-divider section-alt py-16 sm:py-20 md:py-28">
+    <section id="pricing" className="site-section-anchor section-divider section-alt py-16 sm:py-20 md:py-28">
       <div className="site-container">
         <SectionHeader
           label="Tarifs"
@@ -19,11 +19,11 @@ export function Pricing() {
           <p className="text-center text-[11px] text-muted-foreground mb-3 md:hidden">
             Glissez pour comparer les plans →
           </p>
-          <div className="flex md:grid md:grid-cols-2 gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-2 md:pb-0 -mx-1 px-1 md:mx-0 md:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="scroll-carousel md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:pb-0">
             {pricingPlans.map((p) => (
               <div
                 key={p.name}
-                className={`relative rounded-2xl p-5 sm:p-6 transition-all min-w-[calc(50%-0.5rem)] w-[calc(50%-0.5rem)] sm:min-w-[260px] sm:w-[260px] md:min-w-0 md:w-auto shrink-0 snap-start flex flex-col bg-card border ${
+                className={`relative rounded-2xl p-5 sm:p-6 transition-all w-[min(100%,20rem)] min-w-[85vw] sm:min-w-[260px] sm:w-[260px] md:min-w-0 md:w-auto flex flex-col bg-card border ${
                   p.highlight
                     ? "border-primary shadow-primary ring-1 ring-primary/20 md:-translate-y-1"
                     : "border-border shadow-sm"

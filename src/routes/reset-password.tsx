@@ -83,7 +83,7 @@ function ResetPasswordPage() {
   return (
     <>
       <Navbar />
-      <main className="site-page-top min-h-screen flex items-center justify-center px-4 py-16">
+      <main className="site-page-top min-h-[calc(100dvh-var(--site-header-height))] flex items-center justify-center px-4 py-8 sm:py-12 pb-[env(safe-area-inset-bottom,0px)]">
         <div className="surface w-full max-w-md p-8 rounded-2xl">
           {!isSupabaseConfigured && (
             <div className="bg-amber-500/10 text-amber-700 rounded-lg p-3 text-sm mb-6">

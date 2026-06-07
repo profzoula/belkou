@@ -24,6 +24,8 @@ import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrl } from "@/lib/si
 import { pricingPlans } from "@/lib/plans";
 import { seoHead } from "@/lib/seo";
 import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
+import { claimSignupReferral } from "@/lib/fns/affiliate";
+import { getStoredReferralCode } from "@/lib/referral-storage";
 
 type StudentRegistration = {
   id: string;
@@ -55,6 +57,7 @@ function DashboardPage() {
   const { user, session, loading, configured, signOut } = useAuth();
   const navigate = useNavigate();
   const dashboardFn = useServerFn(getStudentDashboard);
+  const claimReferralFn = useServerFn(claimSignupReferral);
   const [registration, setRegistration] = useState<StudentRegistration | null | undefined>(undefined);
 
   useEffect(() => {
@@ -66,10 +69,18 @@ function DashboardPage() {
   useEffect(() => {
     if (!session?.access_token) return;
 
+    const storedRef = getStoredReferralCode();
+    void claimReferralFn({
+      data: {
+        accessToken: session.access_token,
+        referralCode: storedRef ?? undefined,
+      },
+    }).catch(() => undefined);
+
     dashboardFn({ data: { accessToken: session.access_token } })
       .then((result) => setRegistration(result.registration))
       .catch(() => setRegistration(null));
-  }, [session?.access_token, dashboardFn]);
+  }, [session?.access_token, dashboardFn, claimReferralFn]);
 
   if (loading) {
     return (
@@ -149,7 +160,7 @@ function DashboardHeader({
         <h1 className="text-2xl md:text-3xl font-semibold">Bonjour, {name}</h1>
         <p className="text-sm text-muted-foreground mt-1">{email}</p>
       </div>
-      <Button variant="outline" size="sm" className="shrink-0 self-start" onClick={onSignOut}>
+      <Button variant="outline" size="sm" className="shrink-0 self-start touch-target w-full sm:w-auto" onClick={onSignOut}>
         <LogOut className="h-4 w-4" /> Déconnexion
       </Button>
     </div>
@@ -176,7 +187,7 @@ function OnboardingDashboard({ name }: { name: string }) {
               ci-dessous.
             </p>
           </div>
-          <Button asChild variant="hero" size="lg" className="shrink-0 touch-target">
+          <Button asChild variant="hero" size="lg" className="shrink-0 touch-target w-full md:w-auto">
             <Link to="/register">
               S&apos;inscrire à la formation <ArrowRight className="h-4 w-4" />
             </Link>
@@ -330,9 +341,9 @@ function PendingEnrollmentDashboard({ registration }: { registration: StudentReg
 
   return (
     <div className="space-y-6">
-      <div className="surface rounded-2xl p-6 md:p-8 border-amber-200/60 bg-amber-50/40">
+      <div className="surface rounded-2xl p-6 md:p-8 border-amber-200/60 dark:border-amber-500/25 bg-amber-50/40 dark:bg-amber-500/10">
         <div className="flex gap-4">
-          <div className="icon-box shrink-0 bg-amber-100 text-amber-700">
+          <div className="icon-box shrink-0 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300">
             <Clock className="h-4 w-4" />
           </div>
           <div>
@@ -364,7 +375,7 @@ function EnrolledDashboard({ registration }: { registration: StudentRegistration
     <div className="space-y-6">
       <div className="brand-feature surface rounded-2xl p-6 md:p-8">
         <div className="flex gap-4">
-          <div className="icon-box shrink-0 bg-green-100 text-green-700">
+          <div className="icon-box shrink-0 bg-green-100 dark:bg-emerald-500/20 text-green-700 dark:text-emerald-300">
             <CheckCircle2 className="h-4 w-4" />
           </div>
           <div className="flex-1">
