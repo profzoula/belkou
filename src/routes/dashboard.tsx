@@ -93,7 +93,10 @@ function DashboardPage() {
   if (!user) return null;
 
   const name =
-    (user.user_metadata?.full_name as string | undefined) ?? user.email?.split("@")[0] ?? "Étudiant";
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.user_metadata?.name as string | undefined) ??
+    user.email?.split("@")[0] ??
+    "Étudiant";
 
   const handleSignOut = async () => {
     await signOut();

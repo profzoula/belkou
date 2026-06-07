@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/login")({
@@ -70,7 +71,10 @@ function LoginPage() {
             <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code> dans vos variables d&apos;environnement.
           </div>
         ) : (
-          <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
+          <div className="space-y-4">
+            <GoogleAuthButton label="Se connecter avec Google" disabled={loading} />
+            <AuthDivider />
+            <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -110,6 +114,7 @@ function LoginPage() {
               </Link>
             </p>
           </form>
+          </div>
         )}
         </div>
       </main>

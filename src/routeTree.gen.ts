@@ -21,6 +21,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal/privacy'
 import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
@@ -84,6 +85,11 @@ const LegalCgvRoute = LegalCgvRouteImport.update({
   path: '/legal/cgv',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/auth/callback'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/auth/callback'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/auth/callback'
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   LegalCgvRoute: typeof LegalCgvRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalCgvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   LegalCgvRoute: LegalCgvRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
