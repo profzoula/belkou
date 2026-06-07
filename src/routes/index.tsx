@@ -27,10 +27,10 @@ function Index() {
   const studentCount = Route.useLoaderData();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden max-w-[100vw]">
       <JsonLd data={[organizationJsonLd(), courseJsonLd()]} />
       <Navbar />
-      <main>
+      <main className="overflow-x-hidden max-w-full">
         <Hero studentCount={studentCount} />
         <TemplateShowcase />
         <Learn />

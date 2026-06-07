@@ -17,14 +17,14 @@ const avatars = [
 
 function CodePreview() {
   return (
-    <div className="surface rounded-2xl overflow-hidden shadow-md border border-border h-full">
+    <div className="surface min-w-0 rounded-2xl overflow-hidden shadow-md border border-border h-full">
       <div className="flex items-center gap-2 border-b border-border bg-muted/50 px-4 py-2.5">
         <span className="h-2 w-2 rounded-full bg-red-400/80 shrink-0" />
         <span className="h-2 w-2 rounded-full bg-amber-400/80 shrink-0" />
         <span className="h-2 w-2 rounded-full bg-emerald-400/80 shrink-0" />
         <span className="ml-1.5 text-[10px] font-mono text-muted-foreground">belkou-app.tsx</span>
       </div>
-      <div className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed bg-muted/30 dark:bg-muted/50 text-foreground">
+      <div className="p-4 sm:p-5 font-mono text-[11px] sm:text-xs leading-relaxed bg-muted/30 dark:bg-muted/50 text-foreground break-words">
         <p>
           <span className="text-primary">const</span> app ={" "}
           <span className="text-orange-600 dark:text-orange-400">createSaaS</span>({"{"}
@@ -66,10 +66,10 @@ export function Hero({ studentCount }: HeroProps) {
         className="pointer-events-none absolute top-32 right-0 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl"
       />
 
-      <div className="site-container relative pt-8 sm:pt-10 lg:pt-12">
-        <div className="grid lg:grid-cols-2 lg:grid-rows-[auto_auto_auto] gap-x-10 xl:gap-x-14 gap-y-8 lg:gap-y-6 items-start">
+      <div className="site-container relative pt-8 sm:pt-10 lg:pt-12 min-w-0">
+        <div className="grid min-w-0 lg:grid-cols-2 lg:grid-rows-[auto_auto_auto] gap-x-10 xl:gap-x-14 gap-y-8 lg:gap-y-6 items-start">
           {/* Hero copy */}
-          <div className="order-1 lg:col-start-1 lg:row-start-1 text-center lg:text-left animate-fade-up">
+          <div className="order-1 lg:col-start-1 lg:row-start-1 min-w-0 w-full max-w-full text-center lg:text-left animate-fade-up">
             <div className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-3 badge mb-5 sm:mb-6">
               <div className="avatar-stack">
                 {avatars.map((cls, i) => (
@@ -90,29 +90,39 @@ export function Hero({ studentCount }: HeroProps) {
               </span>
             </div>
 
-            <h1 className="font-display text-[2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.1rem] font-bold leading-[1.08] mb-4 sm:mb-5 text-balance">
+            <h1 className="font-display text-[1.65rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.1rem] font-bold leading-[1.12] mb-4 sm:mb-5 text-balance break-words">
               Créez, lancez et <span className="text-gradient">vendez</span> vos apps IA en 8 semaines
             </h1>
 
-            <p className="max-w-xl mx-auto lg:mx-0 text-sm sm:text-base text-muted-foreground mb-6 sm:mb-7 leading-relaxed">
+            <p className="max-w-xl mx-auto lg:mx-0 text-sm sm:text-base text-muted-foreground mb-6 sm:mb-7 leading-relaxed break-words">
               Pas besoin d&apos;être développeur. Apprenez à construire des apps IA, des SaaS et des automatisations
               avec une communauté qui avance avec vous.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3 mb-4">
-              <Button asChild variant="hero" size="lg" className="w-full sm:w-auto touch-target px-8">
+            <div className="flex w-full max-w-full flex-col sm:flex-row items-stretch sm:items-center lg:items-start justify-center lg:justify-start gap-3 mb-4">
+              <Button
+                asChild
+                variant="hero"
+                size="lg"
+                className="w-full max-w-full sm:w-auto touch-target px-4 sm:px-8 whitespace-normal text-center"
+              >
                 <Link to="/register">
                   S&apos;inscrire à la formation <ArrowRight className="h-4 w-4 shrink-0" />
                 </Link>
               </Button>
-              <Button asChild variant="soft" size="lg" className="w-full sm:w-auto touch-target px-8">
+              <Button
+                asChild
+                variant="soft"
+                size="lg"
+                className="w-full max-w-full sm:w-auto touch-target px-4 sm:px-8 whitespace-normal text-center"
+              >
                 <a href="#learn">
                   <Play className="h-4 w-4 shrink-0" /> Voir le programme
                 </a>
               </Button>
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground break-words">
               Pas encore prêt ?{" "}
               <Link to="/signup" className="font-semibold text-primary hover:underline">
                 Créer un compte
@@ -125,12 +135,12 @@ export function Hero({ studentCount }: HeroProps) {
           </div>
 
           {/* Objectifs — dwat, sticky */}
-          <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-3 animate-fade-up [animation-delay:60ms] lg:sticky lg:top-[calc(var(--site-header-height)+1rem)]">
+          <div className="order-2 lg:col-start-2 lg:row-start-1 lg:row-span-3 min-w-0 w-full max-w-full animate-fade-up [animation-delay:60ms] lg:sticky lg:top-[calc(var(--site-header-height)+1rem)]">
             <FormationObjectivesPanel />
           </div>
 
           {/* Stats */}
-          <div className="order-3 lg:col-start-1 lg:row-start-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 animate-fade-up [animation-delay:100ms]">
+          <div className="order-3 lg:col-start-1 lg:row-start-2 min-w-0 w-full grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 animate-fade-up [animation-delay:100ms]">
             {stats.map((s, i) => (
               <div
                 key={s.l}
@@ -146,7 +156,7 @@ export function Hero({ studentCount }: HeroProps) {
           </div>
 
           {/* Code + logos scroll */}
-          <div className="order-4 lg:col-start-1 lg:row-start-3 space-y-3 sm:space-y-4 animate-fade-up [animation-delay:140ms]">
+          <div className="order-4 lg:col-start-1 lg:row-start-3 min-w-0 w-full max-w-full space-y-3 sm:space-y-4 animate-fade-up [animation-delay:140ms]">
             <CodePreview />
             <ToolsStrip variant="marquee" logosOnly showLabel={false} align="left" bordered={false} />
           </div>

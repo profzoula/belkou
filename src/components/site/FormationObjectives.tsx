@@ -5,14 +5,14 @@ export function FormationObjectivesPanel() {
   const { formation } = siteConfig;
 
   return (
-    <div id="objectifs" className="site-section-anchor relative">
+    <div id="objectifs" className="site-section-anchor relative min-w-0 w-full max-w-full overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-8 -right-6 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
+        className="pointer-events-none absolute -top-8 right-0 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-6 -left-4 h-32 w-32 rounded-full bg-amber-400/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-6 left-0 h-32 w-32 rounded-full bg-amber-400/10 blur-3xl"
       />
 
       <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-card/90 shadow-lg backdrop-blur-sm">
@@ -40,18 +40,18 @@ export function FormationObjectivesPanel() {
               <div className="icon-box shadow-primary">
                 <Target className="h-4 w-4" />
               </div>
-              <h3 className="text-sm font-semibold tracking-tight">Après la formation, vous saurez</h3>
+              <h3 className="min-w-0 flex-1 text-sm font-semibold tracking-tight">Après la formation, vous saurez</h3>
             </div>
             <ul className="space-y-1.5">
               {formation.objectives.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-2.5 rounded-xl px-2 py-2 text-sm text-foreground/90 leading-snug transition-colors hover:bg-primary/[0.04]"
+                  className="flex min-w-0 items-start gap-2.5 rounded-xl px-2 py-2 text-sm text-foreground/90 leading-snug transition-colors hover:bg-primary/[0.04]"
                 >
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/15">
                     <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />
                   </span>
-                  <span>{item}</span>
+                  <span className="min-w-0 flex-1 break-words">{item}</span>
                 </li>
               ))}
             </ul>
