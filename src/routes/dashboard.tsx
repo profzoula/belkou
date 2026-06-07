@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   Clock,
   Gift,
-  LogOut,
   MessageCircle,
   Sparkles,
   Target,
@@ -54,7 +53,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
-  const { user, session, loading, configured, signOut } = useAuth();
+  const { user, session, loading, configured } = useAuth();
   const navigate = useNavigate();
   const dashboardFn = useServerFn(getStudentDashboard);
   const claimReferralFn = useServerFn(claimSignupReferral);
@@ -110,16 +109,11 @@ function DashboardPage() {
     user.email?.split("@")[0] ??
     "Étudiant";
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate({ to: "/" });
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="site-container site-page-top pb-12 sm:pb-16 max-w-5xl">
-        <DashboardHeader name={name} email={user.email ?? ""} onSignOut={handleSignOut} />
+        <DashboardHeader name={name} email={user.email ?? ""} />
 
         {session?.access_token ? (
           <div className="mb-8 sm:mb-10">
@@ -144,25 +138,12 @@ function DashboardPage() {
   );
 }
 
-function DashboardHeader({
-  name,
-  email,
-  onSignOut,
-}: {
-  name: string;
-  email: string;
-  onSignOut: () => void;
-}) {
+function DashboardHeader({ name, email }: { name: string; email: string }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-      <div>
-        <p className="section-label mb-2">Espace étudiant</p>
-        <h1 className="text-2xl md:text-3xl font-semibold">Bonjour, {name}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{email}</p>
-      </div>
-      <Button variant="outline" size="sm" className="shrink-0 self-start touch-target w-full sm:w-auto" onClick={onSignOut}>
-        <LogOut className="h-4 w-4" /> Déconnexion
-      </Button>
+    <div className="mb-8">
+      <p className="section-label mb-2">Espace étudiant</p>
+      <h1 className="text-2xl md:text-3xl font-semibold">Bonjour, {name}</h1>
+      <p className="text-sm text-muted-foreground mt-1">{email}</p>
     </div>
   );
 }
