@@ -158,7 +158,7 @@ export const adminMarkCashPaid = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        registrationId: z.string().uuid(),
+        registrationId: z.string().min(1),
         sendEmail: z.boolean().optional().default(true),
       })
       .parse(data),
@@ -189,7 +189,7 @@ export const adminGrantFreeVip = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        registrationId: z.string().uuid().optional(),
+        registrationId: z.string().min(1).optional(),
         email: z.string().email().optional(),
         sendEmail: z.boolean().optional().default(true),
       })

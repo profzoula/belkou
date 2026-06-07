@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { RegistrationRecord } from "@/lib/schemas/registration";
+import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 
 let client: SupabaseClient | null | undefined;
 
@@ -33,82 +34,83 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
   };
 }
 
-function registrationPayload(record: RegistrationRecord, includeUpdatedAt: boolean) {
-  const base = {
-    id: record.id,
-    full_name: record.full_name,
-    email: record.email.trim().toLowerCase(),
-    whatsapp: record.whatsapp,
-    country: record.country,
-    level: record.level,
-    plan: record.plan,
-    payment_status: record.payment_status,
-    stripe_session_id: record.stripe_session_id,
-    created_at: record.created_at,
+type RegistrationFields = Pick<
+  RegistrationRecord,
+  "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "payment_status"
+>;
+
+function baseFields(
+  data: RegistrationInput,
+  paymentStatus: RegistrationRecord["payment_status"],
+): RegistrationFields {
+  return {
+    full_name: data.full_name,
+    email: normalizeRegistrationEmail(data.email),
+    whatsapp: data.whatsapp,
+    country: data.country,
+    level: data.level,
+    plan: data.plan,
+    payment_status: paymentStatus,
   };
-  if (!includeUpdatedAt) return base;
-  return { ...base, updated_at: record.updated_at ?? new Date().toISOString() };
 }
 
-async function runSupabaseWrite(
+async function supabaseUpdateFields(
   sb: SupabaseClient,
-  mode: "insert" | "update",
-  record: RegistrationRecord,
-  existingId?: string,
-): Promise<{ ok: boolean; error?: string }> {
+  id: string,
+  fields: RegistrationFields,
+): Promise<void> {
   for (const includeUpdatedAt of [true, false]) {
-    const payload = registrationPayload(record, includeUpdatedAt);
-    const result =
-      mode === "update" && existingId
-        ? await sb.from("registrations").update(payload).eq("id", existingId)
-        : await sb.from("registrations").insert(payload);
-
-    if (!result.error) return { ok: true };
-    const message = result.error.message;
-    if (includeUpdatedAt && message.includes("updated_at")) {
-      continue;
+    const payload = includeUpdatedAt ? { ...fields, updated_at: new Date().toISOString() } : fields;
+    const { error } = await sb.from("registrations").update(payload).eq("id", id);
+    if (!error) return;
+    if (!includeUpdatedAt || !error.message.includes("updated_at")) {
+      throw error;
     }
-    return { ok: false, error: message };
   }
-  return { ok: false, error: "unknown" };
 }
 
-export async function supabaseSaveRegistration(record: RegistrationRecord): Promise<string> {
+async function supabaseInsertFields(
+  sb: SupabaseClient,
+  fields: RegistrationFields,
+): Promise<RegistrationRecord> {
+  for (const includeUpdatedAt of [true, false]) {
+    const payload = includeUpdatedAt ? { ...fields, updated_at: new Date().toISOString() } : fields;
+    const { data, error } = await sb.from("registrations").insert(payload).select().single();
+    if (!error && data) return rowToRecord(data as Record<string, unknown>);
+    if (!includeUpdatedAt || !error?.message.includes("updated_at")) {
+      throw error ?? new Error("Insert failed");
+    }
+  }
+  throw new Error("Insert failed");
+}
+
+export async function supabaseSaveRegistration(
+  data: RegistrationInput,
+  options?: { payment_status?: RegistrationRecord["payment_status"] },
+): Promise<RegistrationRecord> {
   const sb = getSupabaseAdmin();
   if (!sb) {
     const isProd = process.env.NODE_ENV === "production";
     if (isProd) {
       throw new Error("Base de données non configurée (SUPABASE_SERVICE_ROLE_KEY manquant).");
     }
-    console.warn("[BelKou] Supabase admin not configured — registration not persisted.");
-    return record.id;
+    throw new Error("Supabase non configuré en local.");
   }
 
-  const normalized = { ...record, email: record.email.trim().toLowerCase() };
-  const existing = await supabaseGetByEmail(normalized.email);
-  const targetId = existing?.id ?? normalized.id;
-  const toWrite = existing ? { ...normalized, id: targetId, created_at: existing.created_at } : normalized;
+  const existing = await supabaseGetByEmail(data.email);
+  const fields = baseFields(data, options?.payment_status ?? existing?.payment_status ?? "pending");
 
-  const write = existing
-    ? await runSupabaseWrite(sb, "update", toWrite, existing.id)
-    : await runSupabaseWrite(sb, "insert", toWrite);
-
-  if (!write.ok) {
-    console.error("[BelKou] Supabase save registration:", write.error);
-    if (write.error?.includes("duplicate key") || write.error?.includes("unique")) {
-      const retry = await supabaseGetByEmail(normalized.email);
-      if (retry) {
-        await runSupabaseWrite(sb, "update", { ...normalized, id: retry.id, created_at: retry.created_at }, retry.id);
-        return retry.id;
-      }
-      throw new Error(
-        "Cet email est déjà inscrit. Réessayez — vous serez redirigé vers le paiement.",
-      );
+  try {
+    if (existing) {
+      await supabaseUpdateFields(sb, existing.id, fields);
+      return { ...existing, ...fields };
     }
+    return await supabaseInsertFields(sb, fields);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[BelKou] Supabase save registration:", message);
     throw new Error("Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.");
   }
-
-  return targetId;
 }
 
 export async function supabaseUpdateRegistrationDetails(
@@ -118,18 +120,17 @@ export async function supabaseUpdateRegistrationDetails(
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
-  const payload = { ...data, email: data.email.trim().toLowerCase() };
-  let { error } = await sb
-    .from("registrations")
-    .update({ ...payload, updated_at: new Date().toISOString() })
-    .eq("id", id);
+  const existing = await supabaseGetById(id);
+  const fields = baseFields(
+    { ...data, plan: data.plan },
+    existing?.payment_status ?? "pending",
+  );
 
-  if (error?.message.includes("updated_at")) {
-    ({ error } = await sb.from("registrations").update(payload).eq("id", id));
-  }
-
-  if (error) {
-    console.error("[BelKou] Supabase update registration:", error.message);
+  try {
+    await supabaseUpdateFields(sb, id, fields);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[BelKou] Supabase update registration:", message);
     throw new Error("Impossible de mettre à jour votre inscription. Réessayez ou contactez le support.");
   }
 }
@@ -138,9 +139,8 @@ export async function supabaseGetByEmail(email: string): Promise<RegistrationRec
   const sb = getSupabaseAdmin();
   if (!sb) return null;
 
-  const normalized = email.trim().toLowerCase();
+  const normalized = normalizeRegistrationEmail(email);
 
-  // ilike = case-insensitive; limit(1) avoids maybeSingle() errors when duplicates exist
   const { data, error } = await sb
     .from("registrations")
     .select("*")

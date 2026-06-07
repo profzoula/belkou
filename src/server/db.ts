@@ -116,39 +116,42 @@ export async function saveRegistration(
     updated_at: new Date().toISOString(),
   };
 
-  if (db) {
-    await initDb(db);
-    await db
-      .prepare(
-        `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, payment_status, stripe_session_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      )
-      .bind(
-        record.id,
-        record.full_name,
-        record.email,
-        record.whatsapp,
-        record.country,
-        record.level,
-        record.plan,
-        record.payment_status,
-        record.stripe_session_id,
-        record.created_at,
-        record.updated_at,
-      )
-      .run();
-    const persistedId = await supabaseSaveRegistration(record);
-    if (persistedId !== record.id) {
-      return { ...(await getRegistrationById(db, persistedId)) ?? { ...record, id: persistedId } };
-    }
-    return record;
+  if (!db) {
+    const saved = await supabaseSaveRegistration(normalized, options);
+    devStore.set(saved.id, saved);
+    return saved;
   }
 
-  const persistedId = await supabaseSaveRegistration(record);
-  const finalRecord = persistedId !== record.id ? { ...record, id: persistedId } : record;
-  devStore.set(finalRecord.id, finalRecord);
-  console.info("[BelKou dev] Registration saved:", finalRecord.id, finalRecord.email);
-  return finalRecord;
+  await initDb(db);
+  await db
+    .prepare(
+      `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, payment_status, stripe_session_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      record.id,
+      record.full_name,
+      record.email,
+      record.whatsapp,
+      record.country,
+      record.level,
+      record.plan,
+      record.payment_status,
+      record.stripe_session_id,
+      record.created_at,
+      record.updated_at,
+    )
+    .run();
+
+  try {
+    const saved = await supabaseSaveRegistration(normalized, options);
+    devStore.set(saved.id, saved);
+    return saved;
+  } catch (error) {
+    console.warn("[BelKou] Supabase sync failed (D1 saved):", error);
+    devStore.set(record.id, record);
+    return record;
+  }
 }
 
 export async function getRegistrationByEmail(
