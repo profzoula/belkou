@@ -67,10 +67,21 @@ function toWebRequest(req) {
 
 async function sendWebResponse(res, response) {
   res.statusCode = response.status;
+
+  const setCookies =
+    typeof response.headers.getSetCookie === "function"
+      ? response.headers.getSetCookie()
+      : [];
+
   response.headers.forEach((value, key) => {
-    if (key.toLowerCase() === "transfer-encoding") return;
+    const lower = key.toLowerCase();
+    if (lower === "transfer-encoding" || lower === "set-cookie") return;
     res.setHeader(key, value);
   });
+
+  for (const cookie of setCookies) {
+    res.appendHeader("Set-Cookie", cookie);
+  }
   if (!response.body) {
     res.end();
     return;

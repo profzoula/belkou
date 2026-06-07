@@ -38,7 +38,14 @@ export async function handleOAuthCallback(request: Request): Promise<Response> {
 
   const headers = new Headers();
 
+  const isSecure = requestUrl.protocol === "https:";
+
   const supabase = createServerClient(url, anonKey, {
+    cookieOptions: {
+      secure: isSecure,
+      sameSite: "lax",
+      path: "/",
+    },
     cookies: {
       getAll() {
         return parseCookieHeader(request.headers.get("Cookie") ?? "");

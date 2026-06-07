@@ -12,6 +12,11 @@ let browserClient: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient | null {
   if (!isSupabaseConfigured || typeof window === "undefined") return null;
   browserClient ??= createBrowserClient(url!, anonKey!, {
+    cookieOptions: {
+      secure: window.location.protocol === "https:",
+      sameSite: "lax",
+      path: "/",
+    },
     auth: {
       detectSessionInUrl: true,
       persistSession: true,

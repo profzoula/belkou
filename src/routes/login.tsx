@@ -26,11 +26,14 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   useEffect(() => {
     const message = new URLSearchParams(window.location.search).get("error");
     if (message) {
-      toast.error(decodeURIComponent(message));
+      const decoded = decodeURIComponent(message);
+      setOauthError(decoded);
+      toast.error(decoded);
       window.history.replaceState({}, "", "/login");
     }
   }, []);
@@ -81,6 +84,11 @@ function LoginPage() {
           </div>
         ) : (
           <div className="space-y-4">
+            {oauthError ? (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                {oauthError}
+              </div>
+            ) : null}
             <GoogleAuthButton label="Se connecter avec Google" disabled={loading} />
             <AuthDivider />
             <form onSubmit={submit} className="space-y-5 surface rounded-2xl p-6 md:p-8">
