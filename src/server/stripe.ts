@@ -38,6 +38,7 @@ export async function createCheckoutSession(params: {
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer_email: params.email,
+    payment_method_types: ["card"],
     line_items: [lineItem],
     success_url: `${env.SITE_URL}/success?registrationId=${params.registrationId}&plan=${params.plan}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${env.SITE_URL}/register?plan=${params.plan}`,

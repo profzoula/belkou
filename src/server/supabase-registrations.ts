@@ -35,7 +35,14 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
 
 export async function supabaseSaveRegistration(record: RegistrationRecord): Promise<void> {
   const sb = getSupabaseAdmin();
-  if (!sb) return;
+  if (!sb) {
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd) {
+      throw new Error("Base de données non configurée (SUPABASE_SERVICE_ROLE_KEY manquant).");
+    }
+    console.warn("[BelKou] Supabase admin not configured — registration not persisted.");
+    return;
+  }
 
   const { error } = await sb.from("registrations").upsert({
     id: record.id,
@@ -48,10 +55,28 @@ export async function supabaseSaveRegistration(record: RegistrationRecord): Prom
     payment_status: record.payment_status,
     stripe_session_id: record.stripe_session_id,
     created_at: record.created_at,
-    updated_at: record.updated_at,
+    updated_at: record.updated_at ?? new Date().toISOString(),
   });
 
-  if (error) console.error("[BelKou] Supabase save registration:", error.message);
+  if (error) {
+    console.error("[BelKou] Supabase save registration:", error.message);
+    throw new Error("Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.");
+  }
+}
+
+export async function supabaseUpdateRegistrationDetails(
+  id: string,
+  data: Pick<RegistrationRecord, "full_name" | "email" | "whatsapp" | "country" | "level" | "plan">,
+): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+
+  const { error } = await sb
+    .from("registrations")
+    .update({ ...data, updated_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) console.error("[BelKou] Supabase update registration:", error.message);
 }
 
 export async function supabaseGetByEmail(email: string): Promise<RegistrationRecord | null> {
@@ -61,7 +86,7 @@ export async function supabaseGetByEmail(email: string): Promise<RegistrationRec
   const { data, error } = await sb
     .from("registrations")
     .select("*")
-    .ilike("email", email.trim())
+    .eq("email", email.trim().toLowerCase())
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

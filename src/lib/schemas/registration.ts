@@ -1,8 +1,17 @@
 import { z } from "zod";
 
+export function normalizeRegistrationEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 export const registrationSchema = z.object({
   full_name: z.string().trim().min(2, "Nom trop court").max(100),
-  email: z.string().trim().email("Email invalide").max(255),
+  email: z
+    .string()
+    .trim()
+    .email("Email invalide")
+    .max(255)
+    .transform(normalizeRegistrationEmail),
   whatsapp: z.string().trim().min(6, "Numéro invalide").max(30),
   country: z.string().min(1, "Choisissez un pays"),
   level: z.string().min(1, "Choisissez un niveau"),

@@ -61,7 +61,7 @@ export function checkRateLimit(
  * Rate limit presets for BelKou
  */
 export const RATE_LIMITS = {
-  register: { limit: 3, windowMs: 60 * 1000 },      // 3 per minute
+  register: { limit: 10, windowMs: 10 * 60 * 1000 }, // 10 per 10 minutes
   login: { limit: 5, windowMs: 60 * 1000 },          // 5 per minute
   adminLogin: { limit: 5, windowMs: 60 * 1000 },     // 5 per minute
   forgotPassword: { limit: 3, windowMs: 5 * 60 * 1000 }, // 3 per 5 minutes

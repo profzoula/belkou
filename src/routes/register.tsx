@@ -60,11 +60,16 @@ function RegisterPage() {
     try {
       const result = await submitFn({ data: parsed.data });
 
+      if (result.resumed) {
+        toast.info("Inscription retrouvée — redirection vers le paiement.");
+      }
+
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
         return;
       }
 
+      toast.info("Stripe indisponible — suivez les instructions de paiement manuel.");
       navigate({
         to: "/success",
         search: {
@@ -75,7 +80,11 @@ function RegisterPage() {
       });
     } catch (error) {
       console.error(error);
-      toast.error("L'inscription a échoué. Veuillez réessayer.");
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "L'inscription a échoué. Veuillez réessayer ou nous contacter.";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

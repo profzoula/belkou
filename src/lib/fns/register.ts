@@ -1,8 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { registrationSchema } from "@/lib/schemas/registration";
+import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb } from "@/server/env";
-import { getRegistrationByEmail, getRegistrationById, saveRegistration, setStripeSessionId, updateRegistrationPayment } from "@/server/db";
+import {
+  getRegistrationByEmail,
+  getRegistrationById,
+  saveRegistration,
+  setStripeSessionId,
+  updateRegistrationDetails,
+  updateRegistrationPayment,
+} from "@/server/db";
 import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 import { createCheckoutSession } from "@/server/stripe";
 import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
@@ -26,52 +34,73 @@ function manualPaymentHtml() {
   return lines.join("");
 }
 
+async function startCheckout(
+  db: Awaited<ReturnType<typeof getDb>>,
+  record: RegistrationRecord,
+) {
+  let checkoutUrl: string | null = null;
+
+  try {
+    const session = await createCheckoutSession({
+      registrationId: record.id,
+      plan: record.plan,
+      email: record.email,
+      fullName: record.full_name,
+    });
+
+    if (session?.url && session.id) {
+      checkoutUrl = session.url;
+      await setStripeSessionId(db, record.id, session.id);
+      await updateRegistrationPayment(db, record.id, { payment_status: "pending" });
+    } else {
+      await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
+    }
+  } catch (error) {
+    console.error("Stripe checkout error:", error);
+    await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
+  }
+
+  return checkoutUrl;
+}
+
 export const submitRegistration = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registrationSchema.parse(data))
   .handler(async ({ data }) => {
     const db = await getDb();
 
-    // Rate limiting
     const allowed = checkRateLimit(`register:${data.email}`, RATE_LIMITS.register.limit, RATE_LIMITS.register.windowMs);
     if (!allowed) {
-      throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
+      throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
     }
 
-    // Check for duplicate email
     const existing = await getRegistrationByEmail(db, data.email);
+    let record: RegistrationRecord;
+    let resumed = false;
+
     if (existing) {
-      throw new Error("Cet email est déjà inscrit. Connectez-vous ou utilisez un autre email.");
+      if (existing.payment_status === "paid") {
+        throw new Error(
+          "Cet email est déjà inscrit et payé. Connectez-vous sur /login pour accéder à votre espace.",
+        );
+      }
+
+      const updated = await updateRegistrationDetails(db, existing.id, data);
+      record = updated ?? { ...existing, ...data };
+      resumed = true;
+    } else {
+      record = await saveRegistration(db, data);
     }
 
-    const record = await saveRegistration(db, data);
     const planConfig = siteConfig.plans[data.plan];
     const manualHtml = manualPaymentHtml();
-
-    let checkoutUrl: string | null = null;
-
-    try {
-      const session = await createCheckoutSession({
-        registrationId: record.id,
-        plan: data.plan,
-        email: data.email,
-        fullName: data.full_name,
-      });
-
-      if (session?.url && session.id) {
-        checkoutUrl = session.url;
-        await setStripeSessionId(db, record.id, session.id);
-      } else {
-        await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
-      }
-    } catch (error) {
-      console.error("Stripe checkout error:", error);
-      await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
-    }
+    const checkoutUrl = await startCheckout(db, record);
 
     try {
       await sendEmail({
         to: data.email,
-        subject: `Inscription BelKou — ${planConfig.name}`,
+        subject: resumed
+          ? `Reprise inscription BelKou — ${planConfig.name}`
+          : `Inscription BelKou — ${planConfig.name}`,
         html: registrationPendingEmail({
           name: data.full_name,
           plan: data.plan,
@@ -90,6 +119,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
       checkoutUrl,
       manualPayment: !checkoutUrl,
       plan: data.plan,
+      resumed,
     };
   });
 

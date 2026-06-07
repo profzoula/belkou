@@ -1,4 +1,5 @@
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
   supabaseGetByEmail,
   supabaseGetById,
@@ -10,6 +11,7 @@ import {
   supabaseSetStripeSessionId,
   supabaseUpdateGrant,
   supabaseUpdatePayment,
+  supabaseUpdateRegistrationDetails,
   type RegistrationStats,
 } from "@/server/supabase-registrations";
 
@@ -54,13 +56,59 @@ export function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
   };
 }
 
+export async function updateRegistrationDetails(
+  db: D1Database | null,
+  id: string,
+  data: RegistrationInput,
+): Promise<RegistrationRecord | null> {
+  const normalized: RegistrationInput = {
+    ...data,
+    email: normalizeRegistrationEmail(data.email),
+  };
+  const updatedAt = new Date().toISOString();
+
+  if (db) {
+    await db
+      .prepare(
+        `UPDATE registrations SET full_name = ?, email = ?, whatsapp = ?, country = ?, level = ?, plan = ?, updated_at = ? WHERE id = ?`,
+      )
+      .bind(
+        normalized.full_name,
+        normalized.email,
+        normalized.whatsapp,
+        normalized.country,
+        normalized.level,
+        normalized.plan,
+        updatedAt,
+        id,
+      )
+      .run();
+    await supabaseUpdateRegistrationDetails(id, normalized);
+    return getRegistrationById(db, id);
+  }
+
+  await supabaseUpdateRegistrationDetails(id, normalized);
+  const existing = devStore.get(id);
+  if (existing) {
+    const next = { ...existing, ...normalized, updated_at: updatedAt };
+    devStore.set(id, next);
+    return next;
+  }
+
+  return supabaseGetById(id);
+}
+
 export async function saveRegistration(
   db: D1Database | null,
   data: RegistrationInput,
   options?: { payment_status?: RegistrationRecord["payment_status"] },
 ): Promise<RegistrationRecord> {
-  const record: RegistrationRecord = {
+  const normalized: RegistrationInput = {
     ...data,
+    email: normalizeRegistrationEmail(data.email),
+  };
+  const record: RegistrationRecord = {
+    ...normalized,
     id: crypto.randomUUID(),
     payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
@@ -103,7 +151,7 @@ export async function getRegistrationByEmail(
   db: D1Database | null,
   email: string,
 ): Promise<RegistrationRecord | null> {
-  const normalized = email.trim().toLowerCase();
+  const normalized = normalizeRegistrationEmail(email);
 
   if (db) {
     const row = await db
