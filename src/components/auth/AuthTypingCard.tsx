@@ -49,13 +49,13 @@ export function AuthTypingCard() {
       <p className="text-sm font-medium text-primary-foreground/75">Posez votre question</p>
 
       <div className="mt-4 min-h-[88px] rounded-xl border border-primary-foreground/10 bg-black/20 px-4 py-3.5">
-        <p className="text-[15px] leading-relaxed text-primary-foreground">
+        <p className="font-mono text-sm leading-relaxed text-primary-foreground sm:text-[15px]">
           {displayed}
           <span
-            className={`ml-0.5 inline-block w-[2px] translate-y-[2px] bg-primary transition-opacity duration-100 ${
+            className={`ml-px inline-block w-[2px] translate-y-px bg-primary transition-opacity duration-100 ${
               cursorVisible ? "opacity-100" : "opacity-0"
             }`}
-            style={{ height: "1.1em" }}
+            style={{ height: "1.15em" }}
             aria-hidden
           />
         </p>
