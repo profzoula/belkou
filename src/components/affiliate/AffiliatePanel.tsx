@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Copy, DollarSign, Link2, Users, Wallet } from "lucide-react";
+import { Copy, DollarSign, Link2, RefreshCw, Users, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,7 +78,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
         }
       : null;
 
-  const affiliate = data?.affiliate ?? clientFallback;
+  const affiliate = data?.affiliate ?? (loading ? null : clientFallback);
   const canWithdraw =
     affiliate &&
     affiliate.stats.balanceUsd >= (affiliate.minWithdrawalUsd ?? AFFILIATE_MIN_WITHDRAWAL_USD) &&
@@ -164,6 +164,17 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
           Partagez votre lien : <strong className="text-foreground">${affiliate.signupCommissionUsd ?? AFFILIATE_SIGNUP_COMMISSION_USD}</strong> quand
           quelqu&apos;un crée un compte, <strong className="text-foreground">${affiliate.commissionUsd}</strong> s&apos;il paie la formation.
         </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-3 h-8 text-xs text-muted-foreground"
+          disabled={loading}
+          onClick={() => void loadDashboard()}
+        >
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+          Actualiser les commissions
+        </Button>
       </div>
 
       <div className="p-5 sm:p-6 space-y-5">

@@ -69,16 +69,17 @@ function DashboardPage() {
     if (!session?.access_token) return;
 
     const storedRef = getStoredReferralCode();
-    void claimReferralFn({
-      data: {
-        accessToken: session.access_token,
-        referralCode: storedRef ?? undefined,
-      },
-    }).catch(() => undefined);
+    void (async () => {
+      await claimReferralFn({
+        data: {
+          accessToken: session.access_token,
+          referralCode: storedRef ?? undefined,
+        },
+      }).catch(() => undefined);
 
-    dashboardFn({ data: { accessToken: session.access_token } })
-      .then((result) => setRegistration(result.registration))
-      .catch(() => setRegistration(null));
+      const result = await dashboardFn({ data: { accessToken: session.access_token } });
+      setRegistration(result.registration);
+    })().catch(() => setRegistration(null));
   }, [session?.access_token, dashboardFn, claimReferralFn]);
 
   if (loading) {

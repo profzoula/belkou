@@ -256,7 +256,10 @@ async function insertAffiliateReferral(
     return { ok: false, error: retryError.message };
   }
 
-  if (isMissingTableError(error.message)) return { ok: true };
+  if (isMissingTableError(error.message)) {
+    affiliateTablesAvailable = false;
+    return { ok: false, error: "affiliate_tables_missing" };
+  }
   return { ok: false, error: error.message };
 }
 
@@ -293,11 +296,22 @@ export async function persistAffiliate(params: {
 
   const { data: existing } = await sb
     .from("affiliates")
-    .select("id")
+    .select("id, code")
     .eq("user_id", params.userId)
     .maybeSingle();
 
-  if (existing) return;
+  if (existing) {
+    if (normalizeCode(String(existing.code)) !== code) {
+      const { error: updateError } = await sb
+        .from("affiliates")
+        .update({ code, email, full_name: params.fullName.trim() })
+        .eq("user_id", params.userId);
+      if (updateError && !updateError.message.includes("unique")) {
+        console.error("[BelKou] sync affiliate code:", updateError.message);
+      }
+    }
+    return;
+  }
 
   const { error } = await sb.from("affiliates").insert({
     user_id: params.userId,
@@ -325,7 +339,69 @@ export async function getAffiliateByUserId(userId: string): Promise<AffiliateRec
 
   const { data, error } = await sb.auth.admin.getUserById(userId);
   if (error || !data.user) return null;
-  return metadataToAffiliate(data.user, code);
+
+  const metaAffiliate = metadataToAffiliate(data.user, code);
+  if (await checkAffiliateTables(sb)) {
+    return (await ensureAffiliateDbRecord(metaAffiliate)) ?? metaAffiliate;
+  }
+  return metaAffiliate;
+}
+
+/** Load referrals for an affiliate user — matches by DB id and all known codes. */
+async function listReferralsForAffiliateUser(
+  sb: SupabaseClient,
+  userId: string,
+  affiliateCode?: string,
+): Promise<AffiliateReferralRecord[]> {
+  const codes = new Set<string>();
+  if (affiliateCode) codes.add(normalizeCode(affiliateCode));
+
+  const metaCode = await getAffiliateCodeFromMetadata(sb, userId);
+  if (metaCode) codes.add(metaCode);
+
+  const { data: affiliateRows } = await sb
+    .from("affiliates")
+    .select("id, code")
+    .eq("user_id", userId);
+
+  const affiliateIds: string[] = [];
+  for (const row of affiliateRows ?? []) {
+    affiliateIds.push(String(row.id));
+    codes.add(normalizeCode(String(row.code)));
+  }
+
+  const seen = new Set<string>();
+  const results: AffiliateReferralRecord[] = [];
+
+  const appendRows = (rows: Record<string, unknown>[] | null) => {
+    for (const row of rows ?? []) {
+      const ref = rowToReferral(row);
+      if (seen.has(ref.id)) continue;
+      seen.add(ref.id);
+      results.push(ref);
+    }
+  };
+
+  if (affiliateIds.length > 0) {
+    const { data, error } = await sb
+      .from("affiliate_referrals")
+      .select("*")
+      .in("affiliate_id", affiliateIds)
+      .order("created_at", { ascending: false });
+    if (!error) appendRows(data);
+  }
+
+  for (const code of codes) {
+    if (!code) continue;
+    const { data, error } = await sb
+      .from("affiliate_referrals")
+      .select("*")
+      .eq("referral_code", code)
+      .order("created_at", { ascending: false });
+    if (!error) appendRows(data);
+  }
+
+  return results.sort((a, b) => b.created_at.localeCompare(a.created_at));
 }
 
 export async function getOrCreateAffiliate(params: {
@@ -680,38 +756,31 @@ export async function getAffiliateStats(
   const sb = getSupabaseAdmin();
   if (!sb) return empty;
 
-  if (await checkAffiliateTables(sb) && affiliateCode) {
-    const { data, error } = await sb
-      .from("affiliate_referrals")
-      .select("*")
-      .eq("referral_code", normalizeCode(affiliateCode))
-      .order("created_at", { ascending: false });
+  if (await checkAffiliateTables(sb) && userId) {
+    const dbAffiliate = await getAffiliateByUserId(userId);
+    const resolvedCode = dbAffiliate?.code ?? (affiliateCode ? normalizeCode(affiliateCode) : "");
+    const referralsList = await listReferralsForAffiliateUser(sb, userId, resolvedCode || affiliateCode);
 
-    if (!error) {
-      const referralsList = (data ?? []).map((row) => rowToReferral(row as Record<string, unknown>));
-      const pending = referralsList.filter((r) => r.status === "pending").length;
-      const earned = referralsList.filter((r) => r.status === "earned").length;
-      const paidOut = referralsList.filter((r) => r.status === "paid_out").length;
-      const grossBalance = referralsList
-        .filter((r) => r.status === "earned")
-        .reduce((sum, r) => sum + r.amount_usd, 0);
+    const pending = referralsList.filter((r) => r.status === "pending").length;
+    const earned = referralsList.filter((r) => r.status === "earned").length;
+    const paidOut = referralsList.filter((r) => r.status === "paid_out").length;
+    const grossBalance = referralsList
+      .filter((r) => r.status === "earned")
+      .reduce((sum, r) => sum + Number(r.amount_usd), 0);
 
-      if (referralsList.length > 0) {
-        return applyWithdrawalBalance(
-          {
-            referrals: referralsList.length,
-            pending,
-            earned,
-            earnedUsd: grossBalance,
-            paidOut,
-            balanceUsd: grossBalance,
-            referralsList: referralsList.slice(0, 10),
-          },
-          userId,
-          affiliateCode,
-        );
-      }
-    }
+    return applyWithdrawalBalance(
+      {
+        referrals: referralsList.length,
+        pending,
+        earned,
+        earnedUsd: grossBalance,
+        paidOut,
+        balanceUsd: grossBalance,
+        referralsList: referralsList.slice(0, 10),
+      },
+      userId,
+      resolvedCode || affiliateCode,
+    );
   }
 
   if (affiliateCode) {

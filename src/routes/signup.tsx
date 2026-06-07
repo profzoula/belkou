@@ -98,9 +98,12 @@ function SignupPage() {
       return;
     }
 
-    if (data.session?.access_token && referredBy) {
-      void claimReferralFn({
-        data: { accessToken: data.session.access_token, referralCode: referredBy },
+    if (data.session?.access_token) {
+      await claimReferralFn({
+        data: {
+          accessToken: data.session.access_token,
+          referralCode: referredBy ?? undefined,
+        },
       }).catch(() => undefined);
     }
 

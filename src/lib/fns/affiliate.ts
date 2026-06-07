@@ -13,6 +13,7 @@ import {
   earnSignupAffiliateCommission,
   getAffiliateByCode,
   getAffiliateStats,
+  getOrCreateAffiliate,
   persistAffiliate,
 } from "@/server/affiliates";
 import { getServerEnvResolved } from "@/server/env";
@@ -32,12 +33,23 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       return { affiliate: null as const, error: "not_authenticated" as const };
     }
 
-    const code = affiliateCodeForUser(user);
     const email = normalizeRegistrationEmail(user.email);
     const fullName =
       (user.user_metadata?.full_name as string | undefined) ??
       (user.user_metadata?.name as string | undefined) ??
       user.email.split("@")[0];
+    const fallbackCode = affiliateCodeForUser(user);
+
+    const affiliateRecord = await getOrCreateAffiliate({
+      userId: user.id,
+      email,
+      fullName,
+    }).catch((err) => {
+      console.warn("[BelKou] getOrCreateAffiliate:", err);
+      return null;
+    });
+
+    const code = affiliateRecord?.code ?? fallbackCode;
 
     await persistAffiliate({
       userId: user.id,
@@ -52,14 +64,22 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       (typeof metaCode === "string" ? metaCode.trim() : "");
 
     if (pendingReferralCode) {
-      await earnSignupAffiliateCommission({
+      const claimResult = await earnSignupAffiliateCommission({
         userId: user.id,
         email,
         referralCode: pendingReferralCode,
-      }).catch((err) => console.warn("[BelKou] claim signup referral:", err));
+      }).catch((err) => {
+        console.warn("[BelKou] claim signup referral:", err);
+        return { ok: false as const, reason: "error" };
+      });
+      if (!claimResult.ok && claimResult.reason === "tables_unavailable") {
+        console.error(
+          "[BelKou] Affiliate tables missing — run migrations/supabase_affiliates.sql in Supabase",
+        );
+      }
     }
 
-    const stats = await getAffiliateStats(user.id, code, user.id);
+    const stats = await getAffiliateStats(affiliateRecord?.id ?? user.id, code, user.id);
     const env = await getServerEnvResolved();
     const siteUrl = (env.SITE_URL ?? process.env.VITE_SITE_URL ?? "https://belkou.online").replace(
       /\/$/,

@@ -45,11 +45,11 @@ export function AuthTypingCard() {
   }, []);
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-primary/20 bg-foreground p-6 shadow-primary">
-      <p className="text-sm font-medium text-primary-foreground/75">Posez votre question</p>
+    <div className="w-full max-w-md rounded-2xl border border-primary/25 bg-card p-6 shadow-lg">
+      <p className="text-sm font-semibold text-card-foreground">Posez votre question</p>
 
-      <div className="mt-4 min-h-[88px] rounded-xl border border-primary-foreground/10 bg-black/20 px-4 py-3.5">
-        <p className="font-mono text-sm leading-relaxed text-primary-foreground sm:text-[15px]">
+      <div className="mt-4 min-h-[88px] rounded-xl border border-border bg-muted/60 px-4 py-3.5">
+        <p className="font-mono text-sm leading-relaxed text-card-foreground sm:text-[15px]">
           {displayed}
           <span
             className={`ml-px inline-block w-[2px] translate-y-px bg-primary transition-opacity duration-100 ${
@@ -61,7 +61,7 @@ export function AuthTypingCard() {
         </p>
       </div>
 
-      <div className="mt-5 flex items-center justify-between gap-4 text-xs text-primary-foreground/50">
+      <div className="mt-5 flex items-center justify-between gap-4 text-xs text-muted-foreground">
         <span>Formation Vibe Coding par IA</span>
         <span className="shrink-0">Appuyez sur Entrée pour commencer</span>
       </div>

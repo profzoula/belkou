@@ -52,10 +52,12 @@ function AuthCallbackPage() {
         return;
       }
 
-      const referralCode = getStoredReferralCode();
-      if (accessToken && referralCode) {
-        void claimReferralFn({
-          data: { accessToken, referralCode },
+      if (accessToken) {
+        await claimReferralFn({
+          data: {
+            accessToken,
+            referralCode: getStoredReferralCode() ?? undefined,
+          },
         }).catch(() => undefined);
       }
 
