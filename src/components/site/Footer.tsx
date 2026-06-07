@@ -19,7 +19,7 @@ export function Footer() {
           <div className="min-w-0">
             <h4 className="text-sm font-semibold mb-4">Navigation</h4>
             <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li><a href="#features" className="hover:text-foreground transition-colors">Compétences</a></li>
+              <li><a href="#templates" className="hover:text-foreground transition-colors">Projets</a></li>
               <li><a href="#objectifs" className="hover:text-foreground transition-colors">Objectifs</a></li>
               <li><a href="#learn" className="hover:text-foreground transition-colors">Parcours</a></li>
               <li><a href="#pricing" className="hover:text-foreground transition-colors">Tarifs</a></li>

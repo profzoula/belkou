@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
 
 const links = [
-  { href: "#features", label: "Compétences" },
+  { href: "#templates", label: "Projets" },
   { href: "#objectifs", label: "Objectifs" },
   { href: "#learn", label: "Parcours" },
   { href: "#pricing", label: "Tarifs" },
