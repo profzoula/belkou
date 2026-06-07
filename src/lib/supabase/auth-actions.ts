@@ -1,3 +1,4 @@
+import { REFERRAL_STORAGE_KEY } from "@/lib/affiliate-config";
 import { siteConfig } from "@/lib/site-config";
 import { getSupabase } from "@/lib/supabase/client";
 
@@ -19,11 +20,21 @@ export function getAuthCallbackUrl(): string {
   return `${siteUrl}/auth/callback`;
 }
 
+function persistReferralCookieForOAuth() {
+  if (typeof document === "undefined") return;
+  const ref = localStorage.getItem(REFERRAL_STORAGE_KEY);
+  if (!ref) return;
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${REFERRAL_STORAGE_KEY}=${encodeURIComponent(ref)}; path=/; max-age=86400; SameSite=Lax${secure}`;
+}
+
 export async function signInWithGoogle() {
   const supabase = getSupabase();
   if (!supabase) {
     return { error: new Error("Authentification non configurée.") };
   }
+
+  persistReferralCookieForOAuth();
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",

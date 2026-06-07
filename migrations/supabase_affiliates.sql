@@ -30,6 +30,7 @@ create table if not exists public.affiliate_referrals (
 );
 
 create index if not exists idx_affiliate_referrals_affiliate on public.affiliate_referrals (affiliate_id);
+create index if not exists idx_affiliate_referrals_code on public.affiliate_referrals (referral_code);
 create index if not exists idx_affiliate_referrals_status on public.affiliate_referrals (status);
 create index if not exists idx_affiliate_referrals_type on public.affiliate_referrals (referral_type);
 

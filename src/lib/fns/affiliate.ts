@@ -18,7 +18,14 @@ import {
 import { getServerEnvResolved } from "@/server/env";
 
 export const getAffiliateDashboard = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => z.object({ accessToken: z.string().min(1) }).parse(data))
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        accessToken: z.string().min(1),
+        referralCode: z.string().optional(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email || !user.id) {
@@ -26,17 +33,31 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
     }
 
     const code = affiliateCodeForUser(user);
+    const email = normalizeRegistrationEmail(user.email);
     const fullName =
       (user.user_metadata?.full_name as string | undefined) ??
       (user.user_metadata?.name as string | undefined) ??
       user.email.split("@")[0];
 
-    void persistAffiliate({
+    await persistAffiliate({
       userId: user.id,
-      email: normalizeRegistrationEmail(user.email),
+      email,
       fullName,
       code,
     }).catch((err) => console.warn("[BelKou] persist affiliate:", err));
+
+    const metaCode = user.user_metadata?.referred_by;
+    const pendingReferralCode =
+      data.referralCode?.trim() ||
+      (typeof metaCode === "string" ? metaCode.trim() : "");
+
+    if (pendingReferralCode) {
+      await earnSignupAffiliateCommission({
+        userId: user.id,
+        email,
+        referralCode: pendingReferralCode,
+      }).catch((err) => console.warn("[BelKou] claim signup referral:", err));
+    }
 
     const stats = await getAffiliateStats(user.id, code, user.id);
     const env = await getServerEnvResolved();
@@ -76,7 +97,7 @@ export const claimSignupReferral = createServerFn({ method: "POST" })
     const metaCode = user.user_metadata?.referred_by;
     const referralCode =
       data.referralCode?.trim() ||
-      (typeof metaCode === "string" ? metaCode : "");
+      (typeof metaCode === "string" ? metaCode.trim() : "");
 
     if (!referralCode) {
       return { ok: false as const, reason: "no_code" };

@@ -195,6 +195,71 @@ async function getOrCreateAffiliateFromMetadata(params: {
   return null;
 }
 
+/** Ensures a row exists in `affiliates` and returns the DB record (uuid id for FK inserts). */
+export async function ensureAffiliateDbRecord(affiliate: AffiliateRecord): Promise<AffiliateRecord | null> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return null;
+  if (!(await checkAffiliateTables(sb))) return affiliate;
+
+  const { data: byUser, error: userError } = await sb
+    .from("affiliates")
+    .select("*")
+    .eq("user_id", affiliate.user_id)
+    .maybeSingle();
+
+  if (!userError && byUser) return rowToAffiliate(byUser);
+
+  const { data: inserted, error: insertError } = await sb
+    .from("affiliates")
+    .insert({
+      user_id: affiliate.user_id,
+      email: affiliate.email,
+      full_name: affiliate.full_name,
+      code: affiliate.code,
+    })
+    .select()
+    .single();
+
+  if (!insertError && inserted) return rowToAffiliate(inserted);
+
+  if (
+    insertError?.message.includes("duplicate") ||
+    insertError?.message.includes("unique")
+  ) {
+    const { data: retry } = await sb
+      .from("affiliates")
+      .select("*")
+      .eq("user_id", affiliate.user_id)
+      .maybeSingle();
+    if (retry) return rowToAffiliate(retry);
+  }
+
+  if (insertError) {
+    console.error("[BelKou] ensure affiliate record:", insertError.message);
+  }
+
+  return null;
+}
+
+async function insertAffiliateReferral(
+  sb: SupabaseClient,
+  row: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await sb.from("affiliate_referrals").insert(row);
+
+  if (!error) return { ok: true };
+
+  if (error.message.includes("referral_type")) {
+    const { referral_type: _type, ...withoutType } = row;
+    const { error: retryError } = await sb.from("affiliate_referrals").insert(withoutType);
+    if (!retryError) return { ok: true };
+    return { ok: false, error: retryError.message };
+  }
+
+  if (isMissingTableError(error.message)) return { ok: true };
+  return { ok: false, error: error.message };
+}
+
 export async function getAffiliateByCode(code: string): Promise<AffiliateRecord | null> {
   const sb = getSupabaseAdmin();
   if (!sb) return null;
@@ -226,15 +291,24 @@ export async function persistAffiliate(params: {
 
   if (!(await checkAffiliateTables(sb))) return;
 
-  const existing = await getAffiliateByUserId(params.userId);
+  const { data: existing } = await sb
+    .from("affiliates")
+    .select("id")
+    .eq("user_id", params.userId)
+    .maybeSingle();
+
   if (existing) return;
 
-  await sb.from("affiliates").insert({
+  const { error } = await sb.from("affiliates").insert({
     user_id: params.userId,
     email,
     full_name: params.fullName.trim(),
     code,
   });
+
+  if (error && !error.message.includes("duplicate") && !error.message.includes("unique")) {
+    console.error("[BelKou] persist affiliate:", error.message);
+  }
 }
 
 export async function getAffiliateByUserId(userId: string): Promise<AffiliateRecord | null> {
@@ -264,7 +338,10 @@ export async function getOrCreateAffiliate(params: {
 
   const email = normalizeRegistrationEmail(params.email);
   const existing = await getAffiliateByUserId(params.userId);
-  if (existing) return existing;
+  if (existing) {
+    const ensured = await ensureAffiliateDbRecord(existing);
+    return ensured ?? existing;
+  }
 
   if (await checkAffiliateTables(sb)) {
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -357,8 +434,11 @@ export async function attributeReferral(params: {
 
   if (existing) return { ok: true };
 
-  const { error } = await sb.from("affiliate_referrals").insert({
-    affiliate_id: affiliate.id,
+  const dbAffiliate = await ensureAffiliateDbRecord(affiliate);
+  if (!dbAffiliate) return { ok: false, reason: "affiliate_not_persisted" };
+
+  const insertResult = await insertAffiliateReferral(sb, {
+    affiliate_id: dbAffiliate.id,
     registration_id: params.registrationId,
     referred_email: referredEmail,
     referral_code: code,
@@ -367,8 +447,8 @@ export async function attributeReferral(params: {
     status: "pending",
   });
 
-  if (error && !isMissingTableError(error.message)) {
-    console.error("[BelKou] attribute referral:", error.message);
+  if (!insertResult.ok) {
+    console.error("[BelKou] attribute referral:", insertResult.error);
     return { ok: false, reason: "insert_failed" };
   }
 
@@ -447,7 +527,14 @@ export async function earnSignupAffiliateCommission(params: {
   }
 
   if (!(await checkAffiliateTables(sb))) {
-    return { ok: true };
+    console.warn("[BelKou] earn signup commission: affiliate tables unavailable");
+    return { ok: false, reason: "tables_unavailable" };
+  }
+
+  const dbAffiliate = await ensureAffiliateDbRecord(affiliate);
+  if (!dbAffiliate) {
+    console.error("[BelKou] earn signup commission: could not persist affiliate", code);
+    return { ok: false, reason: "affiliate_not_persisted" };
   }
 
   const registrationId = signupReferralId(params.userId);
@@ -460,8 +547,8 @@ export async function earnSignupAffiliateCommission(params: {
 
   if (existing) return { ok: true };
 
-  const { error } = await sb.from("affiliate_referrals").insert({
-    affiliate_id: affiliate.id,
+  const insertResult = await insertAffiliateReferral(sb, {
+    affiliate_id: dbAffiliate.id,
     registration_id: registrationId,
     referred_email: referredEmail,
     referral_code: code,
@@ -471,8 +558,8 @@ export async function earnSignupAffiliateCommission(params: {
     earned_at: new Date().toISOString(),
   });
 
-  if (error && !isMissingTableError(error.message)) {
-    console.error("[BelKou] earn signup commission:", error.message);
+  if (!insertResult.ok) {
+    console.error("[BelKou] earn signup commission:", insertResult.error);
     return { ok: false, reason: "insert_failed" };
   }
 
@@ -518,8 +605,11 @@ export async function earnAffiliateCommission(registrationId: string): Promise<v
   const referredEmail = normalizeRegistrationEmail(String(registration.email));
   if (affiliate.email === referredEmail) return;
 
-  await sb.from("affiliate_referrals").insert({
-    affiliate_id: affiliate.id,
+  const dbAffiliate = await ensureAffiliateDbRecord(affiliate);
+  if (!dbAffiliate) return;
+
+  await insertAffiliateReferral(sb, {
+    affiliate_id: dbAffiliate.id,
     registration_id: registrationId,
     referred_email: referredEmail,
     referral_code: normalizeCode(referralCode),
@@ -597,8 +687,8 @@ export async function getAffiliateStats(
       .eq("referral_code", normalizeCode(affiliateCode))
       .order("created_at", { ascending: false });
 
-    if (!error && data?.length) {
-      const referralsList = data.map((row) => rowToReferral(row as Record<string, unknown>));
+    if (!error) {
+      const referralsList = (data ?? []).map((row) => rowToReferral(row as Record<string, unknown>));
       const pending = referralsList.filter((r) => r.status === "pending").length;
       const earned = referralsList.filter((r) => r.status === "earned").length;
       const paidOut = referralsList.filter((r) => r.status === "paid_out").length;
@@ -606,19 +696,21 @@ export async function getAffiliateStats(
         .filter((r) => r.status === "earned")
         .reduce((sum, r) => sum + r.amount_usd, 0);
 
-      return applyWithdrawalBalance(
-        {
-          referrals: referralsList.length,
-          pending,
-          earned,
-          earnedUsd: grossBalance,
-          paidOut,
-          balanceUsd: grossBalance,
-          referralsList: referralsList.slice(0, 10),
-        },
-        userId,
-        affiliateCode,
-      );
+      if (referralsList.length > 0) {
+        return applyWithdrawalBalance(
+          {
+            referrals: referralsList.length,
+            pending,
+            earned,
+            earnedUsd: grossBalance,
+            paidOut,
+            balanceUsd: grossBalance,
+            referralsList: referralsList.slice(0, 10),
+          },
+          userId,
+          affiliateCode,
+        );
+      }
     }
   }
 

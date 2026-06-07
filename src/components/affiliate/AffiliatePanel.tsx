@@ -17,6 +17,7 @@ function formatUsd(amount: number): string {
   return amount < 1 ? amount.toFixed(2) : amount.toFixed(amount % 1 === 0 ? 0 : 2);
 }
 import { getAffiliateDashboard, requestAffiliateWithdrawalFn } from "@/lib/fns/affiliate";
+import { getStoredReferralCode } from "@/lib/referral-storage";
 import { useAuth } from "@/hooks/use-auth";
 
 type AffiliatePanelProps = {
@@ -34,11 +35,22 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
   const [paymentMethod, setPaymentMethod] = useState("moncash");
   const [paymentDetails, setPaymentDetails] = useState("");
 
-  useEffect(() => {
-    dashboardFn({ data: { accessToken } })
+  const loadDashboard = () => {
+    setLoading(true);
+    const storedRef = getStoredReferralCode();
+    return dashboardFn({
+      data: {
+        accessToken,
+        referralCode: storedRef ?? undefined,
+      },
+    })
       .then(setData)
       .catch(() => setData({ affiliate: null }))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    void loadDashboard();
   }, [accessToken, dashboardFn]);
 
   const siteUrl = (import.meta.env.VITE_SITE_URL ?? "https://belkou.online").replace(/\/$/, "");
@@ -47,7 +59,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
     user?.id && user.email
       ? {
           code: affiliateCodeForUser(user),
-          link: `${siteUrl}/register?ref=${affiliateCodeForUser(user)}`,
+          link: `${siteUrl}/signup?ref=${affiliateCodeForUser(user)}`,
           commissionUsd: AFFILIATE_COMMISSION_USD,
           signupCommissionUsd: AFFILIATE_SIGNUP_COMMISSION_USD,
           stats: {
