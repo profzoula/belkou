@@ -1,11 +1,23 @@
 import { siteConfig } from "@/lib/site-config";
 import { supabase } from "@/lib/supabase/client";
 
+/** OAuth return URL — must match Supabase → Authentication → URL Configuration. */
 export function getAuthCallbackUrl(): string {
-  if (typeof window !== "undefined") {
-    return `${window.location.origin}/auth/callback`;
+  const siteUrl = siteConfig.siteUrl.replace(/\/$/, "");
+
+  if (typeof window === "undefined") {
+    return `${siteUrl}/auth/callback`;
   }
-  return `${siteConfig.siteUrl}/auth/callback`;
+
+  const { hostname, origin } = window.location;
+  const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+
+  if (isLocal) {
+    return `${origin.replace(/\/$/, "")}/auth/callback`;
+  }
+
+  // Production: always use configured site URL (avoids localhost fallback from Supabase)
+  return `${siteUrl}/auth/callback`;
 }
 
 export async function signInWithGoogle() {
