@@ -4,7 +4,12 @@ import { DollarSign, RefreshCw, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { adminProcessWithdrawal, getAdminAffiliateOverview } from "@/lib/fns/admin";
-import { AFFILIATE_MIN_WITHDRAWAL_USD, AFFILIATE_SIGNUP_COMMISSION_USD, AFFILIATE_COMMISSION_USD } from "@/lib/affiliate-config";
+import {
+  AFFILIATE_COMMISSION_USD,
+  AFFILIATE_MIN_WITHDRAWAL_USD,
+  AFFILIATE_SIGNUP_COMMISSION_USD,
+  formatAffiliateUsd,
+} from "@/lib/affiliate-config";
 
 type Overview = Awaited<ReturnType<typeof getAdminAffiliateOverview>>;
 
@@ -93,7 +98,7 @@ export function AdminCommissionsTab() {
         {[
           { label: "Affiliés actifs", value: data.affiliates.length },
           { label: "Commissions gagnées", value: `$${totalEarned.toFixed(2)}` },
-          { label: "Solde à payer", value: `$${totalBalance.toFixed(0)}` },
+          { label: "Solde à payer", value: `$${formatAffiliateUsd(totalBalance)}` },
           { label: "Retraits en attente", value: pendingWithdrawals.length },
         ].map((s) => (
           <div key={s.label} className="surface rounded-xl p-4">
@@ -135,11 +140,11 @@ export function AdminCommissionsTab() {
                     <td className="px-5 py-3">{a.email}</td>
                     <td className="px-5 py-3">{a.referrals}</td>
                     <td className="px-5 py-3 text-primary font-medium">{a.earned}</td>
-                    <td className="px-5 py-3 font-semibold">${a.balanceUsd.toFixed(0)}</td>
+                    <td className="px-5 py-3 font-semibold">${formatAffiliateUsd(a.balanceUsd)}</td>
                     <td className="px-5 py-3 text-muted-foreground">
-                      ${a.withdrawalPaidUsd.toFixed(0)}
+                      ${formatAffiliateUsd(a.withdrawalPaidUsd)}
                       {a.withdrawalPendingUsd > 0 ? (
-                        <span className="ml-1 text-amber-600 text-xs">(+${a.withdrawalPendingUsd.toFixed(0)} att.)</span>
+                        <span className="ml-1 text-amber-600 text-xs">(+${formatAffiliateUsd(a.withdrawalPendingUsd)} att.)</span>
                       ) : null}
                     </td>
                   </tr>
@@ -185,7 +190,7 @@ export function AdminCommissionsTab() {
                       <div className="font-medium">{w.affiliate_email}</div>
                       <div className="text-xs text-muted-foreground font-mono">{w.affiliate_code}</div>
                     </td>
-                    <td className="px-5 py-3 font-semibold">${w.amount_usd.toFixed(0)}</td>
+                    <td className="px-5 py-3 font-semibold">${formatAffiliateUsd(w.amount_usd)}</td>
                     <td className="px-5 py-3">
                       <div className="text-xs uppercase font-medium">{w.payment_method}</div>
                       <div className="text-xs text-muted-foreground max-w-[200px] truncate" title={w.payment_details}>

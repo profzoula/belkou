@@ -11,11 +11,8 @@ import {
   AFFILIATE_COMMISSION_USD,
   AFFILIATE_MIN_WITHDRAWAL_USD,
   AFFILIATE_SIGNUP_COMMISSION_USD,
+  formatAffiliateUsd,
 } from "@/lib/affiliate-config";
-
-function formatUsd(amount: number): string {
-  return amount < 1 ? amount.toFixed(2) : amount.toFixed(amount % 1 === 0 ? 0 : 2);
-}
 import { getAffiliateDashboard, requestAffiliateWithdrawalFn } from "@/lib/fns/affiliate";
 import { getStoredReferralCode } from "@/lib/referral-storage";
 import { useAuth } from "@/hooks/use-auth";
@@ -202,11 +199,11 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
             <div className="text-xs text-muted-foreground mt-1">Parrainages</div>
           </div>
           <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 text-center">
-            <div className="text-2xl font-bold text-primary">${formatUsd(affiliate.stats.earnedUsd ?? affiliate.stats.balanceUsd)}</div>
+            <div className="text-2xl font-bold text-primary">${formatAffiliateUsd(affiliate.stats.earnedUsd ?? affiliate.stats.balanceUsd)}</div>
             <div className="text-xs text-muted-foreground mt-1">Commissions gagnées</div>
           </div>
           <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
-            <div className="text-2xl font-bold text-foreground">${formatUsd(affiliate.stats.balanceUsd)}</div>
+            <div className="text-2xl font-bold text-foreground">${formatAffiliateUsd(affiliate.stats.balanceUsd)}</div>
             <div className="text-xs text-muted-foreground mt-1">Solde à payer</div>
           </div>
         </div>
@@ -265,7 +262,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                     }`}
                   >
                     {ref.status === "earned"
-                      ? `+$${formatUsd(ref.amount_usd)}${ref.referral_type === "signup" ? " compte" : ""}`
+                      ? `+$${formatAffiliateUsd(ref.amount_usd)}${ref.referral_type === "signup" ? " compte" : ""}`
                       : ref.status === "paid_out"
                         ? "Payé"
                         : "En attente"}
@@ -288,7 +285,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                 {affiliate.stats.hasPendingWithdrawal
                   ? " Une demande est déjà en cours de traitement."
                   : affiliate.stats.balanceUsd > 0
-                    ? ` Solde disponible : $${formatUsd(affiliate.stats.balanceUsd)}.`
+                    ? ` Solde disponible : $${formatAffiliateUsd(affiliate.stats.balanceUsd)}.`
                     : ""}
               </p>
             </div>
@@ -309,7 +306,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
             <form onSubmit={submitWithdrawal} className="space-y-3 pt-2 border-t border-border">
               <p className="text-sm">
                 Montant demandé :{" "}
-                <strong className="text-foreground">${formatUsd(affiliate.stats.balanceUsd)}</strong>
+                <strong className="text-foreground">${formatAffiliateUsd(affiliate.stats.balanceUsd)}</strong>
               </p>
               <div className="space-y-2">
                 <Label>Méthode de paiement</Label>
