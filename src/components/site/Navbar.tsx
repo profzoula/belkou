@@ -1,0 +1,190 @@
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { Menu, Moon, Sun, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/lib/site-config";
+import { useAuth } from "@/hooks/use-auth";
+import { PromoTopbar } from "@/components/site/PromoTopbar";
+
+const links = [
+  { href: "/courses", label: "Cours", route: true },
+  { href: "#categories", label: "Catégories", route: false },
+  { href: "#how-it-works", label: "Comment ça marche", route: false },
+  { href: "#faq", label: "FAQ", route: false },
+];
+
+function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?: boolean }) {
+  const { user, loading, signOut } = useAuth();
+  const [dark, setDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  const toggleDark = () => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("belkou-theme", next ? "dark" : "light");
+  };
+  const wrapClass = stacked
+    ? "flex flex-col gap-2 w-full [&_button]:w-full [&_a]:w-full [&_button]:touch-target [&_a]:touch-target"
+    : "flex items-center gap-2";
+
+  if (loading) {
+    return <div className="h-9 w-24 rounded-full bg-muted/60 animate-pulse" />;
+  }
+
+  if (user) {
+    return (
+      <div className={wrapClass}>
+        <button
+          onClick={toggleDark}
+          className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={dark ? "Mode clair" : "Mode sombre"}
+        >
+          {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </button>
+        <Button asChild variant="outline" size={stacked ? "lg" : "sm"}>
+          <Link to="/dashboard" onClick={onNavigate}>
+            Mon espace
+          </Link>
+        </Button>
+        <Button
+          variant="ghost"
+          size={stacked ? "lg" : "sm"}
+          className={`text-muted-foreground ${stacked ? "w-full" : ""}`}
+          onClick={async () => {
+            await signOut();
+            onNavigate?.();
+            window.location.href = "/";
+          }}
+        >
+          Déconnexion
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={wrapClass}>
+      <button
+        onClick={toggleDark}
+        className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
+        aria-label={dark ? "Mode clair" : "Mode sombre"}
+      >
+        {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      </button>
+      <Button asChild variant="ghost" size={stacked ? "lg" : "sm"} className="text-muted-foreground">
+        <Link to="/login" onClick={onNavigate}>
+          Connexion
+        </Link>
+      </Button>
+      <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
+        <Link to="/signup" onClick={onNavigate}>
+          S'inscrire
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+export function Navbar() {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)]">
+      <PromoTopbar />
+      <div className="glass">
+        <div className="site-container flex h-14 sm:h-16 items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 font-display font-bold tracking-tight">
+            <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 rounded-lg object-contain" />
+            <span className="text-[15px]">{siteConfig.name}</span>
+          </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex">
+            {links.map((l) =>
+              l.route ? (
+                <Link
+                  key={l.href}
+                  to={l.href}
+                  className="rounded-full px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                >
+                  {l.label}
+                </Link>
+              ) : (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="rounded-full px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent"
+                >
+                  {l.label}
+                </a>
+              ),
+            )}
+          </nav>
+
+          <div className="hidden md:block">
+            <NavActions />
+          </div>
+
+          <button
+            type="button"
+            className="md:hidden grid h-10 w-10 touch-target place-items-center rounded-full border border-border bg-card text-foreground"
+            onClick={() => setOpen(!open)}
+            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+      </div>
+
+      {open && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          aria-label="Fermer le menu"
+          onClick={close}
+        />
+      )}
+
+      {open && (
+        <div className="relative z-50 md:hidden border-t border-border bg-card site-container py-4 shadow-md max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain">
+          <nav className="flex flex-col gap-1">
+            {links.map((l) =>
+              l.route ? (
+                <Link
+                  key={l.href}
+                  to={l.href}
+                  onClick={close}
+                  className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  {l.label}
+                </Link>
+              ) : (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={close}
+                  className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                >
+                  {l.label}
+                </a>
+              ),
+            )}
+            <div className="mt-3 pt-3 border-t border-border">
+              <NavActions onNavigate={close} stacked />
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}
