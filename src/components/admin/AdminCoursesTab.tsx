@@ -64,6 +64,7 @@ type LessonDraft = {
 type CourseMetaDraft = {
   title: string;
   description: string;
+  whatYouLearn: string;
   instructor: string;
   price: string;
   originalPrice: string;
@@ -99,6 +100,7 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
   return {
     title: course.title,
     description: course.description,
+    whatYouLearn: course.whatYouLearn.join("\n"),
     instructor: course.instructor,
     price: String(course.price),
     originalPrice: String(course.originalPrice),
@@ -147,7 +149,6 @@ export function AdminCoursesTab() {
   const [schedulingSlug, setSchedulingSlug] = useState<string | null>(null);
   const [showScheduleFor, setShowScheduleFor] = useState<string | null>(null);
   const [editorScheduleDraft, setEditorScheduleDraft] = useState("");
-  const [savingSchedule, setSavingSchedule] = useState(false);
   const [addingSectionId, setAddingSectionId] = useState<string | null>(null);
   const [addingSession, setAddingSession] = useState(false);
   const [deletingLessonId, setDeletingLessonId] = useState<string | null>(null);
@@ -279,16 +280,68 @@ export function AdminCoursesTab() {
     }
   };
 
-  const saveEditorSchedule = async () => {
-    if (!selectedCourse) return;
-    setSavingSchedule(true);
+  const saveCourseMeta = async () => {
+    if (!selectedCourse || !metaDraft) return;
+
+    setSavingMeta(true);
     try {
-      await saveSchedule(selectedCourse.slug, editorScheduleDraft, !editorScheduleDraft.trim());
+      const price = Number(metaDraft.price);
+      const originalPrice = Number(metaDraft.originalPrice);
+      if (Number.isNaN(price) || Number.isNaN(originalPrice)) {
+        toast.error("Prix invalides");
+        return;
+      }
+
+      const result = await saveCourseFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          title: metaDraft.title.trim(),
+          description: metaDraft.description,
+          whatYouLearn: metaDraft.whatYouLearn
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean),
+          instructor: metaDraft.instructor.trim(),
+          price,
+          originalPrice,
+          skillLevel: metaDraft.skillLevel.trim(),
+          totalDuration: metaDraft.totalDuration.trim(),
+          bestseller: metaDraft.bestseller,
+        },
+      });
+      let nextCourses = result.courses;
+
+      const currentScheduleLocal = toDatetimeLocalValue(selectedCourse.scheduledPublishAt);
+      const scheduleChanged = editorScheduleDraft.trim() !== currentScheduleLocal;
+
+      if (scheduleChanged) {
+        if (!editorScheduleDraft.trim()) {
+          const scheduleResult = await scheduleFn({
+            data: { courseSlug: selectedCourse.slug, scheduledPublishAt: null },
+          });
+          nextCourses = scheduleResult.courses;
+        } else {
+          const iso = fromDatetimeLocalValue(editorScheduleDraft);
+          if (!iso) {
+            toast.error("Date de publication invalide");
+            return;
+          }
+          const scheduleResult = await scheduleFn({
+            data: { courseSlug: selectedCourse.slug, scheduledPublishAt: iso },
+          });
+          nextCourses = scheduleResult.courses;
+        }
+      }
+
+      setCourses(nextCourses);
+      syncDrafts(nextCourses);
+      toast.success("Cours enregistré");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Sauvegarde impossible");
     } finally {
-      setSavingSchedule(false);
+      setSavingMeta(false);
     }
   };
-
   const updateDraft = (courseSlug: string, lessonId: string, patch: Partial<LessonDraft>) => {
     const key = `${courseSlug}:${lessonId}`;
     setDrafts((current) => ({
@@ -335,41 +388,6 @@ export function AdminCoursesTab() {
       toast.error(error instanceof Error ? error.message : "Sauvegarde impossible");
     } finally {
       setSavingId(null);
-    }
-  };
-
-  const saveCourseMeta = async () => {
-    if (!selectedCourse || !metaDraft) return;
-
-    setSavingMeta(true);
-    try {
-      const price = Number(metaDraft.price);
-      const originalPrice = Number(metaDraft.originalPrice);
-      if (Number.isNaN(price) || Number.isNaN(originalPrice)) {
-        toast.error("Prix invalides");
-        return;
-      }
-
-      const result = await saveCourseFn({
-        data: {
-          courseSlug: selectedCourse.slug,
-          title: metaDraft.title.trim(),
-          description: metaDraft.description,
-          instructor: metaDraft.instructor.trim(),
-          price,
-          originalPrice,
-          skillLevel: metaDraft.skillLevel.trim(),
-          totalDuration: metaDraft.totalDuration.trim(),
-          bestseller: metaDraft.bestseller,
-        },
-      });
-      setCourses(result.courses);
-      syncDrafts(result.courses);
-      toast.success("Informations du cours enregistrées");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Sauvegarde impossible");
-    } finally {
-      setSavingMeta(false);
     }
   };
 
@@ -599,6 +617,19 @@ export function AdminCoursesTab() {
                 className="rounded-lg min-h-[88px]"
               />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="meta-learn">Ce que vous apprendrez</Label>
+              <Textarea
+                id="meta-learn"
+                value={metaDraft.whatYouLearn}
+                onChange={(e) => updateMetaDraft({ whatYouLearn: e.target.value })}
+                placeholder={"Une ligne par point, ex. :\nUtiliser Cursor pour générer du code\nDéployer votre première app"}
+                className="rounded-lg min-h-[120px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                Une ligne = un point sur la page d&apos;inscription (section « Ce que vous apprendrez »).
+              </p>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="meta-instructor">Instructeur</Label>
               <Input
@@ -644,20 +675,14 @@ export function AdminCoursesTab() {
         </div>
 
         <div className="rounded-xl border border-border/70 bg-card p-4 space-y-4 shadow-sm">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-semibold flex items-center gap-2">
-                <CalendarClock className="h-4 w-4 text-primary" />
-                Programmer la mise en ligne
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Le cours sera visible sur le site immédiatement pour les inscriptions. Les vidéos se débloquent automatiquement à la date choisie.
-              </p>
-            </div>
-            <Button variant="hero" size="sm" disabled={savingSchedule} onClick={saveEditorSchedule}>
-              <Save className="h-4 w-4 mr-2" />
-              {savingSchedule ? "Enregistrement..." : "Enregistrer le programme"}
-            </Button>
+          <div>
+            <h2 className="font-semibold flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-primary" />
+              Programmer la mise en ligne
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Le cours sera visible sur le site immédiatement pour les inscriptions. Les vidéos se débloquent automatiquement à la date choisie. Enregistré avec le bouton Enregistrer ci-dessus.
+            </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="space-y-1.5 flex-1">
@@ -670,20 +695,17 @@ export function AdminCoursesTab() {
                 className="rounded-lg max-w-sm"
               />
             </div>
-            {selectedCourse.scheduledPublishAt && (
+            {editorScheduleDraft && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="rounded-lg"
-                disabled={savingSchedule}
-                onClick={() => {
-                  setEditorScheduleDraft("");
-                  void saveSchedule(selectedCourse.slug, "", true);
-                }}
+                disabled={savingMeta}
+                onClick={() => setEditorScheduleDraft("")}
               >
                 <X className="h-4 w-4 mr-2" />
-                Annuler la programmation
+                Effacer la date
               </Button>
             )}
           </div>

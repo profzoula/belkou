@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS registrations (
   country TEXT NOT NULL,
   level TEXT NOT NULL,
   plan TEXT NOT NULL,
+  course_slug TEXT,
   payment_status TEXT NOT NULL DEFAULT 'pending',
   stripe_session_id TEXT,
   created_at TEXT NOT NULL,
@@ -50,6 +51,7 @@ export function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
     level: String(row.level),
     plan: row.plan as RegistrationRecord["plan"],
     payment_status: row.payment_status as RegistrationRecord["payment_status"],
+    course_slug: row.course_slug ? String(row.course_slug) : null,
     stripe_session_id: row.stripe_session_id ? String(row.stripe_session_id) : null,
     referral_code: row.referral_code ? String(row.referral_code) : null,
     created_at: String(row.created_at),
@@ -71,7 +73,7 @@ export async function updateRegistrationDetails(
   if (db) {
     await db
       .prepare(
-        `UPDATE registrations SET full_name = ?, email = ?, whatsapp = ?, country = ?, level = ?, plan = ?, updated_at = ? WHERE id = ?`,
+        `UPDATE registrations SET full_name = ?, email = ?, whatsapp = ?, country = ?, level = ?, plan = ?, course_slug = ?, updated_at = ? WHERE id = ?`,
       )
       .bind(
         normalized.full_name,
@@ -80,6 +82,7 @@ export async function updateRegistrationDetails(
         normalized.country,
         normalized.level,
         normalized.plan,
+        normalized.course_slug ?? null,
         updatedAt,
         id,
       )
@@ -114,6 +117,7 @@ export async function saveRegistration(
     payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
     referral_code: null,
+    course_slug: normalized.course_slug ?? null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -127,8 +131,8 @@ export async function saveRegistration(
   await initDb(db);
   await db
     .prepare(
-      `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, payment_status, stripe_session_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, course_slug, payment_status, stripe_session_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       record.id,
@@ -138,6 +142,7 @@ export async function saveRegistration(
       record.country,
       record.level,
       record.plan,
+      record.course_slug,
       record.payment_status,
       record.stripe_session_id,
       record.created_at,

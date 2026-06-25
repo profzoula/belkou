@@ -459,6 +459,7 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
         skillLevel: z.string().optional(),
         totalDuration: z.string().optional(),
         bestseller: z.boolean().optional(),
+        whatYouLearn: z.array(z.string().min(1)).optional(),
         thumbnailLabel: z.string().optional(),
         thumbnailGradient: z.string().optional(),
         thumbnailImageUrl: z.string().optional(),

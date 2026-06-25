@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { siteConfig } from "@/lib/site-config";
 import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
@@ -44,23 +45,54 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
         >
           {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
-        <Button asChild variant="outline" size={stacked ? "lg" : "sm"}>
-          <Link to="/dashboard" onClick={onNavigate}>
-            Mon espace
+        {!stacked && (
+          <Link
+            to="/dashboard"
+            onClick={onNavigate}
+            className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+          >
+            Mes cours
           </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          size={stacked ? "lg" : "sm"}
-          className={`text-muted-foreground ${stacked ? "w-full" : ""}`}
-          onClick={async () => {
-            await signOut();
-            onNavigate?.();
-            window.location.href = "/";
-          }}
-        >
-          Déconnexion
-        </Button>
+        )}
+        {stacked ? (
+          <div className="flex flex-col gap-1 w-full">
+            <Link
+              to="/dashboard"
+              onClick={onNavigate}
+              className="touch-target rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent"
+            >
+              Mes cours
+            </Link>
+            <Link
+              to="/courses"
+              onClick={onNavigate}
+              className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Catalogue de cours
+            </Link>
+            <Link
+              to="/dashboard"
+              hash="affiliate"
+              onClick={onNavigate}
+              className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              Programme affilié
+            </Link>
+            <button
+              type="button"
+              className="touch-target rounded-lg px-3 py-3 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+              onClick={async () => {
+                onNavigate?.();
+                await signOut();
+                window.location.href = "/";
+              }}
+            >
+              Déconnexion
+            </button>
+          </div>
+        ) : (
+          <UserAccountMenu onNavigate={onNavigate} />
+        )}
       </div>
     );
   }

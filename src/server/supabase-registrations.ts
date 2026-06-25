@@ -33,6 +33,7 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
     level: String(row.level),
     plan: row.plan as RegistrationRecord["plan"],
     payment_status: row.payment_status as RegistrationRecord["payment_status"],
+    course_slug: row.course_slug ? String(row.course_slug) : null,
     stripe_session_id: row.stripe_session_id ? String(row.stripe_session_id) : null,
     referral_code: row.referral_code ? String(row.referral_code) : null,
     created_at: String(row.created_at),
@@ -42,7 +43,7 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
 
 type RegistrationFields = Pick<
   RegistrationRecord,
-  "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "payment_status"
+  "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "payment_status" | "course_slug"
 >;
 
 function baseFields(
@@ -57,6 +58,7 @@ function baseFields(
     level: data.level,
     plan: data.plan,
     payment_status: paymentStatus,
+    course_slug: data.course_slug ?? null,
   };
 }
 
@@ -121,14 +123,22 @@ export async function supabaseSaveRegistration(
 
 export async function supabaseUpdateRegistrationDetails(
   id: string,
-  data: Pick<RegistrationRecord, "full_name" | "email" | "whatsapp" | "country" | "level" | "plan">,
+  data: Pick<RegistrationRecord, "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "course_slug">,
 ): Promise<void> {
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
   const existing = await supabaseGetById(id);
   const fields = baseFields(
-    { ...data, plan: data.plan },
+    {
+      full_name: data.full_name,
+      email: data.email,
+      whatsapp: data.whatsapp,
+      country: data.country,
+      level: data.level,
+      plan: data.plan,
+      course_slug: data.course_slug ?? undefined,
+    },
     existing?.payment_status ?? "pending",
   );
 

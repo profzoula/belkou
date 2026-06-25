@@ -109,7 +109,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
     if (existing) {
       if (existing.payment_status === "paid") {
         throw new Error(
-          "Cet email est déjà inscrit et payé. Connectez-vous sur /login pour accéder à votre espace.",
+          "Cet email a déjà un accès payé. Connectez-vous sur /login pour accéder à vos cours.",
         );
       }
 
