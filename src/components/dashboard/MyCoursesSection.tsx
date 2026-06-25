@@ -146,7 +146,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground shrink-0">Trier par :</span>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="w-[200px] rounded-md border-border h-9 text-sm">
+            <SelectTrigger className="w-full sm:w-[200px] rounded-md border-border h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

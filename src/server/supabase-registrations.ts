@@ -192,6 +192,28 @@ export async function supabaseUpdateGrant(
   if (error) console.error("[BelKou] Supabase update grant:", error.message);
 }
 
+export async function supabaseUpdateCourseAccess(
+  id: string,
+  update: {
+    course_slug: string;
+    payment_status: RegistrationRecord["payment_status"];
+  },
+): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+
+  const { error } = await sb
+    .from("registrations")
+    .update({
+      course_slug: update.course_slug,
+      payment_status: update.payment_status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) console.error("[BelKou] Supabase update course access:", error.message);
+}
+
 export async function supabaseUpdatePayment(
   id: string,
   update: { payment_status: RegistrationRecord["payment_status"]; stripe_session_id?: string | null },

@@ -77,7 +77,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     : siteConfig.cohortStartDate;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <header className="border-b border-white/10 bg-course-hero text-white">
         <div className="site-container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm">
@@ -117,7 +117,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             </p>
           )}
 
-          <h1 className="max-w-4xl font-display text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
+          <h1 className="max-w-4xl font-display text-xl font-bold leading-tight sm:text-3xl md:text-4xl">
             {course.title}
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/80 sm:text-base">
@@ -281,6 +281,20 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             </div>
           </section>
         </main>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden">
+        <div className="site-container flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+            <p className="text-xl font-bold">${course.price}</p>
+          </div>
+          <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+            <Link to="/checkout" search={{ course: course.slug }}>
+              S&apos;inscrire
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

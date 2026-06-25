@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { siteConfig } from "@/lib/site-config";
@@ -16,17 +16,6 @@ const links = [
 
 function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?: boolean }) {
   const { user, loading, signOut } = useAuth();
-  const [dark, setDark] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return document.documentElement.classList.contains("dark");
-  });
-
-  const toggleDark = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("belkou-theme", next ? "dark" : "light");
-  };
   const wrapClass = stacked
     ? "flex flex-col gap-2 w-full [&_button]:w-full [&_a]:w-full [&_button]:touch-target [&_a]:touch-target"
     : "flex items-center gap-2";
@@ -36,76 +25,62 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
   }
 
   if (user) {
-    return (
-      <div className={wrapClass}>
-        <button
-          onClick={toggleDark}
-          className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label={dark ? "Mode clair" : "Mode sombre"}
-        >
-          {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </button>
-        {!stacked && (
+    if (stacked) {
+      return (
+        <div className="flex flex-col gap-1 w-full">
           <Link
             to="/dashboard"
             onClick={onNavigate}
-            className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+            className="touch-target rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent"
           >
             Mes cours
           </Link>
-        )}
-        {stacked ? (
-          <div className="flex flex-col gap-1 w-full">
-            <Link
-              to="/dashboard"
-              onClick={onNavigate}
-              className="touch-target rounded-lg px-3 py-3 text-sm font-semibold hover:bg-accent"
-            >
-              Mes cours
-            </Link>
-            <Link
-              to="/courses"
-              onClick={onNavigate}
-              className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              Catalogue de cours
-            </Link>
-            <Link
-              to="/dashboard"
-              hash="affiliate"
-              onClick={onNavigate}
-              className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              Programme affilié
-            </Link>
-            <button
-              type="button"
-              className="touch-target rounded-lg px-3 py-3 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
-              onClick={async () => {
-                onNavigate?.();
-                await signOut();
-                window.location.href = "/";
-              }}
-            >
-              Déconnexion
-            </button>
-          </div>
-        ) : (
-          <UserAccountMenu onNavigate={onNavigate} />
-        )}
+          <Link
+            to="/courses"
+            onClick={onNavigate}
+            className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            Catalogue de cours
+          </Link>
+          <Link
+            to="/dashboard"
+            hash="affiliate"
+            onClick={onNavigate}
+            className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            Programme affilié
+          </Link>
+          <button
+            type="button"
+            className="touch-target rounded-lg px-3 py-3 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+            onClick={async () => {
+              onNavigate?.();
+              await signOut();
+              window.location.href = "/";
+            }}
+          >
+            Déconnexion
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className={wrapClass}>
+        <Link
+          to="/dashboard"
+          onClick={onNavigate}
+          className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+        >
+          Mes cours
+        </Link>
+        <UserAccountMenu onNavigate={onNavigate} />
       </div>
     );
   }
 
   return (
     <div className={wrapClass}>
-      <button
-        onClick={toggleDark}
-        className="touch-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground hover:text-foreground transition-colors"
-        aria-label={dark ? "Mode clair" : "Mode sombre"}
-      >
-        {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-      </button>
       <Button asChild variant="ghost" size={stacked ? "lg" : "sm"} className="text-muted-foreground">
         <Link to="/login" onClick={onNavigate}>
           Connexion
@@ -113,7 +88,7 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
       </Button>
       <Button asChild variant="hero" size={stacked ? "lg" : "sm"}>
         <Link to="/signup" onClick={onNavigate}>
-          S'inscrire
+          S&apos;inscrire
         </Link>
       </Button>
     </div>
@@ -121,6 +96,7 @@ function NavActions({ onNavigate, stacked }: { onNavigate?: () => void; stacked?
 }
 
 export function Navbar() {
+  const { user, loading } = useAuth();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -135,10 +111,10 @@ export function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)]">
       <PromoTopbar />
       <div className="glass">
-        <div className="site-container flex h-14 sm:h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 font-display font-bold tracking-tight">
-            <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 rounded-lg object-contain" />
-            <span className="text-[15px]">{siteConfig.name}</span>
+        <div className="site-container flex h-14 sm:h-16 items-center justify-between gap-3">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 font-display font-bold tracking-tight">
+            <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 shrink-0 rounded-lg object-contain" />
+            <span className="truncate text-[15px]">{siteConfig.name}</span>
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -163,18 +139,21 @@ export function Navbar() {
             )}
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-2">
             <NavActions />
           </div>
 
-          <button
-            type="button"
-            className="md:hidden grid h-10 w-10 touch-target place-items-center rounded-full border border-border bg-card text-foreground"
-            onClick={() => setOpen(!open)}
-            aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-          >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            {!loading && user ? <UserAccountMenu onNavigate={close} /> : null}
+            <button
+              type="button"
+              className="grid h-10 w-10 touch-target place-items-center rounded-full border border-border bg-card text-foreground"
+              onClick={() => setOpen(!open)}
+              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+            >
+              {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </div>
 

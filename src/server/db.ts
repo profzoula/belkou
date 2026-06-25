@@ -11,6 +11,7 @@ import {
   supabaseSetStripeSessionId,
   supabaseUpdateGrant,
   supabaseUpdatePayment,
+  supabaseUpdateCourseAccess,
   supabaseUpdateRegistrationDetails,
   type RegistrationStats,
 } from "@/server/supabase-registrations";
@@ -205,6 +206,43 @@ export async function updateRegistrationGrant(
   const existing = devStore.get(id);
   if (existing) {
     const next = { ...existing, plan: update.plan, payment_status: update.payment_status };
+    devStore.set(id, next);
+    return next;
+  }
+
+  return supabaseGetById(id);
+}
+
+export async function updateRegistrationCourseAccess(
+  db: D1Database | null,
+  id: string,
+  update: {
+    course_slug: string;
+    payment_status: RegistrationRecord["payment_status"];
+  },
+): Promise<RegistrationRecord | null> {
+  const updatedAt = new Date().toISOString();
+
+  if (db) {
+    await db
+      .prepare(
+        `UPDATE registrations SET course_slug = ?, payment_status = ?, updated_at = ? WHERE id = ?`,
+      )
+      .bind(update.course_slug, update.payment_status, updatedAt, id)
+      .run();
+    await supabaseUpdateCourseAccess(id, update);
+    return getRegistrationById(db, id);
+  }
+
+  await supabaseUpdateCourseAccess(id, update);
+  const existing = devStore.get(id);
+  if (existing) {
+    const next = {
+      ...existing,
+      course_slug: update.course_slug,
+      payment_status: update.payment_status,
+      updated_at: updatedAt,
+    };
     devStore.set(id, next);
     return next;
   }

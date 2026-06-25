@@ -1,12 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { BASE_COURSE_SLUGS } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
+import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { supabaseGetByEmail } from "@/server/supabase-registrations";
 import { getResolvedCourseBySlug } from "@/server/site-content";
-
-const LEGACY_COURSE_SLUG = BASE_COURSE_SLUGS[0];
 
 export type StudentEnrollment = {
   id: string;

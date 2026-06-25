@@ -11,6 +11,7 @@ import { serializeCourseForAdmin } from "@/lib/admin-courses";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb, getServerEnvResolved } from "@/server/env";
 import { registrationSchema } from "@/lib/schemas/registration";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
   getRegistrationByEmail,
   getRegistrationById,
@@ -320,6 +321,61 @@ export const getAdminAffiliateOverview = createServerFn({ method: "GET" }).handl
   const { getAdminAffiliateOverview: loadOverview } = await import("@/server/affiliates");
   return loadOverview();
 });
+
+export const getAdminStudents = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { listAdminStudents } = await import("@/server/admin-students");
+  const { getResolvedCourses } = await import("@/server/site-content");
+  const [students, courses] = await Promise.all([listAdminStudents(), getResolvedCourses()]);
+
+  return {
+    students,
+    courses: courses.map((course) => ({
+      slug: course.slug,
+      title: course.title,
+      published: course.published !== false,
+    })),
+  };
+});
+
+export const adminGrantCourseAccess = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        email: z.string().trim().email(),
+        courseSlug: z.string().min(1),
+        fullName: z.string().trim().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { grantCourseAccessToStudent } = await import("@/server/admin-students");
+    const { getResolvedCourseBySlug } = await import("@/server/site-content");
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) {
+      throw new Error("Cours introuvable");
+    }
+
+    const record = await grantCourseAccessToStudent({
+      email: normalizeRegistrationEmail(data.email),
+      courseSlug: data.courseSlug,
+      fullName: data.fullName,
+    });
+
+    return {
+      ok: true as const,
+      registration: {
+        id: record.id,
+        email: record.email,
+        full_name: record.full_name,
+        course_slug: record.course_slug,
+        payment_status: record.payment_status,
+      },
+      courseTitle: course.title,
+    };
+  });
 
 export const adminProcessWithdrawal = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>

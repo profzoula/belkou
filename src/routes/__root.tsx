@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: defaultTitle },
       { name: "description", content: defaultDescription },
       { name: "author", content: siteConfig.name },
-      { name: "theme-color", content: "#ea580c" },
+      { name: "theme-color", content: "#4f46b5" },
       { property: "og:title", content: defaultTitle },
       { property: "og:description", content: defaultDescription },
       { property: "og:type", content: "website" },
@@ -123,10 +123,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
-            var theme = localStorage.getItem('belkou-theme');
-            if (theme !== 'light') {
-              document.documentElement.classList.add('dark');
-            }
+            document.documentElement.classList.remove('dark');
+            try { localStorage.setItem('belkou-theme', 'light'); } catch (e) {}
           })();
         `}} />
       </head>

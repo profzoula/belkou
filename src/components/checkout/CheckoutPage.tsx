@@ -154,10 +154,10 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
         </div>
       </header>
 
-      <main className="site-container py-8 lg:py-10">
-        <h1 className="text-2xl font-bold text-foreground mb-8">Checkout to start learning</h1>
+      <main className="site-container py-6 sm:py-8 lg:py-10 px-0 sm:px-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-6 sm:mb-8 px-4 sm:px-0">Checkout to start learning</h1>
 
-        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:items-start">
+        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:items-start px-4 sm:px-0">
           <div className="space-y-6 min-w-0">
             {/* Product */}
             <section className="rounded border border-border bg-white p-5">

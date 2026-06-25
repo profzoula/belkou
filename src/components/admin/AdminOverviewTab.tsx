@@ -73,7 +73,7 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           label="Premium (inscrits)"
           value={stats.premium}
           icon={GraduationCap}
-          onManage={() => onNavigate("inscriptions")}
+          onManage={() => onNavigate("students")}
         />
         <AdminStatCard
           label="VIP (inscrits)"

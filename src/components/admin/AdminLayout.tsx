@@ -2,23 +2,23 @@ import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
   DollarSign,
+  GraduationCap,
   LayoutDashboard,
   LogOut,
   RefreshCw,
   Settings,
   Users,
-  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "overview" | "inscriptions" | "courses" | "commissions" | "settings";
+export type AdminSection = "overview" | "courses" | "students" | "inscriptions" | "commissions" | "settings";
 
 const navItems: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "overview", label: "Dashboard", icon: LayoutDashboard },
   { id: "courses", label: "Cours", icon: BookOpen },
-  { id: "courses", label: "Vidéos Vimeo", icon: Video },
+  { id: "students", label: "Étudiants", icon: GraduationCap },
   { id: "inscriptions", label: "Inscriptions", icon: Users },
   { id: "commissions", label: "Revenus", icon: DollarSign },
   { id: "settings", label: "Paramètres", icon: Settings },
@@ -56,19 +56,13 @@ export function AdminLayout({
           </div>
 
           <nav className="flex gap-1 overflow-x-auto p-3 lg:flex-col lg:overflow-visible lg:px-4 lg:py-5">
-            {navItems.map((item, index) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
-              const isDashboard = item.label === "Dashboard";
-              const isVideos = item.label === "Vidéos Vimeo";
-              const activeState = isDashboard
-                ? active === "overview"
-                : isVideos
-                  ? active === "courses"
-                  : active === item.id;
+              const activeState = active === item.id;
 
               return (
                 <button
-                  key={`${item.id}-${index}`}
+                  key={item.id}
                   type="button"
                   onClick={() => onNavigate(item.id)}
                   className={cn(

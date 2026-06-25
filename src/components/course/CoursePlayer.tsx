@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -29,10 +30,14 @@ import {
 import { getCourseIcon } from "@/lib/course-icons";
 import {
   courseStartsAtLabel,
+  formatScheduledPublishLabel,
   isCourseContentLive,
   isScheduledInFuture,
 } from "@/lib/course-publish";
+import { getLessonLockState } from "@/lib/course-access";
+import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
 import type { PublicCourse } from "@/lib/fns/courses";
+import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { VimeoPlayer } from "@/components/course/VimeoPlayer";
@@ -42,14 +47,24 @@ type CoursePlayerProps = {
   initialLessonId?: string;
 };
 
-function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: CourseLesson }) {
+function CourseVideoArea({
+  course,
+  lesson,
+  hasPaidAccess,
+}: {
+  course: PublicCourse;
+  lesson: CourseLesson;
+  hasPaidAccess: boolean;
+}) {
   const Icon = getCourseIcon(course.slug);
-  const contentLive = isCourseContentLive(course);
-  const lockedBySchedule = !lesson.preview && !contentLive;
-  const lockedByEnrollment = !lesson.preview && contentLive;
-  const locked = lockedBySchedule || lockedByEnrollment;
+  const { locked, reason } = getLessonLockState({
+    preview: lesson.preview,
+    course,
+    hasPaidAccess,
+  });
   const vimeo = getLessonVimeo(lesson);
   const startLabel = courseStartsAtLabel(course);
+  const enrolledWaiting = hasPaidAccess && reason === "schedule";
 
   if (lesson.type !== "video") {
     return (
@@ -57,13 +72,19 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
         <FileText className="h-10 w-10 text-muted-foreground" />
         <p className="font-semibold">{lesson.title}</p>
         <p className="text-sm text-muted-foreground">
-          {lockedBySchedule && startLabel
-            ? `Contenu disponible le ${startLabel}`
-            : lesson.type === "article"
-              ? "Contenu texte — disponible après inscription."
-              : "Ressources téléchargeables — disponible après inscription."}
+          {enrolledWaiting && startLabel
+            ? `Vous êtes inscrit — contenu disponible le ${startLabel}`
+            : reason === "schedule" && startLabel
+              ? `Contenu disponible le ${startLabel}`
+              : lesson.type === "article"
+                ? "Contenu texte — disponible après inscription."
+                : "Ressources téléchargeables — disponible après inscription."}
         </p>
-        {lockedBySchedule && startLabel ? (
+        {enrolledWaiting ? (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/dashboard">Voir Mes cours</Link>
+          </Button>
+        ) : reason === "schedule" && startLabel ? (
           <Button asChild size="sm">
             <Link to="/checkout" search={{ course: course.slug }}>
               S&apos;inscrire maintenant
@@ -95,7 +116,12 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
       >
         <Icon className="mb-4 h-16 w-16 text-white/20" aria-hidden />
         <p className="max-w-md px-6 text-center text-lg font-bold text-white">{lesson.title}</p>
-        {lockedBySchedule && startLabel ? (
+        {enrolledWaiting && startLabel ? (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
+            <Lock className="h-4 w-4" />
+            Inscription confirmée — vidéos le {startLabel}
+          </p>
+        ) : reason === "schedule" && startLabel ? (
           <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
             <Lock className="h-4 w-4" />
             Vidéos disponibles le {startLabel}
@@ -112,13 +138,19 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
 
       {locked && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
-          <Button asChild size="lg" className="rounded-full">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              {lockedBySchedule
-                ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
-                : "S'inscrire pour débloquer"}
-            </Link>
-          </Button>
+          {enrolledWaiting ? (
+            <Button asChild size="lg" variant="secondary" className="rounded-full">
+              <Link to="/dashboard">Retour à Mes cours</Link>
+            </Button>
+          ) : (
+            <Button asChild size="lg" className="rounded-full">
+              <Link to="/checkout" search={{ course: course.slug }}>
+                {reason === "schedule"
+                  ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
+                  : "S'inscrire pour débloquer"}
+              </Link>
+            </Button>
+          )}
         </div>
       )}
     </div>
@@ -209,11 +241,46 @@ function CurriculumSidebar({
 }
 
 export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
+  const { session } = useAuth();
+  const accessFn = useServerFn(getCourseAccess);
+  const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void accessFn({
+      data: {
+        courseSlug: course.slug,
+        accessToken: session?.access_token,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setAccess(result);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAccess({
+            hasPaidAccess: false,
+            contentLive: isCourseContentLive(course),
+            scheduledPublishAt: course.scheduledPublishAt,
+            paymentStatus: null,
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessFn, course, session?.access_token]);
+
+  const hasPaidAccess = access?.hasPaidAccess ?? false;
+  const contentLive = access?.contentLive ?? isCourseContentLive(course);
   const allLessons = useMemo(() => getAllLessons(course), [course]);
   const defaultLesson = allLessons.find((l) => l.id === initialLessonId) ?? allLessons[0];
   const [activeLessonId, setActiveLessonId] = useState(defaultLesson.id);
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
+  const enrolledWaiting = hasPaidAccess && !contentLive;
 
   const activeLesson = getAllLessons(course).find((l) => l.id === activeLessonId) ?? defaultLesson;
   const activeSection = getSectionForLesson(course, activeLesson.id);
@@ -233,23 +300,36 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
             <Link to="/courses">Tous les cours</Link>
           </Button>
-          <Button asChild size="sm">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire · ${course.price}
-            </Link>
-          </Button>
+          {hasPaidAccess && contentLive ? (
+            <Button asChild size="sm" variant="hero">
+              <Link to="/dashboard">Mes cours</Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm">
+              <Link to="/checkout" search={{ course: course.slug }}>
+                S&apos;inscrire · ${course.price}
+              </Link>
+            </Button>
+          )}
         </div>
       </header>
 
-      {scheduledSoon && startLabel && (
+      {scheduledSoon && startLabel && !enrolledWaiting && (
         <div className="border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-center text-sm text-sky-900">
           Inscriptions ouvertes — les vidéos seront disponibles le <strong>{startLabel}</strong>
         </div>
       )}
 
+      {enrolledWaiting && access?.scheduledPublishAt && (
+        <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2.5 text-center text-sm text-emerald-900">
+          Vous êtes inscrit — accès complet au cours le{" "}
+          <strong>{formatScheduledPublishLabel(access.scheduledPublishAt)}</strong>
+        </div>
+      )}
+
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <main className="min-w-0">
-          <CourseVideoArea course={course} lesson={activeLesson} />
+          <CourseVideoArea course={course} lesson={activeLesson} hasPaidAccess={hasPaidAccess} />
 
           <div className="border-b border-border px-3 sm:px-6">
             <Tabs defaultValue="overview" className="w-full">
