@@ -1,6 +1,15 @@
+import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CalendarClock, Clock, Play } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarClock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatScheduledPublishLabel } from "@/lib/course-publish";
 import type { StudentEnrollment } from "@/lib/fns/dashboard";
@@ -10,30 +19,63 @@ type MyCoursesSectionProps = {
   enrollments: StudentEnrollment[] | undefined;
 };
 
-function statusLabel(enrollment: StudentEnrollment) {
-  if (enrollment.payment_status === "paid") {
-    return enrollment.contentLive ? "Accès actif" : "Inscrit — vidéos bientôt";
-  }
-  if (enrollment.payment_status === "manual_pending") {
-    return "Paiement manuel en attente";
-  }
-  return "Paiement en attente";
+type StatusFilter = "all" | "active" | "scheduled" | "pending";
+type SortOption = "recent" | "title";
+
+function enrollmentStatus(enrollment: StudentEnrollment): StatusFilter {
+  if (enrollment.payment_status !== "paid") return "pending";
+  if (enrollment.contentLive) return "active";
+  return "scheduled";
 }
 
-function statusClass(enrollment: StudentEnrollment) {
-  if (enrollment.payment_status === "paid" && enrollment.contentLive) {
-    return "bg-emerald-100 text-emerald-800";
+function progressLabel(enrollment: StudentEnrollment) {
+  if (enrollment.payment_status !== "paid") {
+    return enrollment.payment_status === "manual_pending"
+      ? "Paiement manuel en attente"
+      : "Paiement en attente";
   }
-  if (enrollment.payment_status === "paid") {
-    return "bg-sky-100 text-sky-800";
+  if (!enrollment.contentLive && enrollment.scheduledPublishAt) {
+    return `Disponible le ${formatScheduledPublishLabel(enrollment.scheduledPublishAt)}`;
   }
-  return "bg-amber-100 text-amber-800";
+  if (enrollment.progressPercent <= 0) {
+    return "Commencer le cours";
+  }
+  return `${enrollment.progressPercent}% terminé`;
 }
 
 export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sort, setSort] = useState<SortOption>("recent");
+
+  const filtered = useMemo(() => {
+    if (!enrollments) return undefined;
+
+    const query = search.trim().toLowerCase();
+    let list = enrollments.filter((enrollment) => {
+      if (statusFilter !== "all" && enrollmentStatus(enrollment) !== statusFilter) {
+        return false;
+      }
+      if (!query) return true;
+      return (
+        enrollment.courseTitle.toLowerCase().includes(query) ||
+        enrollment.instructor.toLowerCase().includes(query)
+      );
+    });
+
+    list = [...list].sort((a, b) => {
+      if (sort === "title") {
+        return a.courseTitle.localeCompare(b.courseTitle, "fr");
+      }
+      return Date.parse(b.purchasedAt) - Date.parse(a.purchasedAt);
+    });
+
+    return list;
+  }, [enrollments, search, statusFilter, sort]);
+
   if (enrollments === undefined) {
     return (
-      <div className="surface rounded-2xl p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card p-10 text-center text-sm text-muted-foreground">
         Chargement de vos cours...
       </div>
     );
@@ -41,22 +83,19 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   if (enrollments.length === 0) {
     return (
-      <section className="space-y-5">
-        <div>
-          <p className="section-label mb-2">Apprentissage</p>
-          <h2 className="text-xl font-semibold">Mes cours</h2>
-        </div>
-        <div className="surface rounded-2xl p-8 md:p-10 text-center">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <BookOpen className="h-7 w-7" />
+      <section>
+        <h2 className="text-2xl font-bold text-[#1c1d1f] mb-6">Mes cours</h2>
+        <div className="rounded-lg border border-border bg-card p-10 md:p-12 text-center">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-muted">
+            <BookOpen className="h-7 w-7 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Aucun cours pour le moment</h3>
+          <h3 className="text-lg font-bold mb-2">Aucun cours pour le moment</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
             Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre.
           </p>
-          <Button asChild variant="hero">
+          <Button asChild className="rounded-md bg-[#5624d0] hover:bg-[#4a1fb8]">
             <Link to="/courses">
-              Voir les cours <ArrowRight className="h-4 w-4" />
+              Explorer les cours <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -64,102 +103,137 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
     );
   }
 
+  const count = filtered?.length ?? 0;
+
   return (
     <section className="space-y-5">
-      <div>
-        <p className="section-label mb-2">Apprentissage</p>
-        <h2 className="text-xl font-semibold">Mes cours</h2>
+      <h2 className="text-2xl font-bold text-[#1c1d1f]">Mes cours</h2>
+
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
+          <SelectTrigger className="w-full lg:w-[180px] rounded-md border-border h-11">
+            <SelectValue placeholder="Progression" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les cours</SelectItem>
+            <SelectItem value="active">Accès actif</SelectItem>
+            <SelectItem value="scheduled">Bientôt disponible</SelectItem>
+            <SelectItem value="pending">Paiement en attente</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="relative flex-1">
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher dans mes cours"
+            className="h-11 rounded-md pr-12"
+          />
+          <button
+            type="button"
+            className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-md bg-[#5624d0] text-white"
+            aria-label="Rechercher"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="grid gap-4">
-        {enrollments.map((enrollment) => (
-          <CourseEnrollmentCard key={enrollment.id} enrollment={enrollment} />
-        ))}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
+        <p className="font-semibold text-[#1c1d1f]">
+          {count} cours
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground shrink-0">Trier par :</span>
+          <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
+            <SelectTrigger className="w-[200px] rounded-md border-border h-9 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Récemment inscrit</SelectItem>
+              <SelectItem value="title">Titre (A–Z)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {count === 0 ? (
+        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center text-sm text-muted-foreground">
+          Aucun cours ne correspond à votre recherche.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+          {filtered?.map((enrollment) => (
+            <CourseGridCard key={enrollment.id} enrollment={enrollment} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
-function CourseEnrollmentCard({ enrollment }: { enrollment: StudentEnrollment }) {
+function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
   const isPaid = enrollment.payment_status === "paid";
   const canLearn = isPaid && enrollment.contentLive;
-  const scheduledLabel =
-    enrollment.scheduledPublishAt && !enrollment.contentLive
-      ? formatScheduledPublishLabel(enrollment.scheduledPublishAt)
-      : null;
+  const href = canLearn
+    ? { to: "/courses/$slug/learn" as const, params: { slug: enrollment.courseSlug } }
+    : isPaid
+      ? { to: "/courses/$slug" as const, params: { slug: enrollment.courseSlug } }
+      : { to: "/checkout" as const, search: { course: enrollment.courseSlug } };
+
+  const showProgress = isPaid && enrollment.contentLive;
 
   return (
-    <article className="surface rounded-2xl overflow-hidden flex flex-col sm:flex-row">
-      <CourseThumbnailBanner
-        thumbnail={{
-          gradient: enrollment.thumbnailGradient,
-          label: "",
-          imageUrl: enrollment.thumbnailImageUrl,
-        }}
-        slug={enrollment.courseSlug}
-        aspectClass="aspect-[16/10] sm:aspect-auto sm:w-56 sm:min-h-[148px]"
-        className="sm:shrink-0"
-        showLabel={false}
-        showIcon={!enrollment.thumbnailImageUrl}
-      />
+    <article className="group flex flex-col min-w-0">
+      <Link
+        {...href}
+        className="block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
+      >
+        <CourseThumbnailBanner
+          thumbnail={{
+            gradient: enrollment.thumbnailGradient,
+            label: "",
+            imageUrl: enrollment.thumbnailImageUrl,
+          }}
+          slug={enrollment.courseSlug}
+          aspectClass="aspect-[16/10]"
+          className="rounded-none border-0"
+          showLabel={false}
+          showIcon={!enrollment.thumbnailImageUrl}
+        />
+      </Link>
 
-      <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span
-            className={cn(
-              "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-              statusClass(enrollment),
-            )}
-          >
-            {statusLabel(enrollment)}
-          </span>
-          {scheduledLabel && (
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <CalendarClock className="h-3.5 w-3.5" />
-              Vidéos le {scheduledLabel}
-            </span>
-          )}
-        </div>
+      <div className="pt-3 flex flex-col flex-1 min-w-0">
+        <Link {...href} className="block min-w-0">
+          <h3 className="font-bold text-sm leading-snug text-[#1c1d1f] line-clamp-2 group-hover:text-[#5624d0] transition-colors">
+            {enrollment.courseTitle}
+          </h3>
+        </Link>
+        <p className="text-xs text-muted-foreground mt-1 truncate">{enrollment.instructor}</p>
 
-        <h3 className="text-lg font-semibold mb-1">{enrollment.courseTitle}</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          {isPaid
-            ? canLearn
-              ? "Continuez votre progression à votre rythme."
-              : "Vous êtes inscrit. Les vidéos seront disponibles à la date indiquée."
-            : enrollment.payment_status === "manual_pending"
-              ? "Finalisez votre paiement manuel pour débloquer l'accès."
-              : "Votre paiement n'est pas encore confirmé."}
-        </p>
-
-        <div className="mt-auto flex flex-wrap gap-2">
-          {canLearn ? (
-            <Button asChild variant="hero" size="sm">
-              <Link to="/courses/$slug/learn" params={{ slug: enrollment.courseSlug }}>
-                <Play className="h-4 w-4" />
-                Continuer le cours
-              </Link>
-            </Button>
-          ) : isPaid ? (
-            <Button asChild variant="outline" size="sm">
-              <Link to="/courses/$slug" params={{ slug: enrollment.courseSlug }}>
-                Voir le cours
-              </Link>
-            </Button>
+        <div className="mt-3 space-y-1.5">
+          {showProgress ? (
+            <>
+              <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-[#5624d0] transition-all"
+                  style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">{progressLabel(enrollment)}</p>
+            </>
           ) : (
-            <Button asChild variant="hero" size="sm">
-              <Link to="/checkout" search={{ course: enrollment.courseSlug }}>
-                <Clock className="h-4 w-4" />
-                Finaliser le paiement
-              </Link>
-            </Button>
-          )}
-          {isPaid && (
-            <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
-              <Link to="/success" search={{ registrationId: enrollment.id }}>
-                Confirmation
-              </Link>
-            </Button>
+            <p
+              className={cn(
+                "text-xs flex items-center gap-1",
+                isPaid ? "text-sky-700" : "text-amber-700",
+              )}
+            >
+              {!isPaid ? null : !enrollment.contentLive ? (
+                <CalendarClock className="h-3.5 w-3.5 shrink-0" />
+              ) : null}
+              {progressLabel(enrollment)}
+            </p>
           )}
         </div>
       </div>

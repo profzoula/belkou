@@ -83,7 +83,7 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-5xl">
+      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-7xl">
         <header id="account" className="mb-8 scroll-mt-24">
           <p className="section-label mb-2">Mon compte</p>
           <h1 className="text-2xl md:text-3xl font-semibold">Bonjour, {name}</h1>

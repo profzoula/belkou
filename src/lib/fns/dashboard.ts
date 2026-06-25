@@ -13,10 +13,12 @@ export type StudentEnrollment = {
   payment_status: "pending" | "paid" | "manual_pending";
   courseSlug: string;
   courseTitle: string;
+  instructor: string;
   thumbnailGradient: string;
   thumbnailImageUrl?: string;
   scheduledPublishAt?: string;
   contentLive: boolean;
+  progressPercent: number;
   purchasedAt: string;
 };
 
@@ -40,8 +42,10 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
             payment_status: registration.payment_status,
             courseSlug: slug,
             courseTitle: "Cours BelKou",
+            instructor: "BelKou",
             thumbnailGradient: "from-primary/80 to-primary",
             contentLive: false,
+            progressPercent: 0,
             purchasedAt: registration.created_at,
           },
         ],
@@ -55,10 +59,12 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
           payment_status: registration.payment_status,
           courseSlug: course.slug,
           courseTitle: course.title,
+          instructor: course.instructor,
           thumbnailGradient: course.thumbnail.gradient,
           thumbnailImageUrl: course.thumbnail.imageUrl,
           scheduledPublishAt: course.scheduledPublishAt,
           contentLive: isCourseContentLive(course),
+          progressPercent: 0,
           purchasedAt: registration.created_at,
         },
       ],
