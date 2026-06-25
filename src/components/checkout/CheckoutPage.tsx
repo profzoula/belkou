@@ -72,19 +72,17 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
     }
 
     loadCourseFn({ data: { slug: courseSlug } })
-      .then((loaded) => {
-        setCourse(loaded);
-        if (loaded?.plan && !initialPlan) {
-          setSelectedPlan(loaded.plan);
-        }
-      })
+      .then((loaded) => setCourse(loaded))
       .catch(() => setCourse(null));
-  }, [courseSlug, initialPlan, loadCourseFn]);
+  }, [courseSlug, loadCourseFn]);
 
   const plan = planDetails[selectedPlan];
-  const originalPrice = ORIGINAL_PRICES[selectedPlan];
-  const savings = originalPrice - plan.price;
-  const pctOff = discountPercent(plan.price, originalPrice);
+  const coursePrice = course?.price;
+  const courseOriginalPrice = course?.originalPrice;
+  const displayPrice = courseSlug && course ? coursePrice! : plan.price;
+  const displayOriginal = courseSlug && course ? courseOriginalPrice! : ORIGINAL_PRICES[selectedPlan];
+  const savings = displayOriginal - displayPrice;
+  const pctOff = discountPercent(displayPrice, displayOriginal);
 
   const update = (key: string, value: string) => setForm((s) => ({ ...s, [key]: value }));
 
@@ -97,7 +95,8 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
 
     const payload = {
       ...form,
-      plan: selectedPlan,
+      plan: courseSlug && course ? "premium" : selectedPlan,
+      course_slug: courseSlug && course ? courseSlug : undefined,
       referral_code: form.referral_code || undefined,
     };
 
@@ -185,50 +184,70 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {(["premium", "vip"] as const).map((planId) => {
-                  const option = planDetails[planId];
-                  const active = selectedPlan === planId;
-                  const orig = ORIGINAL_PRICES[planId];
-                  const save = orig - option.price;
+                {courseSlug && course ? (
+                  <div className="sm:col-span-2 rounded border border-[#5624d0] bg-[#5624d0]/5 p-4">
+                    <p className="font-bold text-sm">{course.title}</p>
+                    <p className="text-xl font-bold mt-1">${course.price}</p>
+                    {course.originalPrice > course.price && (
+                      <span className="inline-block mt-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                        Économisez ${course.originalPrice - course.price}
+                      </span>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
+                  </div>
+                ) : (
+                  (["premium", "vip"] as const).map((planId) => {
+                    const option = planDetails[planId];
+                    const active = selectedPlan === planId;
+                    const orig = ORIGINAL_PRICES[planId];
+                    const save = orig - option.price;
 
-                  return (
-                    <label
-                      key={planId}
-                      className={cn(
-                        "cursor-pointer rounded border p-4 transition-colors",
-                        active
-                          ? "border-[#5624d0] ring-1 ring-[#5624d0]/40 bg-[#5624d0]/5"
-                          : "border-border hover:border-[#5624d0]/50",
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="radio"
-                          name="checkout-plan"
-                          checked={active}
-                          onChange={() => setSelectedPlan(planId)}
-                          className="mt-1 accent-[#5624d0]"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm">{option.name}</p>
-                          <p className="text-xl font-bold mt-1">${option.price}</p>
-                          {save > 0 && (
-                            <span className="inline-block mt-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
-                              Économisez ${save}
-                            </span>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès cohorte</p>
+                    return (
+                      <label
+                        key={planId}
+                        className={cn(
+                          "cursor-pointer rounded border p-4 transition-colors",
+                          active
+                            ? "border-[#5624d0] ring-1 ring-[#5624d0]/40 bg-[#5624d0]/5"
+                            : "border-border hover:border-[#5624d0]/50",
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="checkout-plan"
+                            checked={active}
+                            onChange={() => setSelectedPlan(planId)}
+                            className="mt-1 accent-[#5624d0]"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-sm">{option.name}</p>
+                            <p className="text-xl font-bold mt-1">${option.price}</p>
+                            {save > 0 && (
+                              <span className="inline-block mt-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                                Économisez ${save}
+                              </span>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès cohorte</p>
+                          </div>
                         </div>
-                      </div>
-                    </label>
-                  );
-                })}
+                      </label>
+                    );
+                  })
+                )}
               </div>
 
               <div className="mt-5 pt-5 border-t border-border">
                 <p className="text-sm font-bold mb-3">Ce qui est inclus :</p>
                 <ul className="space-y-2">
-                  {plan.features.map((feature) => (
+                  {(courseSlug && course
+                    ? [
+                        "Accès complet au cours",
+                        "Vidéos et ressources à vie",
+                        "Support communauté BelKou",
+                      ]
+                    : plan.features
+                  ).map((feature) => (
                     <li key={feature} className="flex gap-2 text-sm">
                       <Check className="h-4 w-4 shrink-0 text-[#5624d0]" />
                       {feature}
@@ -362,8 +381,10 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
 
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Plan {plan.name}</dt>
-                  <dd>${plan.price}</dd>
+                  <dt className="text-muted-foreground">
+                    {courseSlug && course ? course.title : `Plan ${plan.name}`}
+                  </dt>
+                  <dd>${displayPrice}</dd>
                 </div>
                 {pctOff > 0 && (
                   <div className="flex justify-between gap-4 text-emerald-700">
@@ -377,7 +398,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                 </div>
                 <div className="flex justify-between gap-4 pt-3 border-t border-border text-base font-bold">
                   <dt>Total:</dt>
-                  <dd>${plan.price}</dd>
+                  <dd>${displayPrice}</dd>
                 </div>
               </dl>
 

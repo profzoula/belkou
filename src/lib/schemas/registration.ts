@@ -16,6 +16,7 @@ export const registrationSchema = z.object({
   country: z.string().min(1, "Choisissez un pays"),
   level: z.string().min(1, "Choisissez un niveau"),
   plan: z.enum(["premium", "vip"]),
+  course_slug: z.string().trim().min(1).optional(),
   referral_code: z
     .string()
     .trim()

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
 import { formatCount } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 
@@ -27,10 +28,13 @@ function CourseCard({ course }: { course: PublicCourse }) {
       <CourseThumbnailBanner
         thumbnail={course.thumbnail}
         slug={course.slug}
-        className="flex items-center justify-center p-4"
+        aspectClass="aspect-[16/10]"
+        className="flex items-center justify-center"
         showLabel={false}
         showIcon={false}
-      />
+      >
+        <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
+      </CourseThumbnailBanner>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-foreground group-hover:text-primary">
@@ -39,6 +43,7 @@ function CourseCard({ course }: { course: PublicCourse }) {
         <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
 
         <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} />
           {course.bestseller && (
             <span className="rounded-sm bg-teal-800 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
               Bestseller

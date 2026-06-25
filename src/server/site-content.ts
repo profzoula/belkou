@@ -485,7 +485,13 @@ export async function deleteSectionFromCourse(params: { courseSlug: string; sect
 
     const remainingSections = mergeCourse(base, nextOverride).sections.length;
     if (remainingSections === 0) {
-      return { ok: false, reason: "Impossible de supprimer la dernière session" };
+      overrides[params.courseSlug] = {
+        ...nextOverride,
+        addedSections: [...addedSections, buildNewSection("Introduction")],
+      };
+      const result = await saveCourseOverrides(overrides);
+      if (!result.ok) return result;
+      return { ok: true as const };
     }
 
     overrides[params.courseSlug] = nextOverride;
@@ -502,9 +508,6 @@ export async function deleteSectionFromCourse(params: { courseSlug: string; sect
 
   const next = deleteSectionFromStoredCourse(stored[index], sectionId);
   if (!next) {
-    if (stored[index].sections.length <= 1) {
-      return { ok: false, reason: "Impossible de supprimer la dernière session" };
-    }
     return { ok: false, reason: "Session introuvable" };
   }
 

@@ -67,7 +67,6 @@ type CourseMetaDraft = {
   instructor: string;
   price: string;
   originalPrice: string;
-  plan: "premium" | "vip";
   skillLevel: string;
   totalDuration: string;
   bestseller: boolean;
@@ -103,7 +102,6 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
     instructor: course.instructor,
     price: String(course.price),
     originalPrice: String(course.originalPrice),
-    plan: course.plan ?? "premium",
     skillLevel: course.skillLevel,
     totalDuration: course.totalDuration,
     bestseller: Boolean(course.bestseller),
@@ -117,9 +115,8 @@ const emptyNewLesson = (): NewLessonDraft => ({
   preview: false,
 });
 
-function planBadge(plan: AdminCourse["plan"], isBase: boolean) {
-  if (isBase) return "Base";
-  return plan === "vip" ? "VIP" : "Premium";
+function courseTypeBadge(isBase: boolean) {
+  return isBase ? "Base" : "Cours";
 }
 
 export function AdminCoursesTab() {
@@ -162,7 +159,6 @@ export function AdminCoursesTab() {
   const [newTitle, setNewTitle] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [newPlan, setNewPlan] = useState<"premium" | "vip">("premium");
   const [slugEdited, setSlugEdited] = useState(false);
 
   const syncDrafts = (list: AdminCourse[]) => {
@@ -362,7 +358,6 @@ export function AdminCoursesTab() {
           instructor: metaDraft.instructor.trim(),
           price,
           originalPrice,
-          plan: metaDraft.plan,
           skillLevel: metaDraft.skillLevel.trim(),
           totalDuration: metaDraft.totalDuration.trim(),
           bestseller: metaDraft.bestseller,
@@ -459,11 +454,11 @@ export function AdminCoursesTab() {
 
   const deleteSection = async (sectionId: string, sectionTitle: string) => {
     if (!selectedCourse) return;
-    if (selectedCourse.sections.length <= 1) {
-      toast.error("Impossible de supprimer la dernière session");
-      return;
-    }
-    if (!window.confirm(`Supprimer la session « ${sectionTitle} » et toutes ses leçons ?`)) return;
+    const isLastSection = selectedCourse.sections.length <= 1;
+    const message = isLastSection
+      ? `Supprimer la session « ${sectionTitle} » ? Une session Introduction vide sera recréée.`
+      : `Supprimer la session « ${sectionTitle} » et toutes ses leçons ?`;
+    if (!window.confirm(message)) return;
 
     setDeletingSectionId(sectionId);
     try {
@@ -503,7 +498,6 @@ export function AdminCoursesTab() {
           title: newTitle.trim(),
           slug: newSlug.trim(),
           description: newDescription.trim() || undefined,
-          plan: newPlan,
         },
       });
       setCourses(result.courses);
@@ -511,7 +505,6 @@ export function AdminCoursesTab() {
       setNewTitle("");
       setNewSlug("");
       setNewDescription("");
-      setNewPlan("premium");
       setSlugEdited(false);
       setActiveTab("draft");
       toast.success(`Cours créé — aperçu : /courses/${result.createdSlug}`);
@@ -636,19 +629,16 @@ export function AdminCoursesTab() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Plan</Label>
-              <Select
-                value={metaDraft.plan}
-                onValueChange={(v) => updateMetaDraft({ plan: v as "premium" | "vip" })}
-              >
-                <SelectTrigger className="rounded-lg">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="vip">VIP</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="meta-original-price">Prix barré ($)</Label>
+              <Input
+                id="meta-original-price"
+                type="number"
+                min={0}
+                value={metaDraft.originalPrice}
+                onChange={(e) => updateMetaDraft({ originalPrice: e.target.value })}
+                className="rounded-lg"
+                placeholder="Optionnel — pour afficher une réduction"
+              />
             </div>
           </div>
         </div>
@@ -729,7 +719,6 @@ export function AdminCoursesTab() {
         >
           {selectedCourse.sections.map((section) => {
             const newLesson = getNewLessonDraft(section.id);
-            const canDeleteSection = selectedCourse.sections.length > 1;
             return (
               <AccordionItem key={section.id} value={section.id} className="rounded-xl border border-border bg-card px-4">
                 <AccordionPrimitive.Header className="flex items-center gap-2">
@@ -745,19 +734,17 @@ export function AdminCoursesTab() {
                     </div>
                     <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                   </AccordionPrimitive.Trigger>
-                  {canDeleteSection && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-8 shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      disabled={deletingSectionId === section.id}
-                      onClick={() => void deleteSection(section.id, section.title)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      {deletingSectionId === section.id ? "..." : "Supprimer"}
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    disabled={deletingSectionId === section.id}
+                    onClick={() => void deleteSection(section.id, section.title)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    {deletingSectionId === section.id ? "..." : "Supprimer"}
+                  </Button>
                 </AccordionPrimitive.Header>
                 <AccordionContent className="pb-4 space-y-4">
                   {section.lessons.map((lesson, index) => {
@@ -859,9 +846,8 @@ export function AdminCoursesTab() {
           <div>
             <h2 className="font-semibold">Ajouter une session</h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Créez une nouvelle section (ex. Introduction, Module 2, Déploiement…). Le bouton{" "}
-              <strong className="text-foreground">Supprimer</strong> apparaît à droite de chaque session dès qu&apos;il
-              y en a au moins deux.
+              Créez une nouvelle section (ex. Introduction, Module 2, Déploiement…). Utilisez{" "}
+              <strong className="text-foreground">Supprimer</strong> à droite de chaque session pour l&apos;effacer.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -917,7 +903,7 @@ export function AdminCoursesTab() {
                 placeholder="Mon nouveau cours"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="new-slug">Slug (URL)</Label>
               <Input
                 id="new-slug"
@@ -928,18 +914,6 @@ export function AdminCoursesTab() {
                 }}
                 className="rounded-lg"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Plan</Label>
-              <Select value={newPlan} onValueChange={(v) => setNewPlan(v as "premium" | "vip")}>
-                <SelectTrigger className="rounded-lg">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="vip">VIP</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <div className="flex gap-2">
@@ -1017,7 +991,7 @@ export function AdminCoursesTab() {
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
-                        {planBadge(course.plan, course.isBase)}
+                        {courseTypeBadge(course.isBase)}
                       </span>
                     </td>
                     <td className="px-4 py-4">

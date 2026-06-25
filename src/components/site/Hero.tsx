@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 import { ToolsStrip } from "@/components/site/ToolsStrip";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
 import { formatCount } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 
@@ -23,9 +24,10 @@ function FeaturedCourseCard({ course }: { course: PublicCourse }) {
       params={{ slug: course.slug }}
       className="group block surface overflow-hidden rounded-2xl border border-border shadow-lg transition-all hover:shadow-xl hover:border-primary/30"
     >
-      <CourseThumbnailBanner thumbnail={course.thumbnail} slug={course.slug} className="p-6" showLabel={false}>
+      <CourseThumbnailBanner thumbnail={course.thumbnail} slug={course.slug} className="p-6" showLabel={false} showIcon={false}>
+        <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
         {course.bestseller && (
-          <span className="absolute left-4 top-4 z-10 rounded-sm bg-teal-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          <span className="absolute right-4 top-4 z-10 rounded-sm bg-teal-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
             Bestseller
           </span>
         )}
@@ -37,6 +39,9 @@ function FeaturedCourseCard({ course }: { course: PublicCourse }) {
       </CourseThumbnailBanner>
       <div className="p-4 sm:p-5">
         <p className="truncate text-sm text-muted-foreground">{course.instructor}</p>
+        <div className="mt-2">
+          <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} />
+        </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           <span className="inline-flex items-center gap-0.5 font-bold text-amber-600">
             {course.rating.toFixed(1)}

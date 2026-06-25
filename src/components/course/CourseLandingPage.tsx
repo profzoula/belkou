@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Award,
@@ -25,9 +25,7 @@ import {
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import type { PublicCourse } from "@/lib/fns/courses";
-import { planDetails, type PlanId } from "@/lib/plans";
 import { siteConfig } from "@/lib/site-config";
-import { cn } from "@/lib/utils";
 
 type CourseLandingPageProps = {
   course: PublicCourse;
@@ -36,15 +34,6 @@ type CourseLandingPageProps = {
 function discountPercent(price: number, original: number) {
   if (original <= price) return 0;
   return Math.round((1 - price / original) * 100);
-}
-
-function planPriceForCourse(course: PublicCourse, planId: PlanId) {
-  const coursePlan = course.plan ?? "premium";
-  if (planId === coursePlan) {
-    return { price: course.price, original: course.originalPrice };
-  }
-  const option = planDetails[planId];
-  return { price: option.price, original: Math.round(option.price * 1.35) };
 }
 
 function CourseThumbnail({ course }: { course: PublicCourse }) {
@@ -80,8 +69,6 @@ function CourseThumbnail({ course }: { course: PublicCourse }) {
 }
 
 export function CourseLandingPage({ course }: CourseLandingPageProps) {
-  const defaultPlan: PlanId = course.plan ?? "premium";
-  const [selectedPlan, setSelectedPlan] = useState<PlanId>(defaultPlan);
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
   const contentLive = isCourseContentLive(course);
@@ -144,7 +131,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </span>
             )}
             <span className="rounded-sm bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
-              {planDetails[defaultPlan].name}
+              {course.skillLevel}
             </span>
           </div>
 
@@ -170,54 +157,22 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <CourseThumbnail course={course} />
 
             <div className="space-y-4 p-5">
-              {(["premium", "vip"] as const).map((planId) => {
-                const option = planDetails[planId];
-                const active = selectedPlan === planId;
-                const { price, original } = planPriceForCourse(course, planId);
-                const pct = discountPercent(price, original);
-
-                return (
-                  <label
-                    key={planId}
-                    className={cn(
-                      "flex cursor-pointer gap-3 rounded-lg border p-4 transition-colors",
-                      active ? "border-primary ring-1 ring-primary/30 bg-primary/5" : "border-border hover:border-primary/40",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="plan"
-                      checked={active}
-                      onChange={() => setSelectedPlan(planId)}
-                      className="mt-1 accent-primary"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold">{option.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{option.desc}</p>
-                      <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                        <span className="text-2xl font-bold">${price}</span>
-                        {pct > 0 && (
-                          <>
-                            <span className="text-sm text-muted-foreground line-through">${original}</span>
-                            <span className="text-xs font-semibold text-emerald-600">{pct}% off</span>
-                          </>
-                        )}
-                      </div>
-                      <ul className="mt-2 space-y-1">
-                        {option.features.slice(0, 2).map((feature) => (
-                          <li key={feature} className="flex gap-2 text-xs text-muted-foreground">
-                            <Check className="h-3.5 w-3.5 shrink-0 text-primary" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </label>
-                );
-              })}
+              <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
+                <div className="mt-2 flex flex-wrap items-baseline gap-2">
+                  <span className="text-3xl font-bold">${course.price}</span>
+                  {courseDiscount > 0 && (
+                    <>
+                      <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
+                      <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off</span>
+                    </>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">Accès complet au cours · paiement unique</p>
+              </div>
 
               <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                <Link to="/checkout" search={{ plan: selectedPlan, course: course.slug }}>
+                <Link to="/checkout" search={{ course: course.slug }}>
                   S&apos;inscrire maintenant
                 </Link>
               </Button>
@@ -241,7 +196,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
             <span className="inline-flex items-center gap-1 rounded-sm bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-900 dark:bg-violet-500/20 dark:text-violet-200">
               <Award className="h-3.5 w-3.5" />
-              {planDetails[defaultPlan].name}
+              {course.skillLevel}
             </span>
             <span className="inline-flex items-center gap-1 font-bold text-amber-600">
               {course.rating.toFixed(1)}

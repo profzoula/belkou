@@ -16,6 +16,7 @@ import { createCheckoutSession } from "@/server/stripe";
 import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
 import type { PlanId } from "@/lib/site-config";
 import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
+import { getResolvedCourseBySlug } from "@/server/site-content";
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -35,9 +36,33 @@ function manualPaymentHtml() {
   return lines.join("");
 }
 
+async function resolveCheckoutPricing(data: RegistrationInput) {
+  if (data.course_slug) {
+    const course = await getResolvedCourseBySlug(data.course_slug);
+    if (!course) {
+      throw new Error("Cours introuvable.");
+    }
+    return {
+      price: course.price,
+      label: course.title,
+      courseSlug: course.slug,
+      courseTitle: course.title,
+    };
+  }
+
+  const planConfig = siteConfig.plans[data.plan];
+  return {
+    price: planConfig.price,
+    label: planConfig.name,
+    courseSlug: undefined,
+    courseTitle: undefined,
+  };
+}
+
 async function startCheckout(
   db: Awaited<ReturnType<typeof getDb>>,
   record: RegistrationRecord,
+  pricing: Awaited<ReturnType<typeof resolveCheckoutPricing>>,
 ) {
   let checkoutUrl: string | null = null;
 
@@ -47,6 +72,9 @@ async function startCheckout(
       plan: record.plan,
       email: record.email,
       fullName: record.full_name,
+      courseSlug: pricing.courseSlug,
+      courseTitle: pricing.courseTitle,
+      amountUsd: pricing.courseSlug ? pricing.price : undefined,
     });
 
     if (session?.url && session.id) {
@@ -103,20 +131,20 @@ export const submitRegistration = createServerFn({ method: "POST" })
       }
     }
 
-    const planConfig = siteConfig.plans[data.plan];
+    const pricing = await resolveCheckoutPricing(data);
     const manualHtml = manualPaymentHtml();
-    const checkoutUrl = await startCheckout(db, record);
+    const checkoutUrl = await startCheckout(db, record, pricing);
 
     try {
       await sendEmail({
         to: data.email,
         subject: resumed
-          ? `Reprise inscription BelKou — ${planConfig.name}`
-          : `Inscription BelKou — ${planConfig.name}`,
+          ? `Reprise inscription BelKou — ${pricing.label}`
+          : `Inscription BelKou — ${pricing.label}`,
         html: registrationPendingEmail({
           name: data.full_name,
           plan: data.plan,
-          price: planConfig.price,
+          price: pricing.price,
           registrationId: record.id,
           checkoutUrl,
           manualPaymentHtml: manualHtml,

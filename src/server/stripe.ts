@@ -13,27 +13,51 @@ export async function createCheckoutSession(params: {
   plan: PlanId;
   email: string;
   fullName: string;
+  courseSlug?: string;
+  courseTitle?: string;
+  amountUsd?: number;
 }) {
   const stripe = await getStripe();
   const env = await getServerEnvResolved();
   if (!stripe) return null;
 
-  const priceId =
-    params.plan === "premium" ? env.STRIPE_PRICE_PREMIUM : env.STRIPE_PRICE_VIP;
+  const isCourseCheckout = Boolean(params.courseSlug && params.amountUsd != null);
 
-  const lineItem = priceId
-    ? { price: priceId, quantity: 1 }
-    : {
+  const priceId = isCourseCheckout
+    ? null
+    : params.plan === "premium"
+      ? env.STRIPE_PRICE_PREMIUM
+      : env.STRIPE_PRICE_VIP;
+
+  const lineItem = isCourseCheckout
+    ? {
         price_data: {
           currency: "usd",
-          unit_amount: params.plan === "premium" ? 19900 : 29000,
+          unit_amount: Math.round(params.amountUsd! * 100),
           product_data: {
-            name: `BelKou ${params.plan === "premium" ? "Premium" : "VIP"}`,
-            description: "Formation BelKou — apps IA & SaaS",
+            name: params.courseTitle ?? "Cours BelKou",
+            description: "Accès complet au cours BelKou",
           },
         },
         quantity: 1,
-      };
+      }
+    : priceId
+      ? { price: priceId, quantity: 1 }
+      : {
+          price_data: {
+            currency: "usd",
+            unit_amount: params.plan === "premium" ? 19900 : 29000,
+            product_data: {
+              name: `BelKou ${params.plan === "premium" ? "Premium" : "VIP"}`,
+              description: "Formation BelKou — apps IA & SaaS",
+            },
+          },
+          quantity: 1,
+        };
+
+  const cancelUrl = params.courseSlug
+    ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
+    : `${env.SITE_URL}/register?plan=${params.plan}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -41,11 +65,12 @@ export async function createCheckoutSession(params: {
     payment_method_types: ["card"],
     line_items: [lineItem],
     success_url: `${env.SITE_URL}/success?registrationId=${params.registrationId}&plan=${params.plan}&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.SITE_URL}/register?plan=${params.plan}`,
+    cancel_url: cancelUrl,
     metadata: {
       registrationId: params.registrationId,
       plan: params.plan,
       fullName: params.fullName,
+      ...(params.courseSlug ? { courseSlug: params.courseSlug } : {}),
     },
   });
 

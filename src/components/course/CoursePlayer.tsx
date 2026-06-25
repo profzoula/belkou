@@ -65,13 +65,13 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
         </p>
         {lockedBySchedule && startLabel ? (
           <Button asChild size="sm">
-            <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+            <Link to="/checkout" search={{ course: course.slug }}>
               S&apos;inscrire maintenant
             </Link>
           </Button>
         ) : locked ? (
           <Button asChild size="sm">
-            <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+            <Link to="/checkout" search={{ course: course.slug }}>
               S&apos;inscrire
             </Link>
           </Button>
@@ -113,7 +113,7 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
       {locked && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
           <Button asChild size="lg" className="rounded-full">
-            <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+            <Link to="/checkout" search={{ course: course.slug }}>
               {lockedBySchedule
                 ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
                 : "S'inscrire pour débloquer"}
@@ -234,7 +234,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             <Link to="/courses">Tous les cours</Link>
           </Button>
           <Button asChild size="sm">
-            <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+            <Link to="/checkout" search={{ course: course.slug }}>
               S&apos;inscrire · ${course.price}
             </Link>
           </Button>
@@ -306,7 +306,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button size="sm" variant="outline" className="rounded-full" asChild>
-                          <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+                          <Link to="/checkout" search={{ course: course.slug }}>
                             Commencer
                           </Link>
                         </Button>
@@ -378,7 +378,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     Disponible après inscription à la formation BelKou.
                   </p>
                   <Button asChild className="mt-4" size="sm">
-                    <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+                    <Link to="/checkout" search={{ course: course.slug }}>
                       S&apos;inscrire maintenant
                     </Link>
                   </Button>

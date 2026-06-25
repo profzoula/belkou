@@ -162,12 +162,19 @@ export function deleteSectionFromStoredCourse(
   course: StoredCourse,
   sectionId: string,
 ): StoredCourse | null {
-  if (course.sections.length <= 1) return null;
   if (!course.sections.some((section) => section.id === sectionId)) return null;
+
+  const nextSections = course.sections.filter((section) => section.id !== sectionId);
+  if (nextSections.length === 0) {
+    return {
+      ...course,
+      sections: [buildNewSection("Introduction")],
+    };
+  }
 
   return {
     ...course,
-    sections: course.sections.filter((section) => section.id !== sectionId),
+    sections: nextSections,
   };
 }
 
