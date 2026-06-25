@@ -1,9 +1,14 @@
 import type { Course, CourseLesson } from "@/lib/courses";
 import { courses as baseCourses, DEFAULT_PREVIEW_VIMEO, isBaseCourseSlug } from "@/lib/courses";
 import {
+  addLessonToStoredCourse,
   buildDefaultStoredCourse,
+  buildNewVideoLesson,
   patchLessonInStoredCourse,
+  patchStoredCourseMeta,
   storedCourseToCourse,
+  type AddLessonInput,
+  type CourseMetaPatch,
   type CreateCourseInput,
   type StoredCourse,
 } from "@/lib/course-storage";
@@ -12,8 +17,12 @@ import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type CourseLessonOverride = Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration">>;
 
+export type CourseMetaOverride = CourseMetaPatch;
+
 export type CourseOverride = {
+  meta?: CourseMetaOverride;
   lessons?: Record<string, CourseLessonOverride>;
+  addedLessons?: Array<{ sectionId: string; lesson: CourseLesson }>;
 };
 
 export type CourseOverridesMap = Record<string, CourseOverride>;
@@ -72,18 +81,56 @@ async function writeJson<T>(key: string, value: T): Promise<{ ok: boolean; reaso
 }
 
 export function mergeCourse(base: Course, override?: CourseOverride): Course {
-  if (!override?.lessons) return base;
+  if (!override) return base;
 
-  return {
-    ...base,
-    sections: base.sections.map((section) => ({
-      ...section,
-      lessons: section.lessons.map((lesson) => ({
-        ...lesson,
-        ...override.lessons?.[lesson.id],
+  let merged: Course = { ...base };
+
+  if (override.meta) {
+    const meta = override.meta;
+    merged = {
+      ...merged,
+      ...(meta.title !== undefined && { title: meta.title }),
+      ...(meta.description !== undefined && { description: meta.description }),
+      ...(meta.instructor !== undefined && { instructor: meta.instructor }),
+      ...(meta.price !== undefined && { price: meta.price }),
+      ...(meta.originalPrice !== undefined && { originalPrice: meta.originalPrice }),
+      ...(meta.plan !== undefined && { plan: meta.plan }),
+      ...(meta.skillLevel !== undefined && { skillLevel: meta.skillLevel }),
+      ...(meta.totalDuration !== undefined && { totalDuration: meta.totalDuration }),
+      ...(meta.bestseller !== undefined && { bestseller: meta.bestseller }),
+      thumbnail: {
+        ...merged.thumbnail,
+        ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
+        ...(meta.thumbnailGradient !== undefined && { gradient: meta.thumbnailGradient }),
+      },
+    };
+  }
+
+  if (override.lessons) {
+    merged = {
+      ...merged,
+      sections: merged.sections.map((section) => ({
+        ...section,
+        lessons: section.lessons.map((lesson) => ({
+          ...lesson,
+          ...override.lessons?.[lesson.id],
+        })),
       })),
-    })),
-  };
+    };
+  }
+
+  if (override.addedLessons?.length) {
+    merged = {
+      ...merged,
+      sections: merged.sections.map((section) => {
+        const extra = override.addedLessons!.filter((item) => item.sectionId === section.id);
+        if (!extra.length) return section;
+        return { ...section, lessons: [...section.lessons, ...extra.map((item) => item.lesson)] };
+      }),
+    };
+  }
+
+  return merged;
 }
 
 function applyDefaultVimeo(course: Course, defaultVimeo?: string): Course {
@@ -199,6 +246,77 @@ export async function updateLessonOverride(params: {
 
   stored[index] = patchLessonInStoredCourse(stored[index], params.lessonId, cleanPatch);
   return saveStoredAdminCourses(stored);
+}
+
+export async function updateCourseMeta(params: { courseSlug: string; patch: CourseMetaPatch }) {
+  const cleanPatch = Object.fromEntries(
+    Object.entries(params.patch).filter(([, value]) => value !== undefined),
+  ) as CourseMetaPatch;
+
+  if (Object.keys(cleanPatch).length === 0) {
+    return { ok: false, reason: "Aucune modification" };
+  }
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const overrides = await getCourseOverrides();
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    overrides[params.courseSlug] = {
+      ...courseOverride,
+      meta: { ...courseOverride.meta, ...cleanPatch },
+    };
+    return saveCourseOverrides(overrides);
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  stored[index] = patchStoredCourseMeta(stored[index], cleanPatch);
+  return saveStoredAdminCourses(stored);
+}
+
+export async function addLessonToCourse(params: { courseSlug: string; input: AddLessonInput }) {
+  const title = params.input.title.trim();
+  if (!title) {
+    return { ok: false, reason: "Titre requis" };
+  }
+
+  const settings = await getSiteSettings();
+  const previewVimeo = settings.vimeoPreviewDefault?.trim() || DEFAULT_PREVIEW_VIMEO;
+  const lesson = buildNewVideoLesson({ ...params.input, title }, previewVimeo);
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const base = baseCourses.find((course) => course.slug === params.courseSlug);
+    if (!base?.sections.some((section) => section.id === params.input.sectionId)) {
+      return { ok: false, reason: "Section introuvable" };
+    }
+
+    const overrides = await getCourseOverrides();
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    const addedLessons = [...(courseOverride.addedLessons ?? []), { sectionId: params.input.sectionId, lesson }];
+    overrides[params.courseSlug] = { ...courseOverride, addedLessons };
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const, lessonId: lesson.id };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  const next = addLessonToStoredCourse(stored[index], params.input.sectionId, lesson);
+  if (!next) {
+    return { ok: false, reason: "Section introuvable" };
+  }
+
+  stored[index] = next;
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const, lessonId: lesson.id };
 }
 
 export async function createAdminCourse(input: CreateCourseInput) {

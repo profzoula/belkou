@@ -367,6 +367,75 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     return { ok: true as const, courses };
   });
 
+export const adminUpdateCourse = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        title: z.string().min(1).optional(),
+        description: z.string().optional(),
+        instructor: z.string().optional(),
+        price: z.number().min(0).optional(),
+        originalPrice: z.number().min(0).optional(),
+        plan: z.enum(["premium", "vip"]).optional(),
+        skillLevel: z.string().optional(),
+        totalDuration: z.string().optional(),
+        bestseller: z.boolean().optional(),
+        thumbnailLabel: z.string().optional(),
+        thumbnailGradient: z.string().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+    const { courseSlug, ...patch } = data;
+
+    const result = await updateCourseMeta({ courseSlug, patch });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+
+    const courses = await getResolvedCourses();
+    return { ok: true as const, courses };
+  });
+
+export const adminAddLesson = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        sectionId: z.string().min(1),
+        title: z.string().min(1),
+        duration: z.string().optional(),
+        vimeo: z.string().optional(),
+        preview: z.boolean().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { addLessonToCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await addLessonToCourse({
+      courseSlug: data.courseSlug,
+      input: {
+        sectionId: data.sectionId,
+        title: data.title,
+        duration: data.duration,
+        vimeo: data.vimeo,
+        preview: data.preview,
+      },
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Ajout impossible");
+    }
+
+    const courses = await getResolvedCourses();
+    return { ok: true as const, courses, lessonId: result.lessonId };
+  });
+
 export const getAdminSiteSettings = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
   const { getSiteSettings, getDefaultSiteSettings } = await import("@/server/site-content");

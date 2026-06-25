@@ -49,14 +49,74 @@ export function patchLessonInStoredCourse(
   };
 }
 
-export function courseToStored(course: Course): StoredCourse {
+export type CourseMetaPatch = {
+  title?: string;
+  description?: string;
+  instructor?: string;
+  price?: number;
+  originalPrice?: number;
+  plan?: "premium" | "vip";
+  skillLevel?: string;
+  totalDuration?: string;
+  bestseller?: boolean;
+  thumbnailLabel?: string;
+  thumbnailGradient?: string;
+};
+
+export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPatch): StoredCourse {
   return {
     ...course,
+    ...(patch.title !== undefined && { title: patch.title }),
+    ...(patch.description !== undefined && { description: patch.description }),
+    ...(patch.instructor !== undefined && { instructor: patch.instructor }),
+    ...(patch.price !== undefined && { price: patch.price }),
+    ...(patch.originalPrice !== undefined && { originalPrice: patch.originalPrice }),
+    ...(patch.plan !== undefined && { plan: patch.plan }),
+    ...(patch.skillLevel !== undefined && { skillLevel: patch.skillLevel }),
+    ...(patch.totalDuration !== undefined && { totalDuration: patch.totalDuration }),
+    ...(patch.bestseller !== undefined && { bestseller: patch.bestseller }),
     thumbnail: {
-      gradient: course.thumbnail.gradient,
-      label: course.thumbnail.label,
-      iconKey: course.slug,
+      ...course.thumbnail,
+      ...(patch.thumbnailLabel !== undefined && { label: patch.thumbnailLabel }),
+      ...(patch.thumbnailGradient !== undefined && { gradient: patch.thumbnailGradient }),
     },
+  };
+}
+
+export type AddLessonInput = {
+  sectionId: string;
+  title: string;
+  duration?: string;
+  vimeo?: string;
+  preview?: boolean;
+};
+
+export function buildNewVideoLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
+  const id = `${slugifyTitle(input.title) || "lesson"}-${Date.now().toString(36)}`;
+  return {
+    id,
+    title: input.title,
+    duration: input.duration ?? "5min",
+    type: "video",
+    preview: input.preview ?? false,
+    vimeo: input.vimeo || (input.preview ? previewVimeo : undefined),
+  };
+}
+
+export function addLessonToStoredCourse(
+  course: StoredCourse,
+  sectionId: string,
+  lesson: CourseLesson,
+): StoredCourse | null {
+  if (!course.sections.some((section) => section.id === sectionId)) {
+    return null;
+  }
+
+  return {
+    ...course,
+    sections: course.sections.map((section) =>
+      section.id === sectionId ? { ...section, lessons: [...section.lessons, lesson] } : section,
+    ),
   };
 }
 
@@ -67,6 +127,17 @@ export type CreateCourseInput = {
   plan?: "premium" | "vip";
   instructor?: string;
 };
+
+export function courseToStored(course: Course): StoredCourse {
+  return {
+    ...course,
+    thumbnail: {
+      gradient: course.thumbnail.gradient,
+      label: course.thumbnail.label,
+      iconKey: course.slug,
+    },
+  };
+}
 
 export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo: string): StoredCourse {
   const plan = input.plan ?? "premium";
