@@ -1,4 +1,5 @@
 import { BASE_COURSE_SLUGS } from "@/lib/courses";
+import { isWelcomePreviewLesson } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
 
@@ -24,15 +25,28 @@ export type LessonLockReason = "none" | "schedule" | "enrollment";
 
 export function getLessonLockState(
   opts: {
-    preview?: boolean;
+    lesson: { id: string; title: string; preview?: boolean; type?: string };
     course: { published?: boolean; scheduledPublishAt?: string };
     hasPaidAccess: boolean;
   },
   now = Date.now(),
 ): { locked: boolean; reason: LessonLockReason } {
-  if (opts.preview) return { locked: false, reason: "none" };
-  const contentLive = isCourseContentLive(opts.course, now);
-  if (!contentLive) return { locked: true, reason: "schedule" };
-  if (!opts.hasPaidAccess) return { locked: true, reason: "enrollment" };
-  return { locked: false, reason: "none" };
+  const { lesson, course, hasPaidAccess } = opts;
+  const contentLive = isCourseContentLive(course, now);
+
+  if (contentLive) {
+    if (hasPaidAccess) return { locked: false, reason: "none" };
+    if (lesson.preview) return { locked: false, reason: "none" };
+    return { locked: true, reason: "enrollment" };
+  }
+
+  if (hasPaidAccess) {
+    if (lesson.type === "video" && isWelcomePreviewLesson(lesson)) {
+      return { locked: false, reason: "none" };
+    }
+    return { locked: true, reason: "schedule" };
+  }
+
+  if (lesson.preview) return { locked: false, reason: "none" };
+  return { locked: true, reason: "schedule" };
 }

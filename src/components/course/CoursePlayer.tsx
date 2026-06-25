@@ -25,6 +25,7 @@ import {
   getAllLessons,
   getLessonVimeo,
   getSectionForLesson,
+  getWelcomePreviewLesson,
   type CourseLesson,
 } from "@/lib/courses";
 import { getCourseIcon } from "@/lib/course-icons";
@@ -51,14 +52,16 @@ function CourseVideoArea({
   course,
   lesson,
   hasPaidAccess,
+  welcomeLessonId,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
   hasPaidAccess: boolean;
+  welcomeLessonId?: string;
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLessonLockState({
-    preview: lesson.preview,
+    lesson,
     course,
     hasPaidAccess,
   });
@@ -81,9 +84,21 @@ function CourseVideoArea({
                 : "Ressources téléchargeables — disponible après inscription."}
         </p>
         {enrolledWaiting ? (
-          <Button asChild size="sm" variant="outline">
-            <Link to="/dashboard">Voir Mes cours</Link>
-          </Button>
+          welcomeLessonId && lesson.id !== welcomeLessonId ? (
+            <Button asChild size="sm" variant="outline">
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={{ lesson: welcomeLessonId }}
+              >
+                Voir la vidéo de bienvenue
+              </Link>
+            </Button>
+          ) : (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/dashboard">Voir Mes cours</Link>
+            </Button>
+          )
         ) : reason === "schedule" && startLabel ? (
           <Button asChild size="sm">
             <Link to="/checkout" search={{ course: course.slug }}>
@@ -139,9 +154,21 @@ function CourseVideoArea({
       {locked && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
           {enrolledWaiting ? (
-            <Button asChild size="lg" variant="secondary" className="rounded-full">
-              <Link to="/dashboard">Retour à Mes cours</Link>
-            </Button>
+            welcomeLessonId && lesson.id !== welcomeLessonId ? (
+              <Button asChild size="lg" variant="secondary" className="rounded-full">
+                <Link
+                  to="/courses/$slug/learn"
+                  params={{ slug: course.slug }}
+                  search={{ lesson: welcomeLessonId }}
+                >
+                  Voir la vidéo de bienvenue
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="lg" variant="secondary" className="rounded-full">
+                <Link to="/dashboard">Retour à Mes cours</Link>
+              </Button>
+            )
           ) : (
             <Button asChild size="lg" className="rounded-full">
               <Link to="/checkout" search={{ course: course.slug }}>
@@ -160,13 +187,16 @@ function CourseVideoArea({
 function CurriculumSidebar({
   course,
   activeLessonId,
+  hasPaidAccess,
   onSelectLesson,
 }: {
   course: PublicCourse;
   activeLessonId: string;
+  hasPaidAccess: boolean;
   onSelectLesson: (lessonId: string) => void;
 }) {
   const defaultSections = course.sections.map((section) => section.id);
+  const welcomeLesson = getWelcomePreviewLesson(course);
 
   return (
     <div className="flex h-full flex-col border-t border-border bg-card lg:border-t-0 lg:border-l">
@@ -200,7 +230,10 @@ function CurriculumSidebar({
                   <ul>
                     {section.lessons.map((lesson, index) => {
                       const active = lesson.id === activeLessonId;
-                      const done = Boolean(lesson.preview) && index === 0;
+                      const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
+                      const done = welcomeLesson
+                        ? lesson.id === welcomeLesson.id
+                        : Boolean(lesson.preview) && index === 0;
 
                       return (
                         <li key={lesson.id}>
@@ -212,10 +245,13 @@ function CurriculumSidebar({
                               active
                                 ? "border-primary bg-primary/10 font-medium text-foreground"
                                 : "border-transparent hover:bg-muted/60",
+                              locked && !active && "opacity-70",
                             )}
                           >
                             {done ? (
                               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            ) : locked ? (
+                              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />
                             ) : (
                               <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
                             )}
@@ -276,13 +312,50 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
   const allLessons = useMemo(() => getAllLessons(course), [course]);
-  const defaultLesson = allLessons.find((l) => l.id === initialLessonId) ?? allLessons[0];
-  const [activeLessonId, setActiveLessonId] = useState(defaultLesson.id);
+  const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
+
+  const resolveLessonId = (lessonId?: string) => {
+    const requested = lessonId ? allLessons.find((lesson) => lesson.id === lessonId) : undefined;
+    if (requested) {
+      const { locked } = getLessonLockState({
+        lesson: requested,
+        course,
+        hasPaidAccess,
+      });
+      if (!locked) return requested.id;
+    }
+
+    if (hasPaidAccess && !contentLive && welcomeLesson) {
+      return welcomeLesson.id;
+    }
+
+    return requested?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
+  };
+
+  const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
 
-  const activeLesson = getAllLessons(course).find((l) => l.id === activeLessonId) ?? defaultLesson;
+  useEffect(() => {
+    if (!access) return;
+
+    setActiveLessonId((current) => {
+      const currentLesson = allLessons.find((lesson) => lesson.id === current);
+      if (currentLesson) {
+        const { locked } = getLessonLockState({
+          lesson: currentLesson,
+          course,
+          hasPaidAccess,
+        });
+        if (!locked) return current;
+      }
+
+      return resolveLessonId(initialLessonId);
+    });
+  }, [access, hasPaidAccess, contentLive, initialLessonId, allLessons, welcomeLesson, course]);
+
+  const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
   const activeSection = getSectionForLesson(course, activeLesson.id);
 
   return (
@@ -329,7 +402,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <main className="min-w-0">
-          <CourseVideoArea course={course} lesson={activeLesson} hasPaidAccess={hasPaidAccess} />
+          <CourseVideoArea
+            course={course}
+            lesson={activeLesson}
+            hasPaidAccess={hasPaidAccess}
+            welcomeLessonId={welcomeLesson?.id}
+          />
 
           <div className="border-b border-border px-3 sm:px-6">
             <Tabs defaultValue="overview" className="w-full">
@@ -472,6 +550,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           <CurriculumSidebar
             course={course}
             activeLessonId={activeLessonId}
+            hasPaidAccess={hasPaidAccess}
             onSelectLesson={(lessonId) => {
               setActiveLessonId(lessonId);
             }}

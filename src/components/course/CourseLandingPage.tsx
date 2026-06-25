@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   Award,
   BookOpen,
+  CalendarClock,
   Check,
   ChevronRight,
   Globe,
@@ -23,6 +24,7 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getWelcomePreviewLesson,
 } from "@/lib/courses";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
@@ -41,11 +43,29 @@ function discountPercent(price: number, original: number) {
   return Math.round((1 - price / original) * 100);
 }
 
-function CourseThumbnail({ course }: { course: PublicCourse }) {
-  const previewLesson = useMemo(
-    () => getAllLessons(course).find((lesson) => lesson.preview && lesson.type === "video"),
-    [course],
-  );
+function CourseThumbnail({
+  course,
+  hasPaidAccess,
+  contentLive,
+  scheduledPublishAt,
+}: {
+  course: PublicCourse;
+  hasPaidAccess: boolean;
+  contentLive: boolean;
+  scheduledPublishAt?: string;
+}) {
+  const enrolledWaiting = hasPaidAccess && !contentLive;
+  const canStartCourse = hasPaidAccess && contentLive;
+  const previewLesson = useMemo(() => {
+    if (enrolledWaiting) {
+      return getWelcomePreviewLesson(course);
+    }
+    return getAllLessons(course).find((lesson) => lesson.preview && lesson.type === "video");
+  }, [course, enrolledWaiting]);
+
+  const availabilityLabel = scheduledPublishAt
+    ? formatScheduledPublishLabel(scheduledPublishAt)
+    : null;
 
   return (
     <CourseThumbnailBanner
@@ -56,19 +76,54 @@ function CourseThumbnail({ course }: { course: PublicCourse }) {
       showLabel={false}
       showIcon={false}
     >
-      <Link
-        to="/courses/$slug/learn"
-        params={{ slug: course.slug }}
-        search={previewLesson ? { lesson: previewLesson.id } : undefined}
-        className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
-      >
-        <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
-          <Play className="ml-1 h-7 w-7 fill-current" />
-        </span>
-        <span className="text-sm font-semibold text-white drop-shadow-sm">
-          {previewLesson ? "Preview gratuite" : "Voir le cours"}
-        </span>
-      </Link>
+      {enrolledWaiting && availabilityLabel ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45 px-4 text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-primary shadow-lg">
+            <CalendarClock className="h-7 w-7" />
+          </span>
+          <div className="max-w-[240px]">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-white/80">
+              Inscription confirmée
+            </p>
+            <p className="mt-1 text-base font-bold leading-snug text-white drop-shadow-sm">
+              Disponible le {availabilityLabel}
+            </p>
+          </div>
+          <Link
+            to="/courses/$slug/learn"
+            params={{ slug: course.slug }}
+            search={previewLesson ? { lesson: previewLesson.id } : undefined}
+            className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+          >
+            Voir la vidéo de bienvenue
+          </Link>
+        </div>
+      ) : canStartCourse ? (
+        <Link
+          to="/courses/$slug/learn"
+          params={{ slug: course.slug }}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
+        >
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
+            <Play className="ml-1 h-7 w-7 fill-current" />
+          </span>
+          <span className="text-sm font-semibold text-white drop-shadow-sm">Commencer le cours</span>
+        </Link>
+      ) : (
+        <Link
+          to="/courses/$slug/learn"
+          params={{ slug: course.slug }}
+          search={previewLesson ? { lesson: previewLesson.id } : undefined}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
+        >
+          <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
+            <Play className="ml-1 h-7 w-7 fill-current" />
+          </span>
+          <span className="text-sm font-semibold text-white drop-shadow-sm">
+            {previewLesson ? "Preview gratuite" : "Voir le cours"}
+          </span>
+        </Link>
+      )}
     </CourseThumbnailBanner>
   );
 }
@@ -110,6 +165,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
+
+  const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
@@ -210,7 +267,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
       <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
         <aside className="mb-8 lg:sticky lg:top-6 lg:order-2 lg:mb-0 lg:self-start">
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-            <CourseThumbnail course={course} />
+            <CourseThumbnail
+              course={course}
+              hasPaidAccess={hasPaidAccess}
+              contentLive={contentLive}
+              scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
+            />
 
             <div className="space-y-4 p-5">
               {hasPaidAccess ? (
@@ -252,8 +314,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               ) : hasPaidAccess ? (
                 <>
                   <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                    <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
-                      Voir les previews
+                    <Link
+                      to="/courses/$slug/learn"
+                      params={{ slug: course.slug }}
+                      search={welcomeLesson ? { lesson: welcomeLesson.id } : undefined}
+                    >
+                      Voir la vidéo de bienvenue
                     </Link>
                   </Button>
                   <Button asChild variant="outline" size="sm" className="w-full">
@@ -381,7 +447,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 {hasPaidAccess
                   ? canStartCourse
                     ? "Retrouvez toutes vos leçons dans le lecteur ou depuis Mes cours."
-                    : "Le contenu vidéo sera débloqué automatiquement à la date prévue. En attendant, les previews restent accessibles."
+                    : "Le contenu vidéo sera débloqué automatiquement à la date prévue. En attendant, la vidéo de bienvenue reste accessible."
                   : scheduledSoon
                     ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
                     : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash."}
@@ -397,7 +463,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <p className="text-xs text-muted-foreground truncate">{course.title}</p>
             {hasPaidAccess ? (
               <p className="text-sm font-semibold text-emerald-700">
-                {canStartCourse ? "Accès actif" : "Inscription confirmée"}
+                {canStartCourse
+                  ? "Accès actif"
+                  : access?.scheduledPublishAt
+                    ? `Disponible le ${formatScheduledPublishLabel(access.scheduledPublishAt)}`
+                    : "Inscription confirmée"}
               </p>
             ) : (
               <p className="text-xl font-bold">${course.price}</p>
@@ -411,7 +481,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             </Button>
           ) : hasPaidAccess ? (
             <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-              <Link to="/dashboard">Mes cours</Link>
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={welcomeLesson ? { lesson: welcomeLesson.id } : undefined}
+              >
+                Bienvenue
+              </Link>
             </Button>
           ) : (
             <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">

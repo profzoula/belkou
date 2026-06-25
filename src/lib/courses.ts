@@ -131,6 +131,19 @@ export function getAllLessons(course: { sections: CourseSection[] }): CourseLess
   return course.sections.flatMap((section) => section.lessons);
 }
 
+export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title">): boolean {
+  if (lesson.id === "intro-welcome") return true;
+  return lesson.title.toLowerCase().includes("bienvenue");
+}
+
+export function getWelcomePreviewLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
+  const lessons = getAllLessons(course);
+  return (
+    lessons.find((lesson) => lesson.id === "intro-welcome") ??
+    lessons.find((lesson) => lesson.type === "video" && isWelcomePreviewLesson(lesson))
+  );
+}
+
 export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
   return getAllLessons(course).find((lesson) => lesson.id === lessonId);
 }
