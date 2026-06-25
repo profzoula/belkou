@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Award,
+  BookOpen,
   Check,
   ChevronRight,
   Globe,
@@ -24,7 +26,10 @@ import {
 } from "@/lib/courses";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
+import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
 import type { PublicCourse } from "@/lib/fns/courses";
+import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
+import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
 
 type CourseLandingPageProps = {
@@ -69,9 +74,45 @@ function CourseThumbnail({ course }: { course: PublicCourse }) {
 }
 
 export function CourseLandingPage({ course }: CourseLandingPageProps) {
+  const { user, session, loading: authLoading } = useAuth();
+  const accessFn = useServerFn(getCourseAccess);
+  const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void accessFn({
+      data: {
+        courseSlug: course.slug,
+        accessToken: session?.access_token,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setAccess(result);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAccess({
+            hasPaidAccess: false,
+            contentLive: isCourseContentLive(course),
+            scheduledPublishAt: course.scheduledPublishAt,
+            paymentStatus: null,
+          });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessFn, course, session?.access_token]);
+
+  const hasPaidAccess = access?.hasPaidAccess ?? false;
+  const contentLive = access?.contentLive ?? isCourseContentLive(course);
+  const enrolledWaiting = hasPaidAccess && !contentLive;
+  const canStartCourse = hasPaidAccess && contentLive;
+
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
-  const contentLive = isCourseContentLive(course);
   const startLabel = course.scheduledPublishAt
     ? formatScheduledPublishLabel(course.scheduledPublishAt)
     : siteConfig.cohortStartDate;
@@ -79,14 +120,22 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <header className="border-b border-white/10 bg-course-hero text-white">
-        <div className="site-container flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm">
-            <img src={siteConfig.logo} alt="" className="h-8 w-8 rounded-lg" />
+        <div className="site-container flex h-14 items-center justify-between gap-3">
+          <Link to="/" className="flex min-w-0 items-center gap-2 font-display font-bold text-sm">
+            <img src={siteConfig.logo} alt="" className="h-8 w-8 shrink-0 rounded-lg" />
             {siteConfig.name}
           </Link>
-          <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
-            <Link to="/courses">Tous les cours</Link>
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
+              <Link to="/courses">Tous les cours</Link>
+            </Button>
+            {!authLoading && !user ? (
+              <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
+                <Link to="/login">Connexion</Link>
+              </Button>
+            ) : null}
+            {!authLoading && user ? <UserAccountMenu /> : null}
+          </div>
         </div>
       </header>
 
@@ -104,14 +153,21 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <span className="text-white/90 line-clamp-1">{course.title}</span>
           </nav>
 
-          {scheduledSoon && course.scheduledPublishAt && (
+          {enrolledWaiting && access?.scheduledPublishAt && (
+            <p className="mb-4 inline-flex rounded-lg border border-emerald-400/50 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+              Vous êtes inscrit — accès complet au cours le{" "}
+              {formatScheduledPublishLabel(access.scheduledPublishAt)}
+            </p>
+          )}
+
+          {scheduledSoon && course.scheduledPublishAt && !hasPaidAccess && (
             <p className="mb-4 inline-flex rounded-lg border border-sky-400/50 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">
               Inscriptions ouvertes — les vidéos seront disponibles le{" "}
               {formatScheduledPublishLabel(course.scheduledPublishAt)}
             </p>
           )}
 
-          {!contentLive && !scheduledSoon && (
+          {!contentLive && !scheduledSoon && !hasPaidAccess && (
             <p className="mb-4 inline-flex rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs text-white/80">
               Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
             </p>
@@ -157,36 +213,79 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <CourseThumbnail course={course} />
 
             <div className="space-y-4 p-5">
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
-                <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                  <span className="text-3xl font-bold">${course.price}</span>
-                  {courseDiscount > 0 && (
-                    <>
-                      <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
-                      <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off</span>
-                    </>
-                  )}
+              {hasPaidAccess ? (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                    {canStartCourse ? "Accès actif" : "Inscription confirmée"}
+                  </p>
+                  <p className="mt-2 text-sm text-emerald-900">
+                    {canStartCourse
+                      ? "Vous avez accès à toutes les leçons de ce cours."
+                      : enrolledWaiting && access?.scheduledPublishAt
+                        ? `Les vidéos seront disponibles le ${formatScheduledPublishLabel(access.scheduledPublishAt)}.`
+                        : "Votre accès sera activé dès le lancement du cours."}
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Accès complet au cours · paiement unique</p>
-              </div>
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
+                  <div className="mt-2 flex flex-wrap items-baseline gap-2">
+                    <span className="text-3xl font-bold">${course.price}</span>
+                    {courseDiscount > 0 && (
+                      <>
+                        <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
+                        <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">Accès complet au cours · paiement unique</p>
+                </div>
+              )}
 
-              <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                <Link to="/checkout" search={{ course: course.slug }}>
-                  S&apos;inscrire maintenant
-                </Link>
-              </Button>
+              {canStartCourse ? (
+                <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                  <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Commencer le cours
+                  </Link>
+                </Button>
+              ) : hasPaidAccess ? (
+                <>
+                  <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                    <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
+                      Voir les previews
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="w-full">
+                    <Link to="/dashboard">Mes cours</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                    <Link to="/checkout" search={{ course: course.slug }}>
+                      S&apos;inscrire maintenant
+                    </Link>
+                  </Button>
 
-              <Button asChild variant="outline" size="sm" className="w-full">
-                <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
-                  Voir le contenu du cours
-                </Link>
-              </Button>
+                  <Button asChild variant="outline" size="sm" className="w-full">
+                    <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
+                      Voir le contenu du cours
+                    </Link>
+                  </Button>
+                </>
+              )}
 
               <p className="text-center text-[11px] text-muted-foreground">
-                {scheduledSoon
-                  ? `Vidéos disponibles le ${startLabel}`
-                  : `Garantie satisfaction · Accès cohorte ${startLabel}`}
+                {hasPaidAccess
+                  ? canStartCourse
+                    ? "Progression sauvegardée dans Mes cours"
+                    : enrolledWaiting
+                      ? `Vidéos disponibles le ${startLabel}`
+                      : "Accès BelKou confirmé"
+                  : scheduledSoon
+                    ? `Vidéos disponibles le ${startLabel}`
+                    : `Garantie satisfaction · Accès cohorte ${startLabel}`}
               </p>
             </div>
           </div>
@@ -270,13 +369,22 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <ShieldCheck className="h-8 w-8 shrink-0 text-primary" />
             <div>
               <h3 className="font-semibold">
-                Formation BelKou
-                {scheduledSoon ? ` — début le ${startLabel}` : ` — cohorte ${siteConfig.cohortStartDate}`}
+                {hasPaidAccess
+                  ? canStartCourse
+                    ? "Vous êtes inscrit à cette formation"
+                    : `Inscription confirmée — début le ${startLabel}`
+                  : scheduledSoon
+                    ? `Formation BelKou — début le ${startLabel}`
+                    : `Formation BelKou — cohorte ${siteConfig.cohortStartDate}`}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                {scheduledSoon
-                  ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
-                  : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash."}
+                {hasPaidAccess
+                  ? canStartCourse
+                    ? "Retrouvez toutes vos leçons dans le lecteur ou depuis Mes cours."
+                    : "Le contenu vidéo sera débloqué automatiquement à la date prévue. En attendant, les previews restent accessibles."
+                  : scheduledSoon
+                    ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
+                    : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash."}
               </p>
             </div>
           </section>
@@ -287,13 +395,31 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         <div className="site-container flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground truncate">{course.title}</p>
-            <p className="text-xl font-bold">${course.price}</p>
+            {hasPaidAccess ? (
+              <p className="text-sm font-semibold text-emerald-700">
+                {canStartCourse ? "Accès actif" : "Inscription confirmée"}
+              </p>
+            ) : (
+              <p className="text-xl font-bold">${course.price}</p>
+            )}
           </div>
-          <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire
-            </Link>
-          </Button>
+          {canStartCourse ? (
+            <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+              <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
+                Commencer
+              </Link>
+            </Button>
+          ) : hasPaidAccess ? (
+            <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+              <Link to="/dashboard">Mes cours</Link>
+            </Button>
+          ) : (
+            <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+              <Link to="/checkout" search={{ course: course.slug }}>
+                S&apos;inscrire
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
