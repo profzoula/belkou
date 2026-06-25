@@ -41,6 +41,8 @@ export type Course = {
   whatYouLearn: string[];
   /** false = masqué sur le site public */
   published?: boolean;
+  /** ISO date — le cours devient visible automatiquement à cette date */
+  scheduledPublishAt?: string;
   thumbnail: {
     gradient: string;
     icon: LucideIcon;

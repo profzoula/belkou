@@ -7,6 +7,7 @@ import {
   buildNewSection,
   buildNewVideoLesson,
   deleteLessonFromStoredCourse,
+  deleteSectionFromStoredCourse,
   patchLessonInStoredCourse,
   patchStoredCourseMeta,
   storedCourseToCourse,
@@ -16,6 +17,7 @@ import {
   type StoredCourse,
 } from "@/lib/course-storage";
 import { siteConfig } from "@/lib/site-config";
+import { isCourseLive } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type CourseLessonOverride = Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration">>;
@@ -28,6 +30,7 @@ export type CourseOverride = {
   addedLessons?: Array<{ sectionId: string; lesson: CourseLesson }>;
   addedSections?: CourseSection[];
   deletedLessons?: string[];
+  deletedSections?: string[];
 };
 
 export type CourseOverridesMap = Record<string, CourseOverride>;
@@ -104,6 +107,9 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
       ...(meta.totalDuration !== undefined && { totalDuration: meta.totalDuration }),
       ...(meta.bestseller !== undefined && { bestseller: meta.bestseller }),
       ...(meta.published !== undefined && { published: meta.published }),
+      ...(meta.scheduledPublishAt !== undefined && {
+        scheduledPublishAt: meta.scheduledPublishAt ?? undefined,
+      }),
       thumbnail: {
         ...merged.thumbnail,
         ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
@@ -143,6 +149,14 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
     merged = {
       ...merged,
       sections: [...merged.sections, ...override.addedSections],
+    };
+  }
+
+  if (override.deletedSections?.length) {
+    const deleted = new Set(override.deletedSections);
+    merged = {
+      ...merged,
+      sections: merged.sections.filter((section) => !deleted.has(section.id)),
     };
   }
 
@@ -219,7 +233,12 @@ export async function getResolvedCourses(): Promise<Course[]> {
 
 export async function getPublishedCourses(): Promise<Course[]> {
   const all = await resolveCourseList();
-  return all.filter((course) => course.published !== false);
+  return all
+    .filter((course) => isCourseLive(course))
+    .map((course) => ({
+      ...course,
+      published: true,
+    }));
 }
 
 export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {
@@ -426,6 +445,75 @@ export async function deleteLessonFromCourse(params: { courseSlug: string; lesso
   }
 
   stored[index] = deleteLessonFromStoredCourse(stored[index], lessonId);
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const };
+}
+
+export async function deleteSectionFromCourse(params: { courseSlug: string; sectionId: string }) {
+  const sectionId = params.sectionId.trim();
+  if (!sectionId) {
+    return { ok: false, reason: "Session introuvable" };
+  }
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const base = baseCourses.find((course) => course.slug === params.courseSlug);
+    if (!base) {
+      return { ok: false, reason: "Cours introuvable" };
+    }
+
+    const overrides = await getCourseOverrides();
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    const addedSections = (courseOverride.addedSections ?? []).filter(
+      (section) => section.id !== sectionId,
+    );
+    const wasAdded = addedSections.length !== (courseOverride.addedSections ?? []).length;
+    const deletedSections = new Set(courseOverride.deletedSections ?? []);
+
+    if (!wasAdded) {
+      if (!base.sections.some((section) => section.id === sectionId)) {
+        return { ok: false, reason: "Session introuvable" };
+      }
+      deletedSections.add(sectionId);
+    }
+
+    const addedLessons = (courseOverride.addedLessons ?? []).filter(
+      (item) => item.sectionId !== sectionId,
+    );
+
+    const nextOverride: CourseOverride = {
+      ...courseOverride,
+      addedSections,
+      deletedSections: [...deletedSections],
+      addedLessons,
+    };
+
+    const remainingSections = mergeCourse(base, nextOverride).sections.length;
+    if (remainingSections === 0) {
+      return { ok: false, reason: "Impossible de supprimer la dernière session" };
+    }
+
+    overrides[params.courseSlug] = nextOverride;
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  const next = deleteSectionFromStoredCourse(stored[index], sectionId);
+  if (!next) {
+    if (stored[index].sections.length <= 1) {
+      return { ok: false, reason: "Impossible de supprimer la dernière session" };
+    }
+    return { ok: false, reason: "Session introuvable" };
+  }
+
+  stored[index] = next;
   const result = await saveStoredAdminCourses(stored);
   if (!result.ok) return result;
   return { ok: true as const };

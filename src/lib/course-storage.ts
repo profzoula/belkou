@@ -65,6 +65,7 @@ export type CourseMetaPatch = {
   thumbnailGradient?: string;
   thumbnailImageUrl?: string;
   published?: boolean;
+  scheduledPublishAt?: string | null;
 };
 
 export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPatch): StoredCourse {
@@ -80,6 +81,9 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
     ...(patch.totalDuration !== undefined && { totalDuration: patch.totalDuration }),
     ...(patch.bestseller !== undefined && { bestseller: patch.bestseller }),
     ...(patch.published !== undefined && { published: patch.published }),
+    ...(patch.scheduledPublishAt !== undefined && {
+      scheduledPublishAt: patch.scheduledPublishAt ?? undefined,
+    }),
     thumbnail: {
       ...course.thumbnail,
       ...(patch.thumbnailLabel !== undefined && { label: patch.thumbnailLabel }),
@@ -151,6 +155,19 @@ export function deleteLessonFromStoredCourse(course: StoredCourse, lessonId: str
       ...section,
       lessons: section.lessons.filter((lesson) => lesson.id !== lessonId),
     })),
+  };
+}
+
+export function deleteSectionFromStoredCourse(
+  course: StoredCourse,
+  sectionId: string,
+): StoredCourse | null {
+  if (course.sections.length <= 1) return null;
+  if (!course.sections.some((section) => section.id === sectionId)) return null;
+
+  return {
+    ...course,
+    sections: course.sections.filter((section) => section.id !== sectionId),
   };
 }
 

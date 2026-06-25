@@ -463,6 +463,7 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
         thumbnailGradient: z.string().optional(),
         thumbnailImageUrl: z.string().optional(),
         published: z.boolean().optional(),
+        scheduledPublishAt: z.string().nullable().optional(),
       })
       .parse(data),
   )
@@ -487,12 +488,56 @@ export const adminSetCoursePublished = createServerFn({ method: "POST" })
     await requireAdmin();
     const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
 
+    const patch: { published: boolean; scheduledPublishAt?: null } = { published: data.published };
+    if (data.published) {
+      patch.scheduledPublishAt = null;
+    }
+
     const result = await updateCourseMeta({
       courseSlug: data.courseSlug,
-      patch: { published: data.published },
+      patch,
     });
     if (!result.ok) {
       throw new Error(result.reason ?? "Mise à jour impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminScheduleCoursePublish = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        scheduledPublishAt: z.string().nullable(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+
+    let scheduledPublishAt: string | null = null;
+    if (data.scheduledPublishAt) {
+      const at = Date.parse(data.scheduledPublishAt);
+      if (Number.isNaN(at)) {
+        throw new Error("Date de publication invalide");
+      }
+      if (at <= Date.now()) {
+        throw new Error("Choisissez une date et une heure dans le futur");
+      }
+      scheduledPublishAt = new Date(at).toISOString();
+    }
+
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: {
+        scheduledPublishAt,
+        ...(scheduledPublishAt ? { published: false } : {}),
+      },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Programmation impossible");
     }
 
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
@@ -574,6 +619,80 @@ export const adminDeleteLesson = createServerFn({ method: "POST" })
       lessonId: data.lessonId,
     });
 
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminDeleteSection = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), sectionId: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { deleteSectionFromCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await deleteSectionFromCourse({
+      courseSlug: data.courseSlug,
+      sectionId: data.sectionId,
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminUploadCourseThumbnail = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { uploadCourseThumbnail } = await import("@/server/course-thumbnail-storage");
+    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+
+    const upload = await uploadCourseThumbnail({
+      courseSlug: data.courseSlug,
+      contentType: data.contentType,
+      dataBase64: data.dataBase64,
+    });
+    if (!upload.ok) {
+      throw new Error(upload.reason);
+    }
+
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: { thumbnailImageUrl: upload.publicUrl },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminRemoveCourseThumbnail = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: { thumbnailImageUrl: "" },
+    });
     if (!result.ok) {
       throw new Error(result.reason ?? "Suppression impossible");
     }

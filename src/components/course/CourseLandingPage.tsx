@@ -23,6 +23,7 @@ import {
   getAllLessons,
 } from "@/lib/courses";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { isCourseLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { siteConfig } from "@/lib/site-config";
@@ -109,9 +110,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <span className="text-white/90 line-clamp-1">{course.title}</span>
           </nav>
 
-          {!course.published && (
+          {!isCourseLive(course) && (
             <p className="mb-4 inline-flex rounded-lg border border-amber-400/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
-              Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
+              {isScheduledInFuture(course) && course.scheduledPublishAt
+                ? `Programmé — visible le ${formatScheduledPublishLabel(course.scheduledPublishAt)}`
+                : "Brouillon — ce cours n'est pas encore visible dans le catalogue public."}
             </p>
           )}
 

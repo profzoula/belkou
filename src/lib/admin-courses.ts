@@ -1,5 +1,6 @@
 import type { Course } from "@/lib/courses";
 import { isBaseCourseSlug } from "@/lib/courses";
+import { isCourseLive, isScheduledInFuture } from "@/lib/course-publish";
 
 export type AdminCourse = Omit<Course, "thumbnail"> & {
   thumbnail: {
@@ -8,13 +9,15 @@ export type AdminCourse = Omit<Course, "thumbnail"> & {
     imageUrl?: string;
   };
   published: boolean;
+  isLive: boolean;
+  isScheduled: boolean;
   isBase: boolean;
   lessonCount: number;
   videoCount: number;
   missingVimeo: number;
 };
 
-export type AdminCourseTab = "published" | "hidden" | "draft";
+export type AdminCourseTab = "published" | "scheduled" | "hidden" | "draft";
 
 export function getCourseMetrics(course: Course) {
   const lessons = course.sections.flatMap((section) => section.lessons);
@@ -29,8 +32,9 @@ export function getCourseMetrics(course: Course) {
 
 export function getAdminCourseTab(course: AdminCourse): AdminCourseTab {
   if (course.missingVimeo > 0) return "draft";
-  if (!course.published) return "hidden";
-  return "published";
+  if (course.isScheduled) return "scheduled";
+  if (course.isLive) return "published";
+  return "hidden";
 }
 
 export function serializeCourseForAdmin(course: Course): AdminCourse {
@@ -43,6 +47,8 @@ export function serializeCourseForAdmin(course: Course): AdminCourse {
       ...(course.thumbnail.imageUrl ? { imageUrl: course.thumbnail.imageUrl } : {}),
     },
     published: course.published !== false,
+    isLive: isCourseLive(course),
+    isScheduled: isScheduledInFuture(course),
     isBase: isBaseCourseSlug(course.slug),
     ...metrics,
   };

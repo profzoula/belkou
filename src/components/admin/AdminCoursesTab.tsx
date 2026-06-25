@@ -3,12 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft,
+  CalendarClock,
   ExternalLink,
   Pencil,
   Plus,
   Save,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -36,12 +38,19 @@ import {
   adminCreateCourse,
   adminDeleteCourse,
   adminDeleteLesson,
+  adminDeleteSection,
+  adminScheduleCoursePublish,
   adminSetCoursePublished,
   adminUpdateCourse,
   adminUpdateLesson,
   getAdminCourses,
 } from "@/lib/fns/admin";
 import { slugifyTitle } from "@/lib/course-storage";
+import {
+  formatScheduledPublishLabel,
+  fromDatetimeLocalValue,
+  toDatetimeLocalValue,
+} from "@/lib/course-publish";
 import { cn } from "@/lib/utils";
 
 type LessonDraft = {
@@ -61,9 +70,6 @@ type CourseMetaDraft = {
   skillLevel: string;
   totalDuration: string;
   bestseller: boolean;
-  thumbnailLabel: string;
-  thumbnailGradient: string;
-  thumbnailImageUrl: string;
 };
 
 type NewLessonDraft = {
@@ -75,6 +81,7 @@ type NewLessonDraft = {
 
 const tabLabels: Record<AdminCourseTab, string> = {
   published: "Publiés",
+  scheduled: "Programmés",
   hidden: "Masqués",
   draft: "En préparation",
 };
@@ -99,9 +106,6 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
     skillLevel: course.skillLevel,
     totalDuration: course.totalDuration,
     bestseller: Boolean(course.bestseller),
-    thumbnailLabel: course.thumbnail.label,
-    thumbnailGradient: course.thumbnail.gradient,
-    thumbnailImageUrl: course.thumbnail.imageUrl ?? "",
   };
 }
 
@@ -122,9 +126,11 @@ export function AdminCoursesTab() {
   const saveLessonFn = useServerFn(adminUpdateLesson);
   const saveCourseFn = useServerFn(adminUpdateCourse);
   const publishFn = useServerFn(adminSetCoursePublished);
+  const scheduleFn = useServerFn(adminScheduleCoursePublish);
   const addLessonFn = useServerFn(adminAddLesson);
   const addSectionFn = useServerFn(adminAddSection);
   const deleteLessonFn = useServerFn(adminDeleteLesson);
+  const deleteSectionFn = useServerFn(adminDeleteSection);
   const createFn = useServerFn(adminCreateCourse);
   const deleteFn = useServerFn(adminDeleteCourse);
 
@@ -140,9 +146,14 @@ export function AdminCoursesTab() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savingMeta, setSavingMeta] = useState(false);
   const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
+  const [schedulingSlug, setSchedulingSlug] = useState<string | null>(null);
+  const [showScheduleFor, setShowScheduleFor] = useState<string | null>(null);
+  const [editorScheduleDraft, setEditorScheduleDraft] = useState("");
+  const [savingSchedule, setSavingSchedule] = useState(false);
   const [addingSectionId, setAddingSectionId] = useState<string | null>(null);
   const [addingSession, setAddingSession] = useState(false);
   const [deletingLessonId, setDeletingLessonId] = useState<string | null>(null);
+  const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -183,7 +194,12 @@ export function AdminCoursesTab() {
   }, []);
 
   const tabCounts = useMemo(() => {
-    const counts: Record<AdminCourseTab, number> = { published: 0, hidden: 0, draft: 0 };
+    const counts: Record<AdminCourseTab, number> = {
+      published: 0,
+      scheduled: 0,
+      hidden: 0,
+      draft: 0,
+    };
     for (const course of courses) {
       counts[getAdminCourseTab(course)] += 1;
     }
@@ -210,8 +226,10 @@ export function AdminCoursesTab() {
   useEffect(() => {
     if (selectedCourse) {
       setMetaDraft(courseToMetaDraft(selectedCourse));
+      setEditorScheduleDraft(toDatetimeLocalValue(selectedCourse.scheduledPublishAt));
     } else {
       setMetaDraft(null);
+      setEditorScheduleDraft("");
     }
   }, [selectedCourse]);
 
@@ -228,11 +246,49 @@ export function AdminCoursesTab() {
       });
       setCourses(result.courses);
       syncDrafts(result.courses);
+      setShowScheduleFor(null);
       toast.success(published ? "Cours publié" : "Cours masqué");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Mise à jour impossible");
     } finally {
       setTogglingSlug(null);
+    }
+  };
+
+  const saveSchedule = async (courseSlug: string, localValue: string, clear = false) => {
+    setSchedulingSlug(courseSlug);
+    try {
+      const iso = clear ? null : fromDatetimeLocalValue(localValue);
+      if (!clear && !iso) {
+        toast.error("Date invalide");
+        return;
+      }
+
+      const result = await scheduleFn({
+        data: {
+          courseSlug,
+          scheduledPublishAt: iso,
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+      setShowScheduleFor(null);
+      setEditorScheduleDraft(clear ? "" : localValue);
+      toast.success(clear ? "Programmation annulée" : "Mise en ligne programmée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Programmation impossible");
+    } finally {
+      setSchedulingSlug(null);
+    }
+  };
+
+  const saveEditorSchedule = async () => {
+    if (!selectedCourse) return;
+    setSavingSchedule(true);
+    try {
+      await saveSchedule(selectedCourse.slug, editorScheduleDraft, !editorScheduleDraft.trim());
+    } finally {
+      setSavingSchedule(false);
     }
   };
 
@@ -309,9 +365,6 @@ export function AdminCoursesTab() {
           skillLevel: metaDraft.skillLevel.trim(),
           totalDuration: metaDraft.totalDuration.trim(),
           bestseller: metaDraft.bestseller,
-          thumbnailLabel: metaDraft.thumbnailLabel.trim(),
-          thumbnailGradient: metaDraft.thumbnailGradient.trim(),
-          thumbnailImageUrl: metaDraft.thumbnailImageUrl.trim() || undefined,
         },
       });
       setCourses(result.courses);
@@ -400,6 +453,32 @@ export function AdminCoursesTab() {
       toast.error(error instanceof Error ? error.message : "Suppression impossible");
     } finally {
       setDeletingLessonId(null);
+    }
+  };
+
+  const deleteSection = async (sectionId: string, sectionTitle: string) => {
+    if (!selectedCourse) return;
+    if (selectedCourse.sections.length <= 1) {
+      toast.error("Impossible de supprimer la dernière session");
+      return;
+    }
+    if (!window.confirm(`Supprimer la session « ${sectionTitle} » et toutes ses leçons ?`)) return;
+
+    setDeletingSectionId(sectionId);
+    try {
+      const result = await deleteSectionFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          sectionId,
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+      toast.success("Session supprimée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setDeletingSectionId(null);
     }
   };
 
@@ -573,20 +652,71 @@ export function AdminCoursesTab() {
           </div>
         </div>
 
+        <div className="rounded-xl border border-border/70 bg-card p-4 space-y-4 shadow-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-semibold flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-primary" />
+                Programmer la mise en ligne
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Le cours deviendra visible automatiquement à la date choisie (sans action manuelle).
+              </p>
+            </div>
+            <Button variant="hero" size="sm" disabled={savingSchedule} onClick={saveEditorSchedule}>
+              <Save className="h-4 w-4 mr-2" />
+              {savingSchedule ? "Enregistrement..." : "Enregistrer le programme"}
+            </Button>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="space-y-1.5 flex-1">
+              <Label htmlFor="schedule-at">Date et heure de publication</Label>
+              <Input
+                id="schedule-at"
+                type="datetime-local"
+                value={editorScheduleDraft}
+                onChange={(e) => setEditorScheduleDraft(e.target.value)}
+                className="rounded-lg max-w-sm"
+              />
+            </div>
+            {selectedCourse.scheduledPublishAt && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                disabled={savingSchedule}
+                onClick={() => {
+                  setEditorScheduleDraft("");
+                  void saveSchedule(selectedCourse.slug, "", true);
+                }}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Annuler la programmation
+              </Button>
+            )}
+          </div>
+          {selectedCourse.isScheduled && selectedCourse.scheduledPublishAt && (
+            <p className="text-sm text-sky-700 bg-sky-50 rounded-lg px-3 py-2">
+              Live prévu le {formatScheduledPublishLabel(selectedCourse.scheduledPublishAt)}
+            </p>
+          )}
+          {selectedCourse.isLive && !selectedCourse.isScheduled && (
+            <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+              Ce cours est actuellement visible sur le site public.
+            </p>
+          )}
+        </div>
+
         <AdminCourseThumbnailEditor
           slug={selectedCourse.slug}
-          value={{
-            label: metaDraft.thumbnailLabel,
-            gradient: metaDraft.thumbnailGradient,
-            imageUrl: metaDraft.thumbnailImageUrl || undefined,
+          imageUrl={selectedCourse.thumbnail.imageUrl}
+          gradient={selectedCourse.thumbnail.gradient}
+          label={selectedCourse.thumbnail.label}
+          onUpdated={(updatedCourses) => {
+            setCourses(updatedCourses);
+            syncDrafts(updatedCourses);
           }}
-          onChange={(patch) =>
-            updateMetaDraft({
-              ...(patch.label !== undefined && { thumbnailLabel: patch.label }),
-              ...(patch.gradient !== undefined && { thumbnailGradient: patch.gradient }),
-              ...(patch.imageUrl !== undefined && { thumbnailImageUrl: patch.imageUrl }),
-            })
-          }
         />
 
         <Accordion
@@ -600,9 +730,27 @@ export function AdminCoursesTab() {
             return (
               <AccordionItem key={section.id} value={section.id} className="rounded-xl border border-border bg-card px-4">
                 <AccordionTrigger className="hover:no-underline py-4">
-                  <div className="text-left">
-                    <p className="font-semibold">{section.title}</p>
-                    <p className="text-xs text-muted-foreground">{section.lessons.length} leçons</p>
+                  <div className="flex w-full items-center justify-between gap-3 pr-2">
+                    <div className="text-left">
+                      <p className="font-semibold">{section.title}</p>
+                      <p className="text-xs text-muted-foreground">{section.lessons.length} leçons</p>
+                    </div>
+                    {selectedCourse.sections.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 shrink-0 text-destructive hover:text-destructive"
+                        disabled={deletingSectionId === section.id}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void deleteSection(section.id, section.title);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        {deletingSectionId === section.id ? "..." : "Supprimer session"}
+                      </Button>
+                    )}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pb-4 space-y-4">
@@ -819,8 +967,7 @@ export function AdminCoursesTab() {
         <div className="border-b border-border px-6 py-4">
           <h2 className="font-display text-lg font-bold">Catalogue public</h2>
           <p className="text-sm text-muted-foreground">
-            Cours visibles sur le site quand ils sont publiés. Masquez un cours ou terminez les vidéos Vimeo avant
-            publication.
+            Publiez immédiatement ou programmez une date de mise en ligne automatique.
           </p>
         </div>
 
@@ -866,17 +1013,90 @@ export function AdminCoursesTab() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={course.published}
-                          disabled={togglingSlug === course.slug || course.missingVimeo > 0}
-                          onCheckedChange={(checked) => togglePublished(course, checked)}
-                          className="data-[state=checked]:bg-[#1a2744]"
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {course.published ? "Publié" : "Masqué"}
-                          {course.missingVimeo > 0 && " · vidéos manquantes"}
-                        </span>
+                      <div className="space-y-2 min-w-[220px]">
+                        {course.isScheduled && course.scheduledPublishAt ? (
+                          <div className="space-y-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-800">
+                              <CalendarClock className="h-3 w-3" />
+                              Live le {formatScheduledPublishLabel(course.scheduledPublishAt)}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 rounded-lg text-xs"
+                              disabled={schedulingSlug === course.slug}
+                              onClick={() => saveSchedule(course.slug, "", true)}
+                            >
+                              Annuler
+                            </Button>
+                          </div>
+                        ) : showScheduleFor === course.slug ? (
+                          <div className="space-y-2">
+                            <Input
+                              type="datetime-local"
+                              value={editorScheduleDraft}
+                              onChange={(e) => setEditorScheduleDraft(e.target.value)}
+                              className="rounded-lg h-8 text-xs"
+                            />
+                            <div className="flex gap-1">
+                              <Button
+                                type="button"
+                                size="sm"
+                                className="h-7 rounded-lg text-xs"
+                                disabled={schedulingSlug === course.slug || course.missingVimeo > 0}
+                                onClick={() => saveSchedule(course.slug, editorScheduleDraft)}
+                              >
+                                OK
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 rounded-lg text-xs"
+                                onClick={() => setShowScheduleFor(null)}
+                              >
+                                Annuler
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={course.isLive}
+                                disabled={
+                                  togglingSlug === course.slug ||
+                                  course.missingVimeo > 0 ||
+                                  course.isScheduled
+                                }
+                                onCheckedChange={(checked) => togglePublished(course, checked)}
+                                className="data-[state=checked]:bg-[#1a2744]"
+                              />
+                              <span className="text-xs text-muted-foreground">
+                                {course.isLive ? "Publié" : "Masqué"}
+                                {course.missingVimeo > 0 && " · vidéos manquantes"}
+                              </span>
+                            </div>
+                            {course.missingVimeo === 0 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-7 rounded-lg text-xs"
+                                onClick={() => {
+                                  setShowScheduleFor(course.slug);
+                                  setEditorScheduleDraft(
+                                    toDatetimeLocalValue(course.scheduledPublishAt),
+                                  );
+                                }}
+                              >
+                                <CalendarClock className="h-3 w-3 mr-1" />
+                                Programmer
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
