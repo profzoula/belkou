@@ -8,7 +8,7 @@ import { AdminLayout, type AdminSection } from "@/components/admin/AdminLayout";
 import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { AdminRegistrationsTab } from "@/components/admin/AdminRegistrationsTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
-import { adminLogout, getAdminDashboard } from "@/lib/fns/admin";
+import { adminLogout, getAdminOverview } from "@/lib/fns/admin";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -24,15 +24,18 @@ export const Route = createFileRoute("/admin/")({
 function AdminDashboardPage() {
   const navigate = useNavigate();
   const logoutFn = useServerFn(adminLogout);
-  const dashboardFn = useServerFn(getAdminDashboard);
+  const overviewFn = useServerFn(getAdminOverview);
   const [section, setSection] = useState<AdminSection>("overview");
   const [refreshKey, setRefreshKey] = useState(0);
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getAdminDashboard>>["stats"] | null>(null);
+  const [overview, setOverview] = useState<Awaited<ReturnType<typeof getAdminOverview>> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dashboardFn()
-      .then((data) => setStats(data.stats))
-      .catch(() => navigate({ to: "/admin/login" }));
+    setLoading(true);
+    overviewFn()
+      .then(setOverview)
+      .catch(() => navigate({ to: "/admin/login" }))
+      .finally(() => setLoading(false));
   }, [refreshKey]);
 
   const logout = async () => {
@@ -48,19 +51,24 @@ function AdminDashboardPage() {
       active={section}
       onNavigate={setSection}
       onRefresh={refresh}
+      refreshing={loading}
       onLogout={logout}
     >
       {section === "overview" &&
-        (stats ? (
-          <AdminOverviewTab stats={stats} onNavigate={setSection} />
+        (overview ? (
+          <AdminOverviewTab data={overview} onNavigate={setSection} />
         ) : (
-          <div className="surface rounded-2xl p-10 text-center text-sm text-muted-foreground">Chargement...</div>
+          <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+            Chargement du dashboard...
+          </div>
         ))}
 
       {section === "inscriptions" && (
         <AdminRegistrationsTab
           key={refreshKey}
-          onStatsLoaded={setStats}
+          onStatsLoaded={(stats) =>
+            setOverview((current) => (current ? { ...current, stats } : current))
+          }
         />
       )}
 

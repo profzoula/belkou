@@ -116,6 +116,79 @@ export const getAdminDashboard = createServerFn({ method: "GET" }).handler(async
   };
 });
 
+export const getAdminOverview = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const db = await getDb();
+  const { getResolvedCourses } = await import("@/server/site-content");
+  const [registrations, stats, courses] = await Promise.all([
+    listRegistrations(db),
+    getRegistrationStats(db),
+    getResolvedCourses(),
+  ]);
+
+  let totalLessons = 0;
+  let videoLessons = 0;
+  let lessonsWithoutVideo = 0;
+  let previewLessons = 0;
+
+  const courseSummaries = courses.map((course) => {
+    const lessons = course.sections.flatMap((section) => section.lessons);
+    const videos = lessons.filter((lesson) => lesson.type === "video");
+    const missingVimeo = videos.filter((lesson) => !lesson.vimeo?.trim()).length;
+    const previews = lessons.filter((lesson) => lesson.preview).length;
+
+    totalLessons += lessons.length;
+    videoLessons += videos.length;
+    lessonsWithoutVideo += missingVimeo;
+    previewLessons += previews;
+
+    return {
+      slug: course.slug,
+      title: course.title,
+      plan: course.plan ?? "premium",
+      lessonCount: lessons.length,
+      videoCount: videos.length,
+      missingVimeo,
+    };
+  });
+
+  let affiliateCount = 0;
+  let pendingWithdrawals = 0;
+  try {
+    const { getAdminAffiliateOverview } = await import("@/server/affiliates");
+    const affiliateData = await getAdminAffiliateOverview();
+    affiliateCount = affiliateData.affiliates.length;
+    pendingWithdrawals = affiliateData.withdrawals.filter((w) => w.status === "pending").length;
+  } catch {
+    // Affiliate tables optional
+  }
+
+  return {
+    stats,
+    content: {
+      courseCount: courses.length,
+      totalLessons,
+      videoLessons,
+      lessonsWithoutVideo,
+      previewLessons,
+      courses: courseSummaries,
+    },
+    affiliate: {
+      affiliateCount,
+      pendingWithdrawals,
+    },
+    recentRegistrations: registrations.slice(0, 8).map((r) => ({
+      id: r.id,
+      full_name: r.full_name,
+      email: r.email,
+      country: r.country,
+      plan: r.plan,
+      payment_status: r.payment_status,
+      created_at: r.created_at,
+    })),
+  };
+});
+
 export const adminAddCashRegistration = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
