@@ -28,10 +28,14 @@ import {
   type AdminCourse,
   type AdminCourseTab,
 } from "@/lib/admin-courses";
+import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import {
   adminAddLesson,
+  adminAddSection,
   adminCreateCourse,
   adminDeleteCourse,
+  adminDeleteLesson,
   adminSetCoursePublished,
   adminUpdateCourse,
   adminUpdateLesson,
@@ -59,6 +63,7 @@ type CourseMetaDraft = {
   bestseller: boolean;
   thumbnailLabel: string;
   thumbnailGradient: string;
+  thumbnailImageUrl: string;
 };
 
 type NewLessonDraft = {
@@ -96,6 +101,7 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
     bestseller: Boolean(course.bestseller),
     thumbnailLabel: course.thumbnail.label,
     thumbnailGradient: course.thumbnail.gradient,
+    thumbnailImageUrl: course.thumbnail.imageUrl ?? "",
   };
 }
 
@@ -117,6 +123,8 @@ export function AdminCoursesTab() {
   const saveCourseFn = useServerFn(adminUpdateCourse);
   const publishFn = useServerFn(adminSetCoursePublished);
   const addLessonFn = useServerFn(adminAddLesson);
+  const addSectionFn = useServerFn(adminAddSection);
+  const deleteLessonFn = useServerFn(adminDeleteLesson);
   const createFn = useServerFn(adminCreateCourse);
   const deleteFn = useServerFn(adminDeleteCourse);
 
@@ -133,6 +141,9 @@ export function AdminCoursesTab() {
   const [savingMeta, setSavingMeta] = useState(false);
   const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
   const [addingSectionId, setAddingSectionId] = useState<string | null>(null);
+  const [addingSession, setAddingSession] = useState(false);
+  const [deletingLessonId, setDeletingLessonId] = useState<string | null>(null);
+  const [newSectionTitle, setNewSectionTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -300,6 +311,7 @@ export function AdminCoursesTab() {
           bestseller: metaDraft.bestseller,
           thumbnailLabel: metaDraft.thumbnailLabel.trim(),
           thumbnailGradient: metaDraft.thumbnailGradient.trim(),
+          thumbnailImageUrl: metaDraft.thumbnailImageUrl.trim() || undefined,
         },
       });
       setCourses(result.courses);
@@ -343,6 +355,54 @@ export function AdminCoursesTab() {
     }
   };
 
+  const addSection = async () => {
+    if (!selectedCourse) return;
+    if (!newSectionTitle.trim()) {
+      toast.error("Titre de la session requis");
+      return;
+    }
+
+    setAddingSession(true);
+    try {
+      const result = await addSectionFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          title: newSectionTitle.trim(),
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+      setNewSectionTitle("");
+      toast.success("Session ajoutée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ajout impossible");
+    } finally {
+      setAddingSession(false);
+    }
+  };
+
+  const deleteLesson = async (lessonId: string, lessonTitle: string) => {
+    if (!selectedCourse) return;
+    if (!window.confirm(`Supprimer la leçon « ${lessonTitle} » ?`)) return;
+
+    setDeletingLessonId(lessonId);
+    try {
+      const result = await deleteLessonFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          lessonId,
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+      toast.success("Leçon supprimée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setDeletingLessonId(null);
+    }
+  };
+
   const handleTitleChange = (value: string) => {
     setNewTitle(value);
     if (!slugEdited) {
@@ -374,7 +434,7 @@ export function AdminCoursesTab() {
       setNewPlan("premium");
       setSlugEdited(false);
       setActiveTab("draft");
-      toast.success("Cours créé — ajoutez les vidéos puis publiez");
+      toast.success(`Cours créé — aperçu : /courses/${result.createdSlug}`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Création impossible");
     } finally {
@@ -513,7 +573,28 @@ export function AdminCoursesTab() {
           </div>
         </div>
 
-        <Accordion type="multiple" defaultValue={selectedCourse.sections.map((s) => s.id)} className="space-y-3">
+        <AdminCourseThumbnailEditor
+          slug={selectedCourse.slug}
+          value={{
+            label: metaDraft.thumbnailLabel,
+            gradient: metaDraft.thumbnailGradient,
+            imageUrl: metaDraft.thumbnailImageUrl || undefined,
+          }}
+          onChange={(patch) =>
+            updateMetaDraft({
+              ...(patch.label !== undefined && { thumbnailLabel: patch.label }),
+              ...(patch.gradient !== undefined && { thumbnailGradient: patch.gradient }),
+              ...(patch.imageUrl !== undefined && { thumbnailImageUrl: patch.imageUrl }),
+            })
+          }
+        />
+
+        <Accordion
+          type="multiple"
+          key={selectedCourse.sections.map((s) => s.id).join("-")}
+          defaultValue={selectedCourse.sections.map((s) => s.id)}
+          className="space-y-3"
+        >
           {selectedCourse.sections.map((section) => {
             const newLesson = getNewLessonDraft(section.id);
             return (
@@ -530,9 +611,22 @@ export function AdminCoursesTab() {
                     const draft = drafts[key] ?? lessonToDraft(lesson);
                     return (
                       <div key={lesson.id} className="rounded-lg border border-border p-4 space-y-3">
-                        <p className="text-sm font-semibold">
-                          {index + 1}. {lesson.title}
-                        </p>
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm font-semibold">
+                            {index + 1}. {lesson.title}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-destructive hover:text-destructive shrink-0"
+                            disabled={deletingLessonId === lesson.id}
+                            onClick={() => deleteLesson(lesson.id, lesson.title)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            {deletingLessonId === lesson.id ? "..." : "Supprimer"}
+                          </Button>
+                        </div>
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="space-y-1.5 sm:col-span-2">
                             <Label>Titre</Label>
@@ -606,6 +700,31 @@ export function AdminCoursesTab() {
             );
           })}
         </Accordion>
+
+        <div className="rounded-xl border border-dashed border-border bg-card p-4 space-y-3">
+          <div>
+            <h2 className="font-semibold">Ajouter une session</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Créez une nouvelle section (ex. Introduction, Module 2, Déploiement…).
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="new-section-title">Titre de la session</Label>
+              <Input
+                id="new-section-title"
+                value={newSectionTitle}
+                onChange={(e) => setNewSectionTitle(e.target.value)}
+                className="rounded-lg"
+                placeholder="Construire votre application"
+              />
+            </div>
+            <Button variant="hero" size="sm" disabled={addingSession} onClick={addSection}>
+              <Plus className="h-4 w-4 mr-2" />
+              {addingSession ? "Ajout..." : "Ajouter la session"}
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -726,8 +845,20 @@ export function AdminCoursesTab() {
                 {filteredCourses.map((course) => (
                   <tr key={course.slug} className="border-b border-border last:border-0 hover:bg-muted/20">
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-foreground">{course.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{course.slug}</p>
+                      <div className="flex items-center gap-3">
+                        <CourseThumbnailBanner
+                          thumbnail={course.thumbnail}
+                          slug={course.slug}
+                          aspectClass="aspect-[4/3] w-16"
+                          className="rounded-lg overflow-hidden shrink-0 border border-border"
+                          showLabel={false}
+                          showIcon={false}
+                        />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground">{course.title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{course.slug}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">

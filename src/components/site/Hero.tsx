@@ -3,8 +3,8 @@ import { ArrowRight, BookOpen, Play, Star, Users } from "lucide-react";
 import { siteConfig } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 import { ToolsStrip } from "@/components/site/ToolsStrip";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCount } from "@/lib/courses";
-import { getCourseIcon } from "@/lib/course-icons";
 import type { PublicCourse } from "@/lib/fns/courses";
 
 type HeroProps = {
@@ -13,7 +13,6 @@ type HeroProps = {
 };
 
 function FeaturedCourseCard({ course }: { course: PublicCourse }) {
-  const Icon = getCourseIcon(course.slug);
   const previewLesson = course.sections
     .flatMap((s) => s.lessons)
     .find((l) => l.preview && l.type === "video");
@@ -24,20 +23,19 @@ function FeaturedCourseCard({ course }: { course: PublicCourse }) {
       params={{ slug: course.slug }}
       className="group block surface overflow-hidden rounded-2xl border border-border shadow-lg transition-all hover:shadow-xl hover:border-primary/30"
     >
-      <div className={`relative aspect-[16/10] bg-gradient-to-br ${course.thumbnail.gradient} p-6`}>
+      <CourseThumbnailBanner thumbnail={course.thumbnail} slug={course.slug} className="p-6" showLabel={false}>
         {course.bestseller && (
-          <span className="absolute left-4 top-4 rounded-sm bg-teal-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          <span className="absolute left-4 top-4 z-10 rounded-sm bg-teal-800 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
             Bestseller
           </span>
         )}
-        <Icon className="absolute right-4 top-4 h-12 w-12 text-white/20" aria-hidden />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12">
+        <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-white/80">{course.thumbnail.label}</p>
           <h3 className="mt-1 line-clamp-2 font-display text-lg font-bold text-white leading-snug group-hover:underline">
             {course.title}
           </h3>
         </div>
-      </div>
+      </CourseThumbnailBanner>
       <div className="p-4 sm:p-5">
         <p className="truncate text-sm text-muted-foreground">{course.instructor}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">

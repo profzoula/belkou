@@ -7,6 +7,7 @@ export type PublicCourse = Omit<Course, "thumbnail"> & {
   thumbnail: {
     gradient: string;
     label: string;
+    imageUrl?: string;
   };
 };
 
@@ -16,6 +17,7 @@ function toPublicCourse(course: Course): PublicCourse {
     thumbnail: {
       gradient: course.thumbnail.gradient,
       label: course.thumbnail.label,
+      ...(course.thumbnail.imageUrl ? { imageUrl: course.thumbnail.imageUrl } : {}),
     },
   };
 }

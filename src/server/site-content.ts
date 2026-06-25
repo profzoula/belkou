@@ -1,9 +1,12 @@
-import type { Course, CourseLesson } from "@/lib/courses";
+import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
 import { courses as baseCourses, DEFAULT_PREVIEW_VIMEO, isBaseCourseSlug } from "@/lib/courses";
 import {
   addLessonToStoredCourse,
+  addSectionToStoredCourse,
   buildDefaultStoredCourse,
+  buildNewSection,
   buildNewVideoLesson,
+  deleteLessonFromStoredCourse,
   patchLessonInStoredCourse,
   patchStoredCourseMeta,
   storedCourseToCourse,
@@ -23,6 +26,8 @@ export type CourseOverride = {
   meta?: CourseMetaOverride;
   lessons?: Record<string, CourseLessonOverride>;
   addedLessons?: Array<{ sectionId: string; lesson: CourseLesson }>;
+  addedSections?: CourseSection[];
+  deletedLessons?: string[];
 };
 
 export type CourseOverridesMap = Record<string, CourseOverride>;
@@ -103,6 +108,9 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
         ...merged.thumbnail,
         ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
         ...(meta.thumbnailGradient !== undefined && { gradient: meta.thumbnailGradient }),
+        ...(meta.thumbnailImageUrl !== undefined && {
+          imageUrl: meta.thumbnailImageUrl.trim() || undefined,
+        }),
       },
     };
   }
@@ -128,6 +136,24 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
         if (!extra.length) return section;
         return { ...section, lessons: [...section.lessons, ...extra.map((item) => item.lesson)] };
       }),
+    };
+  }
+
+  if (override.addedSections?.length) {
+    merged = {
+      ...merged,
+      sections: [...merged.sections, ...override.addedSections],
+    };
+  }
+
+  if (override.deletedLessons?.length) {
+    const deleted = new Set(override.deletedLessons);
+    merged = {
+      ...merged,
+      sections: merged.sections.map((section) => ({
+        ...section,
+        lessons: section.lessons.filter((lesson) => !deleted.has(lesson.id)),
+      })),
     };
   }
 
@@ -323,6 +349,86 @@ export async function addLessonToCourse(params: { courseSlug: string; input: Add
   const result = await saveStoredAdminCourses(stored);
   if (!result.ok) return result;
   return { ok: true as const, lessonId: lesson.id };
+}
+
+export async function addSectionToCourse(params: { courseSlug: string; title: string }) {
+  const title = params.title.trim();
+  if (!title) {
+    return { ok: false, reason: "Titre requis" };
+  }
+
+  const section = buildNewSection(title);
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const overrides = await getCourseOverrides();
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    const addedSections = [...(courseOverride.addedSections ?? []), section];
+    overrides[params.courseSlug] = { ...courseOverride, addedSections };
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const, sectionId: section.id };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  stored[index] = addSectionToStoredCourse(stored[index], section);
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const, sectionId: section.id };
+}
+
+export async function deleteLessonFromCourse(params: { courseSlug: string; lessonId: string }) {
+  const lessonId = params.lessonId.trim();
+  if (!lessonId) {
+    return { ok: false, reason: "Leçon introuvable" };
+  }
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const overrides = await getCourseOverrides();
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    const addedLessons = (courseOverride.addedLessons ?? []).filter((item) => item.lesson.id !== lessonId);
+    const wasAdded = addedLessons.length !== (courseOverride.addedLessons ?? []).length;
+    const deletedLessons = new Set(courseOverride.deletedLessons ?? []);
+
+    if (!wasAdded) {
+      deletedLessons.add(lessonId);
+    }
+
+    const lessons = { ...(courseOverride.lessons ?? {}) };
+    delete lessons[lessonId];
+
+    overrides[params.courseSlug] = {
+      ...courseOverride,
+      addedLessons,
+      deletedLessons: [...deletedLessons],
+      lessons,
+    };
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  const hasLesson = stored[index].sections.some((section) =>
+    section.lessons.some((lesson) => lesson.id === lessonId),
+  );
+  if (!hasLesson) {
+    return { ok: false, reason: "Leçon introuvable" };
+  }
+
+  stored[index] = deleteLessonFromStoredCourse(stored[index], lessonId);
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const };
 }
 
 export async function createAdminCourse(input: CreateCourseInput) {

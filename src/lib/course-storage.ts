@@ -6,6 +6,7 @@ export type StoredCourseThumbnail = {
   gradient: string;
   label: string;
   iconKey?: string;
+  imageUrl?: string;
 };
 
 export type StoredCourse = Omit<Course, "thumbnail"> & {
@@ -29,6 +30,7 @@ export function storedCourseToCourse(stored: StoredCourse): Course {
       gradient: stored.thumbnail.gradient,
       label: stored.thumbnail.label,
       icon,
+      ...(stored.thumbnail.imageUrl ? { imageUrl: stored.thumbnail.imageUrl } : {}),
     },
   };
 }
@@ -61,6 +63,7 @@ export type CourseMetaPatch = {
   bestseller?: boolean;
   thumbnailLabel?: string;
   thumbnailGradient?: string;
+  thumbnailImageUrl?: string;
   published?: boolean;
 };
 
@@ -81,6 +84,9 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
       ...course.thumbnail,
       ...(patch.thumbnailLabel !== undefined && { label: patch.thumbnailLabel }),
       ...(patch.thumbnailGradient !== undefined && { gradient: patch.thumbnailGradient }),
+      ...(patch.thumbnailImageUrl !== undefined && {
+        imageUrl: patch.thumbnailImageUrl.trim() || undefined,
+      }),
     },
   };
 }
@@ -119,6 +125,32 @@ export function addLessonToStoredCourse(
     sections: course.sections.map((section) =>
       section.id === sectionId ? { ...section, lessons: [...section.lessons, lesson] } : section,
     ),
+  };
+}
+
+export function buildNewSection(title: string): CourseSection {
+  const id = `${slugifyTitle(title) || "section"}-${Date.now().toString(36)}`;
+  return {
+    id,
+    title: title.trim(),
+    lessons: [],
+  };
+}
+
+export function addSectionToStoredCourse(course: StoredCourse, section: CourseSection): StoredCourse {
+  return {
+    ...course,
+    sections: [...course.sections, section],
+  };
+}
+
+export function deleteLessonFromStoredCourse(course: StoredCourse, lessonId: string): StoredCourse {
+  return {
+    ...course,
+    sections: course.sections.map((section) => ({
+      ...section,
+      lessons: section.lessons.filter((lesson) => lesson.id !== lessonId),
+    })),
   };
 }
 

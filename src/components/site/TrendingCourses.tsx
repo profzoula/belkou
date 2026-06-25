@@ -9,8 +9,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { SectionHeader } from "@/components/site/SectionHeader";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCount } from "@/lib/courses";
-import { getCourseIcon } from "@/lib/course-icons";
 import type { PublicCourse } from "@/lib/fns/courses";
 
 type TrendingCoursesProps = {
@@ -18,22 +18,22 @@ type TrendingCoursesProps = {
 };
 
 function CourseCard({ course }: { course: PublicCourse }) {
-  const Icon = getCourseIcon(course.slug);
-
   return (
     <Link
       to="/courses/$slug"
       params={{ slug: course.slug }}
       className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-md hover:border-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
-      <div
-        className={`relative flex aspect-[16/10] items-center justify-center bg-gradient-to-br ${course.thumbnail.gradient} p-4`}
+      <CourseThumbnailBanner
+        thumbnail={course.thumbnail}
+        slug={course.slug}
+        className="flex items-center justify-center p-4"
+        showLabel={false}
       >
-        <Icon className="absolute right-3 top-3 h-8 w-8 text-white/25" aria-hidden />
-        <span className="rounded-lg bg-black/20 px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+        <span className="relative z-10 rounded-lg bg-black/20 px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
           {course.thumbnail.label}
         </span>
-      </div>
+      </CourseThumbnailBanner>
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-foreground group-hover:text-primary">

@@ -461,6 +461,7 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
         bestseller: z.boolean().optional(),
         thumbnailLabel: z.string().optional(),
         thumbnailGradient: z.string().optional(),
+        thumbnailImageUrl: z.string().optional(),
         published: z.boolean().optional(),
       })
       .parse(data),
@@ -534,6 +535,50 @@ export const adminAddLesson = createServerFn({ method: "POST" })
       courses: adminCoursesResponse(await getResolvedCourses()),
       lessonId: result.lessonId,
     };
+  });
+
+export const adminAddSection = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), title: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { addSectionToCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await addSectionToCourse({
+      courseSlug: data.courseSlug,
+      title: data.title,
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Ajout impossible");
+    }
+
+    return {
+      ok: true as const,
+      courses: adminCoursesResponse(await getResolvedCourses()),
+      sectionId: result.sectionId,
+    };
+  });
+
+export const adminDeleteLesson = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), lessonId: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { deleteLessonFromCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await deleteLessonFromCourse({
+      courseSlug: data.courseSlug,
+      lessonId: data.lessonId,
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
 
 export const getAdminSiteSettings = createServerFn({ method: "GET" }).handler(async () => {

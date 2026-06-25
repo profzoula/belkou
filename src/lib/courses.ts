@@ -45,6 +45,7 @@ export type Course = {
     gradient: string;
     icon: LucideIcon;
     label: string;
+    imageUrl?: string;
   };
   sections: CourseSection[];
 };

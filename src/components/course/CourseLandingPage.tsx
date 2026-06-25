@@ -22,7 +22,7 @@ import {
   formatCount,
   getAllLessons,
 } from "@/lib/courses";
-import { getCourseIcon } from "@/lib/course-icons";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { siteConfig } from "@/lib/site-config";
@@ -37,29 +37,33 @@ function discountPercent(price: number, original: number) {
   return Math.round((1 - price / original) * 100);
 }
 
+function planPriceForCourse(course: PublicCourse, planId: PlanId) {
+  const coursePlan = course.plan ?? "premium";
+  if (planId === coursePlan) {
+    return { price: course.price, original: course.originalPrice };
+  }
+  const option = planDetails[planId];
+  return { price: option.price, original: Math.round(option.price * 1.35) };
+}
+
 function CourseThumbnail({ course }: { course: PublicCourse }) {
-  const Icon = getCourseIcon(course.slug);
   const previewLesson = useMemo(
     () => getAllLessons(course).find((lesson) => lesson.preview && lesson.type === "video"),
     [course],
   );
 
   return (
-    <div
-      className={cn(
-        "relative flex aspect-video items-center justify-center overflow-hidden bg-gradient-to-br border-b border-border",
-        course.thumbnail.gradient,
-      )}
+    <CourseThumbnailBanner
+      thumbnail={course.thumbnail}
+      slug={course.slug}
+      aspectClass="aspect-video"
+      className="border-b border-border"
     >
-      <Icon className="absolute right-4 top-4 h-12 w-12 text-white/20" aria-hidden />
-      <span className="absolute left-4 top-4 rounded-md bg-black/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-        {course.thumbnail.label}
-      </span>
       <Link
         to="/courses/$slug/learn"
         params={{ slug: course.slug }}
         search={previewLesson ? { lesson: previewLesson.id } : undefined}
-        className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
+        className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
       >
         <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
           <Play className="ml-1 h-7 w-7 fill-current" />
@@ -68,7 +72,7 @@ function CourseThumbnail({ course }: { course: PublicCourse }) {
           {previewLesson ? "Preview gratuite" : "Voir le cours"}
         </span>
       </Link>
-    </div>
+    </CourseThumbnailBanner>
   );
 }
 
@@ -102,8 +106,14 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               Cours
             </Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-white/90 line-clamp-1">Apps IA & SaaS</span>
+            <span className="text-white/90 line-clamp-1">{course.title}</span>
           </nav>
+
+          {!course.published && (
+            <p className="mb-4 inline-flex rounded-lg border border-amber-400/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+              Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
+            </p>
+          )}
 
           <h1 className="max-w-4xl font-display text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
             {course.title}
@@ -148,7 +158,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               {(["premium", "vip"] as const).map((planId) => {
                 const option = planDetails[planId];
                 const active = selectedPlan === planId;
-                const pct = discountPercent(option.price, course.originalPrice);
+                const { price, original } = planPriceForCourse(course, planId);
+                const pct = discountPercent(price, original);
 
                 return (
                   <label
@@ -169,10 +180,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                       <p className="font-bold">{option.name}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{option.desc}</p>
                       <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                        <span className="text-2xl font-bold">${option.price}</span>
+                        <span className="text-2xl font-bold">${price}</span>
                         {pct > 0 && (
                           <>
-                            <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
+                            <span className="text-sm text-muted-foreground line-through">${original}</span>
                             <span className="text-xs font-semibold text-emerald-600">{pct}% off</span>
                           </>
                         )}
@@ -229,17 +240,19 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             )}
           </div>
 
-          <section className="mb-10 rounded-xl border border-border p-5 sm:p-6">
-            <h2 className="text-xl font-bold mb-4">Ce que vous apprendrez</h2>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {course.whatYouLearn.map((item) => (
-                <li key={item} className="flex gap-2 text-sm">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {course.whatYouLearn.length > 0 && (
+            <section className="mb-10 rounded-xl border border-border p-5 sm:p-6">
+              <h2 className="text-xl font-bold mb-4">Ce que vous apprendrez</h2>
+              <ul className="grid gap-3 sm:grid-cols-2">
+                {course.whatYouLearn.map((item) => (
+                  <li key={item} className="flex gap-2 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="mb-10">
             <h2 className="text-xl font-bold mb-4">Contenu du cours</h2>

@@ -5,7 +5,7 @@ import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import { formatCount } from "@/lib/courses";
 import { getPublicCourses } from "@/lib/fns/courses";
-import { getCourseIcon } from "@/lib/course-icons";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/courses/")({
@@ -38,20 +38,20 @@ function CoursesIndexPage() {
           <p className="mt-10 text-muted-foreground">Aucun cours disponible pour le moment.</p>
         ) : (
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
-            {courses.map((course) => {
-              const Icon = getCourseIcon(course.slug);
-              return (
-                <Link
-                  key={course.slug}
-                  to="/courses/$slug"
-                  params={{ slug: course.slug }}
-                  className="group flex overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md"
-                >
-                  <div
-                    className={`flex w-36 shrink-0 items-center justify-center bg-gradient-to-br sm:w-44 ${course.thumbnail.gradient}`}
-                  >
-                    <Icon className="h-10 w-10 text-white/40" aria-hidden />
-                  </div>
+            {courses.map((course) => (
+              <Link
+                key={course.slug}
+                to="/courses/$slug"
+                params={{ slug: course.slug }}
+                className="group flex overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-md"
+              >
+                <CourseThumbnailBanner
+                  thumbnail={course.thumbnail}
+                  slug={course.slug}
+                  aspectClass="aspect-auto w-36 sm:w-44 min-h-full"
+                  className="shrink-0"
+                  showLabel={false}
+                />
                   <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
                     <h2 className="line-clamp-2 font-bold leading-snug group-hover:text-primary">{course.title}</h2>
                     <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
@@ -68,9 +68,8 @@ function CoursesIndexPage() {
                       <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
                     </div>
                   </div>
-                </Link>
-              );
-            })}
+              </Link>
+            ))}
           </div>
         )}
 

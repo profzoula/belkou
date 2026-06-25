@@ -5,6 +5,7 @@ export type AdminCourse = Omit<Course, "thumbnail"> & {
   thumbnail: {
     gradient: string;
     label: string;
+    imageUrl?: string;
   };
   published: boolean;
   isBase: boolean;
@@ -39,6 +40,7 @@ export function serializeCourseForAdmin(course: Course): AdminCourse {
     thumbnail: {
       gradient: course.thumbnail.gradient,
       label: course.thumbnail.label,
+      ...(course.thumbnail.imageUrl ? { imageUrl: course.thumbnail.imageUrl } : {}),
     },
     published: course.published !== false,
     isBase: isBaseCourseSlug(course.slug),
