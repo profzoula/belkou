@@ -19,7 +19,7 @@ const categories = [
     icon: Rocket,
     title: "Déploiement",
     description: "Railway, Cloudflare, domaines et production",
-    gradient: "from-orange-500 via-amber-500 to-yellow-600",
+    gradient: "from-indigo-600 via-violet-600 to-blue-700",
   },
   {
     icon: CreditCard,

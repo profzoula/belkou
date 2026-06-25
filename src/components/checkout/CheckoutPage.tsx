@@ -155,7 +155,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
       </header>
 
       <main className="site-container py-8 lg:py-10">
-        <h1 className="text-2xl font-bold text-[#1c1d1f] mb-8">Checkout to start learning</h1>
+        <h1 className="text-2xl font-bold text-foreground mb-8">Checkout to start learning</h1>
 
         <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:items-start">
           <div className="space-y-6 min-w-0">
@@ -175,7 +175,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm leading-snug text-[#1c1d1f]">
+                  <p className="text-sm leading-snug text-foreground">
                     Accès complet à <strong>{productTitle}</strong>
                     {course ? "" : ", formation BelKou en cohorte"}.
                   </p>
@@ -185,7 +185,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {courseSlug && course ? (
-                  <div className="sm:col-span-2 rounded border border-[#5624d0] bg-[#5624d0]/5 p-4">
+                  <div className="sm:col-span-2 rounded border border-primary bg-primary/5 p-4">
                     <p className="font-bold text-sm">{course.title}</p>
                     <p className="text-xl font-bold mt-1">${course.price}</p>
                     {course.originalPrice > course.price && (
@@ -208,8 +208,8 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                         className={cn(
                           "cursor-pointer rounded border p-4 transition-colors",
                           active
-                            ? "border-[#5624d0] ring-1 ring-[#5624d0]/40 bg-[#5624d0]/5"
-                            : "border-border hover:border-[#5624d0]/50",
+                            ? "border-primary ring-1 ring-primary/40 bg-primary/5"
+                            : "border-border hover:border-primary/50",
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -218,7 +218,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                             name="checkout-plan"
                             checked={active}
                             onChange={() => setSelectedPlan(planId)}
-                            className="mt-1 accent-[#5624d0]"
+                            className="mt-1 accent-primary"
                           />
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-sm">{option.name}</p>
@@ -249,7 +249,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                     : plan.features
                   ).map((feature) => (
                     <li key={feature} className="flex gap-2 text-sm">
-                      <Check className="h-4 w-4 shrink-0 text-[#5624d0]" />
+                      <Check className="h-4 w-4 shrink-0 text-primary" />
                       {feature}
                     </li>
                   ))}
@@ -259,7 +259,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
 
             {/* Personal info */}
             <section className="rounded border border-border bg-white p-5 space-y-4">
-              <h2 className="font-bold text-[#1c1d1f]">Vos informations</h2>
+              <h2 className="font-bold text-foreground">Vos informations</h2>
               <div className="space-y-2">
                 <Label htmlFor="full_name">Nom complet</Label>
                 <Input
@@ -310,7 +310,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
 
             {/* Billing */}
             <section className="rounded border border-border bg-white p-5 space-y-4">
-              <h2 className="font-bold text-[#1c1d1f]">Billing address</h2>
+              <h2 className="font-bold text-foreground">Billing address</h2>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Country</Label>
@@ -347,15 +347,15 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
             {/* Payment */}
             <section className="rounded border border-border bg-white p-5 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-[#1c1d1f]">Payment Method</h2>
+                <h2 className="font-bold text-foreground">Payment Method</h2>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Secure and encrypted
                 </span>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded border-2 border-[#5624d0] bg-[#5624d0]/5 p-4">
-                <input type="radio" name="pay" checked readOnly className="accent-[#5624d0]" />
+              <label className="flex cursor-pointer items-center gap-3 rounded border-2 border-primary bg-primary/5 p-4">
+                <input type="radio" name="pay" checked readOnly className="accent-primary" />
                 <CreditCard className="h-5 w-5" />
                 <div>
                   <p className="font-semibold text-sm">Carte bancaire</p>
@@ -407,7 +407,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full border-[#5624d0] text-[#5624d0] hover:bg-[#5624d0]/5"
+                    className="w-full border-primary text-primary hover:bg-primary/5"
                     onClick={() => setCouponOpen(true)}
                   >
                     Apply Coupon
@@ -435,7 +435,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                 />
                 <span>
                   J&apos;accepte les{" "}
-                  <Link to="/legal/cgv" className="text-[#5624d0] underline">
+                  <Link to="/legal/cgv" className="text-primary underline">
                     conditions générales
                   </Link>
                   . Cohorte BelKou — début {siteConfig.cohortStartDate}. Pas de remboursement après paiement.
@@ -445,7 +445,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
               <Button
                 type="submit"
                 disabled={loading || !acceptedTerms}
-                className="mt-5 w-full h-12 rounded-md bg-[#5624d0] hover:bg-[#4a1fb8] text-base font-bold"
+                className="mt-5 w-full h-12 rounded-md bg-primary hover:bg-primary/90 text-base font-bold"
               >
                 <Lock className="h-4 w-4 mr-2" />
                 {loading ? "Redirection..." : "Complete purchase"}

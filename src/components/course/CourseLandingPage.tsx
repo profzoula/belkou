@@ -78,7 +78,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-white/10 bg-[#1c1d1f] text-white">
+      <header className="border-b border-white/10 bg-course-hero text-white">
         <div className="site-container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm">
             <img src={siteConfig.logo} alt="" className="h-8 w-8 rounded-lg" />
@@ -90,7 +90,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </div>
       </header>
 
-      <section className="bg-[#1c1d1f] text-white pb-10 pt-6">
+      <section className="bg-course-hero text-white pb-10 pt-6">
         <div className="site-container">
           <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-white/70">
             <Link to="/" className="hover:text-white hover:underline">
@@ -112,7 +112,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           )}
 
           {!contentLive && !scheduledSoon && (
-            <p className="mb-4 inline-flex rounded-lg border border-amber-400/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+            <p className="mb-4 inline-flex rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs text-white/80">
               Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
             </p>
           )}
@@ -126,7 +126,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {course.bestseller && (
-              <span className="rounded-sm bg-[#eceb98] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#3d3c0a]">
+              <span className="rounded-sm bg-white/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
                 Bestseller
               </span>
             )}
@@ -137,7 +137,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
           <p className="mt-3 text-sm">
             Créé par{" "}
-            <span className="text-[#c0caff] underline-offset-2 hover:underline">{course.instructor}</span>
+            <span className="text-indigo-200 underline-offset-2 hover:underline">{course.instructor}</span>
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/70">
@@ -194,7 +194,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
         <main className="min-w-0 lg:order-1">
           <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
-            <span className="inline-flex items-center gap-1 rounded-sm bg-violet-100 px-2 py-0.5 text-xs font-bold text-violet-900 dark:bg-violet-500/20 dark:text-violet-200">
+            <span className="inline-flex items-center gap-1 rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
               <Award className="h-3.5 w-3.5" />
               {course.skillLevel}
             </span>

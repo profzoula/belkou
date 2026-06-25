@@ -12,7 +12,7 @@ export function FormationObjectivesPanel() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-6 left-0 h-32 w-32 rounded-full bg-amber-400/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-6 left-0 h-32 w-32 rounded-full bg-primary/8 blur-3xl"
       />
 
       <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-card/90 shadow-lg backdrop-blur-sm">
@@ -21,7 +21,7 @@ export function FormationObjectivesPanel() {
           className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
         />
 
-        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.06] via-card to-amber-50/30 dark:to-primary/10 px-5 py-5 sm:px-6 sm:py-6">
+        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.06] via-card to-primary-soft/40 px-5 py-5 sm:px-6 sm:py-6">
           <p className="section-label mb-2">
             <Sparkles className="h-3.5 w-3.5" />
             Objectifs

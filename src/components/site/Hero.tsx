@@ -81,7 +81,7 @@ export function Hero({ studentCount, courses }: HeroProps) {
   return (
     <section className="relative overflow-hidden bg-gradient-mesh site-page-top pb-10 sm:pb-14 md:pb-16">
       <div aria-hidden className="pointer-events-none absolute top-20 left-1/4 h-72 w-72 rounded-full bg-primary/8 blur-3xl" />
-      <div aria-hidden className="pointer-events-none absolute top-32 right-0 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute top-32 right-0 h-96 w-96 rounded-full bg-primary/8 blur-3xl" />
 
       <div className="site-container relative pt-8 sm:pt-10 lg:pt-12 min-w-0">
         <div className="grid min-w-0 lg:grid-cols-2 gap-10 xl:gap-14 items-start">

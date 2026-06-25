@@ -84,7 +84,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
   if (enrollments.length === 0) {
     return (
       <section>
-        <h2 className="text-2xl font-bold text-[#1c1d1f] mb-6">Mes cours</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">Mes cours</h2>
         <div className="rounded-lg border border-border bg-card p-10 md:p-12 text-center">
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-muted">
             <BookOpen className="h-7 w-7 text-muted-foreground" />
@@ -93,7 +93,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
           <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
             Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre.
           </p>
-          <Button asChild className="rounded-md bg-[#5624d0] hover:bg-[#4a1fb8]">
+          <Button asChild variant="hero" className="rounded-md">
             <Link to="/courses">
               Explorer les cours <ArrowRight className="h-4 w-4" />
             </Link>
@@ -107,7 +107,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   return (
     <section className="space-y-5">
-      <h2 className="text-2xl font-bold text-[#1c1d1f]">Mes cours</h2>
+      <h2 className="text-2xl font-bold text-foreground">Mes cours</h2>
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
@@ -131,7 +131,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
           />
           <button
             type="button"
-            className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-md bg-[#5624d0] text-white"
+            className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground"
             aria-label="Rechercher"
           >
             <Search className="h-4 w-4" />
@@ -140,7 +140,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
-        <p className="font-semibold text-[#1c1d1f]">
+        <p className="font-semibold text-foreground">
           {count} cours
         </p>
         <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
 
       <div className="pt-3 flex flex-col flex-1 min-w-0">
         <Link {...href} className="block min-w-0">
-          <h3 className="font-bold text-sm leading-snug text-[#1c1d1f] line-clamp-2 group-hover:text-[#5624d0] transition-colors">
+          <h3 className="font-bold text-sm leading-snug text-foreground line-clamp-2 group-hover:text-primary transition-colors">
             {enrollment.courseTitle}
           </h3>
         </Link>
@@ -216,7 +216,7 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
             <>
               <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-[#5624d0] transition-all"
+                  className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
                 />
               </div>
