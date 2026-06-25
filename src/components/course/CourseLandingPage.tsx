@@ -48,11 +48,13 @@ function CourseThumbnail({
   hasPaidAccess,
   contentLive,
   scheduledPublishAt,
+  accessLoading = false,
 }: {
   course: PublicCourse;
   hasPaidAccess: boolean;
   contentLive: boolean;
   scheduledPublishAt?: string;
+  accessLoading?: boolean;
 }) {
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
@@ -76,7 +78,11 @@ function CourseThumbnail({
       showLabel={false}
       showIcon={false}
     >
-      {enrolledWaiting && availabilityLabel ? (
+      {accessLoading ? (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+          <span className="h-10 w-10 animate-pulse rounded-full bg-white/40" />
+        </div>
+      ) : enrolledWaiting && availabilityLabel ? (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45 px-4 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-primary shadow-lg">
             <CalendarClock className="h-7 w-7" />
@@ -134,7 +140,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
     let cancelled = false;
+    setAccess(null);
 
     void accessFn({
       data: {
@@ -159,14 +168,16 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [accessFn, course, session?.access_token]);
+  }, [accessFn, course, session?.access_token, authLoading]);
 
+  const accessLoading = authLoading || (Boolean(user) && access === null);
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
 
   const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
+  const welcomeLearnSearch = welcomeLesson ? { lesson: welcomeLesson.id } : undefined;
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
@@ -269,12 +280,21 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <div className="overflow-hidden rounded-xl border border-border bg-card shadow-lg">
             <CourseThumbnail
               course={course}
-              hasPaidAccess={hasPaidAccess}
+              hasPaidAccess={accessLoading ? false : hasPaidAccess}
               contentLive={contentLive}
               scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
+              accessLoading={accessLoading}
             />
 
             <div className="space-y-4 p-5">
+              {accessLoading ? (
+                <div className="space-y-3" aria-busy="true" aria-label="Chargement de votre accès">
+                  <div className="h-24 animate-pulse rounded-lg bg-muted" />
+                  <div className="h-11 animate-pulse rounded-full bg-muted" />
+                  <div className="h-9 animate-pulse rounded-full bg-muted/70" />
+                </div>
+              ) : (
+                <>
               {hasPaidAccess ? (
                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
@@ -317,28 +337,71 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                     <Link
                       to="/courses/$slug/learn"
                       params={{ slug: course.slug }}
-                      search={welcomeLesson ? { lesson: welcomeLesson.id } : undefined}
+                      search={welcomeLearnSearch}
                     >
+                      <Play className="h-4 w-4 mr-1 fill-current" />
                       Voir la vidéo de bienvenue
                     </Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="w-full">
+                  <Button asChild variant="soft" size="sm" className="w-full">
                     <Link to="/dashboard">Mes cours</Link>
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                    <Link to="/checkout" search={{ course: course.slug }}>
-                      S&apos;inscrire maintenant
-                    </Link>
-                  </Button>
+                  {scheduledSoon ? (
+                    <>
+                      <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                        <Link
+                          to="/courses/$slug/learn"
+                          params={{ slug: course.slug }}
+                          search={welcomeLearnSearch}
+                        >
+                          <Play className="h-4 w-4 mr-1 fill-current" />
+                          Voir la preview gratuite
+                        </Link>
+                      </Button>
+                      <Button asChild variant="soft" size="lg" className="w-full rounded-lg text-base font-bold">
+                        <Link to="/checkout" search={{ course: course.slug }}>
+                          S&apos;inscrire maintenant
+                        </Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                        <Link to="/checkout" search={{ course: course.slug }}>
+                          S&apos;inscrire maintenant
+                        </Link>
+                      </Button>
 
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
-                      Voir le contenu du cours
-                    </Link>
-                  </Button>
+                      <Button asChild variant="soft" size="lg" className="w-full rounded-lg">
+                        <Link
+                          to="/courses/$slug/learn"
+                          params={{ slug: course.slug }}
+                          search={welcomeLearnSearch}
+                        >
+                          <Play className="h-4 w-4 mr-1 fill-current" />
+                          Voir la preview gratuite
+                        </Link>
+                      </Button>
+                    </>
+                  )}
+
+                  {!user ? (
+                    <p className="text-center text-xs text-muted-foreground">
+                      Déjà inscrit ?{" "}
+                      <Link to="/login" className="font-semibold text-primary underline">
+                        Connectez-vous
+                      </Link>{" "}
+                      avec l&apos;email utilisé à l&apos;inscription.
+                    </p>
+                  ) : !hasPaidAccess && access?.paymentStatus !== "paid" ? (
+                    <p className="text-center text-xs text-amber-800">
+                      Ce compte n&apos;a pas encore accès à ce cours. Vérifiez l&apos;email de votre inscription
+                      ou contactez le support BelKou.
+                    </p>
+                  ) : null}
                 </>
               )}
 
@@ -347,12 +410,14 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   ? canStartCourse
                     ? "Progression sauvegardée dans Mes cours"
                     : enrolledWaiting
-                      ? `Vidéos disponibles le ${startLabel}`
+                      ? `Vidéo de bienvenue disponible · cours complet le ${startLabel}`
                       : "Accès BelKou confirmé"
                   : scheduledSoon
-                    ? `Vidéos disponibles le ${startLabel}`
+                    ? `Preview gratuite · cours complet le ${startLabel}`
                     : `Garantie satisfaction · Accès cohorte ${startLabel}`}
               </p>
+                </>
+              )}
             </div>
           </div>
         </aside>
@@ -459,6 +524,16 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden">
         <div className="site-container flex items-center gap-3">
+          {accessLoading ? (
+            <>
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
+                <div className="h-5 w-1/2 animate-pulse rounded bg-muted" />
+              </div>
+              <div className="h-11 w-28 animate-pulse rounded-lg bg-muted" />
+            </>
+          ) : (
+            <>
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground truncate">{course.title}</p>
             {hasPaidAccess ? (
@@ -489,12 +564,24 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 Bienvenue
               </Link>
             </Button>
+          ) : scheduledSoon || welcomeLesson ? (
+            <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={welcomeLearnSearch}
+              >
+                Preview
+              </Link>
+            </Button>
           ) : (
             <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
               <Link to="/checkout" search={{ course: course.slug }}>
                 S&apos;inscrire
               </Link>
             </Button>
+          )}
+            </>
           )}
         </div>
       </div>
