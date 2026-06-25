@@ -1,30 +1,44 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ExternalLink, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ExternalLink,
+  Pencil,
+  Plus,
+  Save,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  getAdminCourseTab,
+  type AdminCourse,
+  type AdminCourseTab,
+} from "@/lib/admin-courses";
 import {
   adminAddLesson,
   adminCreateCourse,
   adminDeleteCourse,
+  adminSetCoursePublished,
   adminUpdateCourse,
   adminUpdateLesson,
   getAdminCourses,
 } from "@/lib/fns/admin";
-import type { Course } from "@/lib/courses";
-import { isBaseCourseSlug } from "@/lib/courses";
 import { slugifyTitle } from "@/lib/course-storage";
-import { Link } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 
 type LessonDraft = {
   title: string;
@@ -54,7 +68,13 @@ type NewLessonDraft = {
   preview: boolean;
 };
 
-function lessonToDraft(lesson: Course["sections"][number]["lessons"][number]): LessonDraft {
+const tabLabels: Record<AdminCourseTab, string> = {
+  published: "Publiés",
+  hidden: "Masqués",
+  draft: "En préparation",
+};
+
+function lessonToDraft(lesson: AdminCourse["sections"][number]["lessons"][number]): LessonDraft {
   return {
     title: lesson.title,
     duration: lesson.duration,
@@ -63,7 +83,7 @@ function lessonToDraft(lesson: Course["sections"][number]["lessons"][number]): L
   };
 }
 
-function courseToMetaDraft(course: Course): CourseMetaDraft {
+function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
   return {
     title: course.title,
     description: course.description,
@@ -86,14 +106,24 @@ const emptyNewLesson = (): NewLessonDraft => ({
   preview: false,
 });
 
+function planBadge(plan: AdminCourse["plan"], isBase: boolean) {
+  if (isBase) return "Base";
+  return plan === "vip" ? "VIP" : "Premium";
+}
+
 export function AdminCoursesTab() {
   const loadFn = useServerFn(getAdminCourses);
   const saveLessonFn = useServerFn(adminUpdateLesson);
   const saveCourseFn = useServerFn(adminUpdateCourse);
+  const publishFn = useServerFn(adminSetCoursePublished);
   const addLessonFn = useServerFn(adminAddLesson);
   const createFn = useServerFn(adminCreateCourse);
   const deleteFn = useServerFn(adminDeleteCourse);
-  const [courses, setCourses] = useState<Course[]>([]);
+
+  const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const [view, setView] = useState<"catalog" | "edit">("catalog");
+  const [activeTab, setActiveTab] = useState<AdminCourseTab>("published");
+  const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState("");
   const [drafts, setDrafts] = useState<Record<string, LessonDraft>>({});
   const [metaDraft, setMetaDraft] = useState<CourseMetaDraft | null>(null);
@@ -101,6 +131,7 @@ export function AdminCoursesTab() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savingMeta, setSavingMeta] = useState(false);
+  const [togglingSlug, setTogglingSlug] = useState<string | null>(null);
   const [addingSectionId, setAddingSectionId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -111,7 +142,7 @@ export function AdminCoursesTab() {
   const [newPlan, setNewPlan] = useState<"premium" | "vip">("premium");
   const [slugEdited, setSlugEdited] = useState(false);
 
-  const syncDrafts = (list: Course[]) => {
+  const syncDrafts = (list: AdminCourse[]) => {
     const nextDrafts: Record<string, LessonDraft> = {};
     for (const course of list) {
       for (const section of course.sections) {
@@ -128,12 +159,6 @@ export function AdminCoursesTab() {
     try {
       const result = await loadFn();
       setCourses(result.courses);
-      setSelectedSlug((current) => {
-        if (current && result.courses.some((course) => course.slug === current)) {
-          return current;
-        }
-        return result.courses[0]?.slug ?? "";
-      });
       syncDrafts(result.courses);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Chargement impossible");
@@ -145,6 +170,26 @@ export function AdminCoursesTab() {
   useEffect(() => {
     load();
   }, []);
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<AdminCourseTab, number> = { published: 0, hidden: 0, draft: 0 };
+    for (const course of courses) {
+      counts[getAdminCourseTab(course)] += 1;
+    }
+    return counts;
+  }, [courses]);
+
+  const filteredCourses = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return courses.filter((course) => {
+      if (getAdminCourseTab(course) !== activeTab) return false;
+      if (!query) return true;
+      return (
+        course.title.toLowerCase().includes(query) ||
+        course.slug.toLowerCase().includes(query)
+      );
+    });
+  }, [courses, activeTab, search]);
 
   const selectedCourse = useMemo(
     () => courses.find((course) => course.slug === selectedSlug),
@@ -158,6 +203,27 @@ export function AdminCoursesTab() {
       setMetaDraft(null);
     }
   }, [selectedCourse]);
+
+  const openEditor = (slug: string) => {
+    setSelectedSlug(slug);
+    setView("edit");
+  };
+
+  const togglePublished = async (course: AdminCourse, published: boolean) => {
+    setTogglingSlug(course.slug);
+    try {
+      const result = await publishFn({
+        data: { courseSlug: course.slug, published },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+      toast.success(published ? "Cours publié" : "Cours masqué");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Mise à jour impossible");
+    } finally {
+      setTogglingSlug(null);
+    }
+  };
 
   const updateDraft = (courseSlug: string, lessonId: string, patch: Partial<LessonDraft>) => {
     const key = `${courseSlug}:${lessonId}`;
@@ -301,15 +367,14 @@ export function AdminCoursesTab() {
         },
       });
       setCourses(result.courses);
-      setSelectedSlug(result.createdSlug);
-      syncDrafts(result.courses);
       setShowCreateForm(false);
       setNewTitle("");
       setNewSlug("");
       setNewDescription("");
       setNewPlan("premium");
       setSlugEdited(false);
-      toast.success("Cours créé");
+      setActiveTab("draft");
+      toast.success("Cours créé — ajoutez les vidéos puis publiez");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Création impossible");
     } finally {
@@ -318,14 +383,15 @@ export function AdminCoursesTab() {
   };
 
   const deleteCourse = async () => {
-    if (!selectedCourse || isBaseCourseSlug(selectedCourse.slug)) return;
+    if (!selectedCourse || selectedCourse.isBase) return;
     if (!window.confirm(`Supprimer « ${selectedCourse.title} » ?`)) return;
 
     setDeleting(true);
     try {
       const result = await deleteFn({ data: { slug: selectedCourse.slug } });
       setCourses(result.courses);
-      setSelectedSlug(result.courses[0]?.slug ?? "");
+      setView("catalog");
+      setSelectedSlug("");
       syncDrafts(result.courses);
       toast.success("Cours supprimé");
     } catch (error) {
@@ -337,139 +403,50 @@ export function AdminCoursesTab() {
 
   if (loading) {
     return (
-      <div className="surface rounded-2xl p-10 text-center text-sm text-muted-foreground">
-        Chargement des cours...
+      <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+        Chargement du catalogue...
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Cours & vidéos</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Modifiez titres, infos, vidéos Vimeo — ou créez de nouveaux cours.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="hero" size="sm" onClick={() => setShowCreateForm((v) => !v)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nouveau cours
-          </Button>
-          {selectedCourse && (
+  if (view === "edit" && selectedCourse && metaDraft) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setView("catalog")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Catalogue
+            </Button>
+            <div>
+              <h1 className="font-display text-xl font-bold">{selectedCourse.title}</h1>
+              <p className="text-sm text-muted-foreground">{selectedCourse.slug}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
               <Link to="/courses/$slug" params={{ slug: selectedCourse.slug }} target="_blank">
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Voir le cours
+                Voir sur le site
               </Link>
             </Button>
-          )}
-        </div>
-      </div>
-
-      {showCreateForm && (
-        <div className="surface rounded-xl p-4 space-y-4">
-          <h2 className="font-semibold">Créer un cours</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="new-title">Titre</Label>
-              <Input
-                id="new-title"
-                value={newTitle}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                className="rounded-lg"
-                placeholder="Mon nouveau cours"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="new-slug">Slug (URL)</Label>
-              <Input
-                id="new-slug"
-                value={newSlug}
-                onChange={(e) => {
-                  setSlugEdited(true);
-                  setNewSlug(slugifyTitle(e.target.value));
-                }}
-                className="rounded-lg"
-                placeholder="mon-nouveau-cours"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Plan</Label>
-              <Select value={newPlan} onValueChange={(v) => setNewPlan(v as "premium" | "vip")}>
-                <SelectTrigger className="rounded-lg">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="vip">VIP</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="new-desc">Description (optionnel)</Label>
-              <Input
-                id="new-desc"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                className="rounded-lg"
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="hero" size="sm" disabled={creating} onClick={createCourse}>
-              {creating ? "Création..." : "Créer le cours"}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(false)}>
-              Annuler
-            </Button>
+            {!selectedCourse.isBase && (
+              <Button variant="destructive" size="sm" disabled={deleting} onClick={deleteCourse}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Supprimer
+              </Button>
+            )}
           </div>
         </div>
-      )}
 
-      <div className="surface rounded-xl p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <Label className="text-xs text-muted-foreground">Cours à éditer</Label>
-            <Select value={selectedSlug} onValueChange={setSelectedSlug}>
-              <SelectTrigger className="mt-2 rounded-lg">
-                <SelectValue placeholder="Choisir un cours" />
-              </SelectTrigger>
-              <SelectContent>
-                {courses.map((course) => (
-                  <SelectItem key={course.slug} value={course.slug}>
-                    {course.title}
-                    {isBaseCourseSlug(course.slug) ? " (base)" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedCourse && !isBaseCourseSlug(selectedCourse.slug) && (
-            <Button variant="destructive" size="sm" disabled={deleting} onClick={deleteCourse}>
-              <Trash2 className="h-4 w-4 mr-2" />
-              {deleting ? "Suppression..." : "Supprimer"}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {selectedCourse && metaDraft && (
-        <div className="surface rounded-xl p-4 space-y-4">
+        <div className="rounded-xl border border-border/70 bg-card p-4 space-y-4 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="font-semibold">Informations du cours</h2>
-              <p className="text-xs text-muted-foreground">
-                Titre, prix, description — visible sur la page du cours.
-              </p>
-            </div>
+            <h2 className="font-semibold">Informations du cours</h2>
             <Button variant="hero" size="sm" disabled={savingMeta} onClick={saveCourseMeta}>
               <Save className="h-4 w-4 mr-2" />
-              {savingMeta ? "Enregistrement..." : "Enregistrer le cours"}
+              {savingMeta ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>
-
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="meta-title">Titre du cours</Label>
@@ -505,7 +482,6 @@ export function AdminCoursesTab() {
                 value={metaDraft.totalDuration}
                 onChange={(e) => updateMetaDraft({ totalDuration: e.target.value })}
                 className="rounded-lg"
-                placeholder="8h total"
               />
             </div>
             <div className="space-y-1.5">
@@ -516,17 +492,6 @@ export function AdminCoursesTab() {
                 min={0}
                 value={metaDraft.price}
                 onChange={(e) => updateMetaDraft({ price: e.target.value })}
-                className="rounded-lg"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="meta-original">Prix barré ($)</Label>
-              <Input
-                id="meta-original"
-                type="number"
-                min={0}
-                value={metaDraft.originalPrice}
-                onChange={(e) => updateMetaDraft({ originalPrice: e.target.value })}
                 className="rounded-lg"
               />
             </div>
@@ -545,54 +510,14 @@ export function AdminCoursesTab() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="meta-level">Niveau</Label>
-              <Input
-                id="meta-level"
-                value={metaDraft.skillLevel}
-                onChange={(e) => updateMetaDraft({ skillLevel: e.target.value })}
-                className="rounded-lg"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="meta-thumb-label">Étiquette miniature</Label>
-              <Input
-                id="meta-thumb-label"
-                value={metaDraft.thumbnailLabel}
-                onChange={(e) => updateMetaDraft({ thumbnailLabel: e.target.value })}
-                className="rounded-lg"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="meta-thumb-gradient">Gradient miniature</Label>
-              <Input
-                id="meta-thumb-gradient"
-                value={metaDraft.thumbnailGradient}
-                onChange={(e) => updateMetaDraft({ thumbnailGradient: e.target.value })}
-                className="rounded-lg"
-                placeholder="from-violet-600 via-indigo-600 to-blue-700"
-              />
-            </div>
-            <label className="flex items-center gap-2 text-sm cursor-pointer sm:col-span-2">
-              <input
-                type="checkbox"
-                checked={metaDraft.bestseller}
-                onChange={(e) => updateMetaDraft({ bestseller: e.target.checked })}
-                className="rounded border-border"
-              />
-              Afficher comme bestseller
-            </label>
           </div>
         </div>
-      )}
 
-      {selectedCourse && (
         <Accordion type="multiple" defaultValue={selectedCourse.sections.map((s) => s.id)} className="space-y-3">
           {selectedCourse.sections.map((section) => {
             const newLesson = getNewLessonDraft(section.id);
-
             return (
-              <AccordionItem key={section.id} value={section.id} className="surface rounded-xl border px-4">
+              <AccordionItem key={section.id} value={section.id} className="rounded-xl border border-border bg-card px-4">
                 <AccordionTrigger className="hover:no-underline py-4">
                   <div className="text-left">
                     <p className="font-semibold">{section.title}</p>
@@ -603,21 +528,15 @@ export function AdminCoursesTab() {
                   {section.lessons.map((lesson, index) => {
                     const key = `${selectedCourse.slug}:${lesson.id}`;
                     const draft = drafts[key] ?? lessonToDraft(lesson);
-
                     return (
                       <div key={lesson.id} className="rounded-lg border border-border p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-semibold">
-                            {index + 1}. {lesson.title}
-                          </p>
-                          <span className="text-[11px] uppercase text-muted-foreground">{lesson.type}</span>
-                        </div>
-
+                        <p className="text-sm font-semibold">
+                          {index + 1}. {lesson.title}
+                        </p>
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="space-y-1.5 sm:col-span-2">
-                            <Label htmlFor={`${key}-title`}>Titre</Label>
+                            <Label>Titre</Label>
                             <Input
-                              id={`${key}-title`}
                               value={draft.title}
                               onChange={(e) =>
                                 updateDraft(selectedCourse.slug, lesson.id, { title: e.target.value })
@@ -628,44 +547,28 @@ export function AdminCoursesTab() {
                           {lesson.type === "video" && (
                             <>
                               <div className="space-y-1.5">
-                                <Label htmlFor={`${key}-duration`}>Durée</Label>
+                                <Label>Durée</Label>
                                 <Input
-                                  id={`${key}-duration`}
                                   value={draft.duration}
                                   onChange={(e) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { duration: e.target.value })
                                   }
                                   className="rounded-lg"
-                                  placeholder="12min"
                                 />
                               </div>
                               <div className="space-y-1.5">
-                                <Label htmlFor={`${key}-vimeo`}>Vimeo (ID ou URL)</Label>
+                                <Label>Vimeo</Label>
                                 <Input
-                                  id={`${key}-vimeo`}
                                   value={draft.vimeo}
                                   onChange={(e) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { vimeo: e.target.value })
                                   }
                                   className="rounded-lg"
-                                  placeholder="1204014571"
                                 />
                               </div>
-                              <label className="flex items-center gap-2 text-sm cursor-pointer sm:col-span-2">
-                                <input
-                                  type="checkbox"
-                                  checked={draft.preview}
-                                  onChange={(e) =>
-                                    updateDraft(selectedCourse.slug, lesson.id, { preview: e.target.checked })
-                                  }
-                                  className="rounded border-border"
-                                />
-                                Preview gratuite (visible sans payer)
-                              </label>
                             </>
                           )}
                         </div>
-
                         <Button
                           size="sm"
                           variant="hero"
@@ -673,75 +576,203 @@ export function AdminCoursesTab() {
                           onClick={() => saveLesson(selectedCourse.slug, lesson.id)}
                         >
                           <Save className="h-4 w-4 mr-2" />
-                          {savingId === key ? "Enregistrement..." : "Enregistrer"}
+                          Enregistrer
                         </Button>
                       </div>
                     );
                   })}
-
                   <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
                     <p className="text-sm font-semibold">Ajouter une vidéo</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor={`new-${section.id}-title`}>Titre de la vidéo</Label>
-                        <Input
-                          id={`new-${section.id}-title`}
-                          value={newLesson.title}
-                          onChange={(e) => updateNewLessonDraft(section.id, { title: e.target.value })}
-                          className="rounded-lg"
-                          placeholder="Nouvelle leçon"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor={`new-${section.id}-duration`}>Durée</Label>
-                        <Input
-                          id={`new-${section.id}-duration`}
-                          value={newLesson.duration}
-                          onChange={(e) => updateNewLessonDraft(section.id, { duration: e.target.value })}
-                          className="rounded-lg"
-                          placeholder="5min"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor={`new-${section.id}-vimeo`}>Vimeo (ID ou URL)</Label>
-                        <Input
-                          id={`new-${section.id}-vimeo`}
-                          value={newLesson.vimeo}
-                          onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
-                          className="rounded-lg"
-                        />
-                      </div>
-                      <label className="flex items-center gap-2 text-sm cursor-pointer sm:col-span-2">
-                        <input
-                          type="checkbox"
-                          checked={newLesson.preview}
-                          onChange={(e) => updateNewLessonDraft(section.id, { preview: e.target.checked })}
-                          className="rounded border-border"
-                        />
-                        Preview gratuite
-                      </label>
+                    <Input
+                      value={newLesson.title}
+                      onChange={(e) => updateNewLessonDraft(section.id, { title: e.target.value })}
+                      className="rounded-lg"
+                      placeholder="Titre de la vidéo"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={addingSectionId === section.id}
+                        onClick={() => addLesson(section.id)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={addingSectionId === section.id}
-                      onClick={() => addLesson(section.id)}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      {addingSectionId === section.id ? "Ajout..." : "Ajouter la vidéo"}
-                    </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
             );
           })}
         </Accordion>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher un cours..."
+            className="rounded-lg pl-9 bg-card"
+          />
+        </div>
+        <Button variant="hero" size="sm" onClick={() => setShowCreateForm((v) => !v)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nouveau cours
+        </Button>
+      </div>
+
+      {showCreateForm && (
+        <div className="rounded-xl border border-border bg-card p-4 space-y-4 shadow-sm">
+          <h2 className="font-semibold">Créer un cours</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="new-title">Titre</Label>
+              <Input
+                id="new-title"
+                value={newTitle}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                className="rounded-lg"
+                placeholder="Mon nouveau cours"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="new-slug">Slug (URL)</Label>
+              <Input
+                id="new-slug"
+                value={newSlug}
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  setNewSlug(slugifyTitle(e.target.value));
+                }}
+                className="rounded-lg"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Plan</Label>
+              <Select value={newPlan} onValueChange={(v) => setNewPlan(v as "premium" | "vip")}>
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="hero" size="sm" disabled={creating} onClick={createCourse}>
+              {creating ? "Création..." : "Créer le cours"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowCreateForm(false)}>
+              Annuler
+            </Button>
+          </div>
+        </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
-        Première utilisation ? Exécutez <code className="rounded bg-muted px-1">supabase/site_content.sql</code> dans
-        Supabase SQL Editor, et ajoutez <code className="rounded bg-muted px-1">SUPABASE_SERVICE_ROLE_KEY</code>.
-      </p>
+      <div className="flex flex-wrap gap-2 border-b border-border pb-1">
+        {(Object.keys(tabLabels) as AdminCourseTab[]).map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "rounded-t-lg px-4 py-2 text-sm font-medium transition-colors",
+              activeTab === tab
+                ? "bg-card border border-b-0 border-border text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tabLabels[tab]} ({tabCounts[tab]})
+          </button>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-border/70 bg-card shadow-sm overflow-hidden">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="font-display text-lg font-bold">Catalogue public</h2>
+          <p className="text-sm text-muted-foreground">
+            Cours visibles sur le site quand ils sont publiés. Masquez un cours ou terminez les vidéos Vimeo avant
+            publication.
+          </p>
+        </div>
+
+        {filteredCourses.length === 0 ? (
+          <div className="px-6 py-12 text-center text-sm text-muted-foreground">
+            {courses.length === 0
+              ? "Aucun cours. Cliquez sur « Nouveau cours » pour commencer."
+              : "Aucun cours dans cet onglet."}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/30 text-left text-muted-foreground">
+                  <th className="px-6 py-3 font-medium">Cours</th>
+                  <th className="px-4 py-3 font-medium">Type</th>
+                  <th className="px-4 py-3 font-medium">Visibilité</th>
+                  <th className="px-6 py-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCourses.map((course) => (
+                  <tr key={course.slug} className="border-b border-border last:border-0 hover:bg-muted/20">
+                    <td className="px-6 py-4">
+                      <p className="font-semibold text-foreground">{course.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{course.slug}</p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
+                        {planBadge(course.plan, course.isBase)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={course.published}
+                          disabled={togglingSlug === course.slug || course.missingVimeo > 0}
+                          onCheckedChange={(checked) => togglePublished(course, checked)}
+                          className="data-[state=checked]:bg-[#1a2744]"
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          {course.published ? "Publié" : "Masqué"}
+                          {course.missingVimeo > 0 && " · vidéos manquantes"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-lg"
+                          onClick={() => openEditor(course.slug)}
+                        >
+                          <Pencil className="h-4 w-4 mr-1.5" />
+                          Éditer
+                        </Button>
+                        <Button asChild variant="ghost" size="icon" className="rounded-lg">
+                          <Link to="/courses/$slug" params={{ slug: course.slug }} target="_blank">
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

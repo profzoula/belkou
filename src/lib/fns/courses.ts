@@ -29,7 +29,7 @@ export const getPublicCourse = createServerFn({ method: "GET" })
   });
 
 export const getPublicCourses = createServerFn({ method: "GET" }).handler(async () => {
-  const { getResolvedCourses } = await import("@/server/site-content");
-  const courses = await getResolvedCourses();
+  const { getPublishedCourses } = await import("@/server/site-content");
+  const courses = await getPublishedCourses();
   return courses.map(toPublicCourse);
 });

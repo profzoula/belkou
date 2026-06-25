@@ -98,6 +98,7 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
       ...(meta.skillLevel !== undefined && { skillLevel: meta.skillLevel }),
       ...(meta.totalDuration !== undefined && { totalDuration: meta.totalDuration }),
       ...(meta.bestseller !== undefined && { bestseller: meta.bestseller }),
+      ...(meta.published !== undefined && { published: meta.published }),
       thumbnail: {
         ...merged.thumbnail,
         ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
@@ -188,6 +189,11 @@ async function resolveCourseList(): Promise<Course[]> {
 
 export async function getResolvedCourses(): Promise<Course[]> {
   return resolveCourseList();
+}
+
+export async function getPublishedCourses(): Promise<Course[]> {
+  const all = await resolveCourseList();
+  return all.filter((course) => course.published !== false);
 }
 
 export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {

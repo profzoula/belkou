@@ -61,6 +61,7 @@ export type CourseMetaPatch = {
   bestseller?: boolean;
   thumbnailLabel?: string;
   thumbnailGradient?: string;
+  published?: boolean;
 };
 
 export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPatch): StoredCourse {
@@ -75,6 +76,7 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
     ...(patch.skillLevel !== undefined && { skillLevel: patch.skillLevel }),
     ...(patch.totalDuration !== undefined && { totalDuration: patch.totalDuration }),
     ...(patch.bestseller !== undefined && { bestseller: patch.bestseller }),
+    ...(patch.published !== undefined && { published: patch.published }),
     thumbnail: {
       ...course.thumbnail,
       ...(patch.thumbnailLabel !== undefined && { label: patch.thumbnailLabel }),
@@ -160,6 +162,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo:
     plan,
     description: input.description ?? "",
     whatYouLearn: [],
+    published: false,
     thumbnail: {
       gradient: "from-violet-600 via-indigo-600 to-blue-700",
       label: input.title.length > 24 ? `${input.title.slice(0, 21)}…` : input.title,

@@ -7,6 +7,7 @@ import {
   createAdminToken,
   getAdminFromRequest,
 } from "@/lib/admin-auth";
+import { serializeCourseForAdmin } from "@/lib/admin-courses";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb, getServerEnvResolved } from "@/server/env";
 import { registrationSchema } from "@/lib/schemas/registration";
@@ -361,8 +362,15 @@ export const getAdminCourses = createServerFn({ method: "GET" }).handler(async (
   await requireAdmin();
   const { getCourseOverrides, getResolvedCourses } = await import("@/server/site-content");
   const [courses, overrides] = await Promise.all([getResolvedCourses(), getCourseOverrides()]);
-  return { courses, overrides };
+  return {
+    courses: courses.map(serializeCourseForAdmin),
+    overrides,
+  };
 });
+
+function adminCoursesResponse(courses: Awaited<ReturnType<typeof import("@/server/site-content").getResolvedCourses>>) {
+  return courses.map(serializeCourseForAdmin);
+}
 
 export const adminCreateCourse = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
@@ -385,8 +393,7 @@ export const adminCreateCourse = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Création impossible");
     }
 
-    const courses = await getResolvedCourses();
-    return { ok: true as const, courses, createdSlug: data.slug };
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()), createdSlug: data.slug };
   });
 
 export const adminDeleteCourse = createServerFn({ method: "POST" })
@@ -400,8 +407,7 @@ export const adminDeleteCourse = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Suppression impossible");
     }
 
-    const courses = await getResolvedCourses();
-    return { ok: true as const, courses };
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
 
 export const adminUpdateLesson = createServerFn({ method: "POST" })
@@ -436,8 +442,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Sauvegarde impossible");
     }
 
-    const courses = await getResolvedCourses();
-    return { ok: true as const, courses };
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
 
 export const adminUpdateCourse = createServerFn({ method: "POST" })
@@ -456,6 +461,7 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
         bestseller: z.boolean().optional(),
         thumbnailLabel: z.string().optional(),
         thumbnailGradient: z.string().optional(),
+        published: z.boolean().optional(),
       })
       .parse(data),
   )
@@ -469,8 +475,26 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Sauvegarde impossible");
     }
 
-    const courses = await getResolvedCourses();
-    return { ok: true as const, courses };
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminSetCoursePublished = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), published: z.boolean() }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: { published: data.published },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Mise à jour impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
 
 export const adminAddLesson = createServerFn({ method: "POST" })
@@ -505,8 +529,11 @@ export const adminAddLesson = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Ajout impossible");
     }
 
-    const courses = await getResolvedCourses();
-    return { ok: true as const, courses, lessonId: result.lessonId };
+    return {
+      ok: true as const,
+      courses: adminCoursesResponse(await getResolvedCourses()),
+      lessonId: result.lessonId,
+    };
   });
 
 export const getAdminSiteSettings = createServerFn({ method: "GET" }).handler(async () => {

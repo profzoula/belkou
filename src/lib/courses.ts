@@ -39,6 +39,8 @@ export type Course = {
   plan?: "premium" | "vip";
   description: string;
   whatYouLearn: string[];
+  /** false = masqué sur le site public */
+  published?: boolean;
   thumbnail: {
     gradient: string;
     icon: LucideIcon;
