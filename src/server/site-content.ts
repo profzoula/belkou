@@ -17,7 +17,7 @@ import {
   type StoredCourse,
 } from "@/lib/course-storage";
 import { siteConfig } from "@/lib/site-config";
-import { isCourseLive } from "@/lib/course-publish";
+import { isCourseListed } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type CourseLessonOverride = Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration">>;
@@ -233,12 +233,7 @@ export async function getResolvedCourses(): Promise<Course[]> {
 
 export async function getPublishedCourses(): Promise<Course[]> {
   const all = await resolveCourseList();
-  return all
-    .filter((course) => isCourseLive(course))
-    .map((course) => ({
-      ...course,
-      published: true,
-    }));
+  return all.filter((course) => isCourseListed(course));
 }
 
 export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {

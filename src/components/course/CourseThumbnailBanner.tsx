@@ -27,7 +27,8 @@ export function CourseThumbnailBanner({
   children,
 }: CourseThumbnailBannerProps) {
   const Icon = icon ?? (slug ? getCourseIcon(slug) : undefined);
-  const label = showLabel && thumbnail.label ? (
+  const hasImage = Boolean(thumbnail.imageUrl?.trim());
+  const label = showLabel && thumbnail.label && !hasImage ? (
     <span
       className={cn(
         "absolute left-3 top-3 z-10 rounded-md bg-black/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm",
@@ -49,7 +50,7 @@ export function CourseThumbnailBanner({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
         {label}
-        {showIcon && Icon && (
+        {showIcon && !hasImage && Icon && (
           <Icon className="absolute right-3 top-3 z-10 h-8 w-8 text-white/30" aria-hidden />
         )}
         {children}

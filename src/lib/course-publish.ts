@@ -12,15 +12,32 @@ export function isScheduledInFuture(
   return at !== null && at > now;
 }
 
-/** True when the course should appear on the public site. */
+/** Videos and full course content are accessible. */
+export function isCourseContentLive(
+  course: { published?: boolean; scheduledPublishAt?: string },
+  now = Date.now(),
+): boolean {
+  if (isScheduledInFuture(course, now)) return false;
+  const scheduled = parseScheduledPublishAt(course.scheduledPublishAt);
+  if (scheduled !== null && scheduled <= now) return true;
+  return course.published !== false;
+}
+
+/** Course appears on the public site — catalog, landing page, checkout. */
+export function isCourseListed(
+  course: { published?: boolean; scheduledPublishAt?: string },
+  now = Date.now(),
+): boolean {
+  if (isScheduledInFuture(course, now)) return true;
+  return isCourseContentLive(course, now);
+}
+
+/** @deprecated Use isCourseContentLive or isCourseListed explicitly. */
 export function isCourseLive(
   course: { published?: boolean; scheduledPublishAt?: string },
   now = Date.now(),
 ): boolean {
-  const scheduled = parseScheduledPublishAt(course.scheduledPublishAt);
-  if (scheduled !== null && scheduled <= now) return true;
-  if (isScheduledInFuture(course, now)) return false;
-  return course.published !== false;
+  return isCourseContentLive(course, now);
 }
 
 export function toDatetimeLocalValue(iso?: string): string {
@@ -44,4 +61,9 @@ export function formatScheduledPublishLabel(iso: string, locale = "fr-FR"): stri
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(iso));
+}
+
+export function courseStartsAtLabel(course: { scheduledPublishAt?: string }): string | null {
+  if (!course.scheduledPublishAt?.trim()) return null;
+  return formatScheduledPublishLabel(course.scheduledPublishAt);
 }

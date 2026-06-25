@@ -27,6 +27,11 @@ import {
   type CourseLesson,
 } from "@/lib/courses";
 import { getCourseIcon } from "@/lib/course-icons";
+import {
+  courseStartsAtLabel,
+  isCourseContentLive,
+  isScheduledInFuture,
+} from "@/lib/course-publish";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -39,8 +44,12 @@ type CoursePlayerProps = {
 
 function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: CourseLesson }) {
   const Icon = getCourseIcon(course.slug);
-  const locked = !lesson.preview;
+  const contentLive = isCourseContentLive(course);
+  const lockedBySchedule = !lesson.preview && !contentLive;
+  const lockedByEnrollment = !lesson.preview && contentLive;
+  const locked = lockedBySchedule || lockedByEnrollment;
   const vimeo = getLessonVimeo(lesson);
+  const startLabel = courseStartsAtLabel(course);
 
   if (lesson.type !== "video") {
     return (
@@ -48,16 +57,25 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
         <FileText className="h-10 w-10 text-muted-foreground" />
         <p className="font-semibold">{lesson.title}</p>
         <p className="text-sm text-muted-foreground">
-          {lesson.type === "article" ? "Contenu texte" : "Ressources téléchargeables"} — disponible après
-          inscription.
+          {lockedBySchedule && startLabel
+            ? `Contenu disponible le ${startLabel}`
+            : lesson.type === "article"
+              ? "Contenu texte — disponible après inscription."
+              : "Ressources téléchargeables — disponible après inscription."}
         </p>
-        {locked && (
+        {lockedBySchedule && startLabel ? (
+          <Button asChild size="sm">
+            <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
+              S&apos;inscrire maintenant
+            </Link>
+          </Button>
+        ) : locked ? (
           <Button asChild size="sm">
             <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
               S&apos;inscrire
             </Link>
           </Button>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -77,7 +95,12 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
       >
         <Icon className="mb-4 h-16 w-16 text-white/20" aria-hidden />
         <p className="max-w-md px-6 text-center text-lg font-bold text-white">{lesson.title}</p>
-        {locked ? (
+        {lockedBySchedule && startLabel ? (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
+            <Lock className="h-4 w-4" />
+            Vidéos disponibles le {startLabel}
+          </p>
+        ) : locked ? (
           <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
             <Lock className="h-4 w-4" />
             Contenu réservé aux inscrits
@@ -88,10 +111,12 @@ function CourseVideoArea({ course, lesson }: { course: PublicCourse; lesson: Cou
       </div>
 
       {locked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
           <Button asChild size="lg" className="rounded-full">
             <Link to="/checkout" search={course.plan ? { plan: course.plan, course: course.slug } : { course: course.slug }}>
-              S&apos;inscrire pour débloquer
+              {lockedBySchedule
+                ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
+                : "S'inscrire pour débloquer"}
             </Link>
           </Button>
         </div>
@@ -187,6 +212,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const allLessons = useMemo(() => getAllLessons(course), [course]);
   const defaultLesson = allLessons.find((l) => l.id === initialLessonId) ?? allLessons[0];
   const [activeLessonId, setActiveLessonId] = useState(defaultLesson.id);
+  const scheduledSoon = isScheduledInFuture(course);
+  const startLabel = courseStartsAtLabel(course);
 
   const activeLesson = getAllLessons(course).find((l) => l.id === activeLessonId) ?? defaultLesson;
   const activeSection = getSectionForLesson(course, activeLesson.id);
@@ -213,6 +240,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           </Button>
         </div>
       </header>
+
+      {scheduledSoon && startLabel && (
+        <div className="border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-center text-sm text-sky-900">
+          Inscriptions ouvertes — les vidéos seront disponibles le <strong>{startLabel}</strong>
+        </div>
+      )}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <main className="min-w-0">

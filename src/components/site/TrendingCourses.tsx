@@ -29,11 +29,8 @@ function CourseCard({ course }: { course: PublicCourse }) {
         slug={course.slug}
         className="flex items-center justify-center p-4"
         showLabel={false}
-      >
-        <span className="relative z-10 rounded-lg bg-black/20 px-3 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-          {course.thumbnail.label}
-        </span>
-      </CourseThumbnailBanner>
+        showIcon={false}
+      />
 
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-foreground group-hover:text-primary">

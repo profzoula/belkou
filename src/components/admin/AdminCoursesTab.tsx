@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowLeft,
   CalendarClock,
+  ChevronDown,
   ExternalLink,
   Pencil,
   Plus,
@@ -17,7 +19,6 @@ import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -660,7 +661,7 @@ export function AdminCoursesTab() {
                 Programmer la mise en ligne
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Le cours deviendra visible automatiquement à la date choisie (sans action manuelle).
+                Le cours sera visible sur le site immédiatement pour les inscriptions. Les vidéos se débloquent automatiquement à la date choisie.
               </p>
             </div>
             <Button variant="hero" size="sm" disabled={savingSchedule} onClick={saveEditorSchedule}>
@@ -698,7 +699,8 @@ export function AdminCoursesTab() {
           </div>
           {selectedCourse.isScheduled && selectedCourse.scheduledPublishAt && (
             <p className="text-sm text-sky-700 bg-sky-50 rounded-lg px-3 py-2">
-              Live prévu le {formatScheduledPublishLabel(selectedCourse.scheduledPublishAt)}
+              Inscriptions ouvertes — vidéos disponibles le{" "}
+              {formatScheduledPublishLabel(selectedCourse.scheduledPublishAt)}
             </p>
           )}
           {selectedCourse.isLive && !selectedCourse.isScheduled && (
@@ -727,32 +729,36 @@ export function AdminCoursesTab() {
         >
           {selectedCourse.sections.map((section) => {
             const newLesson = getNewLessonDraft(section.id);
+            const canDeleteSection = selectedCourse.sections.length > 1;
             return (
               <AccordionItem key={section.id} value={section.id} className="rounded-xl border border-border bg-card px-4">
-                <AccordionTrigger className="hover:no-underline py-4">
-                  <div className="flex w-full items-center justify-between gap-3 pr-2">
+                <AccordionPrimitive.Header className="flex items-center gap-2">
+                  <AccordionPrimitive.Trigger
+                    className={cn(
+                      "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:no-underline text-left",
+                      "[&[data-state=open]>svg]:rotate-180",
+                    )}
+                  >
                     <div className="text-left">
                       <p className="font-semibold">{section.title}</p>
                       <p className="text-xs text-muted-foreground">{section.lessons.length} leçons</p>
                     </div>
-                    {selectedCourse.sections.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 shrink-0 text-destructive hover:text-destructive"
-                        disabled={deletingSectionId === section.id}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          void deleteSection(section.id, section.title);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        {deletingSectionId === section.id ? "..." : "Supprimer session"}
-                      </Button>
-                    )}
-                  </div>
-                </AccordionTrigger>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+                  </AccordionPrimitive.Trigger>
+                  {canDeleteSection && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={deletingSectionId === section.id}
+                      onClick={() => void deleteSection(section.id, section.title)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      {deletingSectionId === section.id ? "..." : "Supprimer"}
+                    </Button>
+                  )}
+                </AccordionPrimitive.Header>
                 <AccordionContent className="pb-4 space-y-4">
                   {section.lessons.map((lesson, index) => {
                     const key = `${selectedCourse.slug}:${lesson.id}`;
@@ -853,7 +859,9 @@ export function AdminCoursesTab() {
           <div>
             <h2 className="font-semibold">Ajouter une session</h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Créez une nouvelle section (ex. Introduction, Module 2, Déploiement…).
+              Créez une nouvelle section (ex. Introduction, Module 2, Déploiement…). Le bouton{" "}
+              <strong className="text-foreground">Supprimer</strong> apparaît à droite de chaque session dès qu&apos;il
+              y en a au moins deux.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -1018,7 +1026,8 @@ export function AdminCoursesTab() {
                           <div className="space-y-2">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-800">
                               <CalendarClock className="h-3 w-3" />
-                              Live le {formatScheduledPublishLabel(course.scheduledPublishAt)}
+                              Inscriptions ouvertes · vidéos le{" "}
+                              {formatScheduledPublishLabel(course.scheduledPublishAt)}
                             </span>
                             <Button
                               type="button"

@@ -1,6 +1,6 @@
 import type { Course } from "@/lib/courses";
 import { isBaseCourseSlug } from "@/lib/courses";
-import { isCourseLive, isScheduledInFuture } from "@/lib/course-publish";
+import { isCourseContentLive, isCourseListed, isScheduledInFuture } from "@/lib/course-publish";
 
 export type AdminCourse = Omit<Course, "thumbnail"> & {
   thumbnail: {
@@ -10,6 +10,7 @@ export type AdminCourse = Omit<Course, "thumbnail"> & {
   };
   published: boolean;
   isLive: boolean;
+  isListed: boolean;
   isScheduled: boolean;
   isBase: boolean;
   lessonCount: number;
@@ -47,7 +48,8 @@ export function serializeCourseForAdmin(course: Course): AdminCourse {
       ...(course.thumbnail.imageUrl ? { imageUrl: course.thumbnail.imageUrl } : {}),
     },
     published: course.published !== false,
-    isLive: isCourseLive(course),
+    isLive: isCourseContentLive(course),
+    isListed: isCourseListed(course),
     isScheduled: isScheduledInFuture(course),
     isBase: isBaseCourseSlug(course.slug),
     ...metrics,

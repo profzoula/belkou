@@ -4,6 +4,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
 import { formatCount } from "@/lib/courses";
+import { isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getPublicCourses } from "@/lib/fns/courses";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { seoHead } from "@/lib/seo";
@@ -53,7 +54,14 @@ function CoursesIndexPage() {
                   showLabel={false}
                 />
                   <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
-                    <h2 className="line-clamp-2 font-bold leading-snug group-hover:text-primary">{course.title}</h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="line-clamp-2 font-bold leading-snug group-hover:text-primary">{course.title}</h2>
+                      {isScheduledInFuture(course) && course.scheduledPublishAt && (
+                        <span className="shrink-0 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
+                          Vidéos le {formatScheduledPublishLabel(course.scheduledPublishAt)}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                       <span className="inline-flex items-center gap-0.5 font-bold text-amber-600">

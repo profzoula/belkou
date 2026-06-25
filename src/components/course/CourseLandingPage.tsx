@@ -23,7 +23,7 @@ import {
   getAllLessons,
 } from "@/lib/courses";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
-import { isCourseLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
+import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { siteConfig } from "@/lib/site-config";
@@ -59,6 +59,8 @@ function CourseThumbnail({ course }: { course: PublicCourse }) {
       slug={course.slug}
       aspectClass="aspect-video"
       className="border-b border-border"
+      showLabel={false}
+      showIcon={false}
     >
       <Link
         to="/courses/$slug/learn"
@@ -81,6 +83,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const defaultPlan: PlanId = course.plan ?? "premium";
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(defaultPlan);
   const courseDiscount = discountPercent(course.price, course.originalPrice);
+  const scheduledSoon = isScheduledInFuture(course);
+  const contentLive = isCourseContentLive(course);
+  const startLabel = course.scheduledPublishAt
+    ? formatScheduledPublishLabel(course.scheduledPublishAt)
+    : siteConfig.cohortStartDate;
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,11 +117,16 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <span className="text-white/90 line-clamp-1">{course.title}</span>
           </nav>
 
-          {!isCourseLive(course) && (
+          {scheduledSoon && course.scheduledPublishAt && (
+            <p className="mb-4 inline-flex rounded-lg border border-sky-400/50 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">
+              Inscriptions ouvertes — les vidéos seront disponibles le{" "}
+              {formatScheduledPublishLabel(course.scheduledPublishAt)}
+            </p>
+          )}
+
+          {!contentLive && !scheduledSoon && (
             <p className="mb-4 inline-flex rounded-lg border border-amber-400/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
-              {isScheduledInFuture(course) && course.scheduledPublishAt
-                ? `Programmé — visible le ${formatScheduledPublishLabel(course.scheduledPublishAt)}`
-                : "Brouillon — ce cours n'est pas encore visible dans le catalogue public."}
+              Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
             </p>
           )}
 
@@ -217,7 +229,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </Button>
 
               <p className="text-center text-[11px] text-muted-foreground">
-                Garantie satisfaction · Accès cohorte {siteConfig.cohortStartDate}
+                {scheduledSoon
+                  ? `Vidéos disponibles le ${startLabel}`
+                  : `Garantie satisfaction · Accès cohorte ${startLabel}`}
               </p>
             </div>
           </div>
@@ -300,9 +314,14 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <section className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
             <ShieldCheck className="h-8 w-8 shrink-0 text-primary" />
             <div>
-              <h3 className="font-semibold">Formation BelKou — cohorte {siteConfig.cohortStartDate}</h3>
+              <h3 className="font-semibold">
+                Formation BelKou
+                {scheduledSoon ? ` — début le ${startLabel}` : ` — cohorte ${siteConfig.cohortStartDate}`}
+              </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash.
+                {scheduledSoon
+                  ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
+                  : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash."}
               </p>
             </div>
           </section>

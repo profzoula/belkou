@@ -30,8 +30,7 @@ function FeaturedCourseCard({ course }: { course: PublicCourse }) {
           </span>
         )}
         <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/60 to-transparent p-4 pt-12">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-white/80">{course.thumbnail.label}</p>
-          <h3 className="mt-1 line-clamp-2 font-display text-lg font-bold text-white leading-snug group-hover:underline">
+          <h3 className="line-clamp-2 font-display text-lg font-bold text-white leading-snug group-hover:underline">
             {course.title}
           </h3>
         </div>
