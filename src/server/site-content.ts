@@ -122,16 +122,10 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
     };
   }
 
-  if (override.lessons) {
+  if (override.addedSections?.length) {
     merged = {
       ...merged,
-      sections: merged.sections.map((section) => ({
-        ...section,
-        lessons: section.lessons.map((lesson) => ({
-          ...lesson,
-          ...override.lessons?.[lesson.id],
-        })),
-      })),
+      sections: [...merged.sections, ...override.addedSections],
     };
   }
 
@@ -146,10 +140,16 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
     };
   }
 
-  if (override.addedSections?.length) {
+  if (override.lessons) {
     merged = {
       ...merged,
-      sections: [...merged.sections, ...override.addedSections],
+      sections: merged.sections.map((section) => ({
+        ...section,
+        lessons: section.lessons.map((lesson) => ({
+          ...lesson,
+          ...override.lessons?.[lesson.id],
+        })),
+      })),
     };
   }
 
@@ -274,6 +274,19 @@ export async function updateLessonOverride(params: {
   if (isBaseCourseSlug(params.courseSlug)) {
     const overrides = await getCourseOverrides();
     const courseOverride = overrides[params.courseSlug] ?? { lessons: {} };
+    const addedLessons = courseOverride.addedLessons ?? [];
+    const addedIndex = addedLessons.findIndex((item) => item.lesson.id === params.lessonId);
+
+    if (addedIndex !== -1) {
+      const nextAddedLessons = [...addedLessons];
+      nextAddedLessons[addedIndex] = {
+        ...nextAddedLessons[addedIndex],
+        lesson: { ...nextAddedLessons[addedIndex].lesson, ...cleanPatch },
+      };
+      overrides[params.courseSlug] = { ...courseOverride, addedLessons: nextAddedLessons };
+      return saveCourseOverrides(overrides);
+    }
+
     const lessons = courseOverride.lessons ?? {};
 
     lessons[params.lessonId] = {
