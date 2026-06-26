@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { Button } from "@/components/ui/button";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
 import { formatCount } from "@/lib/courses";
@@ -80,14 +79,6 @@ function CoursesIndexPage() {
           </div>
         )}
 
-        <div className="mt-12 text-center">
-          <Button asChild variant="hero" className="rounded-full">
-            <Link to="/register">
-              Rejoindre la formation
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
       </main>
       <Footer />
     </div>

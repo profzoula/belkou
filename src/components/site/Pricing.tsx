@@ -60,7 +60,7 @@ export function Pricing() {
                   size="lg"
                   className="w-full touch-target h-auto min-h-10 py-2.5 text-xs sm:text-sm"
                 >
-                  <Link to="/register" search={{ plan: p.id }}>
+                  <Link to="/checkout" search={{ plan: p.id }}>
                     Choisir {p.name}
                   </Link>
                 </Button>

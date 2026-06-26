@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, CreditCard, PlayCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/site/SectionHeader";
+import { siteConfig } from "@/lib/site-config";
 
 const steps = [
   {
@@ -14,7 +15,7 @@ const steps = [
     icon: CreditCard,
     step: "02",
     title: "Inscrivez-vous",
-    description: "Paiement sécurisé par Stripe, PayPal, MonCash ou virement. Accès immédiat après confirmation.",
+    description: `Paiement sécurisé par Stripe, PayPal, MonCash ou virement. Confirmation immédiate — accès complet selon le calendrier du cours (preview dès l'inscription, lancement ${siteConfig.cohortStartDate}).`,
   },
   {
     icon: PlayCircle,

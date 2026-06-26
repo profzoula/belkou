@@ -57,7 +57,7 @@ export async function createCheckoutSession(params: {
 
   const cancelUrl = params.courseSlug
     ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
-    : `${env.SITE_URL}/register?plan=${params.plan}`;
+    : `${env.SITE_URL}/checkout?plan=${params.plan}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

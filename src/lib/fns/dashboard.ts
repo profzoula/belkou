@@ -29,7 +29,7 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email) return { enrollments: [] as StudentEnrollment[] };
 
-    const db = getDb();
+    const db = await getDb();
     const registrations = await listRegistrationsByEmail(db, user.email);
     if (!registrations.length) return { enrollments: [] };
 

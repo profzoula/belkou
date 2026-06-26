@@ -51,7 +51,7 @@ export const getCourseAccess = createServerFn({ method: "POST" })
       };
     }
 
-    const db = getDb();
+    const db = await getDb();
     const registration = await getRegistrationByEmailAndCourse(db, user.email, data.courseSlug);
 
     return {

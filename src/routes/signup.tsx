@@ -129,9 +129,9 @@ function SignupPage() {
         Create your account
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        Compte gratuit pour votre espace étudiant. Prêt à rejoindre la formation ?{" "}
-        <Link to="/register" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-          S&apos;inscrire à BelKou
+        Compte gratuit pour votre espace étudiant. Prêt à acheter un cours ?{" "}
+        <Link to="/courses" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+          Parcourir les cours
         </Link>
         .
       </p>

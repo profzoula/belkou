@@ -71,14 +71,14 @@ export function courseJsonLd() {
         name: "Premium",
         price: siteConfig.plans.premium.price,
         priceCurrency: "USD",
-        url: absoluteUrl("/register?plan=premium"),
+        url: absoluteUrl("/checkout?plan=premium"),
       },
       {
         "@type": "Offer",
         name: "VIP",
         price: siteConfig.plans.vip.price,
         priceCurrency: "USD",
-        url: absoluteUrl("/register?plan=vip"),
+        url: absoluteUrl("/checkout?plan=vip"),
       },
     ],
   };

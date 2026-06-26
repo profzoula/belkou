@@ -97,7 +97,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       affiliate: {
         code,
         link: `${siteUrl}/signup?ref=${code}`,
-        registerLink: `${siteUrl}/register?ref=${code}`,
+        registerLink: `${siteUrl}/checkout?course=apps-ia-cursor-claude&ref=${code}`,
         commissionUsd: AFFILIATE_COMMISSION_USD,
         signupCommissionUsd: AFFILIATE_SIGNUP_COMMISSION_USD,
         minWithdrawalUsd: AFFILIATE_MIN_WITHDRAWAL_USD,

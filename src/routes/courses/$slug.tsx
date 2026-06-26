@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CourseLandingPage } from "@/components/course/CourseLandingPage";
 import { loadCoursePage } from "@/lib/load-course";
-import { seoHead } from "@/lib/seo";
+import { seoHead, courseJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/site/JsonLd";
 
 export const Route = createFileRoute("/courses/$slug")({
   head: ({ loaderData }) =>
@@ -16,5 +17,10 @@ export const Route = createFileRoute("/courses/$slug")({
 
 function CourseLandingPageRoute() {
   const course = Route.useLoaderData();
-  return <CourseLandingPage course={course} />;
+  return (
+    <>
+      <JsonLd data={[courseJsonLd()]} />
+      <CourseLandingPage course={course} />
+    </>
+  );
 }
