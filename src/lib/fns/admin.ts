@@ -930,3 +930,49 @@ export const adminSetServicePublished = createServerFn({ method: "POST" })
 
     return { ok: true as const, services: await ensureServicesInitialized() };
   });
+
+export const adminUploadServiceImage = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        serviceSlug: z.string().min(1),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { uploadServiceImage } = await import("@/server/service-image-storage");
+    const { updateAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+
+    const upload = await uploadServiceImage({
+      serviceSlug: data.serviceSlug,
+      contentType: data.contentType,
+      dataBase64: data.dataBase64,
+    });
+    if (!upload.ok) {
+      throw new Error(upload.reason);
+    }
+
+    const result = await updateAdminService(data.serviceSlug, { imageUrl: upload.publicUrl });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+
+    return { ok: true as const, services: await ensureServicesInitialized() };
+  });
+
+export const adminRemoveServiceImage = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+
+    const result = await updateAdminService(data.slug, { imageUrl: "" });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, services: await ensureServicesInitialized() };
+  });

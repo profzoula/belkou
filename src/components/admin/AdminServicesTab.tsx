@@ -16,6 +16,7 @@ import {
   adminUpdateService,
   getAdminServices,
 } from "@/lib/fns/admin";
+import { AdminServiceImageEditor } from "@/components/admin/AdminServiceImageEditor";
 import {
   SERVICE_GRADIENT_PRESETS,
   SERVICE_ICON_OPTIONS,
@@ -117,6 +118,14 @@ export function AdminServicesTab() {
     setSelectedSlug(slug);
     setDraft(serviceToDraft(service));
     setView("edit");
+  };
+
+  const syncServices = (next: StoredService[]) => {
+    setServices(next);
+    const updated = next.find((service) => service.slug === selectedSlug);
+    if (updated) {
+      setDraft(serviceToDraft(updated));
+    }
   };
 
   const handleCreate = async () => {
@@ -369,14 +378,12 @@ export function AdminServicesTab() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL (optionnel)</Label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://..."
-                  value={draft.imageUrl}
-                  onChange={(event) =>
-                    setDraft((current) => (current ? { ...current, imageUrl: event.target.value } : current))
-                  }
+                <AdminServiceImageEditor
+                  slug={selected.slug}
+                  imageUrl={draft.imageUrl.trim() || undefined}
+                  gradient={draft.gradient}
+                  iconKey={draft.iconKey}
+                  onUpdated={syncServices}
                 />
               </div>
               <div className="flex items-center gap-2">
