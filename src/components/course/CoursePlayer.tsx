@@ -37,6 +37,7 @@ import {
 } from "@/lib/course-publish";
 import { getLessonLockState } from "@/lib/course-access";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
+import { completeLesson } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
@@ -279,6 +280,7 @@ function CurriculumSidebar({
 export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const { session } = useAuth();
   const accessFn = useServerFn(getCourseAccess);
+  const completeFn = useServerFn(completeLesson);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
 
   useEffect(() => {
@@ -357,6 +359,18 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
   const activeSection = getSectionForLesson(course, activeLesson.id);
+  const activeLock = getLessonLockState({ lesson: activeLesson, course, hasPaidAccess });
+
+  useEffect(() => {
+    if (!session?.access_token || !hasPaidAccess || activeLock.locked) return;
+    void completeFn({
+      data: {
+        accessToken: session.access_token,
+        courseSlug: course.slug,
+        lessonId: activeLesson.id,
+      },
+    }).catch(() => undefined);
+  }, [activeLesson.id, activeLock.locked, completeFn, course.slug, hasPaidAccess, session?.access_token]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -373,7 +387,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
             <Link to="/courses">Tous les cours</Link>
           </Button>
-          {hasPaidAccess && contentLive ? (
+          {hasPaidAccess ? (
             <Button asChild size="sm" variant="hero">
               <Link to="/dashboard">Mes cours</Link>
             </Button>
@@ -532,14 +546,27 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               {["qa", "notes", "announcements", "reviews"].map((tab) => (
                 <TabsContent key={tab} value={tab} className="px-1 py-12 text-center sm:px-0">
                   <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-                  <p className="text-sm text-muted-foreground">
-                    Disponible après inscription à la formation BelKou.
-                  </p>
-                  <Button asChild className="mt-4" size="sm">
-                    <Link to="/checkout" search={{ course: course.slug }}>
-                      S&apos;inscrire maintenant
-                    </Link>
-                  </Button>
+                  {hasPaidAccess ? (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        Cette section sera disponible prochainement pour les inscrits.
+                      </p>
+                      <Button asChild className="mt-4" size="sm" variant="soft">
+                        <Link to="/dashboard">Retour à Mes cours</Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        Disponible après inscription à ce cours.
+                      </p>
+                      <Button asChild className="mt-4" size="sm">
+                        <Link to="/checkout" search={{ course: course.slug }}>
+                          S&apos;inscrire maintenant
+                        </Link>
+                      </Button>
+                    </>
+                  )}
                 </TabsContent>
               ))}
             </Tabs>

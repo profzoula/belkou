@@ -3,7 +3,7 @@ import { z } from "zod";
 import { hasPaidAccessToCourse } from "@/lib/course-access";
 import { isCourseContentLive } from "@/lib/course-publish";
 import { getDb } from "@/server/env";
-import { getRegistrationByEmail } from "@/server/db";
+import { getRegistrationByEmailAndCourse } from "@/server/db";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
@@ -52,7 +52,7 @@ export const getCourseAccess = createServerFn({ method: "POST" })
     }
 
     const db = getDb();
-    const registration = await getRegistrationByEmail(db, user.email);
+    const registration = await getRegistrationByEmailAndCourse(db, user.email, data.courseSlug);
 
     return {
       hasPaidAccess: hasPaidAccessToCourse(registration, data.courseSlug),

@@ -38,7 +38,7 @@ const emptyForm = {
 const ROWS_PER_PAGE = 20;
 
 function exportCSV(registrations: Array<Record<string, unknown>>) {
-  const headers = ["Date", "Nom", "Email", "WhatsApp", "Pays", "Niveau", "Plan", "Statut"];
+  const headers = ["Date", "Nom", "Email", "WhatsApp", "Pays", "Niveau", "Plan", "Cours", "Statut"];
   const rows = registrations.map((r) => [
     r.created_at,
     r.full_name,
@@ -47,6 +47,7 @@ function exportCSV(registrations: Array<Record<string, unknown>>) {
     r.country,
     r.level,
     r.plan,
+    r.course_slug ?? "",
     r.payment_status,
   ]);
   const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");

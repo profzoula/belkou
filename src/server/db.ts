@@ -1,7 +1,7 @@
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
+import { registrationCourseKey } from "@/lib/course-access";
 import {
-  supabaseGetByEmail,
   supabaseGetById,
   supabaseGetByStripeSession,
   supabaseGetCount,
@@ -24,7 +24,7 @@ const INIT_SQL = `
 CREATE TABLE IF NOT EXISTS registrations (
   id TEXT PRIMARY KEY,
   full_name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
+  email TEXT NOT NULL,
   whatsapp TEXT NOT NULL,
   country TEXT NOT NULL,
   level TEXT NOT NULL,
@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS registrations (
   updated_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_registrations_email ON registrations(email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_email_course ON registrations(email, COALESCE(course_slug, 'apps-ia-cursor-claude'));
 `;
 
 export async function initDb(db: D1Database) {
@@ -162,27 +163,44 @@ export async function saveRegistration(
   }
 }
 
+export async function listRegistrationsByEmail(
+  db: D1Database | null,
+  email: string,
+): Promise<RegistrationRecord[]> {
+  const normalized = normalizeRegistrationEmail(email);
+
+  if (db) {
+    const { results } = await db
+      .prepare(`SELECT * FROM registrations WHERE lower(email) = ? ORDER BY created_at DESC`)
+      .bind(normalized)
+      .all<Record<string, unknown>>();
+    if (results?.length) return results.map(rowToRecord);
+  }
+
+  const fromSb = await supabaseListByEmail(normalized);
+  if (fromSb.length) return fromSb;
+
+  return [...devStore.values()]
+    .filter((record) => record.email.toLowerCase() === normalized)
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+}
+
+export async function getRegistrationByEmailAndCourse(
+  db: D1Database | null,
+  email: string,
+  courseSlug?: string | null,
+): Promise<RegistrationRecord | null> {
+  const key = registrationCourseKey(courseSlug);
+  const rows = await listRegistrationsByEmail(db, email);
+  return rows.find((row) => registrationCourseKey(row.course_slug) === key) ?? null;
+}
+
 export async function getRegistrationByEmail(
   db: D1Database | null,
   email: string,
 ): Promise<RegistrationRecord | null> {
-  const normalized = normalizeRegistrationEmail(email);
-
-  if (db) {
-    const row = await db
-      .prepare(`SELECT * FROM registrations WHERE lower(email) = ? ORDER BY created_at DESC LIMIT 1`)
-      .bind(normalized)
-      .first();
-    if (row) return rowToRecord(row as Record<string, unknown>);
-  }
-
-  const fromSb = await supabaseGetByEmail(normalized);
-  if (fromSb) return fromSb;
-
-  for (const record of devStore.values()) {
-    if (record.email.toLowerCase() === normalized) return record;
-  }
-  return null;
+  const rows = await listRegistrationsByEmail(db, email);
+  return rows[0] ?? null;
 }
 
 export async function updateRegistrationGrant(

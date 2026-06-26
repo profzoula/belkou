@@ -3,7 +3,7 @@ import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import {
-  getRegistrationByEmail,
+  getRegistrationByEmailAndCourse,
   listRegistrations,
   saveRegistration,
   updateRegistrationCourseAccess,
@@ -35,54 +35,71 @@ function displayNameFromUser(user: User): string {
 export async function listAdminStudents(): Promise<AdminStudentRow[]> {
   const db = await getDb();
   const registrations = await listRegistrations(db);
-  const regByEmail = new Map(registrations.map((r) => [normalizeRegistrationEmail(r.email), r]));
 
   const sb = getSupabaseAdmin();
-  if (!sb) {
-    return registrations.map((r) => ({
-      userId: "",
-      email: r.email,
-      fullName: r.full_name,
-      createdAt: r.created_at,
-      lastSignInAt: null,
-      registrationId: r.id,
-      paymentStatus: r.payment_status,
-      courseSlug: r.course_slug,
-    }));
-  }
+  const usersByEmail = new Map<string, User>();
 
-  const users: User[] = [];
-  let page = 1;
+  if (sb) {
+    let page = 1;
 
-  while (page <= 25) {
-    const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) {
-      console.error("[BelKou] list auth users:", error.message);
-      break;
+    while (page <= 25) {
+      const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) {
+        console.error("[BelKou] list auth users:", error.message);
+        break;
+      }
+      if (!data.users.length) break;
+
+      for (const user of data.users) {
+        if (!user.email) continue;
+        usersByEmail.set(normalizeRegistrationEmail(user.email), user);
+      }
+
+      if (data.users.length < 200) break;
+      page++;
     }
-    if (!data.users.length) break;
-    users.push(...data.users);
-    if (data.users.length < 200) break;
-    page++;
   }
 
-  return users
-    .filter((user) => Boolean(user.email))
-    .map((user) => {
-      const email = normalizeRegistrationEmail(user.email!);
-      const reg = regByEmail.get(email);
-      return {
-        userId: user.id,
-        email: user.email!,
-        fullName: displayNameFromUser(user),
-        createdAt: user.created_at,
-        lastSignInAt: user.last_sign_in_at ?? null,
-        registrationId: reg?.id ?? null,
-        paymentStatus: reg?.payment_status ?? null,
-        courseSlug: reg?.course_slug ?? null,
-      };
-    })
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  const rows: AdminStudentRow[] = [];
+  const emailsWithRegistration = new Set<string>();
+
+  for (const registration of registrations) {
+    const emailKey = normalizeRegistrationEmail(registration.email);
+    emailsWithRegistration.add(emailKey);
+    const user = usersByEmail.get(emailKey);
+
+    rows.push({
+      userId: user?.id ?? "",
+      email: registration.email,
+      fullName: user ? displayNameFromUser(user) : registration.full_name,
+      createdAt: user?.created_at ?? registration.created_at,
+      lastSignInAt: user?.last_sign_in_at ?? null,
+      registrationId: registration.id,
+      paymentStatus: registration.payment_status,
+      courseSlug: registration.course_slug,
+    });
+  }
+
+  if (!sb) {
+    return rows.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }
+
+  for (const [emailKey, user] of usersByEmail) {
+    if (emailsWithRegistration.has(emailKey)) continue;
+
+    rows.push({
+      userId: user.id,
+      email: user.email!,
+      fullName: displayNameFromUser(user),
+      createdAt: user.created_at,
+      lastSignInAt: user.last_sign_in_at ?? null,
+      registrationId: null,
+      paymentStatus: null,
+      courseSlug: null,
+    });
+  }
+
+  return rows.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }
 
 export async function grantCourseAccessToStudent(params: {
@@ -97,7 +114,7 @@ export async function grantCourseAccessToStudent(params: {
 
   const db = await getDb();
   const email = normalizeRegistrationEmail(params.email);
-  const existing = await getRegistrationByEmail(db, email);
+  const existing = await getRegistrationByEmailAndCourse(db, email, params.courseSlug);
 
   if (existing) {
     const updated = await updateRegistrationCourseAccess(db, existing.id, {

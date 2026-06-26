@@ -240,7 +240,7 @@ export function AdminStudentsTab() {
                 </tr>
               ) : (
                 paginatedStudents.map((student) => (
-                  <tr key={student.userId || student.email} className="border-b border-border/60">
+                  <tr key={student.registrationId ?? `${student.userId}-${student.email}`} className="border-b border-border/60">
                     <td className="px-5 py-3 text-muted-foreground">
                       {new Date(student.createdAt).toLocaleDateString("fr-FR")}
                     </td>
@@ -292,7 +292,7 @@ export function AdminStudentsTab() {
             <p className="px-5 py-10 text-center text-sm text-muted-foreground">Aucun étudiant trouvé.</p>
           ) : (
             paginatedStudents.map((student) => (
-              <div key={student.userId || student.email} className="p-4 space-y-3">
+              <div key={student.registrationId ?? `${student.userId}-${student.email}`} className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold truncate">{student.fullName}</p>

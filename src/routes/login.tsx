@@ -8,9 +8,15 @@ import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { z } from "zod";
 import { seoHead } from "@/lib/seo";
 
+const searchSchema = z.object({
+  email: z.string().optional(),
+});
+
 export const Route = createFileRoute("/login")({
+  validateSearch: (search) => searchSchema.parse(search),
   head: () =>
     seoHead({
       title: "Connexion — BelKou",
@@ -22,11 +28,16 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
+  const { email: emailFromSearch } = Route.useSearch();
+  const [email, setEmail] = useState(emailFromSearch ?? "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (emailFromSearch) setEmail(emailFromSearch);
+  }, [emailFromSearch]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

@@ -5,10 +5,20 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { CheckCircle2, MessageCircle, Calendar, Mail, ArrowRight, CreditCard } from "lucide-react";
-import { getRegistrationStatus, verifyStripeSession } from "@/lib/fns/register";
+import {
+  BookOpen,
+  CheckCircle2,
+  CreditCard,
+  LogIn,
+  Mail,
+  MessageCircle,
+  UserPlus,
+} from "lucide-react";
+import { getRegistrationStatus, verifyStripeSession, getSuccessPageContext } from "@/lib/fns/register";
 import { siteConfig, getWhatsappGroupUrl, getWhatsappGroupLabel } from "@/lib/site-config";
 import { seoHead } from "@/lib/seo";
+import { useAuth } from "@/hooks/use-auth";
+import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
 
 const searchSchema = z.object({
   registrationId: z.string().optional(),
@@ -26,8 +36,21 @@ export const Route = createFileRoute("/success")({
       noindex: true,
     }),
   validateSearch: searchSchema,
+  loader: async ({ location }) => {
+    const params = new URLSearchParams(location.search);
+    const registrationId = params.get("registrationId") ?? undefined;
+    return getSuccessPageContext({ data: { registrationId } });
+  },
   component: SuccessPage,
 });
+
+type RegistrationStatus = {
+  payment_status: string;
+  full_name?: string;
+  plan?: string;
+  email?: string;
+  course_slug?: string | null;
+};
 
 function ManualPaymentInfo() {
   const mp = siteConfig.manualPayment;
@@ -55,44 +78,49 @@ function ManualPaymentInfo() {
 
 function SuccessPage() {
   const { registrationId, plan, manual, session_id } = Route.useSearch();
+  const loaderData = Route.useLoaderData();
+  const { user, loading: authLoading } = useAuth();
   const statusFn = useServerFn(getRegistrationStatus);
   const verifyFn = useServerFn(verifyStripeSession);
-  const [status, setStatus] = useState<{ payment_status: string; full_name?: string; plan?: string } | null>(null);
+  const [status, setStatus] = useState<RegistrationStatus | null>(null);
   const [verifiedPaid, setVerifiedPaid] = useState(false);
-  const [verifiedPlan, setVerifiedPlan] = useState<string | undefined>();
+  const [loading, setLoading] = useState(Boolean(registrationId));
 
   useEffect(() => {
     if (!registrationId) return;
 
-    const load = async () => {
+    void (async () => {
       if (session_id) {
         try {
           const v = await verifyFn({ data: { sessionId: session_id, registrationId } });
-          if (v.paid) {
-            setVerifiedPaid(true);
-            if (v.plan) setVerifiedPlan(v.plan);
-          }
-        } catch (e) {
-          console.error(e);
+          if (v.paid) setVerifiedPaid(true);
+        } catch (error) {
+          console.error(error);
         }
       }
+
       try {
         const r = await statusFn({ data: { registrationId } });
         setStatus(r);
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    load();
+    })();
   }, [registrationId, session_id, statusFn, verifyFn]);
 
-  const isPaid = verifiedPaid || status?.payment_status === "paid" || !!session_id;
+  const isPaid = verifiedPaid || status?.payment_status === "paid";
   const showManual = manual === "1" || status?.payment_status === "manual_pending";
-  const displayPlan = (status?.plan ?? plan)?.toUpperCase();
-  const planId = (status?.plan ?? verifiedPlan ?? plan)?.toLowerCase();
+  const courseSlug = status?.course_slug ?? loaderData.courseSlug ?? LEGACY_COURSE_SLUG;
+  const welcomeLessonId = loaderData.welcomeLessonId;
+  const planId = (status?.plan ?? plan)?.toLowerCase();
   const whatsappUrl = isPaid ? getWhatsappGroupUrl(planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
+  const registrationEmail = status?.email;
+  const emailMatchesUser =
+    Boolean(user?.email && registrationEmail) &&
+    user.email!.toLowerCase() === registrationEmail!.toLowerCase();
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,22 +131,49 @@ function SuccessPage() {
         </div>
         <p className="section-label justify-center mb-3">Inscription reçue</p>
         <h1 className="text-2xl md:text-[1.75rem] font-semibold mb-2">
-          {isPaid ? "Paiement confirmé !" : "Inscription enregistrée"}
+          {loading ? "Vérification..." : isPaid ? "Paiement confirmé !" : "Inscription enregistrée"}
         </h1>
         <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-          {displayPlan ? `Plan ${displayPlan}. ` : ""}
           {isPaid
-            ? "Bienvenue dans la formation. Suivez les étapes ci-dessous."
-            : "Consultez votre email pour les instructions de paiement. Après paiement, vous rejoindrez le groupe."}
+            ? "Votre accès au cours sera disponible selon le calendrier du programme. Créez votre compte avec le même email que l'inscription."
+            : "Consultez votre email pour les instructions de paiement."}
         </p>
 
         <div className="space-y-3 text-left">
-          {showManual && !isPaid && (
-            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
-              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
-                <CreditCard className="h-4 w-4" />
+          {isPaid && !authLoading && !user && registrationEmail && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+              <div className="font-semibold text-sm mb-2 text-amber-900">Étape importante</div>
+              <p className="text-sm text-amber-900/90 mb-3">
+                Créez un compte ou connectez-vous avec <strong>{registrationEmail}</strong> pour accéder à vos cours.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button asChild variant="hero" size="sm" className="flex-1">
+                  <Link to="/signup" search={{ email: registrationEmail }}>
+                    <UserPlus className="h-4 w-4" />
+                    Créer mon compte
+                  </Link>
+                </Button>
+                <Button asChild variant="soft" size="sm" className="flex-1">
+                  <Link to="/login" search={{ email: registrationEmail }}>
+                    <LogIn className="h-4 w-4" />
+                    Se connecter
+                  </Link>
+                </Button>
               </div>
-              <div className="min-w-0 flex-1">
+            </div>
+          )}
+
+          {isPaid && user && !emailMatchesUser && registrationEmail && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              Vous êtes connecté en tant que <strong>{user.email}</strong>, mais l&apos;inscription utilise{" "}
+              <strong>{registrationEmail}</strong>. Connectez-vous avec le bon email pour voir vos cours.
+            </div>
+          )}
+
+          {showManual && !isPaid && (
+            <div className="surface rounded-xl p-4 sm:p-5 flex gap-4">
+              <CreditCard className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+              <div>
                 <div className="font-semibold text-sm mb-2">Instructions de paiement</div>
                 <ManualPaymentInfo />
               </div>
@@ -126,16 +181,11 @@ function SuccessPage() {
           )}
 
           {isPaid && whatsappUrl && (
-            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
-              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
-                <MessageCircle className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="font-semibold text-sm mb-1 text-center sm:text-left">Groupe WhatsApp {whatsappLabel}</div>
-                <p className="text-sm text-muted-foreground mb-3 leading-relaxed text-center sm:text-left">
-                  Rejoignez le groupe {whatsappLabel} pour commencer avec les autres étudiants.
-                </p>
-                <Button asChild variant="soft" size="lg" className="w-full sm:w-auto touch-target">
+            <div className="surface rounded-xl p-4 sm:p-5 flex gap-4">
+              <MessageCircle className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+              <div>
+                <div className="font-semibold text-sm mb-1">Groupe WhatsApp {whatsappLabel}</div>
+                <Button asChild variant="soft" size="sm" className="mt-2">
                   <a href={whatsappUrl} target="_blank" rel="noreferrer">
                     Rejoindre {whatsappLabel}
                   </a>
@@ -144,50 +194,43 @@ function SuccessPage() {
             </div>
           )}
 
-          {!isPaid && (
-            <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
-              <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
-                <MessageCircle className="h-4 w-4" />
-              </div>
-              <div className="min-w-0 flex-1 text-center sm:text-left">
-                <div className="font-semibold text-sm mb-1">Groupe WhatsApp</div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Après paiement, vous recevrez le lien du groupe Premium VibeCode ou VIP VibeCode selon votre plan.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
-            <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
-              <Calendar className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1 text-center sm:text-left">
-              <div className="font-semibold text-sm mb-1">Date de la formation</div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Début : <strong className="text-foreground">{siteConfig.cohortStartDate}</strong>
-              </p>
-            </div>
-          </div>
-
-          <div className="surface rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-4 text-left">
-            <div className="icon-box shrink-0 h-10 w-10 mx-auto sm:mx-0">
-              <Mail className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1 text-center sm:text-left">
+          <div className="surface rounded-xl p-4 sm:p-5 flex gap-4">
+            <Mail className="h-5 w-5 shrink-0 text-primary mt-0.5" />
+            <div>
               <div className="font-semibold text-sm mb-1">Email de confirmation</div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Un email a été envoyé dans votre boîte avec tous les détails. Si vous ne le voyez pas, vérifiez les spams.
+              <p className="text-sm text-muted-foreground">
+                Un email a été envoyé si la messagerie est configurée. Vérifiez aussi les spams.
               </p>
             </div>
           </div>
         </div>
 
-        <Button asChild variant="hero" size="lg" className="mt-8 w-full sm:w-auto touch-target">
-          <Link to="/">
-            Retour à l'accueil <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          {isPaid && (emailMatchesUser || !registrationEmail) && (
+            <>
+              <Button asChild variant="hero" size="lg" className="touch-target">
+                <Link to="/dashboard">
+                  <BookOpen className="h-4 w-4" />
+                  Mes cours
+                </Link>
+              </Button>
+              <Button asChild variant="soft" size="lg" className="touch-target">
+                <Link
+                  to="/courses/$slug/learn"
+                  params={{ slug: courseSlug }}
+                  search={welcomeLessonId ? { lesson: welcomeLessonId } : undefined}
+                >
+                  Voir le cours
+                </Link>
+              </Button>
+            </>
+          )}
+          {!isPaid && (
+            <Button asChild variant="hero" size="lg" className="touch-target">
+              <Link to="/">Retour à l&apos;accueil</Link>
+            </Button>
+          )}
+        </div>
       </main>
       <Footer />
     </div>

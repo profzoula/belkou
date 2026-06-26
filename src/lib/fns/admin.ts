@@ -14,6 +14,7 @@ import { registrationSchema } from "@/lib/schemas/registration";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
   getRegistrationByEmail,
+  getRegistrationByEmailAndCourse,
   getRegistrationById,
   getRegistrationStats,
   listRegistrations,
@@ -204,10 +205,14 @@ export const adminAddCashRegistration = createServerFn({ method: "POST" })
     await requireAdmin();
     const db = await getDb();
 
-    const existing = await getRegistrationByEmail(db, data.registration.email);
+    const existing = await getRegistrationByEmailAndCourse(
+      db,
+      data.registration.email,
+      data.registration.course_slug ?? null,
+    );
     if (existing) {
       throw new Error(
-        "Cet email est déjà inscrit. Utilisez « Marquer payé » sur l'inscription existante.",
+        "Cet email est déjà inscrit à ce cours. Utilisez « Marquer payé » sur l'inscription existante.",
       );
     }
 

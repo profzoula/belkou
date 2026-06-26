@@ -410,7 +410,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                     className="w-full border-primary text-primary hover:bg-primary/5"
                     onClick={() => setCouponOpen(true)}
                   >
-                    Apply Coupon
+                    Code parrainage
                   </Button>
                 ) : (
                   <div className="space-y-2">

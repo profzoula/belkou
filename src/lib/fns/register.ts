@@ -4,7 +4,7 @@ import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb } from "@/server/env";
 import {
-  getRegistrationByEmail,
+  getRegistrationByEmailAndCourse,
   getRegistrationById,
   saveRegistration,
   setStripeSessionId,
@@ -17,6 +17,8 @@ import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/se
 import type { PlanId } from "@/lib/site-config";
 import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
 import { getResolvedCourseBySlug } from "@/server/site-content";
+import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
+import { getWelcomePreviewLesson } from "@/lib/courses";
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -102,14 +104,14 @@ export const submitRegistration = createServerFn({ method: "POST" })
       throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
     }
 
-    const existing = await getRegistrationByEmail(db, data.email);
+    const existing = await getRegistrationByEmailAndCourse(db, data.email, data.course_slug ?? null);
     let record: RegistrationRecord;
     let resumed = false;
 
     if (existing) {
       if (existing.payment_status === "paid") {
         throw new Error(
-          "Cet email a déjà un accès payé. Connectez-vous sur /login pour accéder à vos cours.",
+          "Vous avez déjà accès à ce cours. Connectez-vous sur /login pour continuer.",
         );
       }
 
@@ -178,6 +180,8 @@ export const getRegistrationStatus = createServerFn({ method: "GET" })
       plan: record.plan,
       payment_status: record.payment_status,
       full_name: record.full_name,
+      email: record.email,
+      course_slug: record.course_slug,
     };
   });
 
@@ -223,4 +227,19 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
     }
 
     return { paid: true as const, plan: plan ?? record?.plan };
+  });
+
+export const getSuccessPageContext = createServerFn({ method: "GET" })
+  .inputValidator((data: { registrationId?: string }) => data)
+  .handler(async ({ data }) => {
+    if (!data.registrationId) {
+      return { courseSlug: LEGACY_COURSE_SLUG, welcomeLessonId: undefined as string | undefined };
+    }
+
+    const db = await getDb();
+    const record = await getRegistrationById(db, data.registrationId);
+    const slug = record?.course_slug ?? LEGACY_COURSE_SLUG;
+    const course = await getResolvedCourseBySlug(slug);
+    const welcome = course ? getWelcomePreviewLesson(course) : undefined;
+    return { courseSlug: slug, welcomeLessonId: welcome?.id };
   });

@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
+import { registrationCourseKey } from "@/lib/course-access";
 
 let client: SupabaseClient | null | undefined;
 
@@ -81,8 +82,11 @@ async function supabaseInsertFields(
   sb: SupabaseClient,
   fields: RegistrationFields,
 ): Promise<RegistrationRecord> {
+  const id = crypto.randomUUID();
   for (const includeUpdatedAt of [true, false]) {
-    const payload = includeUpdatedAt ? { ...fields, updated_at: new Date().toISOString() } : fields;
+    const payload = includeUpdatedAt
+      ? { id, ...fields, updated_at: new Date().toISOString() }
+      : { id, ...fields };
     const { data, error } = await sb.from("registrations").insert(payload).select().single();
     if (!error && data) return rowToRecord(data as Record<string, unknown>);
     if (!includeUpdatedAt || !error?.message.includes("updated_at")) {
@@ -105,7 +109,7 @@ export async function supabaseSaveRegistration(
     throw new Error("Supabase non configuré en local.");
   }
 
-  const existing = await supabaseGetByEmail(data.email);
+  const existing = await supabaseGetByEmailAndCourse(data.email, data.course_slug ?? null);
   const fields = baseFields(data, options?.payment_status ?? existing?.payment_status ?? "pending");
 
   try {
@@ -152,8 +156,13 @@ export async function supabaseUpdateRegistrationDetails(
 }
 
 export async function supabaseGetByEmail(email: string): Promise<RegistrationRecord | null> {
+  const rows = await supabaseListByEmail(email);
+  return rows[0] ?? null;
+}
+
+export async function supabaseListByEmail(email: string): Promise<RegistrationRecord[]> {
   const sb = getSupabaseAdmin();
-  if (!sb) return null;
+  if (!sb) return [];
 
   const normalized = normalizeRegistrationEmail(email);
 
@@ -161,17 +170,23 @@ export async function supabaseGetByEmail(email: string): Promise<RegistrationRec
     .from("registrations")
     .select("*")
     .ilike("email", normalized)
-    .order("created_at", { ascending: false })
-    .limit(1);
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[BelKou] Supabase get by email:", error.message);
-    return null;
+    console.error("[BelKou] Supabase list by email:", error.message);
+    return [];
   }
 
-  const row = data?.[0];
-  if (!row) return null;
-  return rowToRecord(row as Record<string, unknown>);
+  return (data ?? []).map((row) => rowToRecord(row as Record<string, unknown>));
+}
+
+export async function supabaseGetByEmailAndCourse(
+  email: string,
+  courseSlug?: string | null,
+): Promise<RegistrationRecord | null> {
+  const key = registrationCourseKey(courseSlug);
+  const rows = await supabaseListByEmail(email);
+  return rows.find((row) => registrationCourseKey(row.course_slug) === key) ?? null;
 }
 
 export async function supabaseUpdateGrant(

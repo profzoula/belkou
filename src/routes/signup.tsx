@@ -11,9 +11,15 @@ import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
 import { getStoredReferralCode, normalizeReferralCode } from "@/lib/referral-storage";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { z } from "zod";
 import { seoHead } from "@/lib/seo";
 
+const searchSchema = z.object({
+  email: z.string().optional(),
+});
+
 export const Route = createFileRoute("/signup")({
+  validateSearch: (search) => searchSchema.parse(search),
   head: () =>
     seoHead({
       title: "Créer un compte — BelKou",
@@ -25,9 +31,10 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
+  const { email: emailFromSearch } = Route.useSearch();
   const claimReferralFn = useServerFn(claimSignupReferral);
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailFromSearch ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
@@ -37,6 +44,10 @@ function SignupPage() {
     const stored = getStoredReferralCode();
     if (stored) setReferralCode(stored);
   }, []);
+
+  useEffect(() => {
+    if (emailFromSearch) setEmail(emailFromSearch);
+  }, [emailFromSearch]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

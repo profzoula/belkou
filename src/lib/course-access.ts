@@ -5,6 +5,12 @@ import type { RegistrationRecord } from "@/lib/schemas/registration";
 
 export const LEGACY_COURSE_SLUG = BASE_COURSE_SLUGS[0];
 
+/** Stable key for DB uniqueness and lookups (null/empty → legacy course). */
+export function registrationCourseKey(courseSlug?: string | null): string {
+  const trimmed = courseSlug?.trim();
+  return trimmed || LEGACY_COURSE_SLUG;
+}
+
 export function registrationCoversCourse(
   registration: Pick<RegistrationRecord, "course_slug">,
   courseSlug: string,
