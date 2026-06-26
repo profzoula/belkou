@@ -35,7 +35,9 @@ function progressLabel(enrollment: StudentEnrollment) {
       : "Paiement en attente";
   }
   if (!enrollment.contentLive && enrollment.scheduledPublishAt) {
-    return `Disponible le ${formatScheduledPublishLabel(enrollment.scheduledPublishAt)}`;
+    return enrollment.welcomeLessonId
+      ? "Vidéo de bienvenue disponible"
+      : `Disponible le ${formatScheduledPublishLabel(enrollment.scheduledPublishAt)}`;
   }
   if (enrollment.progressPercent <= 0) {
     return "Commencer le cours";
@@ -175,10 +177,15 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
   const isPaid = enrollment.payment_status === "paid";
   const canLearn = isPaid && enrollment.contentLive;
+  const welcomeSearch = enrollment.welcomeLessonId ? { lesson: enrollment.welcomeLessonId } : undefined;
   const href = canLearn
     ? { to: "/courses/$slug/learn" as const, params: { slug: enrollment.courseSlug } }
     : isPaid
-      ? { to: "/courses/$slug" as const, params: { slug: enrollment.courseSlug } }
+      ? {
+          to: "/courses/$slug/learn" as const,
+          params: { slug: enrollment.courseSlug },
+          ...(welcomeSearch ? { search: welcomeSearch } : {}),
+        }
       : { to: "/checkout" as const, search: { course: enrollment.courseSlug } };
 
   const showProgress = isPaid && enrollment.contentLive;

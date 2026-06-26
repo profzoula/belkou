@@ -24,8 +24,10 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getWelcomeLearnSearch,
   getWelcomePreviewLesson,
 } from "@/lib/courses";
+import { getLessonLockState } from "@/lib/course-access";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
@@ -64,6 +66,11 @@ function CourseThumbnail({
     }
     return getAllLessons(course).find((lesson) => lesson.preview && lesson.type === "video");
   }, [course, enrolledWaiting]);
+  const learnSearch = enrolledWaiting
+    ? getWelcomeLearnSearch(course)
+    : previewLesson
+      ? { lesson: previewLesson.id }
+      : undefined;
 
   const availabilityLabel = scheduledPublishAt
     ? formatScheduledPublishLabel(scheduledPublishAt)
@@ -98,7 +105,7 @@ function CourseThumbnail({
           <Link
             to="/courses/$slug/learn"
             params={{ slug: course.slug }}
-            search={previewLesson ? { lesson: previewLesson.id } : undefined}
+            search={learnSearch}
             className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
           >
             Voir la vidéo de bienvenue
@@ -119,7 +126,7 @@ function CourseThumbnail({
         <Link
           to="/courses/$slug/learn"
           params={{ slug: course.slug }}
-          search={previewLesson ? { lesson: previewLesson.id } : undefined}
+          search={learnSearch}
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
         >
           <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
@@ -177,7 +184,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const canStartCourse = hasPaidAccess && contentLive;
 
   const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
-  const welcomeLearnSearch = welcomeLesson ? { lesson: welcomeLesson.id } : undefined;
+  const welcomeLearnSearch = getWelcomeLearnSearch(course);
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
@@ -480,20 +487,44 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </AccordionTrigger>
                   <AccordionContent>
                     <ul className="space-y-2 pb-2">
-                      {section.lessons.map((lesson, index) => (
-                        <li
-                          key={lesson.id}
-                          className="flex items-center justify-between gap-3 text-sm text-muted-foreground"
-                        >
-                          <span>
-                            {index + 1}. {lesson.title}
-                            {lesson.preview && (
-                              <span className="ml-2 text-[10px] font-bold uppercase text-primary">Preview</span>
+                      {section.lessons.map((lesson, index) => {
+                        const { locked } = getLessonLockState({
+                          lesson,
+                          course,
+                          hasPaidAccess,
+                        });
+                        const learnSearch = locked ? undefined : { lesson: lesson.id };
+                        const row = (
+                          <>
+                            <span>
+                              {index + 1}. {lesson.title}
+                              {lesson.preview && (
+                                <span className="ml-2 text-[10px] font-bold uppercase text-primary">Preview</span>
+                              )}
+                            </span>
+                            <span className="shrink-0 tabular-nums">{lesson.duration}</span>
+                          </>
+                        );
+
+                        return (
+                          <li key={lesson.id}>
+                            {learnSearch ? (
+                              <Link
+                                to="/courses/$slug/learn"
+                                params={{ slug: course.slug }}
+                                search={learnSearch}
+                                className="flex items-center justify-between gap-3 text-sm text-muted-foreground rounded-md px-1 py-0.5 -mx-1 transition-colors hover:bg-muted/60 hover:text-foreground"
+                              >
+                                {row}
+                              </Link>
+                            ) : (
+                              <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                                {row}
+                              </div>
                             )}
-                          </span>
-                          <span className="shrink-0 tabular-nums">{lesson.duration}</span>
-                        </li>
-                      ))}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </AccordionContent>
                 </AccordionItem>
@@ -569,9 +600,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <Link
                 to="/courses/$slug/learn"
                 params={{ slug: course.slug }}
-                search={welcomeLesson ? { lesson: welcomeLesson.id } : undefined}
+                search={welcomeLearnSearch}
               >
-                Bienvenue
+                {welcomeLearnSearch ? "Bienvenue" : "Cours"}
               </Link>
             </Button>
           ) : scheduledSoon || welcomeLesson ? (

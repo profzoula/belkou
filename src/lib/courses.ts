@@ -137,11 +137,19 @@ export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title"
 }
 
 export function getWelcomePreviewLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
-  const lessons = getAllLessons(course);
+  const videos = getAllLessons(course).filter((lesson) => lesson.type === "video");
   return (
-    lessons.find((lesson) => lesson.id === "intro-welcome") ??
-    lessons.find((lesson) => lesson.type === "video" && isWelcomePreviewLesson(lesson))
+    videos.find((lesson) => lesson.id === "intro-welcome") ??
+    videos.find((lesson) => lesson.preview) ??
+    videos.find((lesson) => isWelcomePreviewLesson(lesson))
   );
+}
+
+export function getWelcomeLearnSearch(
+  course: { sections: CourseSection[] },
+): { lesson: string } | undefined {
+  const welcome = getWelcomePreviewLesson(course);
+  return welcome ? { lesson: welcome.id } : undefined;
 }
 
 export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
