@@ -735,7 +735,7 @@ export function AdminCoursesTab() {
 
         <Accordion
           type="multiple"
-          key={selectedCourse.sections.map((s) => s.id).join("-")}
+          key={selectedCourse.sections.map((s) => `${s.id}:${s.lessons.length}`).join("-")}
           defaultValue={selectedCourse.sections.map((s) => s.id)}
           className="space-y-3"
         >

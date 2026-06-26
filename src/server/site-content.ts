@@ -336,11 +336,16 @@ export async function addLessonToCourse(params: { courseSlug: string; input: Add
 
   if (isBaseCourseSlug(params.courseSlug)) {
     const base = baseCourses.find((course) => course.slug === params.courseSlug);
-    if (!base?.sections.some((section) => section.id === params.input.sectionId)) {
-      return { ok: false, reason: "Section introuvable" };
+    if (!base) {
+      return { ok: false, reason: "Cours introuvable" };
     }
 
     const overrides = await getCourseOverrides();
+    const merged = mergeCourse(base, overrides[params.courseSlug]);
+    if (!merged.sections.some((section) => section.id === params.input.sectionId)) {
+      return { ok: false, reason: "Section introuvable" };
+    }
+
     const courseOverride = overrides[params.courseSlug] ?? {};
     const addedLessons = [...(courseOverride.addedLessons ?? []), { sectionId: params.input.sectionId, lesson }];
     overrides[params.courseSlug] = { ...courseOverride, addedLessons };
