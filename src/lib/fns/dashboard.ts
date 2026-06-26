@@ -85,8 +85,7 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
         contentLive: isCourseContentLive(course),
         progressPercent: computeProgressPercent(progressRows.length, countLessons(course)),
         purchasedAt: registration.created_at,
-        welcomeLessonId:
-          getWelcomePreviewLesson(course)?.id ?? getFirstPreviewVideoLesson(course)?.id,
+        welcomeLessonId: getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
       });
     }
 

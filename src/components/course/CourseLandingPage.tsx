@@ -25,6 +25,7 @@ import {
   formatCount,
   getAllLessons,
   getFirstPreviewVideoLesson,
+  getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
   getWelcomeLearnSearch,
@@ -63,15 +64,11 @@ function CourseThumbnail({
 }) {
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
-  const previewLesson = useMemo(() => {
-    if (enrolledWaiting) {
-      return getWelcomePreviewLesson(course);
-    }
-    return getFirstPreviewVideoLesson(course);
-  }, [course, enrolledWaiting]);
-  const learnSearch = enrolledWaiting
-    ? getWelcomeLearnSearch(course)
-    : getPreviewLearnSearch(course);
+  const previewLesson = useMemo(
+    () => getFirstPreviewVideoLesson(course) ?? getWelcomePreviewLesson(course),
+    [course],
+  );
+  const playableLearnSearch = getPlayableLearnSearch(course);
 
   const availabilityLabel = scheduledPublishAt
     ? formatScheduledPublishLabel(scheduledPublishAt)
@@ -91,6 +88,24 @@ function CourseThumbnail({
           <span className="h-10 w-10 animate-pulse rounded-full bg-white/40" />
         </div>
       ) : enrolledWaiting && availabilityLabel ? (
+        playableLearnSearch ? (
+          <Link
+            to="/courses/$slug/learn"
+            params={{ slug: course.slug }}
+            search={playableLearnSearch}
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/35 px-4 text-center transition-colors hover:bg-black/45"
+          >
+            <span className="absolute right-3 top-3 rounded-full bg-black/55 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
+              Cours le {availabilityLabel}
+            </span>
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform group-hover:scale-105">
+              <Play className="ml-1 h-7 w-7 fill-current" />
+            </span>
+            <span className="text-sm font-semibold text-white drop-shadow-sm">
+              {previewLesson?.preview ? "Voir la preview" : "Voir la vidéo de bienvenue"}
+            </span>
+          </Link>
+        ) : (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45 px-4 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-primary shadow-lg">
             <CalendarClock className="h-7 w-7" />
@@ -103,15 +118,8 @@ function CourseThumbnail({
               Disponible le {availabilityLabel}
             </p>
           </div>
-          <Link
-            to="/courses/$slug/learn"
-            params={{ slug: course.slug }}
-            search={learnSearch}
-            className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-          >
-            Voir la vidéo de bienvenue
-          </Link>
         </div>
+        )
       ) : canStartCourse ? (
         <Link
           to="/courses/$slug/learn"
@@ -127,7 +135,7 @@ function CourseThumbnail({
         <Link
           to="/courses/$slug/learn"
           params={{ slug: course.slug }}
-          search={learnSearch}
+          search={playableLearnSearch}
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
         >
           <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
@@ -184,7 +192,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
 
-  const welcomeLearnSearch = getWelcomeLearnSearch(course);
+  const playableLearnSearch = getPlayableLearnSearch(course);
   const previewLearnSearch = getPreviewLearnSearch(course);
   const hasPublicPreview = getPreviewVideoLessons(course).length > 0;
 
@@ -356,10 +364,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                     <Link
                       to="/courses/$slug/learn"
                       params={{ slug: course.slug }}
-                      search={welcomeLearnSearch}
+                      search={playableLearnSearch}
                     >
                       <Play className="h-4 w-4 mr-1 fill-current" />
-                      Voir la vidéo de bienvenue
+                      {hasPublicPreview ? "Voir la preview" : "Voir la vidéo de bienvenue"}
                     </Link>
                   </Button>
                   <Button asChild variant="soft" size="sm" className="w-full">
@@ -410,35 +418,22 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                       ) : null}
                     </>
                   )}
-
-                  {!user ? (
-                    <p className="text-center text-xs text-muted-foreground">
-                      Déjà inscrit ?{" "}
-                      <Link to="/login" className="font-semibold text-primary underline">
-                        Connectez-vous
-                      </Link>{" "}
-                      avec l&apos;email utilisé à l&apos;inscription.
-                    </p>
-                  ) : !hasPaidAccess && access?.paymentStatus !== "paid" ? (
-                    <p className="text-center text-xs text-amber-800">
-                      Ce compte n&apos;a pas encore accès à ce cours. Connectez-vous avec l&apos;email utilisé lors du
-                      paiement ({siteConfig.contactEmail} si besoin).
-                    </p>
-                  ) : null}
                 </>
               )}
 
-              <p className="text-center text-[11px] text-muted-foreground">
-                {hasPaidAccess
-                  ? canStartCourse
-                    ? "Progression sauvegardée dans Mes cours"
-                    : enrolledWaiting
-                      ? `Vidéo de bienvenue disponible · cours complet le ${startLabel}`
-                      : "Accès BelKou confirmé"
-                  : scheduledSoon
-                    ? `Preview gratuite · cours complet le ${startLabel}`
-                    : `Garantie satisfaction · Accès cohorte ${startLabel}`}
-              </p>
+              {hasPaidAccess || scheduledSoon ? (
+                <p className="text-center text-[11px] text-muted-foreground">
+                  {hasPaidAccess
+                    ? canStartCourse
+                      ? "Progression sauvegardée dans Mes cours"
+                      : enrolledWaiting
+                        ? hasPublicPreview
+                          ? `Preview disponible · cours complet le ${startLabel}`
+                          : `Vidéo de bienvenue disponible · cours complet le ${startLabel}`
+                        : "Accès BelKou confirmé"
+                    : `Preview gratuite · cours complet le ${startLabel}`}
+                </p>
+              ) : null}
                 </>
               )}
             </div>
@@ -606,9 +601,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <Link
                 to="/courses/$slug/learn"
                 params={{ slug: course.slug }}
-                search={welcomeLearnSearch}
+                search={playableLearnSearch}
               >
-                {welcomeLearnSearch ? "Bienvenue" : "Cours"}
+                {playableLearnSearch ? (hasPublicPreview ? "Preview" : "Bienvenue") : "Cours"}
               </Link>
             </Button>
           ) : hasPublicPreview ? (

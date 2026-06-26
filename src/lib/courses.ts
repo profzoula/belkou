@@ -167,6 +167,13 @@ export function getPreviewLearnSearch(
   return preview ? { lesson: preview.id } : undefined;
 }
 
+/** Prefer a preview with Vimeo; fall back to welcome lesson metadata. */
+export function getPlayableLearnSearch(
+  course: { sections: CourseSection[] },
+): { lesson: string } | undefined {
+  return getPreviewLearnSearch(course) ?? getWelcomeLearnSearch(course);
+}
+
 export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
   return getAllLessons(course).find((lesson) => lesson.id === lessonId);
 }
