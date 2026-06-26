@@ -45,7 +45,12 @@ export function hasPaidAccessToCourse(
   courseSlug: string,
 ): boolean {
   if (!registration || registration.payment_status !== "paid") return false;
-  return registrationCoversCourse(registration, courseSlug);
+  if (registrationCoversCourse(registration, courseSlug)) return true;
+  // Legacy cohort: paid Premium/VIP before course_slug existed
+  if (registrationCourseKey(courseSlug) === LEGACY_COURSE_SLUG && !registration.course_slug?.trim()) {
+    return true;
+  }
+  return false;
 }
 
 export type LessonLockReason = "none" | "schedule" | "enrollment";

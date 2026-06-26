@@ -269,16 +269,31 @@ export function AdminStudentsTab() {
                       )}
                     </td>
                     <td className="px-5 py-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs"
-                        disabled={granting && actionEmail === student.email}
-                        onClick={() => openGrantDialog(student)}
-                      >
-                        <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
-                        Activer cours
-                      </Button>
+                      {student.paymentStatus === "paid" && student.courseSlug ? (
+                        <div className="flex flex-col items-start gap-1.5">
+                          <span className="text-xs font-medium text-emerald-700">Accès confirmé</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-auto px-0 text-xs text-muted-foreground hover:text-foreground"
+                            disabled={granting && actionEmail === student.email}
+                            onClick={() => openGrantDialog(student)}
+                          >
+                            Activer un autre cours
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          disabled={granting && actionEmail === student.email}
+                          onClick={() => openGrantDialog(student)}
+                        >
+                          <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
+                          Activer cours
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -327,7 +342,9 @@ export function AdminStudentsTab() {
                   onClick={() => openGrantDialog(student)}
                 >
                   <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
-                  Activer un cours
+                  {student.paymentStatus === "paid" && student.courseSlug
+                    ? "Activer un autre cours"
+                    : "Activer un cours"}
                 </Button>
               </div>
             ))

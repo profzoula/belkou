@@ -56,7 +56,6 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
     country: "HT",
     level: "beginner",
     referral_code: "",
-    postal_code: "",
   });
 
   useEffect(() => {
@@ -330,16 +329,6 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                       <SelectItem value="OTHER">Autre</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="postal">ZIP / Code postal (optionnel)</Label>
-                  <Input
-                    id="postal"
-                    value={form.postal_code}
-                    onChange={(e) => update("postal_code", e.target.value)}
-                    placeholder="5 or 9 digit"
-                    className="rounded-md"
-                  />
                 </div>
               </div>
             </section>

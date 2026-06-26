@@ -221,6 +221,16 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <span className="text-white/90 line-clamp-1">{course.title}</span>
           </nav>
 
+          {!authLoading && !user && (
+            <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-50">
+              <span>Déjà payé pour ce cours ?</span>
+              <Link to="/login" className="font-semibold underline underline-offset-2 hover:text-white">
+                Connectez-vous
+              </Link>
+              <span>avec le même email que votre inscription.</span>
+            </p>
+          )}
+
           {enrolledWaiting && access?.scheduledPublishAt && (
             <p className="mb-4 inline-flex rounded-lg border border-emerald-400/50 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
               Vous êtes inscrit — accès complet au cours le{" "}
@@ -398,8 +408,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                     </p>
                   ) : !hasPaidAccess && access?.paymentStatus !== "paid" ? (
                     <p className="text-center text-xs text-amber-800">
-                      Ce compte n&apos;a pas encore accès à ce cours. Vérifiez l&apos;email de votre inscription
-                      ou contactez le support BelKou.
+                      Ce compte n&apos;a pas encore accès à ce cours. Connectez-vous avec l&apos;email utilisé lors du
+                      paiement ({siteConfig.contactEmail} si besoin).
                     </p>
                   ) : null}
                 </>

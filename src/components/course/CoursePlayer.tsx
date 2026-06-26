@@ -40,7 +40,7 @@ import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-acces
 import { completeLesson } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { VimeoPlayer } from "@/components/course/VimeoPlayer";
 
@@ -147,8 +147,12 @@ function CourseVideoArea({
             <Lock className="h-4 w-4" />
             Contenu réservé aux inscrits
           </p>
+        ) : hasPaidAccess ? (
+          <p className="mt-2 text-sm text-white/80">
+            Vidéo en cours de préparation — disponible au lancement du cours.
+          </p>
         ) : (
-          <p className="mt-2 text-sm text-white/80">Ajoutez l&apos;ID Vimeo dans courses.ts ou VITE_VIMEO_PREVIEW_ID</p>
+          <p className="mt-2 text-sm text-white/80">Preview bientôt disponible</p>
         )}
       </div>
 
@@ -181,6 +185,83 @@ function CourseVideoArea({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function EnrolledExtraTab({
+  tab,
+  course,
+  contentLive,
+  startLabel,
+}: {
+  tab: string;
+  course: PublicCourse;
+  contentLive: boolean;
+  startLabel: string | null;
+}) {
+  const whatsappUrl = getWhatsappGroupUrl("premium");
+
+  if (tab === "announcements") {
+    return (
+      <div className="mx-auto max-w-lg space-y-4 text-left">
+        <h3 className="font-semibold">Annonces du cours</h3>
+        <div className="rounded-lg border border-border bg-card p-4 text-sm">
+          {contentLive ? (
+            <p>Le cours est disponible. Consultez le programme dans l&apos;onglet Aperçu et progressez à votre rythme.</p>
+          ) : (
+            <p>
+              Vous êtes inscrit. Les vidéos complètes seront disponibles{" "}
+              {startLabel ? `le ${startLabel}` : "prochainement"}. En attendant, regardez la vidéo de bienvenue.
+            </p>
+          )}
+        </div>
+        {whatsappUrl && (
+          <Button asChild variant="soft" size="sm">
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              Rejoindre le groupe WhatsApp
+            </a>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === "qa") {
+    return (
+      <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
+        <h3 className="font-semibold text-foreground">Questions & réponses</h3>
+        <p>Posez vos questions dans le groupe WhatsApp de la cohorte ou écrivez à {siteConfig.contactEmail}.</p>
+        {whatsappUrl && (
+          <Button asChild variant="soft" size="sm">
+            <a href={whatsappUrl} target="_blank" rel="noreferrer">
+              Ouvrir WhatsApp
+            </a>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (tab === "notes") {
+    return (
+      <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
+        <h3 className="font-semibold text-foreground">Notes de cours</h3>
+        <p>
+          Prenez vos notes dans votre app préférée (Notion, Google Docs, carnet). Les notes intégrées BelKou arrivent
+          bientôt.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
+      <h3 className="font-semibold text-foreground">Avis</h3>
+      <p>
+        Merci pour votre confiance sur <strong className="text-foreground">{course.title}</strong>. Vous pourrez laisser
+        un avis après avoir suivi une partie du cours.
+      </p>
     </div>
   );
 }
@@ -545,18 +626,16 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
               {["qa", "notes", "announcements", "reviews"].map((tab) => (
                 <TabsContent key={tab} value={tab} className="px-1 py-12 text-center sm:px-0">
-                  <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
                   {hasPaidAccess ? (
-                    <>
-                      <p className="text-sm text-muted-foreground">
-                        Cette section sera disponible prochainement pour les inscrits.
-                      </p>
-                      <Button asChild className="mt-4" size="sm" variant="soft">
-                        <Link to="/dashboard">Retour à Mes cours</Link>
-                      </Button>
-                    </>
+                    <EnrolledExtraTab
+                      tab={tab}
+                      course={course}
+                      contentLive={contentLive}
+                      startLabel={courseStartsAtLabel(course)}
+                    />
                   ) : (
                     <>
+                      <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
                       <p className="text-sm text-muted-foreground">
                         Disponible après inscription à ce cours.
                       </p>

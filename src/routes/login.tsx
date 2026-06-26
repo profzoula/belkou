@@ -94,6 +94,10 @@ function LoginPage() {
       <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Sign in to your account
       </h1>
+      <p className="mt-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+        Vous avez déjà payé pour un cours ? Connectez-vous avec{" "}
+        <strong className="text-foreground">le même email</strong> que votre inscription pour accéder à Mes cours.
+      </p>
 
       {!isSupabaseConfigured ? (
         <p className="mt-6 text-sm text-muted-foreground">

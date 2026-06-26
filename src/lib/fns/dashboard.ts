@@ -1,8 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { isCourseContentLive } from "@/lib/course-publish";
-import { LEGACY_COURSE_SLUG, registrationCourseKey } from "@/lib/course-access";
+import {
+  LEGACY_COURSE_SLUG,
+  pickRegistrationForCourse,
+  registrationCourseKey,
+} from "@/lib/course-access";
 import { countLessons } from "@/lib/courses";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { computeProgressPercent, listLessonProgress } from "@/server/lesson-progress";
@@ -30,15 +35,26 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
     if (!user?.email) return { enrollments: [] as StudentEnrollment[] };
 
     const db = await getDb();
-    const registrations = await listRegistrationsByEmail(db, user.email);
+    const email = normalizeRegistrationEmail(user.email);
+    const registrations = await listRegistrationsByEmail(db, email);
     if (!registrations.length) return { enrollments: [] };
+
+    const courseSlugs = new Set<string>();
+    for (const registration of registrations) {
+      courseSlugs.add(registrationCourseKey(registration.course_slug));
+    }
+    if (registrations.some((r) => r.payment_status === "paid" && !r.course_slug?.trim())) {
+      courseSlugs.add(LEGACY_COURSE_SLUG);
+    }
 
     const enrollments: StudentEnrollment[] = [];
 
-    for (const registration of registrations) {
-      const slug = registrationCourseKey(registration.course_slug);
+    for (const slug of courseSlugs) {
+      const registration = pickRegistrationForCourse(registrations, slug);
+      if (!registration) continue;
+
       const course = await getResolvedCourseBySlug(slug);
-      const progressRows = await listLessonProgress(user.email, slug);
+      const progressRows = await listLessonProgress(email, slug);
       const totalLessons = course ? countLessons(course) : 0;
 
       if (!course) {
@@ -70,6 +86,8 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
         purchasedAt: registration.created_at,
       });
     }
+
+    enrollments.sort((a, b) => Date.parse(b.purchasedAt) - Date.parse(a.purchasedAt));
 
     return { enrollments };
   });

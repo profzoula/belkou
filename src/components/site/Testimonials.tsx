@@ -17,6 +17,7 @@ export function Testimonials() {
           description="Des parcours réels sur plusieurs formations — de Port-au-Prince à la diaspora."
           className="max-w-lg"
         />
+        <p className="text-center text-xs text-muted-foreground mb-6 -mt-4">Exemples illustratifs de parcours étudiants.</p>
 
         <p className="text-center text-[11px] text-muted-foreground mb-3 md:hidden">
           Glissez pour voir les témoignages →
