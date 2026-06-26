@@ -9,7 +9,7 @@ import { PromoTopbar } from "@/components/site/PromoTopbar";
 
 const links = [
   { href: "/courses", label: "Cours", route: true },
-  { href: "#categories", label: "Catégories", route: false },
+  { href: "/services", label: "Services", route: true },
   { href: "#how-it-works", label: "Comment ça marche", route: false },
   { href: "#faq", label: "FAQ", route: false },
 ];

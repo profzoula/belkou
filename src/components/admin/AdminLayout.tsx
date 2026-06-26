@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
+  Briefcase,
   DollarSign,
   GraduationCap,
   LayoutDashboard,
@@ -13,11 +14,19 @@ import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "overview" | "courses" | "students" | "inscriptions" | "commissions" | "settings";
+export type AdminSection =
+  | "overview"
+  | "courses"
+  | "services"
+  | "students"
+  | "inscriptions"
+  | "commissions"
+  | "settings";
 
 const navItems: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "overview", label: "Dashboard", icon: LayoutDashboard },
   { id: "courses", label: "Cours", icon: BookOpen },
+  { id: "services", label: "Services", icon: Briefcase },
   { id: "students", label: "Étudiants", icon: GraduationCap },
   { id: "inscriptions", label: "Inscriptions", icon: Users },
   { id: "commissions", label: "Revenus", icon: DollarSign },

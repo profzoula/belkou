@@ -7,6 +7,7 @@ import { AdminCoursesTab } from "@/components/admin/AdminCoursesTab";
 import { AdminLayout, type AdminSection } from "@/components/admin/AdminLayout";
 import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { AdminRegistrationsTab } from "@/components/admin/AdminRegistrationsTab";
+import { AdminServicesTab } from "@/components/admin/AdminServicesTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminStudentsTab } from "@/components/admin/AdminStudentsTab";
 import { adminLogout, getAdminOverview, refreshAdminSession } from "@/lib/fns/admin";
@@ -91,6 +92,8 @@ function AdminDashboardPage() {
       )}
 
       {section === "courses" && <AdminCoursesTab key={refreshKey} />}
+
+      {section === "services" && <AdminServicesTab key={refreshKey} />}
 
       {section === "students" && <AdminStudentsTab key={refreshKey} />}
 

@@ -828,3 +828,105 @@ export const adminSaveSiteSettings = createServerFn({ method: "POST" })
 
     return { ok: true as const, settings: next };
   });
+
+export const getAdminServices = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { ensureServicesInitialized } = await import("@/server/site-content");
+  const services = await ensureServicesInitialized();
+  return { services };
+});
+
+export const adminCreateService = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        title: z.string().min(2),
+        slug: z.string().optional(),
+        description: z.string().optional(),
+        priceLabel: z.string().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { createAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+
+    const result = await createAdminService(data);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Création impossible");
+    }
+
+    return {
+      ok: true as const,
+      services: await ensureServicesInitialized(),
+      createdSlug: result.service.slug,
+    };
+  });
+
+export const adminUpdateService = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        slug: z.string().min(1),
+        title: z.string().min(1).optional(),
+        description: z.string().optional(),
+        priceLabel: z.string().optional(),
+        rating: z.number().min(0).max(5).optional(),
+        ratingsCount: z.number().int().min(0).optional(),
+        provider: z.string().optional(),
+        iconKey: z.enum(["building", "code", "globe", "calculator", "megaphone", "graduation"]).optional(),
+        gradient: z.string().optional(),
+        imageUrl: z.string().optional(),
+        premium: z.boolean().optional(),
+        published: z.boolean().optional(),
+        deliverables: z.array(z.string().min(1)).optional(),
+        deliverablesText: z.string().optional(),
+        actionType: z.enum(["booking", "link"]).optional(),
+        linkHref: z.string().optional(),
+        linkLabel: z.string().optional(),
+        sortOrder: z.number().int().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+    const { slug, ...patch } = data;
+
+    const result = await updateAdminService(slug, patch);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+
+    return { ok: true as const, services: await ensureServicesInitialized() };
+  });
+
+export const adminDeleteService = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { deleteAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+
+    const result = await deleteAdminService(data.slug);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, services: await ensureServicesInitialized() };
+  });
+
+export const adminSetServicePublished = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ slug: z.string().min(1), published: z.boolean() }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateAdminService, ensureServicesInitialized } = await import("@/server/site-content");
+
+    const result = await updateAdminService(data.slug, { published: data.published });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Mise à jour impossible");
+    }
+
+    return { ok: true as const, services: await ensureServicesInitialized() };
+  });

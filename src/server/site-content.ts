@@ -16,6 +16,14 @@ import {
   type CreateCourseInput,
   type StoredCourse,
 } from "@/lib/course-storage";
+import {
+  buildNewService,
+  getDefaultServices,
+  patchStoredService,
+  type CreateServiceInput,
+  type ServicePatch,
+  type StoredService,
+} from "@/lib/service-storage";
 import { siteConfig } from "@/lib/site-config";
 import { isCourseListed } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
@@ -39,6 +47,7 @@ import type { SiteSettings } from "@/lib/site-settings";
 
 const COURSE_OVERRIDES_KEY = "course_overrides";
 const ADMIN_COURSES_KEY = "admin_courses";
+const ADMIN_SERVICES_KEY = "admin_services";
 const SITE_SETTINGS_KEY = "site_settings";
 
 function isMissingTable(message: string): boolean {
@@ -582,6 +591,86 @@ export async function deleteAdminCourse(slug: string) {
     delete overrides[slug];
     await saveCourseOverrides(overrides);
   }
+
+  return { ok: true as const };
+}
+
+export async function getStoredServices(): Promise<StoredService[]> {
+  return readJson<StoredService[]>(ADMIN_SERVICES_KEY, []);
+}
+
+export async function saveStoredServices(services: StoredService[]) {
+  return writeJson(ADMIN_SERVICES_KEY, services);
+}
+
+async function sortServices(services: StoredService[]): Promise<StoredService[]> {
+  return [...services].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function ensureServicesInitialized(): Promise<StoredService[]> {
+  const stored = await getStoredServices();
+  if (stored.length > 0) return sortServices(stored);
+
+  const defaults = getDefaultServices();
+  await saveStoredServices(defaults);
+  return defaults;
+}
+
+export async function getResolvedServices(): Promise<StoredService[]> {
+  const stored = await getStoredServices();
+  if (stored.length > 0) return sortServices(stored);
+  return getDefaultServices();
+}
+
+export async function getPublishedServices(): Promise<StoredService[]> {
+  const all = await getResolvedServices();
+  return all.filter((service) => service.published !== false);
+}
+
+export async function getResolvedServiceBySlug(slug: string): Promise<StoredService | undefined> {
+  const all = await getResolvedServices();
+  return all.find((service) => service.slug === slug);
+}
+
+export async function createAdminService(input: CreateServiceInput) {
+  const title = input.title.trim();
+  if (!title) {
+    return { ok: false as const, reason: "Titre requis" };
+  }
+
+  const stored = await ensureServicesInitialized();
+  const service = buildNewService(input, stored);
+  stored.push(service);
+
+  const result = await saveStoredServices(stored);
+  if (!result.ok) return result;
+
+  return { ok: true as const, service };
+}
+
+export async function updateAdminService(slug: string, patch: ServicePatch) {
+  const stored = await ensureServicesInitialized();
+  const index = stored.findIndex((service) => service.slug === slug);
+  if (index === -1) {
+    return { ok: false as const, reason: "Service introuvable" };
+  }
+
+  stored[index] = patchStoredService(stored[index], patch);
+  const result = await saveStoredServices(stored);
+  if (!result.ok) return result;
+
+  return { ok: true as const, service: stored[index] };
+}
+
+export async function deleteAdminService(slug: string) {
+  const stored = await ensureServicesInitialized();
+  const next = stored.filter((service) => service.slug !== slug);
+  if (next.length === stored.length) {
+    return { ok: false as const, reason: "Service introuvable" };
+  }
+
+  const result = await saveStoredServices(next);
+  if (!result.ok) return result;
 
   return { ok: true as const };
 }

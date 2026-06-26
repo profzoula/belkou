@@ -16,6 +16,10 @@ const faqs = [
     a: "Oui. Chaque cours a sa propre page avec programme, preview et prix. Vous vous inscrivez au cours qui vous intéresse — pas besoin de tout acheter d'un coup.",
   },
   {
+    q: "Un cours est « bientôt disponible » — que puis-je faire ?",
+    a: "Vous pouvez vous inscrire dès maintenant. La preview gratuite est souvent accessible avant le lancement, et le contenu complet se débloque automatiquement à la date indiquée sur la page du cours.",
+  },
+  {
     q: "Dans quelle langue sont les cours ?",
     a: "Les cours sont en français. Quelques termes techniques en anglais peuvent apparaître pour le code et les outils.",
   },

@@ -1,22 +1,29 @@
-import { Check, Globe, MessageCircle, Play, Shield, Zap } from "lucide-react";
+import { BookOpen, Check, Globe, Play, Shield, Zap } from "lucide-react";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { siteConfig } from "@/lib/site-config";
 
+const platformHighlights = [
+  "Catalogue multi-cours — achetez uniquement ce dont vous avez besoin",
+  "Preview gratuite sur chaque cours, sans inscription",
+  "Accès à vie au cours acheté, progression sauvegardée",
+  "Nouvelles formations ajoutées régulièrement",
+];
+
 const benefits = [
   {
+    icon: BookOpen,
+    title: "Un cours = un achat",
+    description: "Pas d'abonnement global. Choisissez une formation, payez une fois, accédez à toutes ses leçons.",
+  },
+  {
     icon: Play,
-    title: "Vidéos structurées",
-    description: "Chaque cours est découpé en modules et leçons claires, avec durée et progression.",
+    title: "Preview avant paiement",
+    description: "Regardez des leçons d'introduction avant de vous inscrire — zéro surprise.",
   },
   {
     icon: Zap,
-    title: "Preview gratuite",
-    description: "Regardez des leçons d'introduction avant de payer — zéro surprise.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Communauté active",
-    description: "Groupes WhatsApp Premium et VIP pour poser vos questions et avancer ensemble.",
+    title: "Leçons en vidéo HD",
+    description: "Modules structurés, durée indiquée et lecteur intégré pour avancer à votre rythme.",
   },
   {
     icon: Globe,
@@ -26,7 +33,7 @@ const benefits = [
   {
     icon: Shield,
     title: "Paiements flexibles",
-    description: `Stripe, PayPal, MonCash, Zelle et virement bancaire.`,
+    description: siteConfig.paymentMethods.join(", "),
   },
 ];
 
@@ -38,14 +45,14 @@ export function PlatformBenefits() {
           <div>
             <SectionHeader
               label="Pourquoi BelKou"
-              title="Une plateforme pensée pour les créateurs"
-              description="Pas une seule formation figée — un catalogue qui grandit, avec des cours spécialisés que vous pouvez acheter individuellement."
+              title="Une plateforme, plusieurs formations"
+              description="BelKou n'est plus une seule cohorte — c'est un catalogue de cours spécialisés que vous explorez et achetez individuellement."
               align="left"
               className="mb-0 sm:mb-0"
             />
 
             <ul className="mt-8 space-y-3">
-              {siteConfig.formation.objectives.slice(0, 4).map((item) => (
+              {platformHighlights.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Check className="h-3 w-3 text-primary" strokeWidth={2.5} />

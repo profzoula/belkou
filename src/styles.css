@@ -70,7 +70,12 @@
 
   --ink: oklch(0.28 0.025 265);
   --primary-soft: oklch(0.96 0.025 272);
-  --course-hero: oklch(0.20 0.035 270);
+  --course-hero: linear-gradient(
+    160deg,
+    oklch(0.955 0.022 275) 0%,
+    oklch(0.928 0.036 268) 55%,
+    oklch(0.908 0.044 262) 100%
+  );
 
   --gradient-primary: linear-gradient(135deg, oklch(0.56 0.17 272), oklch(0.46 0.19 272));
   --gradient-brand: var(--gradient-primary);
@@ -132,7 +137,12 @@
   --ring: oklch(0.62 0.16 272);
   --ink: oklch(0.94 0.008 275);
   --primary-soft: oklch(0.24 0.04 272);
-  --course-hero: oklch(0.16 0.03 270);
+  --course-hero: linear-gradient(
+    160deg,
+    oklch(0.30 0.04 272) 0%,
+    oklch(0.26 0.045 268) 55%,
+    oklch(0.22 0.04 265) 100%
+  );
   --gradient-mesh:
     radial-gradient(ellipse 70% 60% at 50% -20%, oklch(0.62 0.16 272 / 0.12), transparent 55%),
     radial-gradient(ellipse 50% 50% at 90% 20%, oklch(0.62 0.16 272 / 0.06), transparent 50%),

@@ -246,18 +246,18 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
-      <header className="border-b border-white/10 bg-course-hero text-white">
+      <header className="border-b border-border/60 bg-course-hero text-foreground">
         <div className="site-container flex h-14 items-center justify-between gap-3">
           <Link to="/" className="flex min-w-0 items-center gap-2 font-display font-bold text-sm">
             <img src={siteConfig.logo} alt="" className="h-8 w-8 shrink-0 rounded-lg" />
             {siteConfig.name}
           </Link>
           <div className="flex shrink-0 items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
+            <Button asChild variant="outline" size="sm">
               <Link to="/courses">Tous les cours</Link>
             </Button>
             {!authLoading && !user ? (
-              <Button asChild variant="outline" size="sm" className="border-white/20 bg-transparent text-white hover:bg-white/10">
+              <Button asChild variant="outline" size="sm">
                 <Link to="/login">Connexion</Link>
               </Button>
             ) : null}
@@ -266,24 +266,24 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </div>
       </header>
 
-      <section className="bg-course-hero text-white pb-10 pt-6">
+      <section className="bg-course-hero text-foreground pb-10 pt-6">
         <div className="site-container">
-          <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-white/70">
-            <Link to="/" className="hover:text-white hover:underline">
+          <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+            <Link to="/" className="hover:text-foreground hover:underline">
               {siteConfig.name}
             </Link>
             <ChevronRight className="h-3 w-3" />
-            <Link to="/courses" className="hover:text-white hover:underline">
+            <Link to="/courses" className="hover:text-foreground hover:underline">
               Cours
             </Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-white/90 line-clamp-1">{course.title}</span>
+            <span className="text-foreground/90 line-clamp-1">{course.title}</span>
           </nav>
 
           {!authLoading && !user && (
-            <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-500/15 px-4 py-3 text-sm text-amber-50">
+            <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-lg border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950">
               <span>Déjà payé pour ce cours ?</span>
-              <Link to="/login" className="font-semibold underline underline-offset-2 hover:text-white">
+              <Link to="/login" className="font-semibold text-primary underline underline-offset-2">
                 Connectez-vous
               </Link>
               <span>avec le même email que votre inscription.</span>
@@ -291,21 +291,21 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           )}
 
           {enrolledWaiting && access?.scheduledPublishAt && (
-            <p className="mb-4 inline-flex rounded-lg border border-emerald-400/50 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+            <p className="mb-4 inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
               Vous êtes inscrit — accès complet au cours le{" "}
               {formatScheduledPublishLabel(access.scheduledPublishAt)}
             </p>
           )}
 
           {scheduledSoon && course.scheduledPublishAt && !hasPaidAccess && (
-            <p className="mb-4 inline-flex rounded-lg border border-sky-400/50 bg-sky-500/10 px-3 py-2 text-xs text-sky-100">
+            <p className="mb-4 inline-flex rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
               Inscriptions ouvertes — les vidéos seront disponibles le{" "}
               {formatScheduledPublishLabel(course.scheduledPublishAt)}
             </p>
           )}
 
           {!contentLive && !scheduledSoon && !hasPaidAccess && (
-            <p className="mb-4 inline-flex rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-xs text-white/80">
+            <p className="mb-4 inline-flex rounded-lg border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground">
               Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
             </p>
           )}
@@ -313,13 +313,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <h1 className="max-w-4xl font-display text-xl font-bold leading-tight sm:text-3xl md:text-4xl">
             {course.title}
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/80 sm:text-base">
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
             {course.description}
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {course.bestseller && (
-              <span className="rounded-sm bg-white/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
+              <span className="rounded-sm bg-primary/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary">
                 Bestseller
               </span>
             )}
@@ -328,12 +328,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             </span>
           </div>
 
-          <p className="mt-3 text-sm">
+          <p className="mt-3 text-sm text-muted-foreground">
             Créé par{" "}
-            <span className="text-indigo-200 underline-offset-2 hover:underline">{course.instructor}</span>
+            <span className="font-medium text-primary underline-offset-2 hover:underline">{course.instructor}</span>
           </p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/70">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <Globe className="h-3.5 w-3.5" />
               Dernière mise à jour {course.lastUpdated}

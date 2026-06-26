@@ -18,8 +18,10 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal/privacy'
 import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
@@ -74,6 +76,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -82,6 +89,11 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/services/$slug',
+  path: '/services/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LegalTermsRoute = LegalTermsRouteImport.update({
@@ -141,8 +153,10 @@ export interface FileRoutesByFullPath {
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/services/': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
 }
@@ -162,8 +176,10 @@ export interface FileRoutesByTo {
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/courses': typeof CoursesIndexRoute
+  '/services': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
 }
@@ -184,8 +200,10 @@ export interface FileRoutesById {
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/services/': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
 }
@@ -207,8 +225,10 @@ export interface FileRouteTypes {
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/services/$slug'
     | '/admin/'
     | '/courses/'
+    | '/services/'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
   fileRoutesByTo: FileRoutesByTo
@@ -228,8 +248,10 @@ export interface FileRouteTypes {
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/services/$slug'
     | '/admin'
     | '/courses'
+    | '/services'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
   id:
@@ -249,8 +271,10 @@ export interface FileRouteTypes {
     | '/legal/cgv'
     | '/legal/privacy'
     | '/legal/terms'
+    | '/services/$slug'
     | '/admin/'
     | '/courses/'
+    | '/services/'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
   fileRoutesById: FileRoutesById
@@ -271,8 +295,10 @@ export interface RootRouteChildren {
   LegalCgvRoute: typeof LegalCgvRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  ServicesSlugRoute: typeof ServicesSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -341,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/': {
       id: '/courses/'
       path: '/courses'
@@ -353,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/services/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/legal/terms': {
@@ -442,8 +482,10 @@ const rootRouteChildren: RootRouteChildren = {
   LegalCgvRoute: LegalCgvRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTermsRoute: LegalTermsRoute,
+  ServicesSlugRoute: ServicesSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

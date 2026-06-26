@@ -73,3 +73,32 @@ export function paymentConfirmedEmail(name: string, plan: string, whatsappUrl: s
     </div>
   `;
 }
+
+export function serviceBookingEmail(params: {
+  serviceTitle: string;
+  name: string;
+  email: string;
+  phone: string;
+  preferredDate: string;
+  preferredTime: string;
+  message?: string;
+}) {
+  return `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
+      <h1 style="font-size:20px;">Nouvelle demande de rendez-vous</h1>
+      <p><strong>Service :</strong> ${params.serviceTitle}</p>
+      <ul style="line-height:1.6;padding-left:18px;">
+        <li><strong>Nom :</strong> ${params.name}</li>
+        <li><strong>Email :</strong> ${params.email}</li>
+        <li><strong>Téléphone :</strong> ${params.phone}</li>
+        <li><strong>Date préférée :</strong> ${params.preferredDate}</li>
+        <li><strong>Heure préférée :</strong> ${params.preferredTime}</li>
+      </ul>
+      ${
+        params.message?.trim()
+          ? `<p><strong>Message :</strong><br/>${params.message.replace(/\n/g, "<br/>")}</p>`
+          : ""
+      }
+    </div>
+  `;
+}
