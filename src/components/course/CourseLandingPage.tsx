@@ -24,17 +24,19 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getContinueLearnSearch,
+  getCourseActionLabel,
   getFirstPreviewVideoLesson,
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
-  getWelcomeLearnSearch,
   getWelcomePreviewLesson,
 } from "@/lib/courses";
 import { getLessonLockState } from "@/lib/course-access";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
+import { getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { useAuth } from "@/hooks/use-auth";
@@ -55,12 +57,16 @@ function CourseThumbnail({
   contentLive,
   scheduledPublishAt,
   accessLoading = false,
+  continueLearnSearch,
+  courseActionLabel = "Commencer le cours",
 }: {
   course: PublicCourse;
   hasPaidAccess: boolean;
   contentLive: boolean;
   scheduledPublishAt?: string;
   accessLoading?: boolean;
+  continueLearnSearch?: { lesson: string };
+  courseActionLabel?: string;
 }) {
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
@@ -124,12 +130,13 @@ function CourseThumbnail({
         <Link
           to="/courses/$slug/learn"
           params={{ slug: course.slug }}
+          search={continueLearnSearch}
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
         >
           <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
             <Play className="ml-1 h-7 w-7 fill-current" />
           </span>
-          <span className="text-sm font-semibold text-white drop-shadow-sm">Commencer le cours</span>
+          <span className="text-sm font-semibold text-white drop-shadow-sm">{courseActionLabel}</span>
         </Link>
       ) : (
         <Link
@@ -153,7 +160,11 @@ function CourseThumbnail({
 export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const { user, session, loading: authLoading } = useAuth();
   const accessFn = useServerFn(getCourseAccess);
+  const progressFn = useServerFn(getCourseProgress);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+  const [progress, setProgress] = useState<{ completedLessonIds: string[]; progressPercent: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (authLoading) return;
@@ -186,6 +197,35 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     };
   }, [accessFn, course, session?.access_token, authLoading]);
 
+  useEffect(() => {
+    if (authLoading || !session?.access_token) {
+      setProgress(null);
+      return;
+    }
+
+    let cancelled = false;
+    setProgress(null);
+
+    void progressFn({
+      data: {
+        accessToken: session.access_token,
+        courseSlug: course.slug,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setProgress(result);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProgress({ completedLessonIds: [], progressPercent: 0 });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, course.slug, progressFn, session?.access_token]);
+
   const accessLoading = authLoading || (Boolean(user) && access === null);
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
@@ -195,6 +235,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const playableLearnSearch = getPlayableLearnSearch(course);
   const previewLearnSearch = getPreviewLearnSearch(course);
   const hasPublicPreview = getPreviewVideoLessons(course).length > 0;
+  const continueLearnSearch = getContinueLearnSearch(course, progress?.completedLessonIds ?? []);
+  const courseActionLabel = getCourseActionLabel(progress?.progressPercent ?? 0);
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
@@ -311,6 +353,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               contentLive={contentLive}
               scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
               accessLoading={accessLoading}
+              continueLearnSearch={continueLearnSearch}
+              courseActionLabel={courseActionLabel}
             />
 
             <div className="space-y-4 p-5">
@@ -353,9 +397,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
               {canStartCourse ? (
                 <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                  <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
+                  <Link
+                    to="/courses/$slug/learn"
+                    params={{ slug: course.slug }}
+                    search={continueLearnSearch}
+                  >
                     <BookOpen className="h-4 w-4 mr-2" />
-                    Commencer le cours
+                    {courseActionLabel}
                   </Link>
                 </Button>
               ) : hasPaidAccess ? (
@@ -425,7 +473,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 <p className="text-center text-[11px] text-muted-foreground">
                   {hasPaidAccess
                     ? canStartCourse
-                      ? "Progression sauvegardée dans Mes cours"
+                      ? (progress?.progressPercent ?? 0) > 0
+                        ? `${progress?.progressPercent}% terminé · progression sauvegardée`
+                        : "Progression sauvegardée dans Mes cours"
                       : enrolledWaiting
                         ? hasPublicPreview
                           ? `Preview disponible · cours complet le ${startLabel}`
@@ -592,8 +642,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           </div>
           {canStartCourse ? (
             <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-              <Link to="/courses/$slug/learn" params={{ slug: course.slug }}>
-                Commencer
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={continueLearnSearch}
+              >
+                {(progress?.progressPercent ?? 0) > 0 ? "Continuer" : "Commencer"}
               </Link>
             </Button>
           ) : hasPaidAccess ? (

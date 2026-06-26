@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatScheduledPublishLabel } from "@/lib/course-publish";
+import { getCourseActionLabel } from "@/lib/courses";
 import type { StudentEnrollment } from "@/lib/fns/dashboard";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ function progressLabel(enrollment: StudentEnrollment) {
       : `Disponible le ${formatScheduledPublishLabel(enrollment.scheduledPublishAt)}`;
   }
   if (enrollment.progressPercent <= 0) {
-    return "Commencer le cours";
+    return getCourseActionLabel(0);
   }
   return `${enrollment.progressPercent}% terminé`;
 }
@@ -178,8 +179,13 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
   const isPaid = enrollment.payment_status === "paid";
   const canLearn = isPaid && enrollment.contentLive;
   const welcomeSearch = enrollment.welcomeLessonId ? { lesson: enrollment.welcomeLessonId } : undefined;
+  const continueSearch = enrollment.continueLessonId ? { lesson: enrollment.continueLessonId } : undefined;
   const href = canLearn
-    ? { to: "/courses/$slug/learn" as const, params: { slug: enrollment.courseSlug } }
+    ? {
+        to: "/courses/$slug/learn" as const,
+        params: { slug: enrollment.courseSlug },
+        ...(continueSearch ? { search: continueSearch } : {}),
+      }
     : isPaid
       ? {
           to: "/courses/$slug/learn" as const,

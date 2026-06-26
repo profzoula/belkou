@@ -6,7 +6,12 @@ import {
   pickRegistrationForCourse,
   registrationCourseKey,
 } from "@/lib/course-access";
-import { countLessons, getFirstPreviewVideoLesson, getWelcomePreviewLesson } from "@/lib/courses";
+import {
+  countLessons,
+  getFirstPreviewVideoLesson,
+  getNextLessonToWatch,
+  getWelcomePreviewLesson,
+} from "@/lib/courses";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
@@ -27,6 +32,7 @@ export type StudentEnrollment = {
   progressPercent: number;
   purchasedAt: string;
   welcomeLessonId?: string;
+  continueLessonId?: string;
 };
 
 export const getStudentDashboard = createServerFn({ method: "POST" })
@@ -86,6 +92,10 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
         progressPercent: computeProgressPercent(progressRows.length, countLessons(course)),
         purchasedAt: registration.created_at,
         welcomeLessonId: getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
+        continueLessonId: getNextLessonToWatch(
+          course,
+          progressRows.map((row) => row.lesson_id),
+        )?.id,
       });
     }
 

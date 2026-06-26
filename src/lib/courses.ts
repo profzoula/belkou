@@ -174,6 +174,30 @@ export function getPlayableLearnSearch(
   return getPreviewLearnSearch(course) ?? getWelcomeLearnSearch(course);
 }
 
+/** First incomplete lesson, or the first lesson when none are completed yet. */
+export function getNextLessonToWatch(
+  course: { sections: CourseSection[] },
+  completedLessonIds: string[] = [],
+): CourseLesson | undefined {
+  const lessons = getAllLessons(course);
+  if (!lessons.length) return undefined;
+
+  const completed = new Set(completedLessonIds);
+  return lessons.find((lesson) => !completed.has(lesson.id)) ?? lessons[0];
+}
+
+export function getContinueLearnSearch(
+  course: { sections: CourseSection[] },
+  completedLessonIds: string[] = [],
+): { lesson: string } | undefined {
+  const lesson = getNextLessonToWatch(course, completedLessonIds);
+  return lesson ? { lesson: lesson.id } : undefined;
+}
+
+export function getCourseActionLabel(progressPercent: number): string {
+  return progressPercent > 0 ? "Continuer le cours" : "Commencer le cours";
+}
+
 export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
   return getAllLessons(course).find((lesson) => lesson.id === lessonId);
 }
