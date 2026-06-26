@@ -813,15 +813,19 @@ export function AdminCoursesTab() {
                                   className="rounded-lg"
                                 />
                               </div>
-                              <div className="space-y-1.5">
-                                <Label>Vimeo</Label>
+                              <div className="space-y-1.5 sm:col-span-2">
+                                <Label>Vimeo (ID ou lien)</Label>
                                 <Input
                                   value={draft.vimeo}
                                   onChange={(e) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { vimeo: e.target.value })
                                   }
                                   className="rounded-lg"
+                                  placeholder="1204014571 ou https://vimeo.com/1204014571"
                                 />
+                                <p className="text-[11px] text-muted-foreground">
+                                  Collez l&apos;ID Vimeo ou l&apos;URL complète (y compris liens privés avec hash).
+                                </p>
                               </div>
                             </>
                           )}
@@ -840,12 +844,52 @@ export function AdminCoursesTab() {
                   })}
                   <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
                     <p className="text-sm font-semibold">Ajouter une vidéo</p>
-                    <Input
-                      value={newLesson.title}
-                      onChange={(e) => updateNewLessonDraft(section.id, { title: e.target.value })}
-                      className="rounded-lg"
-                      placeholder="Titre de la vidéo"
-                    />
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor={`new-lesson-title-${section.id}`}>Titre de la vidéo</Label>
+                        <Input
+                          id={`new-lesson-title-${section.id}`}
+                          value={newLesson.title}
+                          onChange={(e) => updateNewLessonDraft(section.id, { title: e.target.value })}
+                          className="rounded-lg"
+                          placeholder="Ex. Configuration de l'environnement"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`new-lesson-duration-${section.id}`}>Durée</Label>
+                        <Input
+                          id={`new-lesson-duration-${section.id}`}
+                          value={newLesson.duration}
+                          onChange={(e) => updateNewLessonDraft(section.id, { duration: e.target.value })}
+                          className="rounded-lg"
+                          placeholder="8min"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor={`new-lesson-vimeo-${section.id}`}>Vimeo (ID ou lien)</Label>
+                        <Input
+                          id={`new-lesson-vimeo-${section.id}`}
+                          value={newLesson.vimeo}
+                          onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
+                          className="rounded-lg"
+                          placeholder="1204014571 ou https://vimeo.com/..."
+                        />
+                      </div>
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <p className="text-[11px] text-muted-foreground">
+                          Collez l&apos;ID Vimeo ou l&apos;URL complète. Vous pourrez modifier la vidéo après l&apos;ajout.
+                        </p>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={newLesson.preview}
+                            onChange={(e) => updateNewLessonDraft(section.id, { preview: e.target.checked })}
+                            className="rounded border-border"
+                          />
+                          Preview gratuite (visible sans inscription)
+                        </label>
+                      </div>
+                    </div>
                     <div className="flex gap-2">
                       <Button
                         size="sm"
