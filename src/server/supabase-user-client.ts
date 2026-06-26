@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-function getSupabasePublicEnv() {
+export function getSupabasePublicEnv() {
   const url =
     process.env.VITE_SUPABASE_URL ??
     process.env.SUPABASE_URL ??

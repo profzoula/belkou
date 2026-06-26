@@ -1,13 +1,19 @@
 import { createClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
+import { getSupabasePublicEnv } from "@/server/supabase-user-client";
 
 export async function getUserFromAccessToken(accessToken: string): Promise<User | null> {
-  const url = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_ANON_KEY ?? process.env.SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const { url, anonKey } = getSupabasePublicEnv();
+  if (!url || !anonKey) {
+    console.error("[BelKou] getUserFromAccessToken: Supabase URL or anon key missing on server");
+    return null;
+  }
 
-  const sb = createClient(url, key, { auth: { persistSession: false } });
+  const sb = createClient(url, anonKey, { auth: { persistSession: false } });
   const { data, error } = await sb.auth.getUser(accessToken);
-  if (error || !data.user) return null;
+  if (error || !data.user) {
+    if (error) console.error("[BelKou] getUserFromAccessToken:", error.message);
+    return null;
+  }
   return data.user;
 }

@@ -15,8 +15,29 @@ export function registrationCoversCourse(
   registration: Pick<RegistrationRecord, "course_slug">,
   courseSlug: string,
 ): boolean {
-  const regSlug = registration.course_slug ?? LEGACY_COURSE_SLUG;
-  return regSlug === courseSlug;
+  return registrationCourseKey(registration.course_slug) === registrationCourseKey(courseSlug);
+}
+
+/** Best matching registration row for course access (legacy cohort payers included). */
+export function pickRegistrationForCourse(
+  rows: RegistrationRecord[],
+  courseSlug: string,
+): RegistrationRecord | null {
+  const key = registrationCourseKey(courseSlug);
+  const matching = rows.filter((row) => registrationCourseKey(row.course_slug) === key);
+  const paidMatch = matching.find((row) => row.payment_status === "paid");
+  if (paidMatch) return paidMatch;
+  if (matching[0]) return matching[0];
+
+  if (key !== LEGACY_COURSE_SLUG) return null;
+
+  const paid = rows.filter((row) => row.payment_status === "paid");
+  const legacyCohort = paid.find((row) => !row.course_slug?.trim());
+  if (legacyCohort) return legacyCohort;
+
+  if (paid.length === 1) return paid[0]!;
+
+  return null;
 }
 
 export function hasPaidAccessToCourse(

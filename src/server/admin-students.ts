@@ -1,10 +1,11 @@
 import type { User } from "@supabase/supabase-js";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
+import { pickRegistrationForCourse } from "@/lib/course-access";
 import { getDb } from "@/server/env";
 import {
-  getRegistrationByEmailAndCourse,
   listRegistrations,
+  listRegistrationsByEmail,
   saveRegistration,
   updateRegistrationCourseAccess,
 } from "@/server/db";
@@ -114,7 +115,8 @@ export async function grantCourseAccessToStudent(params: {
 
   const db = await getDb();
   const email = normalizeRegistrationEmail(params.email);
-  const existing = await getRegistrationByEmailAndCourse(db, email, params.courseSlug);
+  const rows = await listRegistrationsByEmail(db, email);
+  const existing = pickRegistrationForCourse(rows, params.courseSlug);
 
   if (existing) {
     const updated = await updateRegistrationCourseAccess(db, existing.id, {

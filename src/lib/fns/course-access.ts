@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { hasPaidAccessToCourse } from "@/lib/course-access";
+import { hasPaidAccessToCourse, pickRegistrationForCourse } from "@/lib/course-access";
 import { isCourseContentLive } from "@/lib/course-publish";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
-import { getRegistrationByEmailAndCourse } from "@/server/db";
+import { listRegistrationsByEmail } from "@/server/db";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
@@ -52,7 +53,8 @@ export const getCourseAccess = createServerFn({ method: "POST" })
     }
 
     const db = await getDb();
-    const registration = await getRegistrationByEmailAndCourse(db, user.email, data.courseSlug);
+    const rows = await listRegistrationsByEmail(db, normalizeRegistrationEmail(user.email));
+    const registration = pickRegistrationForCourse(rows, data.courseSlug);
 
     return {
       hasPaidAccess: hasPaidAccessToCourse(registration, data.courseSlug),

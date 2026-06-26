@@ -1,11 +1,12 @@
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
-import { registrationCourseKey } from "@/lib/course-access";
+import { registrationCourseKey, pickRegistrationForCourse } from "@/lib/course-access";
 import {
   supabaseGetById,
   supabaseGetByStripeSession,
   supabaseGetCount,
   supabaseGetStats,
+  supabaseListByEmail,
   supabaseListRegistrations,
   supabaseSaveRegistration,
   supabaseSetStripeSessionId,
@@ -190,9 +191,8 @@ export async function getRegistrationByEmailAndCourse(
   email: string,
   courseSlug?: string | null,
 ): Promise<RegistrationRecord | null> {
-  const key = registrationCourseKey(courseSlug);
   const rows = await listRegistrationsByEmail(db, email);
-  return rows.find((row) => registrationCourseKey(row.course_slug) === key) ?? null;
+  return pickRegistrationForCourse(rows, registrationCourseKey(courseSlug));
 }
 
 export async function getRegistrationByEmail(
