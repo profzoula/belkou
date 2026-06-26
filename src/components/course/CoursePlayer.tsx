@@ -321,7 +321,10 @@ function CurriculumSidebar({
                         <li key={lesson.id}>
                           <button
                             type="button"
-                            onClick={() => onSelectLesson(lesson.id)}
+                            onClick={() => {
+                              const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
+                              if (!locked) onSelectLesson(lesson.id);
+                            }}
                             className={cn(
                               "flex w-full items-start gap-2 border-l-2 px-3 py-2.5 text-left text-sm transition-colors",
                               active
@@ -408,11 +411,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       if (!locked) return requested.id;
     }
 
-    if (hasPaidAccess && !contentLive && welcomeLesson) {
-      return welcomeLesson.id;
-    }
+    const firstUnlocked = allLessons.find((lesson) => {
+      const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
+      return !locked;
+    });
 
-    return requested?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
+    return firstUnlocked?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
   };
 
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));

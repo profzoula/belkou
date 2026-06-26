@@ -137,6 +137,14 @@ export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title"
 }
 
 export function getWelcomePreviewLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
+  const previews = getPreviewVideoLessons(course);
+  const welcomeCandidate =
+    previews.find((lesson) => lesson.id === "intro-welcome") ??
+    previews.find((lesson) => isWelcomePreviewLesson(lesson)) ??
+    previews[0];
+
+  if (welcomeCandidate) return welcomeCandidate;
+
   const videos = getAllLessons(course).filter((lesson) => lesson.type === "video");
   return (
     videos.find((lesson) => lesson.id === "intro-welcome") ??
@@ -150,6 +158,13 @@ export function getWelcomeLearnSearch(
 ): { lesson: string } | undefined {
   const welcome = getWelcomePreviewLesson(course);
   return welcome ? { lesson: welcome.id } : undefined;
+}
+
+export function getPreviewLearnSearch(
+  course: { sections: CourseSection[] },
+): { lesson: string } | undefined {
+  const preview = getFirstPreviewVideoLesson(course);
+  return preview ? { lesson: preview.id } : undefined;
 }
 
 export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
@@ -181,4 +196,16 @@ export function getLessonVimeo(lesson: CourseLesson): VimeoRef | null {
   }
 
   return null;
+}
+
+export function isPreviewVideoAvailable(lesson: CourseLesson): boolean {
+  return lesson.type === "video" && Boolean(lesson.preview) && Boolean(getLessonVimeo(lesson));
+}
+
+export function getPreviewVideoLessons(course: { sections: CourseSection[] }): CourseLesson[] {
+  return getAllLessons(course).filter(isPreviewVideoAvailable);
+}
+
+export function getFirstPreviewVideoLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
+  return getPreviewVideoLessons(course)[0];
 }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ToolsStrip } from "@/components/site/ToolsStrip";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
-import { formatCount } from "@/lib/courses";
+import { formatCount, getFirstPreviewVideoLesson } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 
 type HeroProps = {
@@ -14,9 +14,7 @@ type HeroProps = {
 };
 
 function FeaturedCourseCard({ course }: { course: PublicCourse }) {
-  const previewLesson = course.sections
-    .flatMap((s) => s.lessons)
-    .find((l) => l.preview && l.type === "video");
+  const previewLesson = getFirstPreviewVideoLesson(course);
 
   return (
     <Link

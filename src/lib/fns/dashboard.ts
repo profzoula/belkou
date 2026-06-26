@@ -6,7 +6,7 @@ import {
   pickRegistrationForCourse,
   registrationCourseKey,
 } from "@/lib/course-access";
-import { countLessons, getWelcomePreviewLesson } from "@/lib/courses";
+import { countLessons, getFirstPreviewVideoLesson, getWelcomePreviewLesson } from "@/lib/courses";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
@@ -85,7 +85,8 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
         contentLive: isCourseContentLive(course),
         progressPercent: computeProgressPercent(progressRows.length, countLessons(course)),
         purchasedAt: registration.created_at,
-        welcomeLessonId: getWelcomePreviewLesson(course)?.id,
+        welcomeLessonId:
+          getWelcomePreviewLesson(course)?.id ?? getFirstPreviewVideoLesson(course)?.id,
       });
     }
 

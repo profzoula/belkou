@@ -24,6 +24,9 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getFirstPreviewVideoLesson,
+  getPreviewLearnSearch,
+  getPreviewVideoLessons,
   getWelcomeLearnSearch,
   getWelcomePreviewLesson,
 } from "@/lib/courses";
@@ -64,13 +67,11 @@ function CourseThumbnail({
     if (enrolledWaiting) {
       return getWelcomePreviewLesson(course);
     }
-    return getAllLessons(course).find((lesson) => lesson.preview && lesson.type === "video");
+    return getFirstPreviewVideoLesson(course);
   }, [course, enrolledWaiting]);
   const learnSearch = enrolledWaiting
     ? getWelcomeLearnSearch(course)
-    : previewLesson
-      ? { lesson: previewLesson.id }
-      : undefined;
+    : getPreviewLearnSearch(course);
 
   const availabilityLabel = scheduledPublishAt
     ? formatScheduledPublishLabel(scheduledPublishAt)
@@ -183,8 +184,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
 
-  const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
   const welcomeLearnSearch = getWelcomeLearnSearch(course);
+  const previewLearnSearch = getPreviewLearnSearch(course);
+  const hasPublicPreview = getPreviewVideoLessons(course).length > 0;
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);
   const scheduledSoon = isScheduledInFuture(course);
@@ -368,16 +370,18 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 <>
                   {scheduledSoon ? (
                     <>
-                      <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
-                        <Link
-                          to="/courses/$slug/learn"
-                          params={{ slug: course.slug }}
-                          search={welcomeLearnSearch}
-                        >
-                          <Play className="h-4 w-4 mr-1 fill-current" />
-                          Voir la preview gratuite
-                        </Link>
-                      </Button>
+                      {hasPublicPreview ? (
+                        <Button asChild variant="hero" size="lg" className="w-full rounded-lg text-base font-bold">
+                          <Link
+                            to="/courses/$slug/learn"
+                            params={{ slug: course.slug }}
+                            search={previewLearnSearch}
+                          >
+                            <Play className="h-4 w-4 mr-1 fill-current" />
+                            Voir la preview gratuite
+                          </Link>
+                        </Button>
+                      ) : null}
                       <Button asChild variant="soft" size="lg" className="w-full rounded-lg text-base font-bold">
                         <Link to="/checkout" search={{ course: course.slug }}>
                           S&apos;inscrire maintenant
@@ -392,16 +396,18 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                         </Link>
                       </Button>
 
-                      <Button asChild variant="soft" size="lg" className="w-full rounded-lg">
-                        <Link
-                          to="/courses/$slug/learn"
-                          params={{ slug: course.slug }}
-                          search={welcomeLearnSearch}
-                        >
-                          <Play className="h-4 w-4 mr-1 fill-current" />
-                          Voir la preview gratuite
-                        </Link>
-                      </Button>
+                      {hasPublicPreview ? (
+                        <Button asChild variant="soft" size="lg" className="w-full rounded-lg">
+                          <Link
+                            to="/courses/$slug/learn"
+                            params={{ slug: course.slug }}
+                            search={previewLearnSearch}
+                          >
+                            <Play className="h-4 w-4 mr-1 fill-current" />
+                            Voir la preview gratuite
+                          </Link>
+                        </Button>
+                      ) : null}
                     </>
                   )}
 
@@ -605,12 +611,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 {welcomeLearnSearch ? "Bienvenue" : "Cours"}
               </Link>
             </Button>
-          ) : scheduledSoon || welcomeLesson ? (
+          ) : hasPublicPreview ? (
             <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
               <Link
                 to="/courses/$slug/learn"
                 params={{ slug: course.slug }}
-                search={welcomeLearnSearch}
+                search={previewLearnSearch}
               >
                 Preview
               </Link>
