@@ -371,6 +371,12 @@
   .bg-course-hero {
     background: var(--course-hero);
   }
+  .bg-hero-dark {
+    background:
+      radial-gradient(ellipse 90% 70% at 50% -10%, rgba(99, 102, 241, 0.12), transparent 55%),
+      radial-gradient(ellipse 80% 60% at 50% 110%, rgba(255, 255, 255, 0.03), transparent 50%),
+      #07080d;
+  }
   .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
