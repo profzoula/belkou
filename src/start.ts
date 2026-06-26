@@ -1,6 +1,7 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
+import { getAdminSessionToken } from "./lib/admin-session";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -19,4 +20,18 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 
 export const startInstance = createStart(() => ({
   requestMiddleware: [errorMiddleware],
+  serverFns: {
+    fetch: (url, init) => {
+      const headers = new Headers(init?.headers);
+      const token = getAdminSessionToken();
+      if (token && !headers.has("Authorization")) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return fetch(url, {
+        ...init,
+        credentials: "include",
+        headers,
+      });
+    },
+  },
 }));

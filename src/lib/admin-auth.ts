@@ -1,4 +1,5 @@
-const COOKIE_NAME = "belkou_admin";
+export const ADMIN_COOKIE_NAME = "belkou_admin";
+const COOKIE_NAME = ADMIN_COOKIE_NAME;
 const MAX_AGE_SEC = 60 * 60 * 24;
 
 type AdminPayload = {
@@ -103,13 +104,48 @@ export function getAdminCookie(cookieHeader: string | null): string | undefined 
   return undefined;
 }
 
+export async function verifyAdminSessionToken(
+  token: string | undefined,
+  secret: string | undefined,
+): Promise<string | null> {
+  if (!secret || !token) return null;
+  const payload = await verifyAdminToken(token, secret);
+  return payload?.u ?? null;
+}
+
 export async function getAdminFromRequest(
   cookieHeader: string | null,
   secret: string | undefined,
 ): Promise<string | null> {
   if (!secret) return null;
   const token = getAdminCookie(cookieHeader);
-  if (!token) return null;
-  const payload = await verifyAdminToken(token, secret);
-  return payload?.u ?? null;
+  return verifyAdminSessionToken(token, secret);
+}
+
+export async function getAdminFromRequestSources(
+  sources: {
+    cookieHeader?: string | null;
+    cookieValue?: string | null;
+    authorization?: string | null;
+    adminToken?: string | null;
+  },
+  secret: string | undefined,
+): Promise<string | null> {
+  if (!secret) return null;
+
+  const candidates = [
+    sources.cookieValue ?? undefined,
+    getAdminCookie(sources.cookieHeader ?? null),
+    sources.authorization?.startsWith("Bearer ")
+      ? sources.authorization.slice("Bearer ".length).trim()
+      : undefined,
+    sources.adminToken?.trim() || undefined,
+  ];
+
+  for (const token of candidates) {
+    const username = await verifyAdminSessionToken(token, secret);
+    if (username) return username;
+  }
+
+  return null;
 }

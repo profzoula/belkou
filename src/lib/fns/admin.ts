@@ -1,11 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeader, setResponseHeader } from "@tanstack/react-start/server";
+import { getCookie, getRequestHeader, setResponseHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import {
+  ADMIN_COOKIE_NAME,
   adminCookieHeader,
   clearAdminCookieHeader,
   createAdminToken,
-  getAdminFromRequest,
+  getAdminCookie,
+  getAdminFromRequestSources,
+  verifyAdminSessionToken,
 } from "@/lib/admin-auth";
 import { serializeCourseForAdmin } from "@/lib/admin-courses";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
@@ -50,12 +53,24 @@ function isSecureRequest(): boolean {
   return getRequestHeader("x-forwarded-proto") === "https" || process.env.NODE_ENV === "production";
 }
 
+async function resolveAdminUsername(env: { ADMIN_PASSWORD?: string }): Promise<string | null> {
+  return getAdminFromRequestSources(
+    {
+      cookieHeader: getRequestHeader("cookie") ?? null,
+      cookieValue: getCookie(ADMIN_COOKIE_NAME) ?? null,
+      authorization: getRequestHeader("authorization") ?? null,
+      adminToken: getRequestHeader("x-admin-token") ?? null,
+    },
+    env.ADMIN_PASSWORD,
+  );
+}
+
 async function requireAdmin(): Promise<void> {
   const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) {
     throw new Error("Admin non configuré");
   }
-  const admin = await getAdminFromRequest(getRequestHeader("cookie") ?? null, env.ADMIN_PASSWORD);
+  const admin = await resolveAdminUsername(env);
   if (!admin) {
     throw new Error("Non autorisé");
   }
@@ -87,7 +102,7 @@ export const adminLogin = createServerFn({ method: "POST" })
 
     const token = await createAdminToken(data.username, env.ADMIN_PASSWORD);
     setResponseHeader("Set-Cookie", adminCookieHeader(token, isSecureRequest()));
-    return { ok: true as const };
+    return { ok: true as const, token };
   });
 
 export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
@@ -415,8 +430,26 @@ export const adminProcessWithdrawal = createServerFn({ method: "POST" })
 export const checkAdminSession = createServerFn({ method: "GET" }).handler(async () => {
   const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) return { authenticated: false as const };
-  const admin = await getAdminFromRequest(getRequestHeader("cookie") ?? null, env.ADMIN_PASSWORD);
+  const admin = await resolveAdminUsername(env);
   return { authenticated: Boolean(admin) };
+});
+
+export const refreshAdminSession = createServerFn({ method: "GET" }).handler(async () => {
+  const env = await getServerEnvResolved();
+  if (!env.ADMIN_PASSWORD) return { ok: false as const };
+
+  const auth = getRequestHeader("authorization");
+  const rawToken =
+    getCookie(ADMIN_COOKIE_NAME) ??
+    getAdminCookie(getRequestHeader("cookie") ?? null) ??
+    (auth?.startsWith("Bearer ") ? auth.slice("Bearer ".length).trim() : undefined) ??
+    getRequestHeader("x-admin-token") ??
+    undefined;
+
+  if (!rawToken) return { ok: false as const };
+  const admin = await verifyAdminSessionToken(rawToken, env.ADMIN_PASSWORD);
+  if (!admin) return { ok: false as const };
+  return { ok: true as const, token: rawToken };
 });
 
 export const getAdminCourses = createServerFn({ method: "GET" }).handler(async () => {

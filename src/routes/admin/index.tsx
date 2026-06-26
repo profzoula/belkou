@@ -9,7 +9,8 @@ import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { AdminRegistrationsTab } from "@/components/admin/AdminRegistrationsTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminStudentsTab } from "@/components/admin/AdminStudentsTab";
-import { adminLogout, getAdminOverview } from "@/lib/fns/admin";
+import { adminLogout, getAdminOverview, refreshAdminSession } from "@/lib/fns/admin";
+import { clearAdminSessionToken, getAdminSessionToken, setAdminSessionToken } from "@/lib/admin-session";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -26,10 +27,25 @@ function AdminDashboardPage() {
   const navigate = useNavigate();
   const logoutFn = useServerFn(adminLogout);
   const overviewFn = useServerFn(getAdminOverview);
+  const refreshSessionFn = useServerFn(refreshAdminSession);
   const [section, setSection] = useState<AdminSection>("overview");
   const [refreshKey, setRefreshKey] = useState(0);
   const [overview, setOverview] = useState<Awaited<ReturnType<typeof getAdminOverview>> | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!getAdminSessionToken()) {
+      refreshSessionFn()
+        .then((result) => {
+          if (result.ok && result.token) {
+            setAdminSessionToken(result.token);
+          }
+        })
+        .catch(() => {
+          /* cookie session missing — login redirect handled by overview load */
+        });
+    }
+  }, [refreshSessionFn]);
 
   useEffect(() => {
     setLoading(true);
@@ -40,6 +56,7 @@ function AdminDashboardPage() {
   }, [refreshKey]);
 
   const logout = async () => {
+    clearAdminSessionToken();
     await logoutFn();
     toast.success("Déconnexion");
     navigate({ to: "/admin/login" });

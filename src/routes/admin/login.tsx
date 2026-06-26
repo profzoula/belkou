@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { adminLogin } from "@/lib/fns/admin";
+import { setAdminSessionToken } from "@/lib/admin-session";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/login")({
@@ -30,7 +31,10 @@ function AdminLoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await loginFn({ data: { username, password } });
+      const result = await loginFn({ data: { username, password } });
+      if (result.token) {
+        setAdminSessionToken(result.token);
+      }
       toast.success("Connexion admin réussie");
       navigate({ to: "/admin" });
     } catch (error) {
