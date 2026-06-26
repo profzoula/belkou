@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -56,7 +57,7 @@ export function AdminLayout({
         <aside className="flex flex-col border-b border-border bg-card lg:min-h-screen lg:border-b-0 lg:border-r">
           <div className="border-b border-border px-5 py-5">
             <div className="flex items-center gap-3">
-              <img src={siteConfig.logo} alt="" className="h-10 w-10 rounded-xl shadow-sm" />
+              <SiteLogo className="h-10 w-10 rounded-xl" alt="" />
               <div className="min-w-0">
                 <p className="font-display text-base font-bold truncate">BelKou Admin</p>
                 <p className="text-xs text-muted-foreground">Plateforme de formation</p>

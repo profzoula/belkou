@@ -40,6 +40,7 @@ import { getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { useAuth } from "@/hooks/use-auth";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 
 type CourseLandingPageProps = {
@@ -249,7 +250,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
       <header className="border-b border-border/60 bg-course-hero text-foreground">
         <div className="site-container flex h-14 items-center justify-between gap-3">
           <Link to="/" className="flex min-w-0 items-center gap-2 font-display font-bold text-sm">
-            <img src={siteConfig.logo} alt="" className="h-8 w-8 shrink-0 rounded-lg" />
+            <SiteLogo className="h-8 w-8 shrink-0" alt="" />
             {siteConfig.name}
           </Link>
           <div className="flex shrink-0 items-center gap-2">

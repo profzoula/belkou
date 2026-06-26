@@ -40,6 +40,7 @@ import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-acces
 import { completeLesson } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { VimeoPlayer } from "@/components/course/VimeoPlayer";
@@ -467,7 +468,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               <span className="hidden sm:inline">Cours</span>
             </Link>
           </Button>
-          <img src={siteConfig.logo} alt="" className="hidden h-7 w-7 rounded-md sm:block" />
+          <SiteLogo className="hidden h-7 w-7 rounded-md sm:inline-flex" alt="" />
           <p className="min-w-0 flex-1 truncate text-sm font-semibold">{course.title}</p>
           <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
             <Link to="/courses">Tous les cours</Link>

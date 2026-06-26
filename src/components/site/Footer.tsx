@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 
 export function Footer() {
@@ -8,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10">
           <div className="min-w-0">
             <Link to="/" className="inline-flex items-center gap-2.5 font-display font-bold mb-4">
-              <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 rounded-lg object-contain" />
+              <SiteLogo className="h-8 w-8" alt={siteConfig.name} />
               {siteConfig.name}
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">

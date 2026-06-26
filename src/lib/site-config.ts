@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "BelKou",
   siteUrl: import.meta.env.VITE_SITE_URL ?? "https://belkou.online",
-  logo: "/favicon/logo.png",
+  logo: "/favicon/logo.svg",
   tagline: "Plateforme de cours IA & SaaS en français",
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? "profzoula@gmail.com",
   whatsappGroups: {

@@ -17,6 +17,7 @@ import { planDetails, type PlanId } from "@/lib/plans";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
 import { cn } from "@/lib/utils";
@@ -143,7 +144,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
       <header className="border-b border-border bg-white">
         <div className="site-container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm">
-            <img src={siteConfig.logo} alt="" className="h-8 w-8 rounded-lg" />
+            <SiteLogo className="h-8 w-8" alt="" />
             {siteConfig.name}
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -170,7 +171,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                   {CourseIcon ? (
                     <CourseIcon className="h-8 w-8 text-white/80" />
                   ) : (
-                    <img src={siteConfig.logo} alt="" className="h-10 w-10 rounded" />
+                    <SiteLogo className="h-10 w-10 rounded" alt="" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">

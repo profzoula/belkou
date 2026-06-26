@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
+import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -190,7 +191,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
               isDark && "text-white",
             )}
           >
-            <img src={siteConfig.logo} alt={siteConfig.name} className="h-8 w-8 shrink-0 rounded-lg object-contain" />
+            <SiteLogo className="h-8 w-8" alt={siteConfig.name} />
             <span className="truncate text-[15px]">{siteConfig.name}</span>
           </Link>
 
