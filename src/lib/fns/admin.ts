@@ -475,6 +475,7 @@ export const adminCreateCourse = createServerFn({ method: "POST" })
         description: z.string().optional(),
         plan: z.enum(["premium", "vip"]).optional(),
         instructor: z.string().optional(),
+        free: z.boolean().optional(),
       })
       .parse(data),
   )

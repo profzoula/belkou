@@ -398,11 +398,16 @@
 .animate-marquee {
   animation: marquee 28s linear infinite;
 }
-.animate-marquee:hover {
+.animate-marquee-reverse {
+  animation: marquee 28s linear infinite reverse;
+}
+.animate-marquee:hover,
+.animate-marquee-reverse:hover {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee,
+  .animate-marquee-reverse,
   .animate-fade-up,
   .promo-topbar,
   .promo-highlight,

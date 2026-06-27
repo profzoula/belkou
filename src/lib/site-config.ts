@@ -4,6 +4,7 @@ export const siteConfig = {
   logo: "/favicon/logo.svg",
   tagline: "Plateforme de cours IA & SaaS en français",
   contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? "profzoula@gmail.com",
+  contactWhatsApp: import.meta.env.VITE_WHATSAPP_PHONE ?? "9413010414",
   whatsappGroups: {
     premium:
       import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ??
@@ -72,4 +73,26 @@ export function getWhatsappGroupUrl(plan: PlanId | string | undefined): string {
 
 export function getWhatsappGroupLabel(plan: PlanId | string | undefined): string {
   return plan === "vip" ? "VIP VibeCode" : "Premium VibeCode";
+}
+
+/** Digits only, with US country code when 10 digits (e.g. 9413010414 → 19413010414). */
+export function normalizeWhatsAppPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `1${digits}`;
+  return digits;
+}
+
+export function getWhatsAppChatUrl(phone = siteConfig.contactWhatsApp): string {
+  return `https://wa.me/${normalizeWhatsAppPhone(phone)}`;
+}
+
+export function formatWhatsAppPhone(phone = siteConfig.contactWhatsApp): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+  if (digits.length === 11 && digits.startsWith("1")) {
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  }
+  return phone.startsWith("+") ? phone : `+${digits}`;
 }

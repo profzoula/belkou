@@ -214,6 +214,14 @@ export function formatCount(count: number): string {
   return new Intl.NumberFormat("fr-FR").format(count);
 }
 
+export function isFreeCourse(course: Pick<Course, "price">): boolean {
+  return course.price <= 0;
+}
+
+export function formatCoursePrice(price: number): string {
+  return isFreeCourse({ price }) ? "Gratuit" : `$${price}`;
+}
+
 const previewVimeoFallback =
   typeof import.meta !== "undefined" ? import.meta.env.VITE_VIMEO_PREVIEW_ID?.trim() : undefined;
 

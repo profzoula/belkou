@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Gift, Star, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
-import { formatCount } from "@/lib/courses";
+import { formatCount, isFreeCourse } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { cn } from "@/lib/utils";
 
@@ -13,10 +13,6 @@ type TrendingCoursesProps = {
 };
 
 type CourseFilter = "all" | "paid" | "free";
-
-function isFreeCourse(course: PublicCourse) {
-  return course.price <= 0;
-}
 
 function StarRating({ rating, count }: { rating: number; count: number }) {
   return (

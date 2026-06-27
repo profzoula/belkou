@@ -3,15 +3,13 @@ import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { TrendingCourses } from "@/components/site/TrendingCourses";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
-import { CourseCategories } from "@/components/site/CourseCategories";
 import { PlatformBenefits } from "@/components/site/PlatformBenefits";
 import { HowItWorks } from "@/components/site/HowItWorks";
-import { FAQ } from "@/components/site/FAQ";
+import { Testimonials } from "@/components/site/Testimonials";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
 import { getStudentCount } from "@/lib/fns/stats";
 import { getPublicCourses } from "@/lib/fns/courses";
-import { getFirstPreviewVideoLesson } from "@/lib/courses";
 import { isScheduledInFuture } from "@/lib/course-publish";
 import { seoHead, defaultTitle, defaultDescription, organizationJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/site/JsonLd";
@@ -37,22 +35,20 @@ function Index() {
   const { studentCount, courses } = Route.useLoaderData();
 
   const upcomingCourses = courses.filter((course) => isScheduledInFuture(course));
-  const previewCourse = courses.find((course) => getFirstPreviewVideoLesson(course));
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden max-w-[100vw]">
       <JsonLd data={[organizationJsonLd()]} />
       <div className="bg-background">
         <Navbar theme="hero" />
-        <Hero studentCount={studentCount} previewCourseSlug={previewCourse?.slug} />
+        <Hero studentCount={studentCount} />
       </div>
       <main className="overflow-x-hidden max-w-full">
         <TrendingCourses courses={courses} />
         <UpcomingCourses courses={upcomingCourses} />
-        <CourseCategories courseCount={courses.length} />
         <PlatformBenefits />
         <HowItWorks />
-        <FAQ />
+        <Testimonials />
         <CTA />
       </main>
       <Footer />

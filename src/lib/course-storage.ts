@@ -186,6 +186,7 @@ export type CreateCourseInput = {
   description?: string;
   plan?: "premium" | "vip";
   instructor?: string;
+  free?: boolean;
 };
 
 export function courseToStored(course: Course): StoredCourse {
@@ -201,7 +202,8 @@ export function courseToStored(course: Course): StoredCourse {
 
 export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo: string): StoredCourse {
   const plan = input.plan ?? "premium";
-  const price = siteConfig.plans[plan].price;
+  const defaultPrice = siteConfig.plans[plan].price;
+  const price = input.free ? 0 : defaultPrice;
 
   return {
     slug: input.slug,
@@ -216,7 +218,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo:
     captions: true,
     skillLevel: "Débutant",
     price,
-    originalPrice: Math.round(price * 1.35),
+    originalPrice: input.free ? 0 : Math.round(defaultPrice * 1.35),
     plan,
     description: input.description ?? "",
     whatYouLearn: [],

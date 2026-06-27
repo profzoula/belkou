@@ -13,7 +13,7 @@ const links = [
   { href: "/courses", label: "Cours", route: true },
   { href: "/services", label: "Services", route: true },
   { href: "#how-it-works", label: "Comment ça marche", route: false },
-  { href: "#faq", label: "FAQ", route: false },
+  { href: "/faq", label: "FAQ", route: true },
 ];
 
 function NavActions({
@@ -179,7 +179,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
           isDark
             ? "border-b border-white/10 bg-[#07080d]/80 backdrop-blur-md"
             : isHero
-              ? "border-b border-border/60 bg-background/80 backdrop-blur-md"
+              ? "border-b border-border/60 bg-white/70 backdrop-blur-md"
               : "glass"
         }
       >

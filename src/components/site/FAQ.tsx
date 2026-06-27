@@ -1,8 +1,8 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { SectionHeader } from "@/components/site/SectionHeader";
 import { siteConfig } from "@/lib/site-config";
+import { cn } from "@/lib/utils";
 
-const faqs = [
+export const faqs = [
   {
     q: "Comment fonctionne BelKou ?",
     a: "BelKou est une plateforme de cours en vidéo. Vous parcourez le catalogue, choisissez une formation, vous inscrivez et accédez aux leçons à votre rythme. Chaque cours propose une preview gratuite.",
@@ -31,34 +31,25 @@ const faqs = [
     q: "Y a-t-il un remboursement ?",
     a: "Non. Toutes les inscriptions sont définitives. Profitez de la preview gratuite avant de vous inscrire.",
   },
-];
+] as const;
 
-export function FAQ() {
+type FaqAccordionProps = {
+  className?: string;
+};
+
+export function FaqAccordion({ className }: FaqAccordionProps) {
   return (
-    <section id="faq" className="site-section-anchor section-divider section-alt py-16 sm:py-20 md:py-28">
-      <div className="site-container max-w-3xl mx-auto">
-        <SectionHeader
-          label="FAQ"
-          title="Des questions ?"
-          description="Tout ce qu'il faut savoir sur la plateforme BelKou et nos cours en ligne."
-          className="mb-10"
-        />
-
-        <div className="surface rounded-2xl px-4 sm:px-6 border border-border">
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((f, i) => (
-              <AccordionItem key={i} value={`item-${i}`} className="border-border last:border-0">
-                <AccordionTrigger className="text-left text-sm sm:text-base font-medium hover:text-primary py-5 hover:no-underline touch-target items-start [&>svg]:mt-1">
-                  {f.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground pb-5 leading-relaxed">
-                  {f.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </div>
-    </section>
+    <div className={cn("surface rounded-2xl border border-border px-4 sm:px-6", className)}>
+      <Accordion type="single" collapsible className="w-full">
+        {faqs.map((f, i) => (
+          <AccordionItem key={f.q} value={`item-${i}`} className="border-border last:border-0">
+            <AccordionTrigger className="touch-target items-start py-5 text-left text-sm font-medium hover:text-primary hover:no-underline sm:text-base [&>svg]:mt-1">
+              {f.q}
+            </AccordionTrigger>
+            <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
   );
 }

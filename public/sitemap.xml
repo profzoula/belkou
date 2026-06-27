@@ -16,7 +16,11 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://belkou.online/legal/cgv</loc>
+    <loc>https://belkou.online/faq</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -7,6 +7,7 @@ import {
   CalendarClock,
   ChevronDown,
   ExternalLink,
+  Gift,
   Pencil,
   Plus,
   Save,
@@ -33,6 +34,8 @@ import {
 } from "@/lib/admin-courses";
 import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { formatCoursePrice, isFreeCourse } from "@/lib/courses";
+import { siteConfig } from "@/lib/site-config";
 import {
   adminAddLesson,
   adminAddSection,
@@ -87,6 +90,17 @@ const tabLabels: Record<AdminCourseTab, string> = {
   draft: "En préparation",
 };
 
+type PriceFilter = "all" | "free" | "paid";
+
+const priceFilterLabels: Record<PriceFilter, string> = {
+  all: "Tous les prix",
+  free: "Gratuits",
+  paid: "Payants",
+};
+
+const defaultPaidPrice = String(siteConfig.plans.premium.price);
+const defaultPaidOriginalPrice = String(Math.round(siteConfig.plans.premium.price * 1.35));
+
 function lessonToDraft(lesson: AdminCourse["sections"][number]["lessons"][number]): LessonDraft {
   return {
     title: lesson.title,
@@ -137,6 +151,7 @@ export function AdminCoursesTab() {
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [view, setView] = useState<"catalog" | "edit">("catalog");
   const [activeTab, setActiveTab] = useState<AdminCourseTab>("published");
+  const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState("");
   const [drafts, setDrafts] = useState<Record<string, LessonDraft>>({});
@@ -160,6 +175,7 @@ export function AdminCoursesTab() {
   const [newTitle, setNewTitle] = useState("");
   const [newSlug, setNewSlug] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [newFree, setNewFree] = useState(false);
   const [slugEdited, setSlugEdited] = useState(false);
 
   const syncDrafts = (list: AdminCourse[]) => {
@@ -208,13 +224,15 @@ export function AdminCoursesTab() {
     const query = search.trim().toLowerCase();
     return courses.filter((course) => {
       if (getAdminCourseTab(course) !== activeTab) return false;
+      if (priceFilter === "free" && !isFreeCourse(course)) return false;
+      if (priceFilter === "paid" && isFreeCourse(course)) return false;
       if (!query) return true;
       return (
         course.title.toLowerCase().includes(query) ||
         course.slug.toLowerCase().includes(query)
       );
     });
-  }, [courses, activeTab, search]);
+  }, [courses, activeTab, priceFilter, search]);
 
   const selectedCourse = useMemo(
     () => courses.find((course) => course.slug === selectedSlug),
@@ -289,6 +307,10 @@ export function AdminCoursesTab() {
       const originalPrice = Number(metaDraft.originalPrice);
       if (Number.isNaN(price) || Number.isNaN(originalPrice)) {
         toast.error("Prix invalides");
+        return;
+      }
+      if (price < 0 || originalPrice < 0) {
+        toast.error("Les prix ne peuvent pas être négatifs");
         return;
       }
 
@@ -516,6 +538,7 @@ export function AdminCoursesTab() {
           title: newTitle.trim(),
           slug: newSlug.trim(),
           description: newDescription.trim() || undefined,
+          free: newFree,
         },
       });
       setCourses(result.courses);
@@ -523,6 +546,7 @@ export function AdminCoursesTab() {
       setNewTitle("");
       setNewSlug("");
       setNewDescription("");
+      setNewFree(false);
       setSlugEdited(false);
       setActiveTab("draft");
       toast.success(`Cours créé — aperçu : /courses/${result.createdSlug}`);
@@ -648,6 +672,32 @@ export function AdminCoursesTab() {
                 className="rounded-lg"
               />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-4 py-3">
+                <div>
+                  <Label htmlFor="meta-free" className="text-sm font-medium">
+                    Cours gratuit
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Affiché comme « Gratuit » sur le site. Mettez le prix à 0 $.
+                  </p>
+                </div>
+                <Switch
+                  id="meta-free"
+                  checked={Number(metaDraft.price) <= 0}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      updateMetaDraft({ price: "0", originalPrice: "0" });
+                    } else {
+                      updateMetaDraft({
+                        price: defaultPaidPrice,
+                        originalPrice: defaultPaidOriginalPrice,
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="meta-price">Prix ($)</Label>
               <Input
@@ -655,6 +705,7 @@ export function AdminCoursesTab() {
                 type="number"
                 min={0}
                 value={metaDraft.price}
+                disabled={Number(metaDraft.price) <= 0}
                 onChange={(e) => updateMetaDraft({ price: e.target.value })}
                 className="rounded-lg"
               />
@@ -666,6 +717,7 @@ export function AdminCoursesTab() {
                 type="number"
                 min={0}
                 value={metaDraft.originalPrice}
+                disabled={Number(metaDraft.price) <= 0}
                 onChange={(e) => updateMetaDraft({ originalPrice: e.target.value })}
                 className="rounded-lg"
                 placeholder="Optionnel — pour afficher une réduction"
@@ -981,6 +1033,19 @@ export function AdminCoursesTab() {
                 className="rounded-lg"
               />
             </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-4 py-3">
+                <div>
+                  <Label htmlFor="new-free" className="text-sm font-medium">
+                    Cours gratuit
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Créer ce cours avec un prix de 0 $ dès le départ.
+                  </p>
+                </div>
+                <Switch id="new-free" checked={newFree} onCheckedChange={setNewFree} />
+              </div>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button variant="hero" size="sm" disabled={creating} onClick={createCourse}>
@@ -992,6 +1057,25 @@ export function AdminCoursesTab() {
           </div>
         </div>
       )}
+
+      <div className="flex flex-wrap items-center gap-2">
+        {(Object.keys(priceFilterLabels) as PriceFilter[]).map((filter) => (
+          <button
+            key={filter}
+            type="button"
+            onClick={() => setPriceFilter(filter)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              priceFilter === filter
+                ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+                : "border-border bg-card text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {filter === "free" ? <Gift className="h-3.5 w-3.5" /> : null}
+            {priceFilterLabels[filter]}
+          </button>
+        ))}
+      </div>
 
       <div className="flex flex-wrap gap-2 border-b border-border pb-1">
         {(Object.keys(tabLabels) as AdminCourseTab[]).map((tab) => (
@@ -1031,6 +1115,7 @@ export function AdminCoursesTab() {
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-left text-muted-foreground">
                   <th className="px-6 py-3 font-medium">Cours</th>
+                  <th className="px-4 py-3 font-medium">Prix</th>
                   <th className="px-4 py-3 font-medium">Type</th>
                   <th className="px-4 py-3 font-medium">Visibilité</th>
                   <th className="px-6 py-3 font-medium text-right">Actions</th>
@@ -1054,6 +1139,18 @@ export function AdminCoursesTab() {
                           <p className="text-xs text-muted-foreground mt-0.5">{course.slug}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      {isFreeCourse(course) ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                          <Gift className="h-3 w-3" />
+                          Gratuit
+                        </span>
+                      ) : (
+                        <span className="text-sm font-semibold text-foreground">
+                          {formatCoursePrice(course.price)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
