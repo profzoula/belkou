@@ -8,3 +8,8 @@ export const getStudentCount = createServerFn({ method: "GET" }).handler(async (
   const registrations = await getRegistrationCount(db);
   return siteConfig.stats.studentsBase + registrations;
 });
+
+export const getCatalogCourseCount = createServerFn({ method: "GET" }).handler(async () => {
+  const { getPublishedCourseCount } = await import("@/server/site-content");
+  return getPublishedCourseCount();
+});

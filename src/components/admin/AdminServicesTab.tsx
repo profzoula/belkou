@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, ExternalLink, Plus, Save, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, CalendarDays, ExternalLink, Plus, Save, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import {
   getAdminServices,
 } from "@/lib/fns/admin";
 import { AdminServiceImageEditor } from "@/components/admin/AdminServiceImageEditor";
+import { AdminServiceBookingsPanel } from "@/components/admin/AdminServiceBookingsPanel";
 import {
   SERVICE_GRADIENT_PRESETS,
   SERVICE_ICON_OPTIONS,
@@ -73,6 +74,8 @@ export function AdminServicesTab() {
 
   const [services, setServices] = useState<StoredService[]>([]);
   const [view, setView] = useState<"list" | "edit">("list");
+  const [listTab, setListTab] = useState<"catalog" | "bookings">("catalog");
+  const [newBookingsCount, setNewBookingsCount] = useState(0);
   const [search, setSearch] = useState("");
   const [selectedSlug, setSelectedSlug] = useState("");
   const [draft, setDraft] = useState<ServiceDraft | null>(null);
@@ -497,11 +500,39 @@ export function AdminServicesTab() {
         <div>
           <h1 className="font-display text-2xl font-bold">Services</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Gérez les services affichés sur la page publique /services.
+            Gérez le catalogue et les demandes de rendez-vous clients.
           </p>
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2 border-b border-border pb-1">
+        <Button
+          variant={listTab === "catalog" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setListTab("catalog")}
+        >
+          Catalogue
+        </Button>
+        <Button
+          variant={listTab === "bookings" ? "default" : "ghost"}
+          size="sm"
+          onClick={() => setListTab("bookings")}
+          className="relative"
+        >
+          <CalendarDays className="h-4 w-4" />
+          Demandes
+          {newBookingsCount > 0 ? (
+            <span className="ml-1 rounded-full bg-sky-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              {newBookingsCount}
+            </span>
+          ) : null}
+        </Button>
+      </div>
+
+      {listTab === "bookings" ? (
+        <AdminServiceBookingsPanel onCountsChange={setNewBookingsCount} />
+      ) : (
+        <>
       <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <h2 className="text-sm font-semibold">Nouveau service</h2>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row">
@@ -593,6 +624,8 @@ export function AdminServicesTab() {
             );
           })}
         </div>
+      )}
+        </>
       )}
     </div>
   );

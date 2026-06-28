@@ -125,7 +125,7 @@ export function Hero({ studentCount }: HeroProps) {
   const studentLabel = formatCount(studentCount);
 
   return (
-    <section className="relative overflow-hidden bg-[url('/hero/bg-with-grid.png')] bg-cover bg-center bg-no-repeat text-slate-800 site-page-top pb-20 md:pb-32">
+    <section className="relative overflow-hidden bg-[url('/hero/bg-with-grid.png')] bg-cover bg-center bg-no-repeat text-slate-800 site-page-top pb-28 md:pb-36 lg:pb-40">
       <div className="site-container relative flex flex-col-reverse gap-10 px-4 pb-8 pt-8 md:mt-16 md:flex-row md:items-center md:gap-12 md:pb-12 md:pt-10 lg:gap-16">
         <div className="min-w-0 flex-1 max-md:text-center">
           <h1 className="animate-fade-up max-w-xl font-display text-4xl font-semibold leading-[1.12] tracking-tight text-balance md:text-5xl md:leading-[1.08] lg:text-6xl lg:leading-[76px]">

@@ -461,7 +461,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="flex h-14 items-center gap-3 px-3 sm:px-4">
+        <div className="site-container flex h-14 items-center gap-3">
           <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 px-2">
             <Link to="/courses/$slug" params={{ slug: course.slug }}>
               <ChevronLeft className="h-4 w-4" />
@@ -500,7 +500,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </div>
       )}
 
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+      <div className="site-container py-4 sm:py-6">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <main className="min-w-0">
           <CourseVideoArea
             course={course}
@@ -657,7 +658,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           </div>
         </main>
 
-        <aside className="lg:sticky lg:top-14 lg:max-h-[calc(100dvh-3.5rem)] lg:overflow-hidden">
+        <aside className="lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
           <CurriculumSidebar
             course={course}
             activeLessonId={activeLessonId}
@@ -667,6 +668,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             }}
           />
         </aside>
+        </div>
       </div>
     </div>
   );

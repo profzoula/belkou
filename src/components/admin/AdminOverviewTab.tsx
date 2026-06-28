@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
+  CalendarDays,
   CheckCircle2,
   Crown,
   DollarSign,
@@ -44,7 +45,7 @@ function formatActivityDate(iso: string): string {
 }
 
 export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
-  const { stats, content, recentRegistrations, affiliate } = data;
+  const { stats, content, recentRegistrations, affiliate, services } = data;
   const publicStudents = siteConfig.stats.studentsBase + stats.total;
 
   return (
@@ -98,6 +99,13 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           value={affiliate.affiliateCount}
           icon={UserPlus}
           onManage={() => onNavigate("commissions")}
+        />
+        <AdminStatCard
+          label="Demandes services"
+          value={services.newBookings}
+          icon={CalendarDays}
+          highlight={services.newBookings > 0}
+          onManage={() => onNavigate("services")}
         />
         <AdminStatCard
           label="Leçons sans vidéo"

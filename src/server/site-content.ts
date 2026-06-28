@@ -243,7 +243,18 @@ export async function getResolvedCourses(): Promise<Course[]> {
 
 export async function getPublishedCourses(): Promise<Course[]> {
   const all = await resolveCourseList();
-  return all.filter((course) => isCourseListed(course));
+  const seen = new Set<string>();
+  return all.filter((course) => {
+    if (!isCourseListed(course)) return false;
+    if (seen.has(course.slug)) return false;
+    seen.add(course.slug);
+    return true;
+  });
+}
+
+export async function getPublishedCourseCount(): Promise<number> {
+  const courses = await getPublishedCourses();
+  return courses.length;
 }
 
 export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {
@@ -673,4 +684,76 @@ export async function deleteAdminService(slug: string) {
   if (!result.ok) return result;
 
   return { ok: true as const };
+}
+
+const SERVICE_BOOKINGS_KEY = "service_bookings";
+let devServiceBookings: import("@/lib/service-booking-storage").ServiceBookingRecord[] = [];
+
+export async function getServiceBookings(): Promise<
+  import("@/lib/service-booking-storage").ServiceBookingRecord[]
+> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return [...devServiceBookings];
+  return readJson<import("@/lib/service-booking-storage").ServiceBookingRecord[]>(
+    SERVICE_BOOKINGS_KEY,
+    [],
+  );
+}
+
+async function saveServiceBookings(
+  bookings: import("@/lib/service-booking-storage").ServiceBookingRecord[],
+) {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    devServiceBookings = [...bookings];
+    return { ok: true as const };
+  }
+  return writeJson(SERVICE_BOOKINGS_KEY, bookings);
+}
+
+export type CreateServiceBookingInput = {
+  serviceSlug: string;
+  serviceTitle: string;
+  name: string;
+  email: string;
+  phone: string;
+  preferredDate: string;
+  preferredTime: string;
+  message?: string;
+};
+
+export async function createServiceBooking(input: CreateServiceBookingInput) {
+  const bookings = await getServiceBookings();
+  const record: import("@/lib/service-booking-storage").ServiceBookingRecord = {
+    id: crypto.randomUUID(),
+    serviceSlug: input.serviceSlug,
+    serviceTitle: input.serviceTitle,
+    name: input.name.trim(),
+    email: input.email.trim(),
+    phone: input.phone.trim(),
+    preferredDate: input.preferredDate,
+    preferredTime: input.preferredTime,
+    message: input.message?.trim() || undefined,
+    status: "new",
+    createdAt: new Date().toISOString(),
+  };
+  bookings.unshift(record);
+  const result = await saveServiceBookings(bookings);
+  if (!result.ok) return result;
+  return { ok: true as const, booking: record };
+}
+
+export async function updateServiceBookingStatus(
+  id: string,
+  status: import("@/lib/service-booking-storage").ServiceBookingStatus,
+) {
+  const bookings = await getServiceBookings();
+  const index = bookings.findIndex((booking) => booking.id === id);
+  if (index === -1) {
+    return { ok: false as const, reason: "Demande introuvable" };
+  }
+  bookings[index] = { ...bookings[index], status };
+  const result = await saveServiceBookings(bookings);
+  if (!result.ok) return result;
+  return { ok: true as const, booking: bookings[index] };
 }

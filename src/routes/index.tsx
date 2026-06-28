@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
+import { ImpactStats } from "@/components/site/ImpactStats";
 import { TrendingCourses } from "@/components/site/TrendingCourses";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
 import { PlatformBenefits } from "@/components/site/PlatformBenefits";
@@ -8,7 +9,7 @@ import { HowItWorks } from "@/components/site/HowItWorks";
 import { Testimonials } from "@/components/site/Testimonials";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
-import { getStudentCount } from "@/lib/fns/stats";
+import { getStudentCount, getCatalogCourseCount } from "@/lib/fns/stats";
 import { getPublicCourses } from "@/lib/fns/courses";
 import { isScheduledInFuture } from "@/lib/course-publish";
 import { seoHead, defaultTitle, defaultDescription, organizationJsonLd } from "@/lib/seo";
@@ -22,26 +23,32 @@ export const Route = createFileRoute("/")({
       path: "/",
     }),
   loader: async () => {
-    const [studentCount, publicCourses] = await Promise.all([getStudentCount(), getPublicCourses()]);
+    const [studentCount, publicCourses, courseCount] = await Promise.all([
+      getStudentCount(),
+      getPublicCourses(),
+      getCatalogCourseCount(),
+    ]);
     return {
       studentCount,
       courses: publicCourses,
+      courseCount,
     };
   },
   component: Index,
 });
 
 function Index() {
-  const { studentCount, courses } = Route.useLoaderData();
+  const { studentCount, courses, courseCount } = Route.useLoaderData();
 
   const upcomingCourses = courses.filter((course) => isScheduledInFuture(course));
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden max-w-[100vw]">
       <JsonLd data={[organizationJsonLd()]} />
-      <div className="bg-background">
+      <div className="relative bg-background">
         <Navbar theme="hero" />
         <Hero studentCount={studentCount} />
+        <ImpactStats studentCount={studentCount} courseCount={courseCount} overlap />
       </div>
       <main className="overflow-x-hidden max-w-full">
         <TrendingCourses courses={courses} />

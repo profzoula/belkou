@@ -28,6 +28,10 @@ export const siteConfig = {
     tools: "20+",
     rating: "4.9",
   },
+  impact: {
+    countries: Number(import.meta.env.VITE_STATS_COUNTRIES ?? 4),
+    asOfLabel: import.meta.env.VITE_STATS_AS_OF ?? "Données mises à jour en 2026",
+  },
   formation: {
     durationRecommended: "8 semaines",
     durationIntensive: "6 semaines (intensif)",

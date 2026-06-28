@@ -137,11 +137,12 @@ export const getAdminDashboard = createServerFn({ method: "GET" }).handler(async
 export const getAdminOverview = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
   const db = await getDb();
-  const { getResolvedCourses } = await import("@/server/site-content");
-  const [registrations, stats, courses] = await Promise.all([
+  const { getResolvedCourses, getServiceBookings } = await import("@/server/site-content");
+  const [registrations, stats, courses, serviceBookings] = await Promise.all([
     listRegistrations(db),
     getRegistrationStats(db),
     getResolvedCourses(),
+    getServiceBookings(),
   ]);
 
   let totalLessons = 0;
@@ -194,6 +195,10 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
     affiliate: {
       affiliateCount,
       pendingWithdrawals,
+    },
+    services: {
+      newBookings: serviceBookings.filter((booking) => booking.status === "new").length,
+      totalBookings: serviceBookings.length,
     },
     recentRegistrations: registrations.slice(0, 8).map((r) => ({
       id: r.id,
@@ -976,4 +981,38 @@ export const adminRemoveServiceImage = createServerFn({ method: "POST" })
     }
 
     return { ok: true as const, services: await ensureServicesInitialized() };
+  });
+
+export const getAdminServiceBookings = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getServiceBookings } = await import("@/server/site-content");
+  const bookings = await getServiceBookings();
+  return {
+    bookings,
+    newCount: bookings.filter((booking) => booking.status === "new").length,
+  };
+});
+
+export const adminUpdateServiceBookingStatus = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        id: z.string().min(1),
+        status: z.enum(["new", "contacted", "closed"]),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { updateServiceBookingStatus, getServiceBookings } = await import("@/server/site-content");
+    const result = await updateServiceBookingStatus(data.id, data.status);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Mise à jour impossible");
+    }
+    const bookings = await getServiceBookings();
+    return {
+      ok: true as const,
+      bookings,
+      newCount: bookings.filter((booking) => booking.status === "new").length,
+    };
   });

@@ -40,19 +40,38 @@ export const submitServiceBooking = createServerFn({ method: "POST" })
 
     await checkRateLimit(`service-booking:${data.email.toLowerCase()}`, RATE_LIMITS.register);
 
-    await sendEmail({
-      to: siteConfig.contactEmail,
-      subject: `[BelKou Services] Rendez-vous — ${service.title} — ${data.name}`,
-      html: serviceBookingEmail({
-        serviceTitle: service.title,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        preferredDate: data.preferredDate,
-        preferredTime: data.preferredTime,
-        message: data.message,
-      }),
+    const { createServiceBooking } = await import("@/server/site-content");
+    const saved = await createServiceBooking({
+      serviceSlug: data.serviceSlug,
+      serviceTitle: service.title,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      preferredDate: data.preferredDate,
+      preferredTime: data.preferredTime,
+      message: data.message,
     });
+    if (!saved.ok) {
+      throw new Error(saved.reason ?? "Impossible d'enregistrer la demande.");
+    }
+
+    try {
+      await sendEmail({
+        to: siteConfig.contactEmail,
+        subject: `[BelKou Services] Rendez-vous — ${service.title} — ${data.name}`,
+        html: serviceBookingEmail({
+          serviceTitle: service.title,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          preferredDate: data.preferredDate,
+          preferredTime: data.preferredTime,
+          message: data.message,
+        }),
+      });
+    } catch (error) {
+      console.error("[BelKou] service booking email failed:", error);
+    }
 
     return { ok: true as const };
   });
