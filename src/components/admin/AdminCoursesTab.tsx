@@ -33,6 +33,7 @@ import {
   type AdminCourseTab,
 } from "@/lib/admin-courses";
 import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
+import { AdminCourseResourcesEditor } from "@/components/admin/AdminCourseResourcesEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCoursePrice, isFreeCourse } from "@/lib/courses";
 import { siteConfig } from "@/lib/site-config";
@@ -62,6 +63,8 @@ type LessonDraft = {
   duration: string;
   vimeo: string;
   preview: boolean;
+  content: string;
+  type: "video" | "article" | "resource";
 };
 
 type CourseMetaDraft = {
@@ -81,6 +84,8 @@ type NewLessonDraft = {
   duration: string;
   vimeo: string;
   preview: boolean;
+  content: string;
+  type: "video" | "article";
 };
 
 const tabLabels: Record<AdminCourseTab, string> = {
@@ -107,6 +112,8 @@ function lessonToDraft(lesson: AdminCourse["sections"][number]["lessons"][number
     duration: lesson.duration,
     vimeo: lesson.vimeo ?? "",
     preview: Boolean(lesson.preview),
+    content: lesson.content ?? "",
+    type: lesson.type,
   };
 }
 
@@ -129,6 +136,8 @@ const emptyNewLesson = (): NewLessonDraft => ({
   duration: "5min",
   vimeo: "",
   preview: false,
+  content: "",
+  type: "video",
 });
 
 function courseTypeBadge(isBase: boolean) {
@@ -401,6 +410,8 @@ export function AdminCoursesTab() {
           duration: draft.duration,
           vimeo: draft.vimeo || undefined,
           preview: draft.preview,
+          content: draft.content,
+          type: draft.type === "resource" ? undefined : draft.type,
         },
       });
       setCourses(result.courses);
@@ -417,7 +428,7 @@ export function AdminCoursesTab() {
     if (!selectedCourse) return;
     const draft = getNewLessonDraft(sectionId);
     if (!draft.title.trim()) {
-      toast.error("Titre de la vidéo requis");
+      toast.error("Titre de la leçon requis");
       return;
     }
 
@@ -428,15 +439,17 @@ export function AdminCoursesTab() {
           courseSlug: selectedCourse.slug,
           sectionId,
           title: draft.title.trim(),
+          type: draft.type,
           duration: draft.duration.trim() || undefined,
-          vimeo: draft.vimeo.trim() || undefined,
+          vimeo: draft.type === "video" ? draft.vimeo.trim() || undefined : undefined,
           preview: draft.preview,
+          content: draft.type === "article" ? draft.content : undefined,
         },
       });
       setCourses(result.courses);
       syncDrafts(result.courses);
       setNewLessonBySection((current) => ({ ...current, [sectionId]: emptyNewLesson() }));
-      toast.success("Vidéo ajoutée");
+      toast.success(draft.type === "article" ? "Module texte ajouté" : "Vidéo ajoutée");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Ajout impossible");
     } finally {
@@ -785,6 +798,15 @@ export function AdminCoursesTab() {
           }}
         />
 
+        <AdminCourseResourcesEditor
+          courseSlug={selectedCourse.slug}
+          resources={selectedCourse.resources ?? []}
+          onUpdated={(updatedCourses) => {
+            setCourses(updatedCourses);
+            syncDrafts(updatedCourses);
+          }}
+        />
+
         <Accordion
           type="multiple"
           key={selectedCourse.sections.map((s) => `${s.id}:${s.lessons.length}`).join("-")}
@@ -827,9 +849,18 @@ export function AdminCoursesTab() {
                     return (
                       <div key={lesson.id} className="rounded-lg border border-border p-4 space-y-3">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-semibold">
-                            {index + 1}. {lesson.title}
-                          </p>
+                          <div>
+                            <p className="text-sm font-semibold">
+                              {index + 1}. {lesson.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {lesson.type === "article"
+                                ? "Module texte"
+                                : lesson.type === "resource"
+                                  ? "Ressource"
+                                  : "Vidéo"}
+                            </p>
+                          </div>
                           <Button
                             type="button"
                             variant="ghost"
@@ -879,6 +910,63 @@ export function AdminCoursesTab() {
                                   Collez l&apos;ID Vimeo ou l&apos;URL complète (y compris liens privés avec hash).
                                 </p>
                               </div>
+                              <div className="space-y-1.5 sm:col-span-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.preview}
+                                    onChange={(e) =>
+                                      updateDraft(selectedCourse.slug, lesson.id, { preview: e.target.checked })
+                                    }
+                                    className="rounded border-border"
+                                  />
+                                  Preview gratuite (visible sans inscription)
+                                </label>
+                              </div>
+                            </>
+                          )}
+                          {lesson.type === "article" && (
+                            <>
+                              <div className="space-y-1.5">
+                                <Label>Durée de lecture</Label>
+                                <Input
+                                  value={draft.duration}
+                                  onChange={(e) =>
+                                    updateDraft(selectedCourse.slug, lesson.id, { duration: e.target.value })
+                                  }
+                                  className="rounded-lg"
+                                  placeholder="8 min"
+                                />
+                              </div>
+                              <div className="space-y-1.5 sm:col-span-2">
+                                <Label>Contenu (Markdown)</Label>
+                                <Textarea
+                                  value={draft.content}
+                                  onChange={(e) =>
+                                    updateDraft(selectedCourse.slug, lesson.id, { content: e.target.value })
+                                  }
+                                  rows={12}
+                                  className="rounded-lg font-mono text-xs"
+                                  placeholder={"## Introduction\n\nTexte du module…\n\n### Section repliable\nContenu affiché dans un accordéon.\n\n- Point 1\n- Point 2"}
+                                />
+                                <p className="text-[11px] text-muted-foreground">
+                                  Utilisez ## pour un titre, ### pour une section repliable (style NetAcad), - pour
+                                  une liste, **gras** pour mettre en évidence.
+                                </p>
+                              </div>
+                              <div className="space-y-1.5 sm:col-span-2">
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input
+                                    type="checkbox"
+                                    checked={draft.preview}
+                                    onChange={(e) =>
+                                      updateDraft(selectedCourse.slug, lesson.id, { preview: e.target.checked })
+                                    }
+                                    className="rounded border-border"
+                                  />
+                                  Preview gratuite (visible sans inscription)
+                                </label>
+                              </div>
                             </>
                           )}
                         </div>
@@ -895,42 +983,86 @@ export function AdminCoursesTab() {
                     );
                   })}
                   <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
-                    <p className="text-sm font-semibold">Ajouter une vidéo</p>
+                    <p className="text-sm font-semibold">Ajouter une leçon</p>
                     <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>Type</Label>
+                        <Select
+                          value={newLesson.type}
+                          onValueChange={(value) =>
+                            updateNewLessonDraft(section.id, { type: value as NewLessonDraft["type"] })
+                          }
+                        >
+                          <SelectTrigger className="rounded-lg">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="video">Vidéo</SelectItem>
+                            <SelectItem value="article">Module texte</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="space-y-1.5 sm:col-span-2">
-                        <Label htmlFor={`new-lesson-title-${section.id}`}>Titre de la vidéo</Label>
+                        <Label htmlFor={`new-lesson-title-${section.id}`}>Titre</Label>
                         <Input
                           id={`new-lesson-title-${section.id}`}
                           value={newLesson.title}
                           onChange={(e) => updateNewLessonDraft(section.id, { title: e.target.value })}
                           className="rounded-lg"
-                          placeholder="Ex. Configuration de l'environnement"
+                          placeholder={
+                            newLesson.type === "article"
+                              ? "Ex. Types de malware"
+                              : "Ex. Configuration de l'environnement"
+                          }
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor={`new-lesson-duration-${section.id}`}>Durée</Label>
+                        <Label htmlFor={`new-lesson-duration-${section.id}`}>
+                          {newLesson.type === "article" ? "Durée de lecture" : "Durée"}
+                        </Label>
                         <Input
                           id={`new-lesson-duration-${section.id}`}
                           value={newLesson.duration}
                           onChange={(e) => updateNewLessonDraft(section.id, { duration: e.target.value })}
                           className="rounded-lg"
-                          placeholder="8min"
+                          placeholder={newLesson.type === "article" ? "8 min" : "8min"}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label htmlFor={`new-lesson-vimeo-${section.id}`}>Vimeo (ID ou lien)</Label>
-                        <Input
-                          id={`new-lesson-vimeo-${section.id}`}
-                          value={newLesson.vimeo}
-                          onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
-                          className="rounded-lg"
-                          placeholder="1204014571 ou https://vimeo.com/..."
-                        />
-                      </div>
+                      {newLesson.type === "video" ? (
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`new-lesson-vimeo-${section.id}`}>Vimeo (ID ou lien)</Label>
+                          <Input
+                            id={`new-lesson-vimeo-${section.id}`}
+                            value={newLesson.vimeo}
+                            onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
+                            className="rounded-lg"
+                            placeholder="1204014571 ou https://vimeo.com/..."
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor={`new-lesson-content-${section.id}`}>Contenu (Markdown)</Label>
+                          <Textarea
+                            id={`new-lesson-content-${section.id}`}
+                            value={newLesson.content}
+                            onChange={(e) => updateNewLessonDraft(section.id, { content: e.target.value })}
+                            rows={8}
+                            className="rounded-lg font-mono text-xs"
+                            placeholder={"## Introduction\n\nTexte…\n\n### Section repliable\nDétails…"}
+                          />
+                        </div>
+                      )}
                       <div className="space-y-1.5 sm:col-span-2">
-                        <p className="text-[11px] text-muted-foreground">
-                          Collez l&apos;ID Vimeo ou l&apos;URL complète. Vous pourrez modifier la vidéo après l&apos;ajout.
-                        </p>
+                        {newLesson.type === "video" ? (
+                          <p className="text-[11px] text-muted-foreground">
+                            Collez l&apos;ID Vimeo ou l&apos;URL complète. Vous pourrez modifier la vidéo après
+                            l&apos;ajout.
+                          </p>
+                        ) : (
+                          <p className="text-[11px] text-muted-foreground">
+                            ## titre · ### section repliable · - liste · **gras**
+                          </p>
+                        )}
                         <label className="flex items-center gap-2 text-sm">
                           <input
                             type="checkbox"

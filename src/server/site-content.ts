@@ -5,7 +5,7 @@ import {
   addSectionToStoredCourse,
   buildDefaultStoredCourse,
   buildNewSection,
-  buildNewVideoLesson,
+  buildNewLesson,
   deleteLessonFromStoredCourse,
   deleteSectionFromStoredCourse,
   patchLessonInStoredCourse,
@@ -28,7 +28,9 @@ import { siteConfig } from "@/lib/site-config";
 import { isCourseListed } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
-export type CourseLessonOverride = Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration">>;
+export type CourseLessonOverride = Partial<
+  Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration" | "content" | "type">
+>;
 
 export type CourseMetaOverride = CourseMetaPatch;
 
@@ -120,6 +122,7 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
       ...(meta.scheduledPublishAt !== undefined && {
         scheduledPublishAt: meta.scheduledPublishAt ?? undefined,
       }),
+      ...(meta.resources !== undefined && { resources: meta.resources }),
       thumbnail: {
         ...merged.thumbnail,
         ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
@@ -365,7 +368,7 @@ export async function addLessonToCourse(params: { courseSlug: string; input: Add
 
   const settings = await getSiteSettings();
   const previewVimeo = settings.vimeoPreviewDefault?.trim() || DEFAULT_PREVIEW_VIMEO;
-  const lesson = buildNewVideoLesson({ ...params.input, title }, previewVimeo);
+  const lesson = buildNewLesson({ ...params.input, title }, previewVimeo);
 
   if (isBaseCourseSlug(params.courseSlug)) {
     const base = baseCourses.find((course) => course.slug === params.courseSlug);

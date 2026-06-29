@@ -520,6 +520,8 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
         preview: z.boolean().optional(),
         title: z.string().optional(),
         duration: z.string().optional(),
+        content: z.string().optional(),
+        type: z.enum(["video", "article", "resource"]).optional(),
       })
       .parse(data),
   )
@@ -535,6 +537,8 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
         preview: data.preview,
         title: data.title,
         duration: data.duration,
+        content: data.content,
+        type: data.type,
       },
     });
 
@@ -651,9 +655,11 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         courseSlug: z.string().min(1),
         sectionId: z.string().min(1),
         title: z.string().min(1),
+        type: z.enum(["video", "article"]).optional(),
         duration: z.string().optional(),
         vimeo: z.string().optional(),
         preview: z.boolean().optional(),
+        content: z.string().optional(),
       })
       .parse(data),
   )
@@ -666,9 +672,11 @@ export const adminAddLesson = createServerFn({ method: "POST" })
       input: {
         sectionId: data.sectionId,
         title: data.title,
+        type: data.type,
         duration: data.duration,
         vimeo: data.vimeo,
         preview: data.preview,
+        content: data.content,
       },
     });
 
@@ -1015,4 +1023,122 @@ export const adminUpdateServiceBookingStatus = createServerFn({ method: "POST" }
       bookings,
       newCount: bookings.filter((booking) => booking.status === "new").length,
     };
+  });
+
+export const adminUploadCourseResource = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        title: z.string().min(1),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+        fileName: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { uploadCourseResource } = await import("@/server/course-resource-storage");
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
+      "@/server/site-content"
+    );
+
+    const uploaded = await uploadCourseResource({
+      courseSlug: data.courseSlug,
+      contentType: data.contentType,
+      dataBase64: data.dataBase64,
+      fileName: data.fileName,
+    });
+    if (!uploaded.ok) {
+      throw new Error(uploaded.reason);
+    }
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) {
+      throw new Error("Cours introuvable");
+    }
+
+    const nextResource = {
+      id: crypto.randomUUID(),
+      title: data.title.trim(),
+      fileUrl: uploaded.publicUrl,
+      fileName: uploaded.fileName,
+      contentType: uploaded.contentType,
+      sortOrder: (course.resources?.length ?? 0) + 1,
+    };
+
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: {
+        resources: [...(course.resources ?? []), nextResource],
+      },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminDeleteCourseResource = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), resourceId: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
+      "@/server/site-content"
+    );
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) {
+      throw new Error("Cours introuvable");
+    }
+
+    const resources = (course.resources ?? []).filter((resource) => resource.id !== data.resourceId);
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: { resources },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminUpdateCourseResource = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        resourceId: z.string().min(1),
+        title: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
+      "@/server/site-content"
+    );
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) {
+      throw new Error("Cours introuvable");
+    }
+
+    const resources = (course.resources ?? []).map((resource) =>
+      resource.id === data.resourceId ? { ...resource, title: data.title.trim() } : resource,
+    );
+    const result = await updateCourseMeta({
+      courseSlug: data.courseSlug,
+      patch: { resources },
+    });
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Mise à jour impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });

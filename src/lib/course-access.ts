@@ -72,6 +72,10 @@ export function getLessonLockState(
     return { locked: false, reason: "none" };
   }
 
+  if (lesson.type === "article" && lesson.preview && (lesson as CourseLesson).content?.trim()) {
+    return { locked: false, reason: "none" };
+  }
+
   if (contentLive) {
     if (hasPaidAccess) return { locked: false, reason: "none" };
     return { locked: true, reason: "enrollment" };

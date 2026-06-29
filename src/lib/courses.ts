@@ -1,4 +1,5 @@
 import { Bot, type LucideIcon } from "lucide-react";
+import type { CourseResource } from "@/lib/course-resources";
 import { siteConfig } from "@/lib/site-config";
 import { parseVimeoRef, type VimeoRef } from "@/lib/vimeo";
 
@@ -13,6 +14,8 @@ export type CourseLesson = {
   preview?: boolean;
   /** Vimeo ID or full URL (https://vimeo.com/123456789 or private link with hash). */
   vimeo?: string;
+  /** Markdown — titres ##, sections repliables ### Titre */
+  content?: string;
 };
 
 export type CourseSection = {
@@ -50,6 +53,8 @@ export type Course = {
     imageUrl?: string;
   };
   sections: CourseSection[];
+  /** Fichiers téléchargeables (PDF, Word, ebook…) pour les inscrits */
+  resources?: CourseResource[];
 };
 
 /** Slugs hardcodés — les autres cours se créent via l'admin. */
@@ -116,7 +121,7 @@ export const courses: Course[] = [
         lessons: [
           { id: "deploy-host", title: "Héberger sur Railway / Cloudflare", duration: "16min", type: "video" },
           { id: "deploy-domain", title: "Domaine et HTTPS", duration: "10min", type: "video" },
-          { id: "deploy-launch", title: "Checklist de lancement", duration: "8min", type: "article" },
+          { id: "deploy-launch", title: "Checklist de lancement", duration: "8 min", type: "article", content: "## Checklist de lancement\n\nAvant de mettre votre app en ligne, vérifiez chaque point ci-dessous.\n\n### Domaine & HTTPS\nConfigurez votre nom de domaine et activez HTTPS (Cloudflare ou hébergeur).\n\n### Variables d'environnement\nVérifiez que toutes les clés API sont définies en production — jamais dans le code source.\n\n### Paiement & emails\nTestez un achat réel ou en mode test, et confirmez la réception des emails transactionnels." },
         ],
       },
     ],

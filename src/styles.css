@@ -368,6 +368,10 @@
     list-style: disc;
     padding-left: 1.25rem;
   }
+  .prose-lesson {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   .bg-course-hero {
     background: var(--course-hero);
   }

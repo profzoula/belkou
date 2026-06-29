@@ -38,7 +38,7 @@ export function storedCourseToCourse(stored: StoredCourse): Course {
 export function patchLessonInStoredCourse(
   course: StoredCourse,
   lessonId: string,
-  patch: Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration">>,
+  patch: Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration" | "content" | "type">>,
 ): StoredCourse {
   return {
     ...course,
@@ -67,6 +67,7 @@ export type CourseMetaPatch = {
   thumbnailImageUrl?: string;
   published?: boolean;
   scheduledPublishAt?: string | null;
+  resources?: import("@/lib/course-resources").CourseResource[];
 };
 
 export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPatch): StoredCourse {
@@ -86,6 +87,7 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
     ...(patch.scheduledPublishAt !== undefined && {
       scheduledPublishAt: patch.scheduledPublishAt ?? undefined,
     }),
+    ...(patch.resources !== undefined && { resources: patch.resources }),
     thumbnail: {
       ...course.thumbnail,
       ...(patch.thumbnailLabel !== undefined && { label: patch.thumbnailLabel }),
@@ -100,13 +102,28 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
 export type AddLessonInput = {
   sectionId: string;
   title: string;
+  type?: "video" | "article";
   duration?: string;
   vimeo?: string;
   preview?: boolean;
+  content?: string;
 };
 
-export function buildNewVideoLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
+export function buildNewLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
   const id = `${slugifyTitle(input.title) || "lesson"}-${Date.now().toString(36)}`;
+  const type = input.type ?? "video";
+
+  if (type === "article") {
+    return {
+      id,
+      title: input.title,
+      duration: input.duration ?? "5 min",
+      type: "article",
+      preview: input.preview ?? false,
+      content: input.content?.trim() ?? "",
+    };
+  }
+
   return {
     id,
     title: input.title,
@@ -115,6 +132,11 @@ export function buildNewVideoLesson(input: AddLessonInput, previewVimeo?: string
     preview: input.preview ?? false,
     vimeo: input.vimeo || (input.preview ? previewVimeo : undefined),
   };
+}
+
+/** @deprecated Use buildNewLesson */
+export function buildNewVideoLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
+  return buildNewLesson({ ...input, type: "video" }, previewVimeo);
 }
 
 export function addLessonToStoredCourse(
@@ -223,6 +245,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo:
     description: input.description ?? "",
     whatYouLearn: [],
     published: false,
+    resources: [],
     thumbnail: {
       gradient: "from-violet-600 via-indigo-600 to-blue-700",
       label: input.title.length > 24 ? `${input.title.slice(0, 21)}…` : input.title,

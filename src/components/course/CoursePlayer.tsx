@@ -44,6 +44,8 @@ import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { VimeoPlayer } from "@/components/course/VimeoPlayer";
+import { LessonArticleContent } from "@/components/course/LessonArticleContent";
+import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
 
 type CoursePlayerProps = {
   course: PublicCourse;
@@ -70,6 +72,48 @@ function CourseVideoArea({
   const vimeo = getLessonVimeo(lesson);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
+
+  if (lesson.type === "article") {
+    if (!locked) {
+      return (
+        <LessonArticleContent
+          title={lesson.title}
+          content={lesson.content?.trim() || "Contenu en cours de rédaction."}
+        />
+      );
+    }
+
+    return (
+      <div className="flex min-h-[280px] w-full flex-col items-center justify-center gap-3 border-b border-border bg-muted/30 px-6 py-12 text-center sm:min-h-[360px]">
+        <FileText className="h-10 w-10 text-muted-foreground" />
+        <p className="font-semibold">{lesson.title}</p>
+        <p className="max-w-md text-sm text-muted-foreground">
+          {enrolledWaiting && startLabel
+            ? `Vous êtes inscrit — contenu disponible le ${startLabel}`
+            : reason === "schedule" && startLabel
+              ? `Contenu disponible le ${startLabel}`
+              : "Module texte — disponible après inscription."}
+        </p>
+        {enrolledWaiting ? (
+          <Button asChild size="sm" variant="outline">
+            <Link to="/dashboard">Voir Mes cours</Link>
+          </Button>
+        ) : reason === "schedule" && startLabel ? (
+          <Button asChild size="sm">
+            <Link to="/checkout" search={{ course: course.slug }}>
+              S&apos;inscrire maintenant
+            </Link>
+          </Button>
+        ) : locked ? (
+          <Button asChild size="sm">
+            <Link to="/checkout" search={{ course: course.slug }}>
+              S&apos;inscrire
+            </Link>
+          </Button>
+        ) : null}
+      </div>
+    );
+  }
 
   if (lesson.type !== "video") {
     return (
@@ -203,31 +247,6 @@ function EnrolledExtraTab({
 }) {
   const whatsappUrl = getWhatsappGroupUrl("premium");
 
-  if (tab === "announcements") {
-    return (
-      <div className="mx-auto max-w-lg space-y-4 text-left">
-        <h3 className="font-semibold">Annonces du cours</h3>
-        <div className="rounded-lg border border-border bg-card p-4 text-sm">
-          {contentLive ? (
-            <p>Le cours est disponible. Consultez le programme dans l&apos;onglet Aperçu et progressez à votre rythme.</p>
-          ) : (
-            <p>
-              Vous êtes inscrit. Les vidéos complètes seront disponibles{" "}
-              {startLabel ? `le ${startLabel}` : "prochainement"}. En attendant, regardez la vidéo de bienvenue.
-            </p>
-          )}
-        </div>
-        {whatsappUrl && (
-          <Button asChild variant="soft" size="sm">
-            <a href={whatsappUrl} target="_blank" rel="noreferrer">
-              Rejoindre le groupe WhatsApp
-            </a>
-          </Button>
-        )}
-      </div>
-    );
-  }
-
   if (tab === "qa") {
     return (
       <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
@@ -338,6 +357,8 @@ function CurriculumSidebar({
                               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                             ) : locked ? (
                               <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />
+                            ) : lesson.type === "article" ? (
+                              <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70" />
                             ) : (
                               <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
                             )}
@@ -517,7 +538,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   { value: "overview", label: "Aperçu" },
                   { value: "qa", label: "Q&R" },
                   { value: "notes", label: "Notes" },
-                  { value: "announcements", label: "Annonces" },
+                  { value: "resources", label: "Ressources" },
                   { value: "reviews", label: "Avis" },
                 ].map((tab) => (
                   <TabsTrigger
@@ -630,7 +651,25 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </div>
               </TabsContent>
 
-              {["qa", "notes", "announcements", "reviews"].map((tab) => (
+              <TabsContent value="resources" className="mt-0 px-1 pb-8 pt-6 sm:px-0">
+                {hasPaidAccess ? (
+                  <CourseResourcesPanel resources={course.resources ?? []} />
+                ) : (
+                  <div className="px-1 py-12 text-center sm:px-0">
+                    <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+                    <p className="text-sm text-muted-foreground">
+                      Les ressources (PDF, Word, ebook…) sont disponibles après inscription au cours.
+                    </p>
+                    <Button asChild className="mt-4" size="sm">
+                      <Link to="/checkout" search={{ course: course.slug }}>
+                        S&apos;inscrire maintenant
+                      </Link>
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              {["qa", "notes", "reviews"].map((tab) => (
                 <TabsContent key={tab} value={tab} className="px-1 py-12 text-center sm:px-0">
                   {hasPaidAccess ? (
                     <EnrolledExtraTab
