@@ -57,11 +57,15 @@ function CourseVideoArea({
   lesson,
   hasPaidAccess,
   welcomeLessonId,
+  nextLessonTitle,
+  onNextLesson,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
   hasPaidAccess: boolean;
   welcomeLessonId?: string;
+  nextLessonTitle?: string;
+  onNextLesson?: () => void;
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLessonLockState({
@@ -163,7 +167,15 @@ function CourseVideoArea({
   }
 
   if (!locked && vimeo) {
-    return <VimeoPlayer video={vimeo} title={lesson.title} lessonKey={lesson.id} />;
+    return (
+      <VimeoPlayer
+        video={vimeo}
+        title={lesson.title}
+        lessonKey={lesson.id}
+        nextLessonTitle={nextLessonTitle}
+        onNextLesson={onNextLesson}
+      />
+    );
   }
 
   return (
@@ -501,6 +513,18 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
   const activeSection = getSectionForLesson(course, activeLesson.id);
   const activeLock = getLessonLockState({ lesson: activeLesson, course, hasPaidAccess });
+  const nextLesson = useMemo(() => {
+    const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
+    if (currentIndex < 0) return null;
+
+    for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
+      const candidate = allLessons[index];
+      const { locked } = getLessonLockState({ lesson: candidate, course, hasPaidAccess });
+      if (!locked) return candidate;
+    }
+
+    return null;
+  }, [activeLessonId, allLessons, course, hasPaidAccess]);
 
   useEffect(() => {
     if (!session?.access_token || !hasPaidAccess || activeLock.locked) return;
@@ -586,6 +610,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             lesson={activeLesson}
             hasPaidAccess={hasPaidAccess}
             welcomeLessonId={welcomeLesson?.id}
+            nextLessonTitle={nextLesson?.title}
+            onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
           />
 
           <div className="border-b border-border px-3 sm:px-6">

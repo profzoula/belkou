@@ -38,6 +38,15 @@ export function parseVimeoRef(input: string): VimeoRef | null {
   return null;
 }
 
+const VIMEO_PLAYER_PARAMS = {
+  badge: false,
+  autopause: false,
+  title: false,
+  byline: false,
+  portrait: false,
+  dnt: true,
+} as const;
+
 export function buildVimeoEmbedUrl(ref: VimeoRef): string {
   const params = new URLSearchParams({
     badge: "0",
@@ -53,4 +62,24 @@ export function buildVimeoEmbedUrl(ref: VimeoRef): string {
   }
 
   return `https://player.vimeo.com/video/${ref.id}?${params.toString()}`;
+}
+
+export function buildVimeoPlayerInit(ref: VimeoRef, width = 640) {
+  const common = {
+    ...VIMEO_PLAYER_PARAMS,
+    responsive: true,
+    width,
+  };
+
+  if (ref.hash) {
+    return {
+      ...common,
+      url: buildVimeoEmbedUrl(ref),
+    };
+  }
+
+  return {
+    ...common,
+    id: Number(ref.id),
+  };
 }
