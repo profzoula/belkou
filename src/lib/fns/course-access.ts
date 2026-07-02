@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hasPaidAccessToCourse, pickRegistrationForCourse } from "@/lib/course-access";
 import { isCourseContentLive } from "@/lib/course-publish";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
+import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail, updateRegistrationCourseAccess } from "@/server/db";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
@@ -54,7 +55,19 @@ export const getCourseAccess = createServerFn({ method: "POST" })
     }
 
     const db = await getDb();
-    const rows = await listRegistrationsByEmail(db, normalizeRegistrationEmail(user.email));
+    const email = normalizeRegistrationEmail(user.email);
+    const fullName =
+      (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+      (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+      undefined;
+
+    await ensureFreeCourseEnrollment(db, {
+      email,
+      courseSlug: data.courseSlug,
+      fullName,
+    }).catch(() => undefined);
+
+    const rows = await listRegistrationsByEmail(db, email);
     const registration = pickRegistrationForCourse(rows, data.courseSlug);
     const hasPaidAccess = hasPaidAccessToCourse(registration, data.courseSlug);
 

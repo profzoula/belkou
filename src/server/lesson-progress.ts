@@ -1,3 +1,4 @@
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type LessonProgressRow = {
@@ -59,4 +60,24 @@ export async function markLessonComplete(
 export function computeProgressPercent(completed: number, total: number): number {
   if (total <= 0) return 0;
   return Math.min(100, Math.round((completed / total) * 100));
+}
+
+export async function listDistinctCourseSlugsForEmail(email: string): Promise<string[]> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return [];
+
+  const normalized = normalizeRegistrationEmail(email);
+  const { data, error } = await sb
+    .from("lesson_progress")
+    .select("course_slug")
+    .ilike("email", normalized);
+
+  if (error) {
+    if (!error.message.includes("lesson_progress")) {
+      console.error("[BelKou] list progress course slugs:", error.message);
+    }
+    return [];
+  }
+
+  return [...new Set((data ?? []).map((row) => String(row.course_slug)).filter(Boolean))];
 }

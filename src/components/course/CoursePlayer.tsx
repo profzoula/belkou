@@ -37,7 +37,7 @@ import {
 } from "@/lib/course-publish";
 import { getLessonLockState } from "@/lib/course-access";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
-import { completeLesson } from "@/lib/fns/progress";
+import { completeLesson, getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
@@ -290,15 +290,17 @@ function CurriculumSidebar({
   course,
   activeLessonId,
   hasPaidAccess,
+  completedLessonIds,
   onSelectLesson,
 }: {
   course: PublicCourse;
   activeLessonId: string;
   hasPaidAccess: boolean;
+  completedLessonIds: string[];
   onSelectLesson: (lessonId: string) => void;
 }) {
   const defaultSections = course.sections.map((section) => section.id);
-  const welcomeLesson = getWelcomePreviewLesson(course);
+  const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds]);
 
   return (
     <div className="flex h-full flex-col border-t border-border bg-card lg:border-t-0 lg:border-l">
@@ -312,7 +314,7 @@ function CurriculumSidebar({
       <div className="flex-1 overflow-y-auto">
         <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
           {course.sections.map((section) => {
-            const completed = section.lessons.filter((l) => l.preview).length;
+            const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
             const sectionDuration = section.lessons.reduce((sum, l) => sum + parseInt(l.duration, 10), 0);
 
             return (
@@ -330,12 +332,10 @@ function CurriculumSidebar({
                 </AccordionTrigger>
                 <AccordionContent className="pb-0">
                   <ul>
-                    {section.lessons.map((lesson, index) => {
+                    {section.lessons.map((lesson) => {
                       const active = lesson.id === activeLessonId;
                       const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
-                      const done = welcomeLesson
-                        ? lesson.id === welcomeLesson.id
-                        : Boolean(lesson.preview) && index === 0;
+                      const done = completedSet.has(lesson.id);
 
                       return (
                         <li key={lesson.id}>
@@ -387,7 +387,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const { session } = useAuth();
   const accessFn = useServerFn(getCourseAccess);
   const completeFn = useServerFn(completeLesson);
+  const progressFn = useServerFn(getCourseProgress);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+  const [progress, setProgress] = useState<{ completedLessonIds: string[]; progressPercent: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -419,6 +423,36 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
+
+  useEffect(() => {
+    if (!session?.access_token || !hasPaidAccess) {
+      setProgress(null);
+      return;
+    }
+
+    let cancelled = false;
+    setProgress(null);
+
+    void progressFn({
+      data: {
+        accessToken: session.access_token,
+        courseSlug: course.slug,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setProgress(result);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProgress({ completedLessonIds: [], progressPercent: 0 });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course.slug, hasPaidAccess, progressFn, session?.access_token]);
+
   const allLessons = useMemo(() => getAllLessons(course), [course]);
   const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
 
@@ -476,7 +510,14 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         courseSlug: course.slug,
         lessonId: activeLesson.id,
       },
-    }).catch(() => undefined);
+    })
+      .then((result) => {
+        setProgress((current) => ({
+          completedLessonIds: [...new Set([...(current?.completedLessonIds ?? []), activeLesson.id])],
+          progressPercent: result.progressPercent,
+        }));
+      })
+      .catch(() => undefined);
   }, [activeLesson.id, activeLock.locked, completeFn, course.slug, hasPaidAccess, session?.access_token]);
 
   return (
@@ -520,6 +561,22 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           <strong>{formatScheduledPublishLabel(access.scheduledPublishAt)}</strong>
         </div>
       )}
+
+      {hasPaidAccess && contentLive ? (
+        <div className="border-b border-border bg-muted/30 px-4 py-3">
+          <div className="site-container flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs font-medium text-foreground">
+              Progression · {progress?.progressPercent ?? 0}% terminé
+            </p>
+            <div className="h-1.5 w-full max-w-md rounded-full bg-muted overflow-hidden sm:ml-4">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${Math.max(progress?.progressPercent ?? 0, 2)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="site-container py-4 sm:py-6">
         <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
@@ -702,6 +759,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             course={course}
             activeLessonId={activeLessonId}
             hasPaidAccess={hasPaidAccess}
+            completedLessonIds={progress?.completedLessonIds ?? []}
             onSelectLesson={(lessonId) => {
               setActiveLessonId(lessonId);
             }}

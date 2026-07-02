@@ -96,6 +96,10 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
           <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
             Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre.
           </p>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto mb-6">
+            Déjà inscrit ? Vérifiez que vous êtes connecté avec la même adresse email que celle utilisée lors du
+            paiement ou de l&apos;activation admin.
+          </p>
           <Button asChild variant="hero" className="rounded-md">
             <Link to="/courses">
               Explorer les cours <ArrowRight className="h-4 w-4" />

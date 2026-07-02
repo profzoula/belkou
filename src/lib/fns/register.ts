@@ -66,6 +66,11 @@ async function startCheckout(
   record: RegistrationRecord,
   pricing: Awaited<ReturnType<typeof resolveCheckoutPricing>>,
 ) {
+  if (pricing.price <= 0) {
+    await updateRegistrationPayment(db, record.id, { payment_status: "paid" });
+    return null;
+  }
+
   let checkoutUrl: string | null = null;
 
   try {

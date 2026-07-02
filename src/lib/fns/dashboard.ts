@@ -15,7 +15,8 @@ import {
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
-import { computeProgressPercent, listLessonProgress } from "@/server/lesson-progress";
+import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
+import { computeProgressPercent, listDistinctCourseSlugsForEmail, listLessonProgress } from "@/server/lesson-progress";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
@@ -43,6 +44,16 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
 
     const db = await getDb();
     const email = normalizeRegistrationEmail(user.email);
+    const fullName =
+      (typeof user.user_metadata?.full_name === "string" && user.user_metadata.full_name) ||
+      (typeof user.user_metadata?.name === "string" && user.user_metadata.name) ||
+      undefined;
+
+    const progressSlugs = await listDistinctCourseSlugsForEmail(email);
+    for (const slug of progressSlugs) {
+      await ensureFreeCourseEnrollment(db, { email, courseSlug: slug, fullName }).catch(() => undefined);
+    }
+
     const registrations = await listRegistrationsByEmail(db, email);
     if (!registrations.length) return { enrollments: [] };
 
