@@ -332,7 +332,7 @@ function CurriculumSidebar({
                 </AccordionTrigger>
                 <AccordionContent className="pb-0">
                   <ul>
-                    {section.lessons.map((lesson) => {
+                    {section.lessons.map((lesson, index) => {
                       const active = lesson.id === activeLessonId;
                       const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
                       const done = completedSet.has(lesson.id);
