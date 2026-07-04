@@ -240,20 +240,49 @@ export function parseLessonDurationMinutes(duration: string): number {
 }
 
 export function getCourseDurationMinutes(course: { sections: CourseSection[] }): number {
-  return getAllLessons(course).reduce(
+  return getCourseVideoDurationMinutes(course);
+}
+
+export function getVideoLessons(course: { sections: CourseSection[] }): CourseLesson[] {
+  return getAllLessons(course).filter((lesson) => lesson.type === "video");
+}
+
+export function getCourseVideoDurationMinutes(course: { sections: CourseSection[] }): number {
+  return getVideoLessons(course).reduce(
     (sum, lesson) => sum + parseLessonDurationMinutes(lesson.duration),
     0,
   );
 }
 
-/** Progress weighted by lesson duration (hours/minutes), not lesson count. */
+export function formatCourseDurationLabel(totalMinutes: number): string {
+  if (totalMinutes <= 0) return "—";
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.round(totalMinutes % 60);
+
+  if (hours > 0 && minutes > 0) return `${hours}h ${minutes}min`;
+  if (hours > 0) return `${hours}h total`;
+  return `${minutes}min`;
+}
+
+export function getCourseDisplayDuration(course: {
+  sections: CourseSection[];
+  totalDuration?: string;
+}): string {
+  const videoMinutes = getCourseVideoDurationMinutes(course);
+  if (videoMinutes > 0) return formatCourseDurationLabel(videoMinutes);
+  if (course.totalDuration?.trim()) return course.totalDuration.trim();
+  return "—";
+}
+
+/** Progress weighted by video duration (hours/minutes), not lesson count. */
 export function computeCourseProgressPercent(
   course: { sections: CourseSection[] },
   completedLessonIds: string[],
 ): number {
-  const lessons = getAllLessons(course);
+  const lessons = getVideoLessons(course);
   const completedSet = new Set(completedLessonIds);
-  const totalMinutes = getCourseDurationMinutes(course);
+  const totalMinutes = getCourseVideoDurationMinutes(course);
 
   if (totalMinutes <= 0) {
     if (lessons.length === 0) return 0;

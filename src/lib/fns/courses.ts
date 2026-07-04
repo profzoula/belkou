@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { Course } from "@/lib/courses";
+import { getCourseDisplayDuration } from "@/lib/courses";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
 export type PublicCourse = Omit<Course, "thumbnail"> & {
@@ -14,6 +15,7 @@ export type PublicCourse = Omit<Course, "thumbnail"> & {
 function toPublicCourse(course: Course): PublicCourse {
   return {
     ...course,
+    totalDuration: getCourseDisplayDuration(course),
     thumbnail: {
       gradient: course.thumbnail.gradient,
       label: course.thumbnail.label,

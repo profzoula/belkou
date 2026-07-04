@@ -35,7 +35,7 @@ import {
 import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
 import { AdminCourseResourcesEditor } from "@/components/admin/AdminCourseResourcesEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
-import { formatCoursePrice, isFreeCourse } from "@/lib/courses";
+import { formatCoursePrice, getCourseDisplayDuration, isFreeCourse } from "@/lib/courses";
 import { siteConfig } from "@/lib/site-config";
 import {
   adminAddLesson,
@@ -336,7 +336,7 @@ export function AdminCoursesTab() {
           price,
           originalPrice,
           skillLevel: metaDraft.skillLevel.trim(),
-          totalDuration: metaDraft.totalDuration.trim(),
+          totalDuration: getCourseDisplayDuration(selectedCourse),
           bestseller: metaDraft.bestseller,
         },
       });
@@ -677,13 +677,16 @@ export function AdminCoursesTab() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="meta-duration">Durée totale</Label>
+              <Label htmlFor="meta-duration">Durée totale (vidéos)</Label>
               <Input
                 id="meta-duration"
-                value={metaDraft.totalDuration}
-                onChange={(e) => updateMetaDraft({ totalDuration: e.target.value })}
-                className="rounded-lg"
+                value={selectedCourse ? getCourseDisplayDuration(selectedCourse) : "—"}
+                readOnly
+                className="rounded-lg bg-muted/40"
               />
+              <p className="text-xs text-muted-foreground">
+                Calculée automatiquement à partir de la durée de chaque leçon vidéo.
+              </p>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <div className="flex items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-4 py-3">
