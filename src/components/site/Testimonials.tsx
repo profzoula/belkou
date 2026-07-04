@@ -8,42 +8,42 @@ type Testimonial = {
   text: string;
 };
 
-const avatar = (id: string) =>
-  `https://images.unsplash.com/${id}?w=200&h=200&auto=format&fit=crop&crop=faces`;
+const avatarBase = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/testimonial-avatars`;
+const avatar = (slug: string) => `${avatarBase}/${slug}.jpg`;
 
 const testimonials: Testimonial[] = [
   {
-    image: avatar("photo-1557860867-9c099dafe735"),
+    image: avatar("junior-pierre"),
     name: "Junior Pierre",
     handle: "@juniorpap · Port-au-Prince",
     text: "En 2 semaines, mwen lanse premye sit mwen an epi mwen jwenn premye kliyan mwen an.",
   },
   {
-    image: avatar("photo-1573497019236-7936a840583a"),
+    image: avatar("marie-claire-desir"),
     name: "Marie-Claire Désir",
     handle: "@mariecap · Cap-Haïtien",
     text: "Mwen pa t janm panse m te kapab kode. BelKou chanje fason m travay ak teknoloji a.",
   },
   {
-    image: avatar("photo-1589156191108-c762ff4f2eb4"),
+    image: avatar("wislande-joseph"),
     name: "Wislande Joseph",
     handle: "@wislandeht · Les Cayes",
     text: "Pi bon envestisman mwen fè ane sa a. Mentorat VIP la vo chak dola.",
   },
   {
-    image: avatar("photo-1539577192316-49d0f7156853"),
+    image: avatar("mackenson-etienne"),
     name: "Mackenson Étienne",
     handle: "@mackjacmel · Jacmel",
     text: "Kou BelKou yo ede m pase de zewo rive nan premye app mwen lanse an production.",
   },
   {
-    image: avatar("photo-1531123897727-8f129e168dce"),
+    image: avatar("sherline-volcy"),
     name: "Sherline Volcy",
     handle: "@sherline509 · Gonaïves",
     text: "Fòmasyon klè, kominote aktif — mwen finalman konprann kijan pou m monetize konpetans tech mwen yo.",
   },
   {
-    image: avatar("photo-1619895862022-09114a804692"),
+    image: avatar("roodly-alce"),
     name: "Roodly Alcé",
     handle: "@roodlydiaspora · Montréal",
     text: "Cursor, Supabase, deplwaman : tout eksplike etap pa etap. M rekòmande BelKou 100 %.",
