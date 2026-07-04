@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/forum/NotificationBell";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
@@ -55,6 +56,13 @@ function NavActions({
             Catalogue de cours
           </Link>
           <Link
+            to="/forum"
+            onClick={onNavigate}
+            className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            Forum
+          </Link>
+          <Link
             to="/dashboard"
             hash="affiliate"
             onClick={onNavigate}
@@ -80,12 +88,20 @@ function NavActions({
     return (
       <div className={wrapClass}>
         <Link
+          to="/forum"
+          onClick={onNavigate}
+          className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+        >
+          Forum
+        </Link>
+        <Link
           to="/dashboard"
           onClick={onNavigate}
           className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
         >
           Mes cours
         </Link>
+        <NotificationBell />
         <UserAccountMenu onNavigate={onNavigate} />
       </div>
     );

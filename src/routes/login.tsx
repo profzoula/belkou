@@ -13,6 +13,7 @@ import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   email: z.string().optional(),
+  redirect: z.string().optional(),
 });
 
 export const Route = createFileRoute("/login")({
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { email: emailFromSearch } = Route.useSearch();
+  const { email: emailFromSearch, redirect: redirectFromSearch } = Route.useSearch();
   const [email, setEmail] = useState(emailFromSearch ?? "");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,7 +86,11 @@ function LoginPage() {
     }
 
     toast.success("Connexion réussie.");
-    window.location.href = "/dashboard";
+    const redirect =
+      redirectFromSearch?.startsWith("/") && !redirectFromSearch.startsWith("//")
+        ? redirectFromSearch
+        : "/dashboard";
+    window.location.href = redirect;
   };
 
   return (

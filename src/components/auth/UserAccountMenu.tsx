@@ -3,6 +3,7 @@ import {
   BookOpen,
   HelpCircle,
   LogOut,
+  MessagesSquare,
   Settings,
   Share2,
   ShoppingBag,
@@ -115,6 +116,12 @@ export function UserAccountMenu({ onNavigate, triggerClassName }: UserAccountMen
         <DropdownMenuSeparator className="m-0" />
 
         <div className="py-1">
+          <DropdownMenuItem asChild className="px-4 py-2.5 cursor-pointer">
+            <Link to="/forum" onClick={close}>
+              <MessagesSquare className="h-4 w-4 mr-3 text-muted-foreground" />
+              Forum étudiant
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem asChild className="px-4 py-2.5 cursor-pointer">
             <Link to="/dashboard" hash="affiliate" onClick={close}>
               <Share2 className="h-4 w-4 mr-3 text-muted-foreground" />

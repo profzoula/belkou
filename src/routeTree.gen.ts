@@ -20,6 +20,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
+import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
@@ -29,6 +30,8 @@ import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
 import { Route as CoursesSlugRouteImport } from './routes/courses/$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ForumCourseSlugIndexRouteImport } from './routes/forum/$courseSlug/index'
+import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$courseSlug/$postId'
 import { Route as CoursesSlugLearnRouteImport } from './routes/courses/$slug/learn'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
@@ -87,6 +90,11 @@ const ServicesIndexRoute = ServicesIndexRouteImport.update({
   path: '/services/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumIndexRoute = ForumIndexRouteImport.update({
+  id: '/forum/',
+  path: '/forum/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -132,6 +140,16 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumCourseSlugIndexRoute = ForumCourseSlugIndexRouteImport.update({
+  id: '/forum/$courseSlug/',
+  path: '/forum/$courseSlug/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumCourseSlugPostIdRoute = ForumCourseSlugPostIdRouteImport.update({
+  id: '/forum/$courseSlug/$postId',
+  path: '/forum/$courseSlug/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesSlugLearnRoute = CoursesSlugLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
@@ -163,9 +181,12 @@ export interface FileRoutesByFullPath {
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/forum/': typeof ForumIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
+  '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
+  '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -187,9 +208,12 @@ export interface FileRoutesByTo {
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/courses': typeof CoursesIndexRoute
+  '/forum': typeof ForumIndexRoute
   '/services': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
+  '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
+  '/forum/$courseSlug': typeof ForumCourseSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -212,9 +236,12 @@ export interface FileRoutesById {
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/courses/': typeof CoursesIndexRoute
+  '/forum/': typeof ForumIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
+  '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
+  '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -238,9 +265,12 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin/'
     | '/courses/'
+    | '/forum/'
     | '/services/'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
+    | '/forum/$courseSlug/$postId'
+    | '/forum/$courseSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -262,9 +292,12 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin'
     | '/courses'
+    | '/forum'
     | '/services'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
+    | '/forum/$courseSlug/$postId'
+    | '/forum/$courseSlug'
   id:
     | '__root__'
     | '/'
@@ -286,9 +319,12 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin/'
     | '/courses/'
+    | '/forum/'
     | '/services/'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
+    | '/forum/$courseSlug/$postId'
+    | '/forum/$courseSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -311,8 +347,11 @@ export interface RootRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  ForumIndexRoute: typeof ForumIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ForumCourseSlugPostIdRoute: typeof ForumCourseSlugPostIdRoute
+  ForumCourseSlugIndexRoute: typeof ForumCourseSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -394,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/': {
+      id: '/forum/'
+      path: '/forum'
+      fullPath: '/forum/'
+      preLoaderRoute: typeof ForumIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/': {
       id: '/courses/'
       path: '/courses'
@@ -457,6 +503,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/$courseSlug/': {
+      id: '/forum/$courseSlug/'
+      path: '/forum/$courseSlug'
+      fullPath: '/forum/$courseSlug/'
+      preLoaderRoute: typeof ForumCourseSlugIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum/$courseSlug/$postId': {
+      id: '/forum/$courseSlug/$postId'
+      path: '/forum/$courseSlug/$postId'
+      fullPath: '/forum/$courseSlug/$postId'
+      preLoaderRoute: typeof ForumCourseSlugPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$slug/learn': {
       id: '/courses/$slug/learn'
       path: '/learn'
@@ -506,8 +566,11 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesSlugRoute: ServicesSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  ForumIndexRoute: ForumIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ForumCourseSlugPostIdRoute: ForumCourseSlugPostIdRoute,
+  ForumCourseSlugIndexRoute: ForumCourseSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
