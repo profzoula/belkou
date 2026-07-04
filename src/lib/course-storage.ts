@@ -124,10 +124,12 @@ export function buildNewLesson(input: AddLessonInput, previewVimeo?: string): Co
     };
   }
 
+  const hasVimeo = Boolean(input.vimeo?.trim() || (input.preview && previewVimeo?.trim()));
+
   return {
     id,
     title: input.title,
-    duration: input.duration ?? "5min",
+    duration: hasVimeo ? (input.duration?.trim() ?? "") : "",
     type: "video",
     preview: input.preview ?? false,
     vimeo: input.vimeo || (input.preview ? previewVimeo : undefined),

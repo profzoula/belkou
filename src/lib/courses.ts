@@ -218,7 +218,7 @@ export function countLessons(course: { sections: CourseSection[] }): number {
 /** Parse "4min", "8 min", "1h 30min", etc. into minutes. */
 export function parseLessonDurationMinutes(duration: string): number {
   const normalized = duration.trim().toLowerCase();
-  if (!normalized) return 5;
+  if (!normalized) return 0;
 
   let total = 0;
   const hoursMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*h(?:\b|[^a-z])/);
@@ -236,7 +236,7 @@ export function parseLessonDurationMinutes(duration: string): number {
   const bareNumber = normalized.match(/^(\d+(?:[.,]\d+)?)$/);
   if (bareNumber) return parseFloat(bareNumber[1].replace(",", "."));
 
-  return 5;
+  return 0;
 }
 
 export function getCourseDurationMinutes(course: { sections: CourseSection[] }): number {
@@ -247,11 +247,35 @@ export function getVideoLessons(course: { sections: CourseSection[] }): CourseLe
   return getAllLessons(course).filter((lesson) => lesson.type === "video");
 }
 
+export function getLessonDisplayDuration(
+  lesson: CourseLesson,
+  course?: { sections: CourseSection[] },
+): string | null {
+  if (lesson.type === "video") {
+    if (!getLessonVimeo(lesson, course)) return null;
+    const trimmed = lesson.duration?.trim();
+    return trimmed || null;
+  }
+
+  const trimmed = lesson.duration?.trim();
+  return trimmed || null;
+}
+
+export function getSectionDurationMinutes(
+  section: CourseSection,
+  course?: { sections: CourseSection[] },
+): number {
+  return section.lessons.reduce((sum, lesson) => {
+    if (!getLessonDisplayDuration(lesson, course)) return sum;
+    return sum + parseLessonDurationMinutes(lesson.duration ?? "");
+  }, 0);
+}
+
 export function getCourseVideoDurationMinutes(course: { sections: CourseSection[] }): number {
-  return getVideoLessons(course).reduce(
-    (sum, lesson) => sum + parseLessonDurationMinutes(lesson.duration),
-    0,
-  );
+  return getVideoLessons(course).reduce((sum, lesson) => {
+    if (!getLessonVimeo(lesson, course)) return sum;
+    return sum + parseLessonDurationMinutes(lesson.duration ?? "");
+  }, 0);
 }
 
 export function formatCourseDurationLabel(totalMinutes: number): string {
@@ -265,14 +289,8 @@ export function formatCourseDurationLabel(totalMinutes: number): string {
   return `${minutes}min`;
 }
 
-export function getCourseDisplayDuration(course: {
-  sections: CourseSection[];
-  totalDuration?: string;
-}): string {
-  const videoMinutes = getCourseVideoDurationMinutes(course);
-  if (videoMinutes > 0) return formatCourseDurationLabel(videoMinutes);
-  if (course.totalDuration?.trim()) return course.totalDuration.trim();
-  return "—";
+export function getCourseDisplayDuration(course: { sections: CourseSection[] }): string {
+  return formatCourseDurationLabel(getCourseVideoDurationMinutes(course));
 }
 
 /** Progress weighted by video duration (hours/minutes), not lesson count. */
@@ -291,9 +309,8 @@ export function computeCourseProgressPercent(
 
   let completedMinutes = 0;
   for (const lesson of lessons) {
-    if (completedSet.has(lesson.id)) {
-      completedMinutes += parseLessonDurationMinutes(lesson.duration);
-    }
+    if (!completedSet.has(lesson.id) || !getLessonVimeo(lesson, course)) continue;
+    completedMinutes += parseLessonDurationMinutes(lesson.duration ?? "");
   }
 
   return Math.min(100, Math.round((completedMinutes / totalMinutes) * 100));
@@ -314,24 +331,38 @@ export function formatCoursePrice(price: number): string {
 const previewVimeoFallback =
   typeof import.meta !== "undefined" ? import.meta.env.VITE_VIMEO_PREVIEW_ID?.trim() : undefined;
 
-export function getLessonVimeo(lesson: CourseLesson): VimeoRef | null {
-  if (lesson.vimeo) {
-    return parseVimeoRef(lesson.vimeo);
+export function getLessonVimeo(
+  lesson: CourseLesson,
+  course?: { sections: CourseSection[] },
+): VimeoRef | null {
+  const trimmed = lesson.vimeo?.trim();
+  if (trimmed) {
+    return parseVimeoRef(trimmed);
   }
 
-  if (lesson.preview && previewVimeoFallback) {
-    return parseVimeoRef(previewVimeoFallback);
+  if (!lesson.preview || !previewVimeoFallback) {
+    return null;
   }
 
-  return null;
+  if (course) {
+    const welcome = getWelcomePreviewLesson(course);
+    if (welcome?.id !== lesson.id) return null;
+  } else if (!isWelcomePreviewLesson(lesson)) {
+    return null;
+  }
+
+  return parseVimeoRef(previewVimeoFallback);
 }
 
-export function isPreviewVideoAvailable(lesson: CourseLesson): boolean {
-  return lesson.type === "video" && Boolean(lesson.preview) && Boolean(getLessonVimeo(lesson));
+export function isPreviewVideoAvailable(
+  lesson: CourseLesson,
+  course?: { sections: CourseSection[] },
+): boolean {
+  return lesson.type === "video" && Boolean(lesson.preview) && Boolean(getLessonVimeo(lesson, course));
 }
 
 export function getPreviewVideoLessons(course: { sections: CourseSection[] }): CourseLesson[] {
-  return getAllLessons(course).filter(isPreviewVideoAvailable);
+  return getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson, course));
 }
 
 export function getFirstPreviewVideoLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {

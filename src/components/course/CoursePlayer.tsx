@@ -23,7 +23,9 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getLessonDisplayDuration,
   getLessonVimeo,
+  getSectionDurationMinutes,
   getSectionForLesson,
   getWelcomePreviewLesson,
   type CourseLesson,
@@ -73,7 +75,7 @@ function CourseVideoArea({
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLockState(lesson);
-  const vimeo = getLessonVimeo(lesson);
+  const vimeo = getLessonVimeo(lesson, course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
 
@@ -336,7 +338,7 @@ function CurriculumSidebar({
         <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
           {course.sections.map((section) => {
             const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
-            const sectionDuration = section.lessons.reduce((sum, l) => sum + parseInt(l.duration, 10), 0);
+            const sectionDuration = getSectionDurationMinutes(section, course);
 
             return (
               <AccordionItem key={section.id} value={section.id} className="border-border">
@@ -346,7 +348,8 @@ function CurriculumSidebar({
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold leading-snug">{section.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {completed}/{section.lessons.length} · {sectionDuration}min
+                        {completed}/{section.lessons.length}
+                        {sectionDuration > 0 ? ` · ${sectionDuration}min` : ""}
                       </p>
                     </div>
                   </div>
@@ -357,6 +360,7 @@ function CurriculumSidebar({
                       const active = lesson.id === activeLessonId;
                       const { locked } = getLockState(lesson);
                       const done = completedSet.has(lesson.id);
+                      const lessonDuration = getLessonDisplayDuration(lesson, course);
 
                       return (
                         <li key={lesson.id}>
@@ -386,9 +390,11 @@ function CurriculumSidebar({
                             <span className="min-w-0 flex-1 leading-snug">
                               {index + 1}. {lesson.title}
                             </span>
-                            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                              {lesson.duration}
-                            </span>
+                            {lessonDuration ? (
+                              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                                {lessonDuration}
+                              </span>
+                            ) : null}
                           </button>
                         </li>
                       );

@@ -27,6 +27,7 @@ import {
   getContinueLearnSearch,
   getCourseActionLabel,
   getFirstPreviewVideoLesson,
+  getLessonDisplayDuration,
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
@@ -546,6 +547,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                           hasPaidAccess,
                         });
                         const learnSearch = locked ? undefined : { lesson: lesson.id };
+                        const lessonDuration = getLessonDisplayDuration(lesson, course);
                         const row = (
                           <>
                             <span>
@@ -554,7 +556,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                                 <span className="ml-2 text-[10px] font-bold uppercase text-primary">Preview</span>
                               )}
                             </span>
-                            <span className="shrink-0 tabular-nums">{lesson.duration}</span>
+                            {lessonDuration ? (
+                              <span className="shrink-0 tabular-nums">{lessonDuration}</span>
+                            ) : null}
                           </>
                         );
 

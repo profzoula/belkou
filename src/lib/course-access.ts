@@ -1,6 +1,6 @@
 import { BASE_COURSE_SLUGS } from "@/lib/courses";
 import { isWelcomePreviewLesson, getLessonVimeo } from "@/lib/courses";
-import type { CourseLesson } from "@/lib/courses";
+import type { CourseLesson, CourseSection } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
 
@@ -78,7 +78,7 @@ export function isLessonUnlockedInSequence(
 export function getLessonLockState(
   opts: {
     lesson: { id: string; title: string; preview?: boolean; type?: string; vimeo?: string };
-    course: { published?: boolean; scheduledPublishAt?: string };
+    course: { published?: boolean; scheduledPublishAt?: string; sections?: CourseSection[] };
     hasPaidAccess: boolean;
     completedLessonIds?: string[];
     orderedLessonIds?: string[];
@@ -88,8 +88,9 @@ export function getLessonLockState(
   const { lesson, course, hasPaidAccess, completedLessonIds, orderedLessonIds } = opts;
   const contentLive = isCourseContentLive(course, now);
   const videoLesson = lesson as CourseLesson;
+  const courseForVimeo = course.sections ? { sections: course.sections } : undefined;
 
-  if (lesson.type === "video" && lesson.preview && getLessonVimeo(videoLesson)) {
+  if (lesson.type === "video" && lesson.preview && getLessonVimeo(videoLesson, courseForVimeo)) {
     if (!hasPaidAccess) {
       return { locked: false, reason: "none" };
     }

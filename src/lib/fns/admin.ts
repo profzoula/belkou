@@ -534,6 +534,8 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     if (data.vimeo?.trim()) {
       const resolved = await fetchVimeoDurationLabel(data.vimeo);
       if (resolved) duration = resolved;
+    } else if (data.type === "video") {
+      duration = "";
     }
 
     const result = await updateLessonOverride({
@@ -687,10 +689,15 @@ export const adminAddLesson = createServerFn({ method: "POST" })
     const { addLessonToCourse, getResolvedCourses } = await import("@/server/site-content");
     const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
 
+    const isArticle = data.type === "article";
     let duration = data.duration;
-    if (data.type !== "article" && data.vimeo?.trim()) {
+    if (isArticle) {
+      duration = data.duration?.trim() || "5 min";
+    } else if (data.vimeo?.trim()) {
       const resolved = await fetchVimeoDurationLabel(data.vimeo);
-      if (resolved) duration = resolved;
+      duration = resolved || "";
+    } else {
+      duration = "";
     }
 
     const result = await addLessonToCourse({

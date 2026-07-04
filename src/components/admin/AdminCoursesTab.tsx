@@ -1045,9 +1045,13 @@ export function AdminCoursesTab() {
                                 <Label>Vimeo (ID ou lien)</Label>
                                 <Input
                                   value={draft.vimeo}
-                                  onChange={(e) =>
-                                    updateDraft(selectedCourse.slug, lesson.id, { vimeo: e.target.value })
-                                  }
+                                  onChange={(e) => {
+                                    const vimeo = e.target.value;
+                                    updateDraft(selectedCourse.slug, lesson.id, {
+                                      vimeo,
+                                      ...(!vimeo.trim() ? { duration: "" } : {}),
+                                    });
+                                  }}
                                   onBlur={() =>
                                     void fillDurationFromVimeo(
                                       draft.vimeo,
@@ -1215,7 +1219,13 @@ export function AdminCoursesTab() {
                           <Input
                             id={`new-lesson-vimeo-${section.id}`}
                             value={newLesson.vimeo}
-                            onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
+                            onChange={(e) => {
+                              const vimeo = e.target.value;
+                              updateNewLessonDraft(section.id, {
+                                vimeo,
+                                ...(!vimeo.trim() ? { duration: "" } : {}),
+                              });
+                            }}
                             onBlur={() =>
                               void fillDurationFromVimeo(
                                 newLesson.vimeo,

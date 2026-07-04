@@ -49,7 +49,7 @@ export function VimeoPlayer({
       void player.destroy();
       playerRef.current = null;
     };
-  }, [lessonKey, onLessonComplete, video]);
+  }, [lessonKey, onLessonComplete, video.id, video.hash]);
 
   const replay = () => {
     const player = playerRef.current;

@@ -1,5 +1,5 @@
 import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
-import { courses as baseCourses, DEFAULT_PREVIEW_VIMEO, isBaseCourseSlug } from "@/lib/courses";
+import { courses as baseCourses, DEFAULT_PREVIEW_VIMEO, getAllLessons, isBaseCourseSlug, isWelcomePreviewLesson } from "@/lib/courses";
 import {
   addLessonToStoredCourse,
   addSectionToStoredCourse,
@@ -244,15 +244,34 @@ function applySectionOrder(course: Course, sectionOrder?: string[]): Course {
   return { ...course, sections: ordered };
 }
 
+function getWelcomeLessonIdForDefaultVimeo(course: Course): string | undefined {
+  const lessons = getAllLessons(course);
+  const welcome =
+    lessons.find((lesson) => lesson.id === "intro-welcome") ??
+    lessons.find(
+      (lesson) =>
+        lesson.type === "video" && lesson.preview && isWelcomePreviewLesson(lesson),
+    ) ??
+    lessons.find((lesson) => lesson.type === "video" && lesson.preview);
+  return welcome?.id;
+}
+
 function applyDefaultVimeo(course: Course, defaultVimeo?: string): Course {
   if (!defaultVimeo) return course;
+
+  const welcomeLessonId = getWelcomeLessonIdForDefaultVimeo(course);
 
   return {
     ...course,
     sections: course.sections.map((section) => ({
       ...section,
       lessons: section.lessons.map((lesson) => {
-        if (lesson.preview && !lesson.vimeo && lesson.type === "video") {
+        if (
+          lesson.preview &&
+          !lesson.vimeo?.trim() &&
+          lesson.type === "video" &&
+          lesson.id === welcomeLessonId
+        ) {
           return { ...lesson, vimeo: defaultVimeo };
         }
         return lesson;
