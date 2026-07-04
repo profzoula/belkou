@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Accordion,
   AccordionContent,
@@ -9,6 +10,7 @@ import { parseInlineMarkdown, parseLessonContent } from "@/lib/parse-lesson-cont
 type LessonArticleContentProps = {
   title: string;
   content: string;
+  onComplete?: () => void;
 };
 
 function InlineText({ text }: { text: string }) {
@@ -28,7 +30,7 @@ function InlineText({ text }: { text: string }) {
   );
 }
 
-export function LessonArticleContent({ title, content }: LessonArticleContentProps) {
+export function LessonArticleContent({ title, content, onComplete }: LessonArticleContentProps) {
   const blocks = parseLessonContent(content);
   const accordionBlocks = blocks.filter((block) => block.type === "accordion");
   const introBlocks = blocks.filter((block) => block.type !== "accordion");
@@ -84,6 +86,14 @@ export function LessonArticleContent({ title, content }: LessonArticleContentPro
               </AccordionItem>
             ))}
           </Accordion>
+        </div>
+      ) : null}
+
+      {onComplete ? (
+        <div className="mt-8 flex justify-end">
+          <Button type="button" variant="hero" size="sm" onClick={onComplete}>
+            Marquer comme terminé
+          </Button>
         </div>
       ) : null}
     </div>

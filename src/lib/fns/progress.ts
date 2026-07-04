@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { computeCourseProgressPercent } from "@/lib/courses";
+import { computeCourseProgressPercent, getAllLessons } from "@/lib/courses";
+import { isLessonUnlockedInSequence } from "@/lib/course-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { listLessonProgress, markLessonComplete } from "@/server/lesson-progress";
@@ -38,13 +39,23 @@ export const completeLesson = createServerFn({ method: "POST" })
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email) throw new Error("Connexion requise.");
 
-    await markLessonComplete(user.email, data.courseSlug, data.lessonId);
     const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) throw new Error("Cours introuvable.");
+
+    const orderedLessonIds = getAllLessons(course).map((lesson) => lesson.id);
     const rows = await listLessonProgress(user.email, data.courseSlug);
     const completedLessonIds = rows.map((row) => row.lesson_id);
+
+    if (
+      !isLessonUnlockedInSequence(data.lessonId, orderedLessonIds, completedLessonIds)
+    ) {
+      throw new Error("Terminez la leçon précédente avant de continuer.");
+    }
+
+    await markLessonComplete(user.email, data.courseSlug, data.lessonId);
+    const updatedRows = await listLessonProgress(user.email, data.courseSlug);
+    const updatedCompleted = updatedRows.map((row) => row.lesson_id);
     return {
-      progressPercent: course
-        ? computeCourseProgressPercent(course, completedLessonIds)
-        : 0,
+      progressPercent: computeCourseProgressPercent(course, updatedCompleted),
     };
   });

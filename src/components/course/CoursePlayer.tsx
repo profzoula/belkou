@@ -35,7 +35,7 @@ import {
   isCourseContentLive,
   isScheduledInFuture,
 } from "@/lib/course-publish";
-import { getLessonLockState } from "@/lib/course-access";
+import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
 import { completeLesson, getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
@@ -60,6 +60,7 @@ function CourseVideoArea({
   nextLessonTitle,
   onNextLesson,
   onLessonComplete,
+  getLockState,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
@@ -68,13 +69,10 @@ function CourseVideoArea({
   nextLessonTitle?: string;
   onNextLesson?: () => void;
   onLessonComplete?: () => void;
+  getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
 }) {
   const Icon = getCourseIcon(course.slug);
-  const { locked, reason } = getLessonLockState({
-    lesson,
-    course,
-    hasPaidAccess,
-  });
+  const { locked, reason } = getLockState(lesson);
   const vimeo = getLessonVimeo(lesson);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
@@ -85,6 +83,7 @@ function CourseVideoArea({
         <LessonArticleContent
           title={lesson.title}
           content={lesson.content?.trim() || "Contenu en cours de rédaction."}
+          onComplete={onLessonComplete}
         />
       );
     }
@@ -94,11 +93,13 @@ function CourseVideoArea({
         <FileText className="h-10 w-10 text-muted-foreground" />
         <p className="font-semibold">{lesson.title}</p>
         <p className="max-w-md text-sm text-muted-foreground">
-          {enrolledWaiting && startLabel
-            ? `Vous êtes inscrit — contenu disponible le ${startLabel}`
-            : reason === "schedule" && startLabel
-              ? `Contenu disponible le ${startLabel}`
-              : "Module texte — disponible après inscription."}
+          {reason === "sequential"
+            ? "Terminez la leçon précédente pour débloquer ce module."
+            : enrolledWaiting && startLabel
+              ? `Vous êtes inscrit — contenu disponible le ${startLabel}`
+              : reason === "schedule" && startLabel
+                ? `Contenu disponible le ${startLabel}`
+                : "Module texte — disponible après inscription."}
         </p>
         {enrolledWaiting ? (
           <Button asChild size="sm" variant="outline">
@@ -202,6 +203,11 @@ function CourseVideoArea({
             <Lock className="h-4 w-4" />
             Vidéos disponibles le {startLabel}
           </p>
+        ) : reason === "sequential" ? (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
+            <Lock className="h-4 w-4" />
+            Terminez la leçon précédente pour continuer
+          </p>
         ) : locked ? (
           <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
             <Lock className="h-4 w-4" />
@@ -218,7 +224,7 @@ function CourseVideoArea({
 
       {locked && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
-          {enrolledWaiting ? (
+          {reason === "sequential" ? null : enrolledWaiting ? (
             welcomeLessonId && lesson.id !== welcomeLessonId ? (
               <Button asChild size="lg" variant="secondary" className="rounded-full">
                 <Link
@@ -304,13 +310,13 @@ function EnrolledExtraTab({
 function CurriculumSidebar({
   course,
   activeLessonId,
-  hasPaidAccess,
+  getLockState,
   completedLessonIds,
   onSelectLesson,
 }: {
   course: PublicCourse;
   activeLessonId: string;
-  hasPaidAccess: boolean;
+  getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
   completedLessonIds: string[];
   onSelectLesson: (lessonId: string) => void;
 }) {
@@ -349,7 +355,7 @@ function CurriculumSidebar({
                   <ul>
                     {section.lessons.map((lesson, index) => {
                       const active = lesson.id === activeLessonId;
-                      const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
+                      const { locked } = getLockState(lesson);
                       const done = completedSet.has(lesson.id);
 
                       return (
@@ -357,8 +363,8 @@ function CurriculumSidebar({
                           <button
                             type="button"
                             onClick={() => {
-                              const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
-                              if (!locked) onSelectLesson(lesson.id);
+                              const { locked: isLocked } = getLockState(lesson);
+                              if (!isLocked) onSelectLesson(lesson.id);
                             }}
                             className={cn(
                               "flex w-full items-start gap-2 border-l-2 px-3 py-2.5 text-left text-sm transition-colors",
@@ -474,22 +480,28 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const allLessons = useMemo(() => getAllLessons(course), [course]);
   const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
+  const orderedLessonIds = useMemo(() => allLessons.map((lesson) => lesson.id), [allLessons]);
+  const completedLessonIds = progress?.completedLessonIds ?? [];
+
+  const getLockState = useCallback(
+    (lesson: CourseLesson) =>
+      getLessonLockState({
+        lesson,
+        course,
+        hasPaidAccess,
+        ...(hasPaidAccess && contentLive ? { completedLessonIds, orderedLessonIds } : {}),
+      }),
+    [completedLessonIds, contentLive, course, hasPaidAccess, orderedLessonIds],
+  );
 
   const resolveLessonId = (lessonId?: string) => {
     const requested = lessonId ? allLessons.find((lesson) => lesson.id === lessonId) : undefined;
     if (requested) {
-      const { locked } = getLessonLockState({
-        lesson: requested,
-        course,
-        hasPaidAccess,
-      });
+      const { locked } = getLockState(requested);
       if (!locked) return requested.id;
     }
 
-    const firstUnlocked = allLessons.find((lesson) => {
-      const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
-      return !locked;
-    });
+    const firstUnlocked = allLessons.find((lesson) => !getLockState(lesson).locked);
 
     return firstUnlocked?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
   };
@@ -505,17 +517,13 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     setActiveLessonId((current) => {
       const currentLesson = allLessons.find((lesson) => lesson.id === current);
       if (currentLesson) {
-        const { locked } = getLessonLockState({
-          lesson: currentLesson,
-          course,
-          hasPaidAccess,
-        });
+        const { locked } = getLockState(currentLesson);
         if (!locked) return current;
       }
 
       return resolveLessonId(initialLessonId);
     });
-  }, [access, hasPaidAccess, contentLive, initialLessonId, allLessons, welcomeLesson, course]);
+  }, [access, getLockState, initialLessonId, allLessons, welcomeLesson, course]);
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
   const activeSection = getSectionForLesson(course, activeLesson.id);
@@ -525,12 +533,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
     for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
       const candidate = allLessons[index];
-      const { locked } = getLessonLockState({ lesson: candidate, course, hasPaidAccess });
+      const { locked } = getLockState(candidate);
       if (!locked) return candidate;
     }
 
     return null;
-  }, [activeLessonId, allLessons, course, hasPaidAccess]);
+  }, [activeLessonId, allLessons, getLockState]);
 
   const recordLessonComplete = useCallback(
     (lessonId: string) => {
@@ -631,6 +639,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             nextLessonTitle={nextLesson?.title}
             onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
             onLessonComplete={handleActiveLessonComplete}
+            getLockState={getLockState}
           />
 
           <div className="border-b border-border px-3 sm:px-6">
@@ -803,8 +812,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           <CurriculumSidebar
             course={course}
             activeLessonId={activeLessonId}
-            hasPaidAccess={hasPaidAccess}
-            completedLessonIds={progress?.completedLessonIds ?? []}
+            getLockState={getLockState}
+            completedLessonIds={completedLessonIds}
             onSelectLesson={(lessonId) => {
               setActiveLessonId(lessonId);
             }}

@@ -54,31 +54,65 @@ export function hasPaidAccessToCourse(
   return false;
 }
 
-export type LessonLockReason = "none" | "schedule" | "enrollment";
+export type LessonLockReason = "none" | "schedule" | "enrollment" | "sequential";
+
+export function isLessonUnlockedInSequence(
+  lessonId: string,
+  orderedLessonIds: string[],
+  completedLessonIds: string[],
+): boolean {
+  const index = orderedLessonIds.indexOf(lessonId);
+  if (index < 0) return false;
+
+  const completed = new Set(completedLessonIds);
+  if (completed.has(lessonId)) return true;
+  if (index === 0) return true;
+
+  for (let i = 0; i < index; i += 1) {
+    if (!completed.has(orderedLessonIds[i]!)) return false;
+  }
+
+  return true;
+}
 
 export function getLessonLockState(
   opts: {
     lesson: { id: string; title: string; preview?: boolean; type?: string; vimeo?: string };
     course: { published?: boolean; scheduledPublishAt?: string };
     hasPaidAccess: boolean;
+    completedLessonIds?: string[];
+    orderedLessonIds?: string[];
   },
   now = Date.now(),
 ): { locked: boolean; reason: LessonLockReason } {
-  const { lesson, course, hasPaidAccess } = opts;
+  const { lesson, course, hasPaidAccess, completedLessonIds, orderedLessonIds } = opts;
   const contentLive = isCourseContentLive(course, now);
   const videoLesson = lesson as CourseLesson;
 
   if (lesson.type === "video" && lesson.preview && getLessonVimeo(videoLesson)) {
-    return { locked: false, reason: "none" };
+    if (!hasPaidAccess) {
+      return { locked: false, reason: "none" };
+    }
   }
 
   if (lesson.type === "article" && lesson.preview && (lesson as CourseLesson).content?.trim()) {
-    return { locked: false, reason: "none" };
+    if (!hasPaidAccess) {
+      return { locked: false, reason: "none" };
+    }
   }
 
   if (contentLive) {
-    if (hasPaidAccess) return { locked: false, reason: "none" };
-    return { locked: true, reason: "enrollment" };
+    if (!hasPaidAccess) {
+      return { locked: true, reason: "enrollment" };
+    }
+
+    if (orderedLessonIds?.length && completedLessonIds) {
+      if (!isLessonUnlockedInSequence(lesson.id, orderedLessonIds, completedLessonIds)) {
+        return { locked: true, reason: "sequential" };
+      }
+    }
+
+    return { locked: false, reason: "none" };
   }
 
   if (hasPaidAccess && lesson.type === "video" && isWelcomePreviewLesson(lesson)) {
