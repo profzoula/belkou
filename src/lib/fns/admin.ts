@@ -755,6 +755,58 @@ export const adminDeleteSection = createServerFn({ method: "POST" })
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
 
+export const adminReorderLessons = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        sectionId: z.string().min(1),
+        lessonIds: z.array(z.string().min(1)).min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { reorderLessonsInCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await reorderLessonsInCourse({
+      courseSlug: data.courseSlug,
+      sectionId: data.sectionId,
+      lessonIds: data.lessonIds,
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Réorganisation impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminReorderSections = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        sectionIds: z.array(z.string().min(1)).min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { reorderSectionsInCourse, getResolvedCourses } = await import("@/server/site-content");
+
+    const result = await reorderSectionsInCourse({
+      courseSlug: data.courseSlug,
+      sectionIds: data.sectionIds,
+    });
+
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Réorganisation impossible");
+    }
+
+    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
 export const adminUploadCourseThumbnail = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

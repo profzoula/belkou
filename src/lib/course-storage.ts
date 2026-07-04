@@ -182,6 +182,42 @@ export function deleteLessonFromStoredCourse(course: StoredCourse, lessonId: str
   };
 }
 
+export function reorderLessonsInStoredCourse(
+  course: StoredCourse,
+  sectionId: string,
+  lessonIds: string[],
+): StoredCourse | null {
+  const section = course.sections.find((item) => item.id === sectionId);
+  if (!section) return null;
+
+  const byId = new Map(section.lessons.map((lesson) => [lesson.id, lesson]));
+  if (lessonIds.length !== section.lessons.length) return null;
+  if (!lessonIds.every((id) => byId.has(id))) return null;
+
+  return {
+    ...course,
+    sections: course.sections.map((item) =>
+      item.id === sectionId
+        ? { ...item, lessons: lessonIds.map((id) => byId.get(id)!) }
+        : item,
+    ),
+  };
+}
+
+export function reorderSectionsInStoredCourse(
+  course: StoredCourse,
+  sectionIds: string[],
+): StoredCourse | null {
+  const byId = new Map(course.sections.map((section) => [section.id, section]));
+  if (sectionIds.length !== course.sections.length) return null;
+  if (!sectionIds.every((id) => byId.has(id))) return null;
+
+  return {
+    ...course,
+    sections: sectionIds.map((id) => byId.get(id)!),
+  };
+}
+
 export function deleteSectionFromStoredCourse(
   course: StoredCourse,
   sectionId: string,

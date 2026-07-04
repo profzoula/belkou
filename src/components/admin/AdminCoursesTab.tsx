@@ -3,7 +3,9 @@ import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  ArrowDown,
   ArrowLeft,
+  ArrowUp,
   CalendarClock,
   ChevronDown,
   ExternalLink,
@@ -44,6 +46,8 @@ import {
   adminDeleteCourse,
   adminDeleteLesson,
   adminDeleteSection,
+  adminReorderLessons,
+  adminReorderSections,
   adminScheduleCoursePublish,
   adminSetCoursePublished,
   adminUpdateCourse,
@@ -154,6 +158,8 @@ export function AdminCoursesTab() {
   const addSectionFn = useServerFn(adminAddSection);
   const deleteLessonFn = useServerFn(adminDeleteLesson);
   const deleteSectionFn = useServerFn(adminDeleteSection);
+  const reorderLessonsFn = useServerFn(adminReorderLessons);
+  const reorderSectionsFn = useServerFn(adminReorderSections);
   const createFn = useServerFn(adminCreateCourse);
   const deleteFn = useServerFn(adminDeleteCourse);
 
@@ -177,6 +183,8 @@ export function AdminCoursesTab() {
   const [addingSession, setAddingSession] = useState(false);
   const [deletingLessonId, setDeletingLessonId] = useState<string | null>(null);
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
+  const [reorderingLessonId, setReorderingLessonId] = useState<string | null>(null);
+  const [reorderingSectionId, setReorderingSectionId] = useState<string | null>(null);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -531,6 +539,68 @@ export function AdminCoursesTab() {
     }
   };
 
+  const moveLesson = async (sectionId: string, lessonId: string, direction: "up" | "down") => {
+    if (!selectedCourse) return;
+
+    const section = selectedCourse.sections.find((item) => item.id === sectionId);
+    if (!section) return;
+
+    const index = section.lessons.findIndex((lesson) => lesson.id === lessonId);
+    if (index === -1) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= section.lessons.length) return;
+
+    const lessonIds = section.lessons.map((lesson) => lesson.id);
+    [lessonIds[index], lessonIds[targetIndex]] = [lessonIds[targetIndex], lessonIds[index]];
+
+    setReorderingLessonId(lessonId);
+    try {
+      const result = await reorderLessonsFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          sectionId,
+          lessonIds,
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Réorganisation impossible");
+    } finally {
+      setReorderingLessonId(null);
+    }
+  };
+
+  const moveSection = async (sectionId: string, direction: "up" | "down") => {
+    if (!selectedCourse) return;
+
+    const index = selectedCourse.sections.findIndex((section) => section.id === sectionId);
+    if (index === -1) return;
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= selectedCourse.sections.length) return;
+
+    const sectionIds = selectedCourse.sections.map((section) => section.id);
+    [sectionIds[index], sectionIds[targetIndex]] = [sectionIds[targetIndex], sectionIds[index]];
+
+    setReorderingSectionId(sectionId);
+    try {
+      const result = await reorderSectionsFn({
+        data: {
+          courseSlug: selectedCourse.slug,
+          sectionIds,
+        },
+      });
+      setCourses(result.courses);
+      syncDrafts(result.courses);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Réorganisation impossible");
+    } finally {
+      setReorderingSectionId(null);
+    }
+  };
+
   const handleTitleChange = (value: string) => {
     setNewTitle(value);
     if (!slugEdited) {
@@ -812,7 +882,9 @@ export function AdminCoursesTab() {
 
         <Accordion
           type="multiple"
-          key={selectedCourse.sections.map((s) => `${s.id}:${s.lessons.length}`).join("-")}
+          key={selectedCourse.sections
+            .map((section) => `${section.id}:${section.lessons.map((lesson) => lesson.id).join(",")}`)
+            .join("|")}
           defaultValue={selectedCourse.sections.map((s) => s.id)}
           className="space-y-3"
         >
@@ -833,17 +905,48 @@ export function AdminCoursesTab() {
                     </div>
                     <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
                   </AccordionPrimitive.Trigger>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    disabled={deletingSectionId === section.id}
-                    onClick={() => void deleteSection(section.id, section.title)}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    {deletingSectionId === section.id ? "..." : "Supprimer"}
-                  </Button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={
+                        reorderingSectionId === section.id ||
+                        selectedCourse.sections.findIndex((item) => item.id === section.id) === 0
+                      }
+                      onClick={() => void moveSection(section.id, "up")}
+                      aria-label="Monter la session"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      disabled={
+                        reorderingSectionId === section.id ||
+                        selectedCourse.sections.findIndex((item) => item.id === section.id) ===
+                          selectedCourse.sections.length - 1
+                      }
+                      onClick={() => void moveSection(section.id, "down")}
+                      aria-label="Descendre la session"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 shrink-0 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={deletingSectionId === section.id}
+                      onClick={() => void deleteSection(section.id, section.title)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      {deletingSectionId === section.id ? "..." : "Supprimer"}
+                    </Button>
+                  </div>
                 </AccordionPrimitive.Header>
                 <AccordionContent className="pb-4 space-y-4">
                   {section.lessons.map((lesson, index) => {
@@ -864,17 +967,44 @@ export function AdminCoursesTab() {
                                   : "Vidéo"}
                             </p>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 text-destructive hover:text-destructive shrink-0"
-                            disabled={deletingLessonId === lesson.id}
-                            onClick={() => deleteLesson(lesson.id, lesson.title)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            {deletingLessonId === lesson.id ? "..." : "Supprimer"}
-                          </Button>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={reorderingLessonId === lesson.id || index === 0}
+                              onClick={() => void moveLesson(section.id, lesson.id, "up")}
+                              aria-label="Monter la leçon"
+                            >
+                              <ArrowUp className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={
+                                reorderingLessonId === lesson.id ||
+                                index === section.lessons.length - 1
+                              }
+                              onClick={() => void moveLesson(section.id, lesson.id, "down")}
+                              aria-label="Descendre la leçon"
+                            >
+                              <ArrowDown className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 text-destructive hover:text-destructive shrink-0"
+                              disabled={deletingLessonId === lesson.id}
+                              onClick={() => deleteLesson(lesson.id, lesson.title)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              {deletingLessonId === lesson.id ? "..." : "Supprimer"}
+                            </Button>
+                          </div>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="space-y-1.5 sm:col-span-2">

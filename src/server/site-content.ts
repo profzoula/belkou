@@ -7,6 +7,8 @@ import {
   buildNewSection,
   buildNewLesson,
   deleteLessonFromStoredCourse,
+  reorderLessonsInStoredCourse,
+  reorderSectionsInStoredCourse,
   deleteSectionFromStoredCourse,
   patchLessonInStoredCourse,
   patchStoredCourseMeta,
@@ -41,6 +43,8 @@ export type CourseOverride = {
   addedSections?: CourseSection[];
   deletedLessons?: string[];
   deletedSections?: string[];
+  lessonOrderBySection?: Record<string, string[]>;
+  sectionOrder?: string[];
 };
 
 export type CourseOverridesMap = Record<string, CourseOverride>;
@@ -184,7 +188,60 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
     };
   }
 
+  merged = applySectionOrder(merged, override.sectionOrder);
+  merged = applyLessonOrder(merged, override.lessonOrderBySection);
+
   return merged;
+}
+
+function applyLessonOrder(course: Course, orderBySection?: Record<string, string[]>): Course {
+  if (!orderBySection) return course;
+
+  return {
+    ...course,
+    sections: course.sections.map((section) => {
+      const order = orderBySection[section.id];
+      if (!order?.length) return section;
+
+      const byId = new Map(section.lessons.map((lesson) => [lesson.id, lesson]));
+      const ordered: CourseLesson[] = [];
+
+      for (const lessonId of order) {
+        const lesson = byId.get(lessonId);
+        if (lesson) {
+          ordered.push(lesson);
+          byId.delete(lessonId);
+        }
+      }
+
+      for (const lesson of section.lessons) {
+        if (byId.has(lesson.id)) ordered.push(lesson);
+      }
+
+      return { ...section, lessons: ordered };
+    }),
+  };
+}
+
+function applySectionOrder(course: Course, sectionOrder?: string[]): Course {
+  if (!sectionOrder?.length) return course;
+
+  const byId = new Map(course.sections.map((section) => [section.id, section]));
+  const ordered: CourseSection[] = [];
+
+  for (const sectionId of sectionOrder) {
+    const section = byId.get(sectionId);
+    if (section) {
+      ordered.push(section);
+      byId.delete(sectionId);
+    }
+  }
+
+  for (const section of course.sections) {
+    if (byId.has(section.id)) ordered.push(section);
+  }
+
+  return { ...course, sections: ordered };
 }
 
 function applyDefaultVimeo(course: Course, defaultVimeo?: string): Course {
@@ -551,6 +608,122 @@ export async function deleteSectionFromCourse(params: { courseSlug: string; sect
   const next = deleteSectionFromStoredCourse(stored[index], sectionId);
   if (!next) {
     return { ok: false, reason: "Session introuvable" };
+  }
+
+  stored[index] = next;
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const };
+}
+
+export async function reorderLessonsInCourse(params: {
+  courseSlug: string;
+  sectionId: string;
+  lessonIds: string[];
+}) {
+  const sectionId = params.sectionId.trim();
+  const lessonIds = params.lessonIds.map((id) => id.trim()).filter(Boolean);
+  if (!sectionId || !lessonIds.length) {
+    return { ok: false, reason: "Ordre invalide" };
+  }
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const base = baseCourses.find((course) => course.slug === params.courseSlug);
+    if (!base) {
+      return { ok: false, reason: "Cours introuvable" };
+    }
+
+    const overrides = await getCourseOverrides();
+    const merged = mergeCourse(base, overrides[params.courseSlug]);
+    const section = merged.sections.find((item) => item.id === sectionId);
+    if (!section) {
+      return { ok: false, reason: "Session introuvable" };
+    }
+
+    const currentIds = section.lessons.map((lesson) => lesson.id);
+    if (
+      lessonIds.length !== currentIds.length ||
+      !lessonIds.every((id) => currentIds.includes(id))
+    ) {
+      return { ok: false, reason: "Ordre invalide" };
+    }
+
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    overrides[params.courseSlug] = {
+      ...courseOverride,
+      lessonOrderBySection: {
+        ...(courseOverride.lessonOrderBySection ?? {}),
+        [sectionId]: lessonIds,
+      },
+    };
+
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  const next = reorderLessonsInStoredCourse(stored[index], sectionId, lessonIds);
+  if (!next) {
+    return { ok: false, reason: "Ordre invalide" };
+  }
+
+  stored[index] = next;
+  const result = await saveStoredAdminCourses(stored);
+  if (!result.ok) return result;
+  return { ok: true as const };
+}
+
+export async function reorderSectionsInCourse(params: {
+  courseSlug: string;
+  sectionIds: string[];
+}) {
+  const sectionIds = params.sectionIds.map((id) => id.trim()).filter(Boolean);
+  if (!sectionIds.length) {
+    return { ok: false, reason: "Ordre invalide" };
+  }
+
+  if (isBaseCourseSlug(params.courseSlug)) {
+    const base = baseCourses.find((course) => course.slug === params.courseSlug);
+    if (!base) {
+      return { ok: false, reason: "Cours introuvable" };
+    }
+
+    const overrides = await getCourseOverrides();
+    const merged = mergeCourse(base, overrides[params.courseSlug]);
+    const currentIds = merged.sections.map((section) => section.id);
+    if (
+      sectionIds.length !== currentIds.length ||
+      !sectionIds.every((id) => currentIds.includes(id))
+    ) {
+      return { ok: false, reason: "Ordre invalide" };
+    }
+
+    const courseOverride = overrides[params.courseSlug] ?? {};
+    overrides[params.courseSlug] = {
+      ...courseOverride,
+      sectionOrder: sectionIds,
+    };
+
+    const result = await saveCourseOverrides(overrides);
+    if (!result.ok) return result;
+    return { ok: true as const };
+  }
+
+  const stored = await getStoredAdminCourses();
+  const index = stored.findIndex((course) => course.slug === params.courseSlug);
+  if (index === -1) {
+    return { ok: false, reason: "Cours introuvable" };
+  }
+
+  const next = reorderSectionsInStoredCourse(stored[index], sectionIds);
+  if (!next) {
+    return { ok: false, reason: "Ordre invalide" };
   }
 
   stored[index] = next;
