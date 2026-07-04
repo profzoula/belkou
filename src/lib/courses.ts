@@ -215,6 +215,61 @@ export function countLessons(course: { sections: CourseSection[] }): number {
   return getAllLessons(course).length;
 }
 
+/** Parse "4min", "8 min", "1h 30min", etc. into minutes. */
+export function parseLessonDurationMinutes(duration: string): number {
+  const normalized = duration.trim().toLowerCase();
+  if (!normalized) return 5;
+
+  let total = 0;
+  const hoursMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*h(?:\b|[^a-z])/);
+  if (hoursMatch) {
+    total += parseFloat(hoursMatch[1].replace(",", ".")) * 60;
+  }
+
+  const minutesMatch = normalized.match(/(\d+(?:[.,]\d+)?)\s*min/);
+  if (minutesMatch) {
+    total += parseFloat(minutesMatch[1].replace(",", "."));
+  }
+
+  if (total > 0) return total;
+
+  const bareNumber = normalized.match(/^(\d+(?:[.,]\d+)?)$/);
+  if (bareNumber) return parseFloat(bareNumber[1].replace(",", "."));
+
+  return 5;
+}
+
+export function getCourseDurationMinutes(course: { sections: CourseSection[] }): number {
+  return getAllLessons(course).reduce(
+    (sum, lesson) => sum + parseLessonDurationMinutes(lesson.duration),
+    0,
+  );
+}
+
+/** Progress weighted by lesson duration (hours/minutes), not lesson count. */
+export function computeCourseProgressPercent(
+  course: { sections: CourseSection[] },
+  completedLessonIds: string[],
+): number {
+  const lessons = getAllLessons(course);
+  const completedSet = new Set(completedLessonIds);
+  const totalMinutes = getCourseDurationMinutes(course);
+
+  if (totalMinutes <= 0) {
+    if (lessons.length === 0) return 0;
+    return Math.min(100, Math.round((completedSet.size / lessons.length) * 100));
+  }
+
+  let completedMinutes = 0;
+  for (const lesson of lessons) {
+    if (completedSet.has(lesson.id)) {
+      completedMinutes += parseLessonDurationMinutes(lesson.duration);
+    }
+  }
+
+  return Math.min(100, Math.round((completedMinutes / totalMinutes) * 100));
+}
+
 export function formatCount(count: number): string {
   return new Intl.NumberFormat("fr-FR").format(count);
 }

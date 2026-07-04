@@ -10,6 +10,7 @@ type VimeoPlayerProps = {
   lessonKey: string;
   nextLessonTitle?: string;
   onNextLesson?: () => void;
+  onLessonComplete?: () => void;
 };
 
 export function VimeoPlayer({
@@ -18,6 +19,7 @@ export function VimeoPlayer({
   lessonKey,
   nextLessonTitle,
   onNextLesson,
+  onLessonComplete,
 }: VimeoPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -32,7 +34,10 @@ export function VimeoPlayer({
     const player = new Player(container, buildVimeoPlayerInit(video, container.clientWidth || 640));
     playerRef.current = player;
 
-    const handleEnded = () => setEnded(true);
+    const handleEnded = () => {
+      setEnded(true);
+      onLessonComplete?.();
+    };
     const handlePlay = () => setEnded(false);
 
     player.on("ended", handleEnded);
@@ -44,7 +49,7 @@ export function VimeoPlayer({
       void player.destroy();
       playerRef.current = null;
     };
-  }, [lessonKey, video]);
+  }, [lessonKey, onLessonComplete, video]);
 
   const replay = () => {
     const player = playerRef.current;

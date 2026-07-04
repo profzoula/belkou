@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -59,6 +59,7 @@ function CourseVideoArea({
   welcomeLessonId,
   nextLessonTitle,
   onNextLesson,
+  onLessonComplete,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
@@ -66,6 +67,7 @@ function CourseVideoArea({
   welcomeLessonId?: string;
   nextLessonTitle?: string;
   onNextLesson?: () => void;
+  onLessonComplete?: () => void;
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLessonLockState({
@@ -174,6 +176,7 @@ function CourseVideoArea({
         lessonKey={lesson.id}
         nextLessonTitle={nextLessonTitle}
         onNextLesson={onNextLesson}
+        onLessonComplete={onLessonComplete}
       />
     );
   }
@@ -404,6 +407,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const [progress, setProgress] = useState<{ completedLessonIds: string[]; progressPercent: number } | null>(
     null,
   );
+  const markedLessonsRef = useRef(new Set<string>());
 
   useEffect(() => {
     let cancelled = false;
@@ -452,7 +456,10 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       },
     })
       .then((result) => {
-        if (!cancelled) setProgress(result);
+        if (!cancelled) {
+          setProgress(result);
+          markedLessonsRef.current = new Set(result.completedLessonIds);
+        }
       })
       .catch(() => {
         if (!cancelled) {
@@ -512,7 +519,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
   const activeSection = getSectionForLesson(course, activeLesson.id);
-  const activeLock = getLessonLockState({ lesson: activeLesson, course, hasPaidAccess });
   const nextLesson = useMemo(() => {
     const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
     if (currentIndex < 0) return null;
@@ -526,23 +532,35 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     return null;
   }, [activeLessonId, allLessons, course, hasPaidAccess]);
 
-  useEffect(() => {
-    if (!session?.access_token || !hasPaidAccess || activeLock.locked) return;
-    void completeFn({
-      data: {
-        accessToken: session.access_token,
-        courseSlug: course.slug,
-        lessonId: activeLesson.id,
-      },
-    })
-      .then((result) => {
-        setProgress((current) => ({
-          completedLessonIds: [...new Set([...(current?.completedLessonIds ?? []), activeLesson.id])],
-          progressPercent: result.progressPercent,
-        }));
+  const recordLessonComplete = useCallback(
+    (lessonId: string) => {
+      if (!session?.access_token || !hasPaidAccess) return;
+      if (markedLessonsRef.current.has(lessonId)) return;
+      markedLessonsRef.current.add(lessonId);
+
+      void completeFn({
+        data: {
+          accessToken: session.access_token,
+          courseSlug: course.slug,
+          lessonId,
+        },
       })
-      .catch(() => undefined);
-  }, [activeLesson.id, activeLock.locked, completeFn, course.slug, hasPaidAccess, session?.access_token]);
+        .then((result) => {
+          setProgress((current) => ({
+            completedLessonIds: [...new Set([...(current?.completedLessonIds ?? []), lessonId])],
+            progressPercent: result.progressPercent,
+          }));
+        })
+        .catch(() => {
+          markedLessonsRef.current.delete(lessonId);
+        });
+    },
+    [completeFn, course.slug, hasPaidAccess, session?.access_token],
+  );
+
+  const handleActiveLessonComplete = useCallback(() => {
+    recordLessonComplete(activeLesson.id);
+  }, [activeLesson.id, recordLessonComplete]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -612,6 +630,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             welcomeLessonId={welcomeLesson?.id}
             nextLessonTitle={nextLesson?.title}
             onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
+            onLessonComplete={handleActiveLessonComplete}
           />
 
           <div className="border-b border-border px-3 sm:px-6">

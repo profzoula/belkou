@@ -7,7 +7,7 @@ import {
   registrationCourseKey,
 } from "@/lib/course-access";
 import {
-  countLessons,
+  computeCourseProgressPercent,
   getFirstPreviewVideoLesson,
   getNextLessonToWatch,
   getWelcomePreviewLesson,
@@ -16,7 +16,7 @@ import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
-import { computeProgressPercent, listDistinctCourseSlugsForEmail, listLessonProgress } from "@/server/lesson-progress";
+import { listDistinctCourseSlugsForEmail, listLessonProgress } from "@/server/lesson-progress";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
@@ -73,7 +73,7 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
 
       const course = await getResolvedCourseBySlug(slug);
       const progressRows = await listLessonProgress(email, slug);
-      const totalLessons = course ? countLessons(course) : 0;
+      const completedLessonIds = progressRows.map((row) => row.lesson_id);
 
       if (!course) {
         enrollments.push({
@@ -84,7 +84,7 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
           instructor: "BelKou",
           thumbnailGradient: "from-primary/80 to-primary",
           contentLive: false,
-          progressPercent: computeProgressPercent(progressRows.length, totalLessons),
+          progressPercent: 0,
           purchasedAt: registration.created_at,
         });
         continue;
@@ -100,13 +100,10 @@ export const getStudentDashboard = createServerFn({ method: "POST" })
         thumbnailImageUrl: course.thumbnail.imageUrl,
         scheduledPublishAt: course.scheduledPublishAt,
         contentLive: isCourseContentLive(course),
-        progressPercent: computeProgressPercent(progressRows.length, countLessons(course)),
+        progressPercent: computeCourseProgressPercent(course, completedLessonIds),
         purchasedAt: registration.created_at,
         welcomeLessonId: getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
-        continueLessonId: getNextLessonToWatch(
-          course,
-          progressRows.map((row) => row.lesson_id),
-        )?.id,
+        continueLessonId: getNextLessonToWatch(course, completedLessonIds)?.id,
       });
     }
 

@@ -1,13 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { countLessons } from "@/lib/courses";
+import { computeCourseProgressPercent } from "@/lib/courses";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
-import {
-  computeProgressPercent,
-  listLessonProgress,
-  markLessonComplete,
-} from "@/server/lesson-progress";
+import { listLessonProgress, markLessonComplete } from "@/server/lesson-progress";
 
 export const getCourseProgress = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
@@ -21,10 +17,10 @@ export const getCourseProgress = createServerFn({ method: "POST" })
     if (!course) return { completedLessonIds: [], progressPercent: 0 };
 
     const rows = await listLessonProgress(user.email, data.courseSlug);
-    const total = countLessons(course);
+    const completedLessonIds = rows.map((row) => row.lesson_id);
     return {
-      completedLessonIds: rows.map((row) => row.lesson_id),
-      progressPercent: computeProgressPercent(rows.length, total),
+      completedLessonIds,
+      progressPercent: computeCourseProgressPercent(course, completedLessonIds),
     };
   });
 
@@ -45,8 +41,10 @@ export const completeLesson = createServerFn({ method: "POST" })
     await markLessonComplete(user.email, data.courseSlug, data.lessonId);
     const course = await getResolvedCourseBySlug(data.courseSlug);
     const rows = await listLessonProgress(user.email, data.courseSlug);
-    const total = course ? countLessons(course) : 0;
+    const completedLessonIds = rows.map((row) => row.lesson_id);
     return {
-      progressPercent: computeProgressPercent(rows.length, total),
+      progressPercent: course
+        ? computeCourseProgressPercent(course, completedLessonIds)
+        : 0,
     };
   });
