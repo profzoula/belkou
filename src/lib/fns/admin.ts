@@ -528,6 +528,13 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { updateLessonOverride, getResolvedCourses } = await import("@/server/site-content");
+    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
+
+    let duration = data.duration;
+    if (data.vimeo?.trim()) {
+      const resolved = await fetchVimeoDurationLabel(data.vimeo);
+      if (resolved) duration = resolved;
+    }
 
     const result = await updateLessonOverride({
       courseSlug: data.courseSlug,
@@ -536,7 +543,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
         vimeo: data.vimeo,
         preview: data.preview,
         title: data.title,
-        duration: data.duration,
+        duration,
         content: data.content,
         type: data.type,
       },
@@ -547,6 +554,18 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     }
 
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminResolveVimeoDuration = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ vimeo: z.string().min(1) }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
+    const duration = await fetchVimeoDurationLabel(data.vimeo);
+    if (!duration) {
+      throw new Error("Durée Vimeo introuvable. Vérifiez l'ID ou le lien.");
+    }
+    return { duration };
   });
 
 export const adminUpdateCourse = createServerFn({ method: "POST" })
@@ -666,6 +685,13 @@ export const adminAddLesson = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { addLessonToCourse, getResolvedCourses } = await import("@/server/site-content");
+    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
+
+    let duration = data.duration;
+    if (data.type !== "article" && data.vimeo?.trim()) {
+      const resolved = await fetchVimeoDurationLabel(data.vimeo);
+      if (resolved) duration = resolved;
+    }
 
     const result = await addLessonToCourse({
       courseSlug: data.courseSlug,
@@ -673,7 +699,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         sectionId: data.sectionId,
         title: data.title,
         type: data.type,
-        duration: data.duration,
+        duration,
         vimeo: data.vimeo,
         preview: data.preview,
         content: data.content,

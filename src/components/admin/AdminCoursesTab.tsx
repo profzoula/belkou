@@ -48,6 +48,7 @@ import {
   adminDeleteSection,
   adminReorderLessons,
   adminReorderSections,
+  adminResolveVimeoDuration,
   adminScheduleCoursePublish,
   adminSetCoursePublished,
   adminUpdateCourse,
@@ -137,7 +138,7 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
 
 const emptyNewLesson = (): NewLessonDraft => ({
   title: "",
-  duration: "5min",
+  duration: "",
   vimeo: "",
   preview: false,
   content: "",
@@ -160,6 +161,7 @@ export function AdminCoursesTab() {
   const deleteSectionFn = useServerFn(adminDeleteSection);
   const reorderLessonsFn = useServerFn(adminReorderLessons);
   const reorderSectionsFn = useServerFn(adminReorderSections);
+  const resolveVimeoFn = useServerFn(adminResolveVimeoDuration);
   const createFn = useServerFn(adminCreateCourse);
   const deleteFn = useServerFn(adminDeleteCourse);
 
@@ -185,6 +187,7 @@ export function AdminCoursesTab() {
   const [deletingSectionId, setDeletingSectionId] = useState<string | null>(null);
   const [reorderingLessonId, setReorderingLessonId] = useState<string | null>(null);
   const [reorderingSectionId, setReorderingSectionId] = useState<string | null>(null);
+  const [resolvingVimeoKey, setResolvingVimeoKey] = useState<string | null>(null);
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -401,6 +404,25 @@ export function AdminCoursesTab() {
       ...current,
       [sectionId]: { ...getNewLessonDraft(sectionId), ...patch },
     }));
+  };
+
+  const fillDurationFromVimeo = async (
+    vimeo: string,
+    onResolved: (duration: string) => void,
+    key: string,
+  ) => {
+    const trimmed = vimeo.trim();
+    if (!trimmed) return;
+
+    setResolvingVimeoKey(key);
+    try {
+      const result = await resolveVimeoFn({ data: { vimeo: trimmed } });
+      onResolved(result.duration);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Durée Vimeo introuvable");
+    } finally {
+      setResolvingVimeoKey(null);
+    }
   };
 
   const saveLesson = async (courseSlug: string, lessonId: string) => {
@@ -1019,16 +1041,6 @@ export function AdminCoursesTab() {
                           </div>
                           {lesson.type === "video" && (
                             <>
-                              <div className="space-y-1.5">
-                                <Label>Durée</Label>
-                                <Input
-                                  value={draft.duration}
-                                  onChange={(e) =>
-                                    updateDraft(selectedCourse.slug, lesson.id, { duration: e.target.value })
-                                  }
-                                  className="rounded-lg"
-                                />
-                              </div>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <Label>Vimeo (ID ou lien)</Label>
                                 <Input
@@ -1036,12 +1048,34 @@ export function AdminCoursesTab() {
                                   onChange={(e) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { vimeo: e.target.value })
                                   }
+                                  onBlur={() =>
+                                    void fillDurationFromVimeo(
+                                      draft.vimeo,
+                                      (duration) =>
+                                        updateDraft(selectedCourse.slug, lesson.id, { duration }),
+                                      key,
+                                    )
+                                  }
                                   className="rounded-lg"
                                   placeholder="1204014571 ou https://vimeo.com/1204014571"
                                 />
                                 <p className="text-[11px] text-muted-foreground">
-                                  Collez l&apos;ID Vimeo ou l&apos;URL complète (y compris liens privés avec hash).
+                                  Collez l&apos;ID Vimeo ou l&apos;URL complète. La durée se remplit
+                                  automatiquement.
                                 </p>
+                              </div>
+                              <div className="space-y-1.5">
+                                <Label>Durée (auto)</Label>
+                                <Input
+                                  value={
+                                    resolvingVimeoKey === key
+                                      ? "Chargement..."
+                                      : draft.duration || "—"
+                                  }
+                                  readOnly
+                                  className="rounded-lg bg-muted/40"
+                                  placeholder="Auto depuis Vimeo"
+                                />
                               </div>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <label className="flex items-center gap-2 text-sm">
@@ -1151,15 +1185,29 @@ export function AdminCoursesTab() {
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor={`new-lesson-duration-${section.id}`}>
-                          {newLesson.type === "article" ? "Durée de lecture" : "Durée"}
+                          {newLesson.type === "article" ? "Durée de lecture" : "Durée (auto)"}
                         </Label>
-                        <Input
-                          id={`new-lesson-duration-${section.id}`}
-                          value={newLesson.duration}
-                          onChange={(e) => updateNewLessonDraft(section.id, { duration: e.target.value })}
-                          className="rounded-lg"
-                          placeholder={newLesson.type === "article" ? "8 min" : "8min"}
-                        />
+                        {newLesson.type === "video" ? (
+                          <Input
+                            id={`new-lesson-duration-${section.id}`}
+                            value={
+                              resolvingVimeoKey === `new:${section.id}`
+                                ? "Chargement..."
+                                : newLesson.duration || "—"
+                            }
+                            readOnly
+                            className="rounded-lg bg-muted/40"
+                            placeholder="Auto depuis Vimeo"
+                          />
+                        ) : (
+                          <Input
+                            id={`new-lesson-duration-${section.id}`}
+                            value={newLesson.duration}
+                            onChange={(e) => updateNewLessonDraft(section.id, { duration: e.target.value })}
+                            className="rounded-lg"
+                            placeholder="8 min"
+                          />
+                        )}
                       </div>
                       {newLesson.type === "video" ? (
                         <div className="space-y-1.5">
@@ -1168,6 +1216,13 @@ export function AdminCoursesTab() {
                             id={`new-lesson-vimeo-${section.id}`}
                             value={newLesson.vimeo}
                             onChange={(e) => updateNewLessonDraft(section.id, { vimeo: e.target.value })}
+                            onBlur={() =>
+                              void fillDurationFromVimeo(
+                                newLesson.vimeo,
+                                (duration) => updateNewLessonDraft(section.id, { duration }),
+                                `new:${section.id}`,
+                              )
+                            }
                             className="rounded-lg"
                             placeholder="1204014571 ou https://vimeo.com/..."
                           />
@@ -1188,8 +1243,7 @@ export function AdminCoursesTab() {
                       <div className="space-y-1.5 sm:col-span-2">
                         {newLesson.type === "video" ? (
                           <p className="text-[11px] text-muted-foreground">
-                            Collez l&apos;ID Vimeo ou l&apos;URL complète. Vous pourrez modifier la vidéo après
-                            l&apos;ajout.
+                            Collez l&apos;ID Vimeo ou l&apos;URL complète — la durée se calcule automatiquement.
                           </p>
                         ) : (
                           <p className="text-[11px] text-muted-foreground">

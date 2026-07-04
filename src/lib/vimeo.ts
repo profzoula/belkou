@@ -38,6 +38,11 @@ export function parseVimeoRef(input: string): VimeoRef | null {
   return null;
 }
 
+export function buildVimeoPageUrl(ref: VimeoRef): string {
+  if (ref.hash) return `https://vimeo.com/${ref.id}/${ref.hash}`;
+  return `https://vimeo.com/${ref.id}`;
+}
+
 const VIMEO_PLAYER_PARAMS = {
   badge: false,
   autopause: false,
