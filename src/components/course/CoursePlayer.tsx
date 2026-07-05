@@ -80,7 +80,7 @@ function CourseVideoArea({
   onLessonComplete?: () => void;
   getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
   activeArticleSubSessionId?: string | null;
-  onArticleSubSessionChange?: (subSessionId: string) => void;
+  onArticleSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLockState(lesson);
@@ -599,15 +599,27 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     });
   }, [activeLesson, activeArticleSessions]);
 
-  useEffect(() => {
-    if (!activeArticleSubSessionId) return;
-    setViewedArticleSubSessionIds((current) => new Set(current).add(activeArticleSubSessionId));
-  }, [activeArticleSubSessionId]);
-
-  const handleSelectArticleSubSession = useCallback((lessonId: string, subSessionId: string) => {
-    setActiveLessonId(lessonId);
-    setActiveArticleSubSessionId(subSessionId);
+  const markArticleSubSessionRead = useCallback((subSessionId: string) => {
+    setViewedArticleSubSessionIds((current) => new Set(current).add(subSessionId));
   }, []);
+
+  const handleArticleSubSessionChange = useCallback(
+    (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => {
+      if (options?.markCurrentAsRead && activeArticleSubSessionId) {
+        markArticleSubSessionRead(activeArticleSubSessionId);
+      }
+      setActiveArticleSubSessionId(subSessionId);
+    },
+    [activeArticleSubSessionId, markArticleSubSessionRead],
+  );
+
+  const handleSelectArticleSubSession = useCallback(
+    (lessonId: string, subSessionId: string) => {
+      setActiveLessonId(lessonId);
+      setActiveArticleSubSessionId(subSessionId);
+    },
+    [],
+  );
 
   const activeSection = getSectionForLesson(course, activeLesson.id);
   const nextLesson = useMemo(() => {
@@ -650,8 +662,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
 
   const handleActiveLessonComplete = useCallback(() => {
+    if (activeArticleSubSessionId) {
+      markArticleSubSessionRead(activeArticleSubSessionId);
+    }
     recordLessonComplete(activeLesson.id);
-  }, [activeLesson.id, recordLessonComplete]);
+  }, [activeArticleSubSessionId, activeLesson.id, markArticleSubSessionRead, recordLessonComplete]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -739,7 +754,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
             activeArticleSubSessionId={activeArticleSubSessionId}
-            onArticleSubSessionChange={setActiveArticleSubSessionId}
+            onArticleSubSessionChange={handleArticleSubSessionChange}
           />
 
           <div className="border-b border-border px-3 sm:px-6">

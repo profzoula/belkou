@@ -22,7 +22,7 @@ type LessonArticleContentProps = {
   content: string;
   lessonId?: string;
   activeSubSessionId?: string | null;
-  onSubSessionChange?: (subSessionId: string) => void;
+  onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
 };
 
@@ -66,13 +66,17 @@ export function LessonArticleContent({
     const nav = getArticleSubSessionNav(lessonId, sessions, effectiveSubSessionId);
 
     if (found) {
+      const goToSubSession = (subSessionId: string, markCurrentAsRead = false) => {
+        onSubSessionChange?.(subSessionId, markCurrentAsRead ? { markCurrentAsRead: true } : undefined);
+      };
+
       return (
         <div className="relative border-b border-border bg-card">
           {nav.prevId && onSubSessionChange ? (
             <button
               type="button"
               aria-label="Sous-session précédente"
-              onClick={() => onSubSessionChange(nav.prevId!)}
+              onClick={() => goToSubSession(nav.prevId!)}
               className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:left-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
             >
               <ChevronLeft className="h-5 w-5" />
@@ -82,7 +86,7 @@ export function LessonArticleContent({
             <button
               type="button"
               aria-label="Sous-session suivante"
-              onClick={() => onSubSessionChange(nav.nextId!)}
+              onClick={() => goToSubSession(nav.nextId!, true)}
               className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:right-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
             >
               <ChevronRight className="h-5 w-5" />
@@ -104,13 +108,13 @@ export function LessonArticleContent({
             <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
               <div className="flex gap-2 sm:hidden">
                 {nav.prevId && onSubSessionChange ? (
-                  <Button type="button" variant="outline" size="sm" onClick={() => onSubSessionChange(nav.prevId!)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => goToSubSession(nav.prevId!)}>
                     <ChevronLeft className="mr-1 h-4 w-4" />
                     Précédent
                   </Button>
                 ) : null}
                 {nav.nextId && onSubSessionChange ? (
-                  <Button type="button" variant="outline" size="sm" onClick={() => onSubSessionChange(nav.nextId!)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => goToSubSession(nav.nextId!, true)}>
                     Suivant
                     <ChevronRight className="ml-1 h-4 w-4" />
                   </Button>
@@ -127,7 +131,7 @@ export function LessonArticleContent({
                   variant="hero"
                   size="sm"
                   className="ml-auto hidden sm:inline-flex"
-                  onClick={() => onSubSessionChange(nav.nextId!)}
+                  onClick={() => goToSubSession(nav.nextId!, true)}
                 >
                   Suivant · {nav.nextTitle}
                 </Button>
