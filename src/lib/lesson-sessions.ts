@@ -244,3 +244,88 @@ export function formatSessionLabel(session: ArticleSession): string {
 export function formatSubSessionLabel(sub: ArticleSubSession): string {
   return `${sub.number} ${sub.title}`;
 }
+
+export function buildArticleSubSessionId(
+  lessonId: string,
+  sessionNumber: number,
+  subNumber: string,
+): string {
+  return `${lessonId}::${sessionNumber}::${subNumber}`;
+}
+
+export function parseArticleSubSessionId(
+  id: string,
+): { lessonId: string; sessionNumber: number; subNumber: string } | null {
+  const parts = id.split("::");
+  if (parts.length !== 3) return null;
+  const sessionNumber = Number.parseInt(parts[1], 10);
+  if (!Number.isFinite(sessionNumber)) return null;
+  return { lessonId: parts[0], sessionNumber, subNumber: parts[2] };
+}
+
+export function findArticleSubSession(
+  sessions: ArticleSession[],
+  sessionNumber: number,
+  subNumber: string,
+): { session: ArticleSession; sub: ArticleSubSession } | null {
+  const session = sessions.find((item) => item.number === sessionNumber);
+  if (!session) return null;
+  const sub = session.subSessions.find((item) => item.number === subNumber);
+  if (!sub) return null;
+  return { session, sub };
+}
+
+export function getFirstArticleSubSessionId(
+  lessonId: string,
+  sessions: ArticleSession[],
+): string | null {
+  const session = sessions[0];
+  const sub = session?.subSessions[0];
+  if (!session || !sub) return null;
+  return buildArticleSubSessionId(lessonId, session.number, sub.number);
+}
+
+export type ArticleSubSessionNav = {
+  prevId: string | null;
+  nextId: string | null;
+  prevTitle: string | null;
+  nextTitle: string | null;
+};
+
+export function getArticleSubSessionNav(
+  lessonId: string,
+  sessions: ArticleSession[],
+  currentId: string,
+): ArticleSubSessionNav {
+  const flat = sessions.flatMap((session) =>
+    session.subSessions.map((sub) => ({
+      id: buildArticleSubSessionId(lessonId, session.number, sub.number),
+      title: `${sub.number} ${sub.title}`,
+    })),
+  );
+  const index = flat.findIndex((item) => item.id === currentId);
+  if (index < 0) {
+    return { prevId: null, nextId: null, prevTitle: null, nextTitle: null };
+  }
+  const prev = flat[index - 1];
+  const next = flat[index + 1];
+  return {
+    prevId: prev?.id ?? null,
+    nextId: next?.id ?? null,
+    prevTitle: prev?.title ?? null,
+    nextTitle: next?.title ?? null,
+  };
+}
+
+export function flattenArticleSubSessions(
+  lessonId: string,
+  sessions: ArticleSession[],
+): Array<{ id: string; session: ArticleSession; sub: ArticleSubSession }> {
+  return sessions.flatMap((session) =>
+    session.subSessions.map((sub) => ({
+      id: buildArticleSubSessionId(lessonId, session.number, sub.number),
+      session,
+      sub,
+    })),
+  );
+}

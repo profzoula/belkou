@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -5,14 +6,23 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { LessonArticleSessions } from "@/components/course/LessonArticleSessions";
+import { ArticleSubSessionBody } from "@/components/course/ArticleSubSessionBody";
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
-import { parseArticleSessions } from "@/lib/lesson-sessions";
+import {
+  findArticleSubSession,
+  getArticleSubSessionNav,
+  getFirstArticleSubSessionId,
+  parseArticleSessions,
+  parseArticleSubSessionId,
+} from "@/lib/lesson-sessions";
 import { parseInlineMarkdown, parseLessonContent } from "@/lib/parse-lesson-content";
 
 type LessonArticleContentProps = {
   title: string;
   content: string;
+  lessonId?: string;
+  activeSubSessionId?: string | null;
+  onSubSessionChange?: (subSessionId: string) => void;
   onComplete?: () => void;
 };
 
@@ -33,25 +43,101 @@ function InlineText({ text }: { text: string }) {
   );
 }
 
-export function LessonArticleContent({ title, content, onComplete }: LessonArticleContentProps) {
+export function LessonArticleContent({
+  title,
+  content,
+  lessonId,
+  activeSubSessionId,
+  onSubSessionChange,
+  onComplete,
+}: LessonArticleContentProps) {
   const sessions = parseArticleSessions(content);
 
-  if (sessions?.length) {
-    return (
-      <div className="prose-lesson border-b border-border bg-card px-4 py-8 sm:px-8 sm:py-10 md:px-10">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
-        <div className="mt-6">
-          <LessonArticleSessions sessions={sessions} />
-        </div>
-        {onComplete ? (
-          <div className="mt-8 flex justify-end">
-            <Button type="button" variant="hero" size="sm" onClick={onComplete}>
-              Marquer comme terminé
-            </Button>
+  if (sessions?.length && lessonId) {
+    const effectiveSubSessionId =
+      activeSubSessionId ?? getFirstArticleSubSessionId(lessonId, sessions);
+
+    if (effectiveSubSessionId) {
+      const parsed = parseArticleSubSessionId(effectiveSubSessionId);
+    const found =
+      parsed && parsed.lessonId === lessonId
+        ? findArticleSubSession(sessions, parsed.sessionNumber, parsed.subNumber)
+        : null;
+    const nav = getArticleSubSessionNav(lessonId, sessions, effectiveSubSessionId);
+
+    if (found) {
+      return (
+        <div className="relative border-b border-border bg-card">
+          {nav.prevId && onSubSessionChange ? (
+            <button
+              type="button"
+              aria-label="Sous-session précédente"
+              onClick={() => onSubSessionChange(nav.prevId!)}
+              className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:left-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+          ) : null}
+          {nav.nextId && onSubSessionChange ? (
+            <button
+              type="button"
+              aria-label="Sous-session suivante"
+              onClick={() => onSubSessionChange(nav.nextId!)}
+              className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:right-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          ) : null}
+
+          <div className="px-4 py-6 sm:px-10 sm:py-10 md:px-14">
+            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+              Session {found.session.number} · {found.sub.number}
+            </p>
+            <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
+              {found.sub.title}
+            </h1>
+
+            <div className="mt-6 min-h-[200px]">
+              <ArticleSubSessionBody sub={found.sub} />
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+              <div className="flex gap-2 sm:hidden">
+                {nav.prevId && onSubSessionChange ? (
+                  <Button type="button" variant="outline" size="sm" onClick={() => onSubSessionChange(nav.prevId!)}>
+                    <ChevronLeft className="mr-1 h-4 w-4" />
+                    Précédent
+                  </Button>
+                ) : null}
+                {nav.nextId && onSubSessionChange ? (
+                  <Button type="button" variant="outline" size="sm" onClick={() => onSubSessionChange(nav.nextId!)}>
+                    Suivant
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                ) : null}
+              </div>
+
+              {onComplete && !nav.nextId ? (
+                <Button type="button" variant="hero" size="sm" onClick={onComplete} className="ml-auto">
+                  Marquer comme terminé
+                </Button>
+              ) : nav.nextId && onSubSessionChange ? (
+                <Button
+                  type="button"
+                  variant="hero"
+                  size="sm"
+                  className="ml-auto hidden sm:inline-flex"
+                  onClick={() => onSubSessionChange(nav.nextId!)}
+                >
+                  Suivant · {nav.nextTitle}
+                </Button>
+              ) : null}
+            </div>
           </div>
-        ) : null}
-      </div>
-    );
+        </div>
+      );
+    }
+    }
   }
 
   if (isLessonHtml(content)) {
@@ -114,9 +200,7 @@ export function LessonArticleContent({ title, content, onComplete }: LessonArtic
       {accordionBlocks.length > 0 ? (
         <div className="mt-8">
           {introBlocks.length === 0 ? (
-            <p className="mb-4 text-sm text-muted-foreground">
-              Sélectionnez un titre pour en savoir plus.
-            </p>
+            <p className="mb-4 text-sm text-muted-foreground">Sélectionnez un titre pour en savoir plus.</p>
           ) : null}
           <Accordion type="multiple" className="rounded-lg border border-border">
             {accordionBlocks.map((block, index) => (

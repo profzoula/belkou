@@ -47,7 +47,12 @@ import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { VimeoPlayer } from "@/components/course/VimeoPlayer";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
+import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
 import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
+import {
+  getFirstArticleSubSessionId,
+  parseArticleSessions,
+} from "@/lib/lesson-sessions";
 
 type CoursePlayerProps = {
   course: PublicCourse;
@@ -63,6 +68,8 @@ function CourseVideoArea({
   onNextLesson,
   onLessonComplete,
   getLockState,
+  activeArticleSubSessionId,
+  onArticleSubSessionChange,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
@@ -72,6 +79,8 @@ function CourseVideoArea({
   onNextLesson?: () => void;
   onLessonComplete?: () => void;
   getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
+  activeArticleSubSessionId?: string | null;
+  onArticleSubSessionChange?: (subSessionId: string) => void;
 }) {
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLockState(lesson);
@@ -81,10 +90,16 @@ function CourseVideoArea({
 
   if (lesson.type === "article") {
     if (!locked) {
+      const articleContent = lesson.content?.trim() || "Contenu en cours de rédaction.";
+      const sessions = parseArticleSessions(articleContent);
+
       return (
         <LessonArticleContent
           title={lesson.title}
-          content={lesson.content?.trim() || "Contenu en cours de rédaction."}
+          content={articleContent}
+          lessonId={lesson.id}
+          activeSubSessionId={sessions?.length ? activeArticleSubSessionId : undefined}
+          onSubSessionChange={onArticleSubSessionChange}
           onComplete={onLessonComplete}
         />
       );
@@ -312,21 +327,27 @@ function EnrolledExtraTab({
 function CurriculumSidebar({
   course,
   activeLessonId,
+  activeArticleSubSessionId,
+  viewedArticleSubSessionIds,
   getLockState,
   completedLessonIds,
   onSelectLesson,
+  onSelectArticleSubSession,
 }: {
   course: PublicCourse;
   activeLessonId: string;
+  activeArticleSubSessionId: string | null;
+  viewedArticleSubSessionIds: Set<string>;
   getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
   completedLessonIds: string[];
   onSelectLesson: (lessonId: string) => void;
+  onSelectArticleSubSession: (lessonId: string, subSessionId: string) => void;
 }) {
   const defaultSections = course.sections.map((section) => section.id);
   const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds]);
 
   return (
-    <div className="flex h-full flex-col border-t border-border bg-card lg:border-t-0 lg:border-l">
+    <div className="flex h-full flex-col border-t border-border bg-card lg:border-t-0 lg:border-r">
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-sm font-bold">Contenu du cours</h2>
         <p className="text-xs text-muted-foreground">
@@ -361,6 +382,33 @@ function CurriculumSidebar({
                       const { locked } = getLockState(lesson);
                       const done = completedSet.has(lesson.id);
                       const lessonDuration = getLessonDisplayDuration(lesson, course);
+                      const articleSessions =
+                        lesson.type === "article" && lesson.content
+                          ? parseArticleSessions(lesson.content)
+                          : null;
+
+                      if (articleSessions?.length) {
+                        return (
+                          <li key={lesson.id} className="px-2 py-2">
+                            <p
+                              className={cn(
+                                "mb-2 px-1 text-xs font-semibold uppercase tracking-wide",
+                                active ? "text-primary" : "text-muted-foreground",
+                              )}
+                            >
+                              {index + 1}. {lesson.title}
+                            </p>
+                            <ArticleCurriculumOutline
+                              lesson={lesson}
+                              sessions={articleSessions}
+                              activeSubSessionId={active ? activeArticleSubSessionId : null}
+                              viewedSubSessionIds={viewedArticleSubSessionIds}
+                              locked={locked}
+                              onSelectSubSession={onSelectArticleSubSession}
+                            />
+                          </li>
+                        );
+                      }
 
                       return (
                         <li key={lesson.id}>
@@ -513,6 +561,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   };
 
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
+  const [activeArticleSubSessionId, setActiveArticleSubSessionId] = useState<string | null>(null);
+  const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(new Set());
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
@@ -532,6 +582,33 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   }, [access, getLockState, initialLessonId, allLessons, welcomeLesson, course]);
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
+  const activeArticleSessions = useMemo(() => {
+    if (activeLesson?.type !== "article" || !activeLesson.content) return null;
+    return parseArticleSessions(activeLesson.content);
+  }, [activeLesson]);
+
+  useEffect(() => {
+    if (!activeLesson || !activeArticleSessions?.length) {
+      setActiveArticleSubSessionId(null);
+      return;
+    }
+
+    setActiveArticleSubSessionId((current) => {
+      if (current?.startsWith(`${activeLesson.id}::`)) return current;
+      return getFirstArticleSubSessionId(activeLesson.id, activeArticleSessions);
+    });
+  }, [activeLesson, activeArticleSessions]);
+
+  useEffect(() => {
+    if (!activeArticleSubSessionId) return;
+    setViewedArticleSubSessionIds((current) => new Set(current).add(activeArticleSubSessionId));
+  }, [activeArticleSubSessionId]);
+
+  const handleSelectArticleSubSession = useCallback((lessonId: string, subSessionId: string) => {
+    setActiveLessonId(lessonId);
+    setActiveArticleSubSessionId(subSessionId);
+  }, []);
+
   const activeSection = getSectionForLesson(course, activeLesson.id);
   const nextLesson = useMemo(() => {
     const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
@@ -635,8 +712,23 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       ) : null}
 
       <div className="site-container py-4 sm:py-6">
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
-        <main className="min-w-0">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <aside className="order-2 lg:order-1 lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
+          <CurriculumSidebar
+            course={course}
+            activeLessonId={activeLessonId}
+            activeArticleSubSessionId={activeArticleSubSessionId}
+            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+            getLockState={getLockState}
+            completedLessonIds={completedLessonIds}
+            onSelectLesson={(lessonId) => {
+              setActiveLessonId(lessonId);
+            }}
+            onSelectArticleSubSession={handleSelectArticleSubSession}
+          />
+        </aside>
+
+        <main className="order-1 min-w-0 lg:order-2">
           <CourseVideoArea
             course={course}
             lesson={activeLesson}
@@ -646,6 +738,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
+            activeArticleSubSessionId={activeArticleSubSessionId}
+            onArticleSubSessionChange={setActiveArticleSubSessionId}
           />
 
           <div className="border-b border-border px-3 sm:px-6">
@@ -813,18 +907,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             </Tabs>
           </div>
         </main>
-
-        <aside className="lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
-          <CurriculumSidebar
-            course={course}
-            activeLessonId={activeLessonId}
-            getLockState={getLockState}
-            completedLessonIds={completedLessonIds}
-            onSelectLesson={(lessonId) => {
-              setActiveLessonId(lessonId);
-            }}
-          />
-        </aside>
         </div>
       </div>
     </div>
