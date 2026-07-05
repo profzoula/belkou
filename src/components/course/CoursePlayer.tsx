@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   CheckCircle2,
@@ -20,6 +20,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
+  computeCourseProgressPercent,
   countLessons,
   formatCount,
   getAllLessons,
@@ -30,6 +31,7 @@ import {
   getWelcomePreviewLesson,
   type CourseLesson,
 } from "@/lib/courses";
+import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseIcon } from "@/lib/course-icons";
 import {
   courseStartsAtLabel,
@@ -37,7 +39,6 @@ import {
   isCourseContentLive,
   isScheduledInFuture,
 } from "@/lib/course-publish";
-import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
 import { completeLesson, getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
@@ -99,6 +100,7 @@ function CourseVideoArea({
           content={articleContent}
           lessonId={lesson.id}
           activeSubSessionId={sessions?.length ? activeArticleSubSessionId : undefined}
+          nextLessonTitle={nextLessonTitle}
           onSubSessionChange={onArticleSubSessionChange}
           onComplete={onLessonComplete}
         />
@@ -403,6 +405,7 @@ function CurriculumSidebar({
                               sessions={articleSessions}
                               activeSubSessionId={active ? activeArticleSubSessionId : null}
                               viewedSubSessionIds={viewedArticleSubSessionIds}
+                              lessonCompleted={done}
                               locked={locked}
                               onSelectSubSession={onSelectArticleSubSession}
                             />
@@ -460,6 +463,7 @@ function CurriculumSidebar({
 
 export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const { session } = useAuth();
+  const navigate = useNavigate();
   const accessFn = useServerFn(getCourseAccess);
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
@@ -563,6 +567,19 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
   const [activeArticleSubSessionId, setActiveArticleSubSessionId] = useState<string | null>(null);
   const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(new Set());
+
+  const selectLesson = useCallback(
+    (lessonId: string) => {
+      setActiveLessonId(lessonId);
+      void navigate({
+        to: "/courses/$slug/learn",
+        params: { slug: course.slug },
+        search: { lesson: lessonId },
+        replace: true,
+      });
+    },
+    [course.slug, navigate],
+  );
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
@@ -615,10 +632,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const handleSelectArticleSubSession = useCallback(
     (lessonId: string, subSessionId: string) => {
-      setActiveLessonId(lessonId);
+      if (lessonId !== activeLessonId) {
+        selectLesson(lessonId);
+      }
       setActiveArticleSubSessionId(subSessionId);
     },
-    [],
+    [activeLessonId, selectLesson],
   );
 
   const activeSection = getSectionForLesson(course, activeLesson.id);
@@ -656,17 +675,66 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         })
         .catch(() => {
           markedLessonsRef.current.delete(lessonId);
+          setProgress((current) => {
+            const completedLessonIds = (current?.completedLessonIds ?? []).filter((id) => id !== lessonId);
+            return {
+              completedLessonIds,
+              progressPercent: computeCourseProgressPercent(course, completedLessonIds),
+            };
+          });
         });
     },
-    [completeFn, course.slug, hasPaidAccess, session?.access_token],
+    [completeFn, course, hasPaidAccess, session?.access_token],
   );
 
   const handleActiveLessonComplete = useCallback(() => {
     if (activeArticleSubSessionId) {
       markArticleSubSessionRead(activeArticleSubSessionId);
     }
-    recordLessonComplete(activeLesson.id);
-  }, [activeArticleSubSessionId, activeLesson.id, markArticleSubSessionRead, recordLessonComplete]);
+
+    const completedId = activeLesson.id;
+    const optimisticCompleted = [...new Set([...completedLessonIds, completedId])];
+
+    setProgress((current) => ({
+      completedLessonIds: optimisticCompleted,
+      progressPercent: computeCourseProgressPercent(course, optimisticCompleted),
+    }));
+
+    recordLessonComplete(completedId);
+
+    const currentIndex = allLessons.findIndex((lesson) => lesson.id === completedId);
+    if (currentIndex < 0) return;
+
+    for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
+      const candidate = allLessons[index]!;
+      const { locked } = getLessonLockState({
+        lesson: candidate,
+        course,
+        hasPaidAccess,
+        completedLessonIds: optimisticCompleted,
+        orderedLessonIds,
+      });
+
+      if (!locked) {
+        selectLesson(candidate.id);
+        if (typeof window !== "undefined") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        return;
+      }
+    }
+  }, [
+    activeArticleSubSessionId,
+    activeLesson.id,
+    allLessons,
+    completedLessonIds,
+    course,
+    hasPaidAccess,
+    markArticleSubSessionRead,
+    orderedLessonIds,
+    recordLessonComplete,
+    selectLesson,
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -736,9 +804,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             viewedArticleSubSessionIds={viewedArticleSubSessionIds}
             getLockState={getLockState}
             completedLessonIds={completedLessonIds}
-            onSelectLesson={(lessonId) => {
-              setActiveLessonId(lessonId);
-            }}
+            onSelectLesson={selectLesson}
             onSelectArticleSubSession={handleSelectArticleSubSession}
           />
         </aside>
@@ -750,7 +816,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             hasPaidAccess={hasPaidAccess}
             welcomeLessonId={welcomeLesson?.id}
             nextLessonTitle={nextLesson?.title}
-            onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
+            onNextLesson={nextLesson ? () => selectLesson(nextLesson.id) : undefined}
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
             activeArticleSubSessionId={activeArticleSubSessionId}

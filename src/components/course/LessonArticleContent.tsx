@@ -25,6 +25,7 @@ type LessonArticleContentProps = {
   content: string;
   lessonId?: string;
   activeSubSessionId?: string | null;
+  nextLessonTitle?: string;
   onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
 };
@@ -52,9 +53,27 @@ type ArticleSubSessionPanelProps = {
   found: NonNullable<ReturnType<typeof findArticleSubSession>>;
   nav: ReturnType<typeof getArticleSubSessionNav>;
   lessonQuiz: ReturnType<typeof findLessonQuizInLesson>;
+  nextLessonTitle?: string;
   onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
 };
+
+function CompleteLessonButton({
+  nextLessonTitle,
+  onComplete,
+}: {
+  nextLessonTitle?: string;
+  onComplete: () => void;
+}) {
+  const label = nextLessonTitle ? `Leçon suivante · ${nextLessonTitle}` : "Marquer comme terminé";
+
+  return (
+    <Button type="button" variant="hero" size="sm" onClick={onComplete} className="gap-2">
+      {label}
+      {nextLessonTitle ? <ChevronRight className="h-4 w-4" /> : null}
+    </Button>
+  );
+}
 
 function ArticleSubSessionPanel({
   lessonId,
@@ -62,6 +81,7 @@ function ArticleSubSessionPanel({
   found,
   nav,
   lessonQuiz,
+  nextLessonTitle,
   onSubSessionChange,
   onComplete,
 }: ArticleSubSessionPanelProps) {
@@ -98,6 +118,10 @@ function ArticleSubSessionPanel({
   };
 
   const showInlineQuiz = requiresLessonQuiz && lessonQuiz && (quizVisible || quizPassed);
+
+  const renderCompleteButton = () => (
+    <CompleteLessonButton nextLessonTitle={nextLessonTitle} onComplete={handleComplete} />
+  );
 
   return (
     <div className="relative border-b border-border bg-card">
@@ -138,6 +162,7 @@ function ArticleSubSessionPanel({
               <LessonQuiz
                 quiz={lessonQuiz.quiz}
                 storageKey={quizPassKey}
+                nextLessonTitle={nextLessonTitle}
                 onPass={() => {
                   setQuizPassed(true);
                   setQuizVisible(true);
@@ -181,9 +206,7 @@ function ArticleSubSessionPanel({
               Quiz
             </Button>
           ) : onComplete && isLastStudentSub && canCompleteLesson ? (
-            <Button type="button" variant="hero" size="sm" onClick={handleComplete} className="ml-auto">
-              Marquer comme terminé
-            </Button>
+            <div className="ml-auto">{renderCompleteButton()}</div>
           ) : nav.nextId && onSubSessionChange ? (
             <Button
               type="button"
@@ -195,9 +218,7 @@ function ArticleSubSessionPanel({
               Suivant · {nav.nextTitle}
             </Button>
           ) : onComplete && isLastStudentSub ? (
-            <Button type="button" variant="hero" size="sm" onClick={handleComplete} className="ml-auto">
-              Marquer comme terminé
-            </Button>
+            <div className="ml-auto">{renderCompleteButton()}</div>
           ) : null}
         </div>
       </div>
@@ -210,6 +231,7 @@ export function LessonArticleContent({
   content,
   lessonId,
   activeSubSessionId,
+  nextLessonTitle,
   onSubSessionChange,
   onComplete,
 }: LessonArticleContentProps) {
@@ -236,6 +258,7 @@ export function LessonArticleContent({
           found={found}
           nav={nav}
           lessonQuiz={lessonQuiz}
+          nextLessonTitle={nextLessonTitle}
           onSubSessionChange={onSubSessionChange}
           onComplete={onComplete}
         />
@@ -256,9 +279,7 @@ export function LessonArticleContent({
         />
         {onComplete ? (
           <div className="mt-8 flex justify-end">
-            <Button type="button" variant="hero" size="sm" onClick={onComplete}>
-              Marquer comme terminé
-            </Button>
+            <CompleteLessonButton nextLessonTitle={nextLessonTitle} onComplete={onComplete} />
           </div>
         ) : null}
       </div>
@@ -323,9 +344,7 @@ export function LessonArticleContent({
 
       {onComplete ? (
         <div className="mt-8 flex justify-end">
-          <Button type="button" variant="hero" size="sm" onClick={onComplete}>
-            Marquer comme terminé
-          </Button>
+          <CompleteLessonButton nextLessonTitle={nextLessonTitle} onComplete={onComplete} />
         </div>
       ) : null}
     </div>

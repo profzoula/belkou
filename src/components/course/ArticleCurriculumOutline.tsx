@@ -11,6 +11,7 @@ type ArticleCurriculumOutlineProps = {
   sessions: ArticleSession[];
   activeSubSessionId: string | null;
   viewedSubSessionIds: Set<string>;
+  lessonCompleted?: boolean;
   locked: boolean;
   onSelectSubSession: (lessonId: string, subSessionId: string) => void;
 };
@@ -20,18 +21,21 @@ export function ArticleCurriculumOutline({
   sessions,
   activeSubSessionId,
   viewedSubSessionIds,
+  lessonCompleted = false,
   locked,
   onSelectSubSession,
 }: ArticleCurriculumOutlineProps) {
   return (
     <div className="space-y-1">
       {sessions.map((session) => {
-        const viewedInSession = session.subSessions.filter(
-          (sub) =>
-            !sub.isQuiz &&
-            viewedSubSessionIds.has(buildArticleSubSessionId(lesson.id, session.number, sub.number)),
-        ).length;
         const visibleSubCount = session.subSessions.filter((sub) => !sub.isQuiz).length;
+        const viewedInSession = lessonCompleted
+          ? visibleSubCount
+          : session.subSessions.filter(
+              (sub) =>
+                !sub.isQuiz &&
+                viewedSubSessionIds.has(buildArticleSubSessionId(lesson.id, session.number, sub.number)),
+            ).length;
 
         return (
           <div key={session.number} className="overflow-hidden rounded-lg border border-border/80">
@@ -53,7 +57,7 @@ export function ArticleCurriculumOutline({
                 .map((sub, index, visibleSubs) => {
                 const subId = buildArticleSubSessionId(lesson.id, session.number, sub.number);
                 const active = activeSubSessionId === subId;
-                const viewed = viewedSubSessionIds.has(subId);
+                const viewed = lessonCompleted || viewedSubSessionIds.has(subId);
                 const last = index === visibleSubs.length - 1;
 
                 return (

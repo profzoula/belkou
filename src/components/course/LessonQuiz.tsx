@@ -14,10 +14,11 @@ import { cn } from "@/lib/utils";
 type LessonQuizProps = {
   quiz: LessonQuizData;
   storageKey: string;
+  nextLessonTitle?: string;
   onPass?: () => void;
 };
 
-export function LessonQuiz({ quiz, storageKey, onPass }: LessonQuizProps) {
+export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: LessonQuizProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [passed, setPassed] = useState(() => readQuizPass(storageKey));
@@ -63,7 +64,8 @@ export function LessonQuiz({ quiz, storageKey, onPass }: LessonQuizProps) {
           <div>
             <p className="font-semibold text-foreground">Quiz reyisi — {quiz.passScore}/{quiz.passScore}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Ou ka kontinye ak rès kou a. Klike <strong>Marquer comme terminé</strong>.
+              Ou ka kontinye ak rès kou a. Klike{" "}
+              <strong>{nextLessonTitle ? `Leçon suivante · ${nextLessonTitle}` : "Marquer comme terminé"}</strong>.
             </p>
           </div>
         </div>
