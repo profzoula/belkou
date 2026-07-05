@@ -233,8 +233,13 @@ export function RichTextEditor({
   };
 
   return (
-    <div className={cn("overflow-hidden rounded-lg border border-border bg-background", className)}>
-      <div className="space-y-2 border-b border-border bg-muted/30 px-2 py-2">
+    <div
+      className={cn(
+        "flex max-h-[70vh] flex-col overflow-hidden rounded-lg border border-border bg-background",
+        className,
+      )}
+    >
+      <div className="shrink-0 space-y-2 border-b border-border bg-muted/30 px-2 py-2">
         <div className="flex flex-wrap items-center gap-1">
           <ToolbarPill
             label="Modèle"
@@ -314,7 +319,7 @@ export function RichTextEditor({
           emitChange();
         }}
         className={cn(
-          "rich-text-editor lesson-html px-4 py-4 text-sm leading-relaxed text-foreground outline-none",
+          "rich-text-editor lesson-html min-h-0 flex-1 basis-0 overflow-y-auto px-4 py-4 text-sm leading-relaxed text-foreground outline-none",
           minHeightClassName,
         )}
       />
