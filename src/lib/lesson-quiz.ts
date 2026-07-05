@@ -179,8 +179,12 @@ export function decodeLessonQuizData(encoded: string): LessonQuiz | null {
   }
 }
 
+export function encodeLessonQuizForStorage(quiz: LessonQuiz): string {
+  return encodeLessonQuizData({ ...quiz, passScore: quiz.questions.length });
+}
+
 export function buildLessonQuizDataBlockHtml(quiz: LessonQuiz): string {
-  const encoded = encodeLessonQuizData({ ...quiz, passScore: quiz.questions.length });
+  const encoded = encodeLessonQuizForStorage(quiz);
   const count = quiz.questions.length;
   return `<div contenteditable="false" data-lesson-quiz-data="${encoded}" class="lesson-quiz-data-block"><strong>Quiz</strong> · ${count} question${count > 1 ? "s" : ""} · ${count}/${count} requis · cliquez « Questions » pour modifier</div>`;
 }

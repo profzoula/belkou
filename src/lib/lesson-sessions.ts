@@ -1,6 +1,6 @@
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import type { LessonQuiz } from "@/lib/lesson-quiz";
-import { extractQuizFromSubSessionHtml } from "@/lib/lesson-quiz";
+import { decodeLessonQuizData, extractQuizFromSubSessionHtml } from "@/lib/lesson-quiz";
 import { parseInlineMarkdown, parseLessonContent, type LessonContentBlock } from "@/lib/parse-lesson-content";
 
 export type ArticleSubSession = {
@@ -247,17 +247,19 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       subIndex += 1;
       const text = element.textContent?.trim() ?? "";
       const sub = parseSubSessionTitle(text, current.number, subIndex);
-      const quizAttr = element.getAttribute("data-lesson-quiz")?.trim();
+      const legacyQuizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
+      const quizFromHeading = decodeLessonQuizData(element.getAttribute("data-lesson-quiz-data") ?? "");
       const body = collectBlocksUntilHeading(nodes, index);
-      const { quiz, introHtml } = extractQuizFromSubSessionHtml(body.html || "");
-      const quizId = !quiz && quizAttr ? quizAttr : undefined;
+      const { quiz: quizFromBody, introHtml } = extractQuizFromSubSessionHtml(body.html || "");
+      const quiz = quizFromHeading ?? quizFromBody ?? undefined;
+      const quizId = !quiz && legacyQuizId ? legacyQuizId : undefined;
       current.subSessions.push({
         number: sub.number,
         title: sub.title,
         blocks: [],
         html: introHtml || undefined,
         quizId,
-        quiz: quiz ?? undefined,
+        quiz,
       });
       index = body.next - 1;
     }

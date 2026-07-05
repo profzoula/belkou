@@ -30,6 +30,7 @@ const LESSON_HTML_CONFIG = {
     "details",
     "summary",
     "hr",
+    "div",
   ],
   ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "contenteditable", "data-lesson-session", "data-lesson-session-title", "data-lesson-subsession", "data-lesson-quiz", "data-lesson-quiz-data"],
 };

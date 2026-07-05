@@ -26,6 +26,7 @@ import {
   buildLessonQuizDataBlockHtml,
   createEmptyLessonQuiz,
   decodeLessonQuizData,
+  encodeLessonQuizForStorage,
   getLessonQuiz,
   type LessonQuiz,
 } from "@/lib/lesson-quiz";
@@ -318,12 +319,21 @@ export function RichTextEditor({
     return null;
   };
 
+  const syncQuizHeading = (heading: HTMLElement, quiz: LessonQuiz) => {
+    heading.setAttribute("data-lesson-quiz", "");
+    heading.setAttribute("data-lesson-quiz-data", encodeLessonQuizForStorage(quiz));
+  };
+
   const loadQuizFromEditor = (heading: Element): LessonQuiz | null => {
+    const fromHeading = decodeLessonQuizData(heading.getAttribute("data-lesson-quiz-data") ?? "");
+    if (fromHeading) return fromHeading;
+
     const block = findQuizDataBlock(heading);
     if (block) {
       const decoded = decodeLessonQuizData(block.getAttribute("data-lesson-quiz-data") ?? "");
       if (decoded) return decoded;
     }
+
     const legacyId = heading.getAttribute("data-lesson-quiz")?.trim();
     if (legacyId) return getLessonQuiz(legacyId);
     return null;
@@ -387,25 +397,34 @@ export function RichTextEditor({
 
   const handleQuizSave = (quiz: LessonQuiz) => {
     const blockHtml = buildLessonQuizDataBlockHtml(quiz);
+    const encoded = encodeLessonQuizForStorage(quiz);
 
     if (quizEditBlock) {
       quizEditBlock.outerHTML = blockHtml;
+      const heading =
+        (quizEditBlock.previousElementSibling?.matches("h3[data-lesson-quiz]")
+          ? quizEditBlock.previousElementSibling
+          : quizEditHeading) ?? null;
+      if (heading) syncQuizHeading(heading as HTMLElement, quiz);
       emitChange();
       return;
     }
 
     if (quizEditHeading) {
+      syncQuizHeading(quizEditHeading, quiz);
       if (!findQuizDataBlock(quizEditHeading)) {
         quizEditHeading.insertAdjacentHTML("afterend", blockHtml);
+      } else {
+        const block = findQuizDataBlock(quizEditHeading);
+        if (block) block.outerHTML = blockHtml;
       }
-      quizEditHeading.setAttribute("data-lesson-quiz", "");
       emitChange();
       return;
     }
 
     if (pendingQuizHeading) {
       insertHtml(
-        `<h3 data-lesson-subsession data-lesson-quiz>${escapeHtml(pendingQuizHeading)}</h3>${blockHtml}<p>Reponn tout kesyon yo kòrèkteman pou w ka kontinye ak rès kou a.</p>`,
+        `<h3 data-lesson-subsession data-lesson-quiz data-lesson-quiz-data="${encoded}">${escapeHtml(pendingQuizHeading)}</h3>${blockHtml}<p>Reponn tout kesyon yo kòrèkteman pou w ka kontinye ak rès kou a.</p>`,
       );
     }
   };
