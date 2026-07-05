@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bold,
   Code,
@@ -17,9 +17,18 @@ import {
   Underline,
   ClipboardCheck,
   Pencil,
+  ListChecks,
 } from "lucide-react";
+import { LessonQuizBuilderDialog } from "@/components/admin/LessonQuizBuilderDialog";
 import { Button } from "@/components/ui/button";
 import { normalizePastedLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
+import {
+  buildLessonQuizDataBlockHtml,
+  createEmptyLessonQuiz,
+  decodeLessonQuizData,
+  getLessonQuiz,
+  type LessonQuiz,
+} from "@/lib/lesson-quiz";
 import {
   formatArticleSessionHeading,
   readArticleSessionTitle,
@@ -123,6 +132,11 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const lastValue = useRef<string | null>(null);
+  const [quizDialogOpen, setQuizDialogOpen] = useState(false);
+  const [quizDraft, setQuizDraft] = useState<LessonQuiz>(() => createEmptyLessonQuiz(5));
+  const [quizEditBlock, setQuizEditBlock] = useState<HTMLElement | null>(null);
+  const [quizEditHeading, setQuizEditHeading] = useState<HTMLElement | null>(null);
+  const [pendingQuizHeading, setPendingQuizHeading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!onRegisterFlush) return;
@@ -294,6 +308,43 @@ export function RichTextEditor({
     );
   };
 
+  const findQuizDataBlock = (heading: Element): HTMLElement | null => {
+    let node = heading.nextElementSibling;
+    while (node) {
+      if (node.matches("h2[data-lesson-session], h3[data-lesson-subsession]")) break;
+      if (node.matches("[data-lesson-quiz-data]")) return node as HTMLElement;
+      node = node.nextElementSibling;
+    }
+    return null;
+  };
+
+  const loadQuizFromEditor = (heading: Element): LessonQuiz | null => {
+    const block = findQuizDataBlock(heading);
+    if (block) {
+      const decoded = decodeLessonQuizData(block.getAttribute("data-lesson-quiz-data") ?? "");
+      if (decoded) return decoded;
+    }
+    const legacyId = heading.getAttribute("data-lesson-quiz")?.trim();
+    if (legacyId) return getLessonQuiz(legacyId);
+    return null;
+  };
+
+  const openQuizBuilder = (options: { heading?: Element | null; subLabel?: string }) => {
+    if (options.heading) {
+      const heading = options.heading as HTMLElement;
+      setQuizEditHeading(heading);
+      setQuizEditBlock(findQuizDataBlock(heading));
+      setQuizDraft(loadQuizFromEditor(heading) ?? createEmptyLessonQuiz(5));
+      setPendingQuizHeading(null);
+    } else {
+      setQuizEditHeading(null);
+      setQuizEditBlock(null);
+      setQuizDraft(createEmptyLessonQuiz(5));
+      setPendingQuizHeading(options.subLabel ?? "1.1 Quiz Chapit la");
+    }
+    setQuizDialogOpen(true);
+  };
+
   const insertQuizSubSession = () => {
     const html = editorRef.current?.innerHTML ?? value;
     const sessionMatches = [...html.matchAll(/data-lesson-session="(\d+)"/g)];
@@ -305,9 +356,58 @@ export function RichTextEditor({
     ];
     const nextSub = existingSubs.length + 1;
     const label = `${sessionNum}.${nextSub}`;
-    insertHtml(
-      `<h3 data-lesson-subsession data-lesson-quiz="prepare-anviwonnman-ch1">${label} Quiz Chapit la</h3><p>Reponn tout 5 kesyon yo kòrèkteman (5/5) pou w ka kontinye ak rès kou a.</p>`,
-    );
+    openQuizBuilder({ subLabel: `${label} Quiz Chapit la` });
+  };
+
+  const editQuizQuestions = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const headings = [...editor.querySelectorAll("h3[data-lesson-quiz]")];
+    if (!headings.length) {
+      window.alert("Aucun quiz trouvé. Cliquez « Quiz » pour en ajouter un.");
+      return;
+    }
+
+    let target = headings[headings.length - 1]!;
+    if (headings.length > 1) {
+      const summary = headings
+        .map((heading) => heading.textContent?.trim() || "Quiz")
+        .join("\n");
+      const picked = window.prompt(`Quel quiz modifier ?\n${summary}`, headings.length.toString());
+      if (!picked?.trim()) return;
+      const index = Number.parseInt(picked.trim(), 10) - 1;
+      if (index >= 0 && index < headings.length) {
+        target = headings[index]!;
+      }
+    }
+
+    openQuizBuilder({ heading: target });
+  };
+
+  const handleQuizSave = (quiz: LessonQuiz) => {
+    const blockHtml = buildLessonQuizDataBlockHtml(quiz);
+
+    if (quizEditBlock) {
+      quizEditBlock.outerHTML = blockHtml;
+      emitChange();
+      return;
+    }
+
+    if (quizEditHeading) {
+      if (!findQuizDataBlock(quizEditHeading)) {
+        quizEditHeading.insertAdjacentHTML("afterend", blockHtml);
+      }
+      quizEditHeading.setAttribute("data-lesson-quiz", "");
+      emitChange();
+      return;
+    }
+
+    if (pendingQuizHeading) {
+      insertHtml(
+        `<h3 data-lesson-subsession data-lesson-quiz>${escapeHtml(pendingQuizHeading)}</h3>${blockHtml}<p>Reponn tout kesyon yo kòrèkteman pou w ka kontinye ak rès kou a.</p>`,
+      );
+    }
   };
 
   return (
@@ -331,6 +431,11 @@ export function RichTextEditor({
             label="Quiz"
             icon={<ClipboardCheck className="h-3.5 w-3.5" />}
             onClick={insertQuizSubSession}
+          />
+          <ToolbarPill
+            label="Questions"
+            icon={<ListChecks className="h-3.5 w-3.5" />}
+            onClick={editQuizQuestions}
           />
           <ToolbarPill
             label="Section ▾"
@@ -383,7 +488,8 @@ export function RichTextEditor({
           <strong className="text-foreground">Modèle</strong> = Session 1 + sous-sessions 1.1, 1.2 ·{" "}
           <strong className="text-foreground">Session</strong> / <strong className="text-foreground">Nom</strong> pour
           titrer ou renommer · <strong className="text-foreground">1.1</strong> pour ajouter des blocs ·{" "}
-          <strong className="text-foreground">Quiz</strong> = 5 questions (5/5 requis).
+          <strong className="text-foreground">Quiz</strong> + <strong className="text-foreground">Questions</strong>{" "}
+          pour créer ou modifier un QCM (N/N requis).
         </p>
       </div>
       <div
@@ -411,6 +517,12 @@ export function RichTextEditor({
           "rich-text-editor lesson-html min-h-0 flex-1 basis-0 overflow-y-auto px-4 py-4 text-sm leading-relaxed text-foreground outline-none",
           minHeightClassName,
         )}
+      />
+      <LessonQuizBuilderDialog
+        open={quizDialogOpen}
+        onOpenChange={setQuizDialogOpen}
+        initialQuiz={quizDraft}
+        onSave={handleQuizSave}
       />
     </div>
   );

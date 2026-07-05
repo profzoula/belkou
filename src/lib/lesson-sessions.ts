@@ -1,4 +1,6 @@
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
+import type { LessonQuiz } from "@/lib/lesson-quiz";
+import { extractQuizFromSubSessionHtml } from "@/lib/lesson-quiz";
 import { parseInlineMarkdown, parseLessonContent, type LessonContentBlock } from "@/lib/parse-lesson-content";
 
 export type ArticleSubSession = {
@@ -7,6 +9,7 @@ export type ArticleSubSession = {
   blocks: LessonContentBlock[];
   html?: string;
   quizId?: string;
+  quiz?: LessonQuiz;
 };
 
 export type ArticleSession = {
@@ -244,14 +247,17 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       subIndex += 1;
       const text = element.textContent?.trim() ?? "";
       const sub = parseSubSessionTitle(text, current.number, subIndex);
-      const quizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
+      const quizAttr = element.getAttribute("data-lesson-quiz")?.trim();
       const body = collectBlocksUntilHeading(nodes, index);
+      const { quiz, introHtml } = extractQuizFromSubSessionHtml(body.html || "");
+      const quizId = !quiz && quizAttr ? quizAttr : undefined;
       current.subSessions.push({
         number: sub.number,
         title: sub.title,
         blocks: [],
-        html: body.html || undefined,
+        html: introHtml || undefined,
         quizId,
+        quiz: quiz ?? undefined,
       });
       index = body.next - 1;
     }

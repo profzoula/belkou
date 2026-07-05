@@ -31,7 +31,7 @@ const LESSON_HTML_CONFIG = {
     "summary",
     "hr",
   ],
-  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "data-lesson-session", "data-lesson-session-title", "data-lesson-subsession", "data-lesson-quiz"],
+  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "contenteditable", "data-lesson-session", "data-lesson-session-title", "data-lesson-subsession", "data-lesson-quiz", "data-lesson-quiz-data"],
 };
 
 export function isLessonHtml(content: string): boolean {

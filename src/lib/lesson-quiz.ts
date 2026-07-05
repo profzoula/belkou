@@ -18,6 +18,8 @@ export type LessonQuiz = {
   questions: LessonQuizQuestion[];
 };
 
+const OPTION_IDS = ["a", "b", "c", "d"] as const;
+
 const QUIZZES: Record<string, LessonQuiz> = {
   "prepare-anviwonnman-ch1": {
     id: "prepare-anviwonnman-ch1",
@@ -89,8 +91,149 @@ const QUIZZES: Record<string, LessonQuiz> = {
   },
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function createQuestion(index: number): LessonQuizQuestion {
+  return {
+    id: `q${index}`,
+    prompt: "",
+    options: OPTION_IDS.map((id) => ({ id, label: "" })),
+    correctOptionId: "a",
+    explanation: "",
+  };
+}
+
+export function createEmptyLessonQuiz(questionCount = 5): LessonQuiz {
+  const questions = Array.from({ length: questionCount }, (_, index) => createQuestion(index + 1));
+  return {
+    id: `quiz-${Date.now()}`,
+    title: "Quiz",
+    passScore: questionCount,
+    questions,
+  };
+}
+
+export function normalizeLessonQuiz(input: Partial<LessonQuiz>): LessonQuiz | null {
+  if (!input.questions?.length) return null;
+
+  const questions = input.questions
+    .map((question, index) => {
+      const options = (question.options ?? []).slice(0, 4).map((option, optionIndex) => ({
+        id: OPTION_IDS[optionIndex] ?? `o${optionIndex}`,
+        label: String(option.label ?? "").trim(),
+      }));
+      while (options.length < 4) {
+        options.push({ id: OPTION_IDS[options.length] ?? `o${options.length}`, label: "" });
+      }
+      const correctOptionId = options.some((option) => option.id === question.correctOptionId)
+        ? question.correctOptionId!
+        : options[0]!.id;
+
+      return {
+        id: question.id?.trim() || `q${index + 1}`,
+        prompt: String(question.prompt ?? "").trim(),
+        options,
+        correctOptionId,
+        explanation: String(question.explanation ?? "").trim() || undefined,
+      };
+    })
+    .filter((question) => question.prompt);
+
+  if (!questions.length) return null;
+
+  return {
+    id: input.id?.trim() || `quiz-${Date.now()}`,
+    title: input.title?.trim() || "Quiz",
+    passScore: questions.length,
+    questions,
+  };
+}
+
+export function encodeLessonQuizData(quiz: LessonQuiz): string {
+  const json = JSON.stringify(quiz);
+  if (typeof btoa !== "undefined") {
+    return btoa(unescape(encodeURIComponent(json)));
+  }
+  return Buffer.from(json, "utf8").toString("base64");
+}
+
+export function decodeLessonQuizData(encoded: string): LessonQuiz | null {
+  try {
+    const trimmed = encoded.trim();
+    if (!trimmed) return null;
+    let json: string;
+    if (typeof atob !== "undefined") {
+      json = decodeURIComponent(escape(atob(trimmed)));
+    } else {
+      json = Buffer.from(trimmed, "base64").toString("utf8");
+    }
+    return normalizeLessonQuiz(JSON.parse(json) as Partial<LessonQuiz>);
+  } catch {
+    return null;
+  }
+}
+
+export function buildLessonQuizDataBlockHtml(quiz: LessonQuiz): string {
+  const encoded = encodeLessonQuizData({ ...quiz, passScore: quiz.questions.length });
+  const count = quiz.questions.length;
+  return `<div contenteditable="false" data-lesson-quiz-data="${encoded}" class="lesson-quiz-data-block"><strong>Quiz</strong> · ${count} question${count > 1 ? "s" : ""} · ${count}/${count} requis · cliquez « Questions » pour modifier</div>`;
+}
+
+export function extractQuizFromSubSessionHtml(html: string): {
+  quiz: LessonQuiz | null;
+  introHtml: string;
+} {
+  const trimmed = html.trim();
+  if (!trimmed) return { quiz: null, introHtml: "" };
+
+  if (typeof document !== "undefined") {
+    const doc = new DOMParser().parseFromString(trimmed, "text/html");
+    const holder = doc.body.querySelector("[data-lesson-quiz-data]");
+    if (!holder) return { quiz: null, introHtml: trimmed };
+    const quiz = decodeLessonQuizData(holder.getAttribute("data-lesson-quiz-data") ?? "");
+    holder.remove();
+    return { quiz, introHtml: doc.body.innerHTML.trim() };
+  }
+
+  const match = trimmed.match(/<div\b[^>]*\bdata-lesson-quiz-data="([^"]+)"[^>]*>[\s\S]*?<\/div>/i);
+  if (!match) return { quiz: null, introHtml: trimmed };
+  const quiz = decodeLessonQuizData(match[1] ?? "");
+  const introHtml = trimmed.replace(match[0], "").trim();
+  return { quiz, introHtml };
+}
+
+export function validateLessonQuizDraft(quiz: LessonQuiz): string | null {
+  if (!quiz.questions.length) return "Ajoutez au moins une question.";
+
+  for (let index = 0; index < quiz.questions.length; index += 1) {
+    const question = quiz.questions[index]!;
+    if (!question.prompt.trim()) {
+      return `Question ${index + 1} : saisissez l'énoncé.`;
+    }
+    for (const option of question.options) {
+      if (!option.label.trim()) {
+        return `Question ${index + 1} : remplissez toutes les réponses (A, B, C, D).`;
+      }
+    }
+  }
+
+  return null;
+}
+
 export function getLessonQuiz(quizId: string): LessonQuiz | null {
   return QUIZZES[quizId] ?? null;
+}
+
+export function resolveLessonQuiz(sub: { quizId?: string; quiz?: LessonQuiz }): LessonQuiz | null {
+  if (sub.quiz?.questions.length) return sub.quiz;
+  if (sub.quizId) return getLessonQuiz(sub.quizId);
+  return null;
 }
 
 export function quizStorageKey(storageKey: string): string {
@@ -123,9 +266,17 @@ export function gradeLessonQuiz(
   for (const question of quiz.questions) {
     if (answers[question.id] === question.correctOptionId) score += 1;
   }
+  const passScore = quiz.passScore || quiz.questions.length;
   return {
     score,
     total: quiz.questions.length,
-    passed: score >= quiz.passScore,
+    passed: score >= passScore,
   };
 }
+
+export function formatLessonQuizEditorSummary(quiz: LessonQuiz): string {
+  const count = quiz.questions.length;
+  return `Quiz · ${count} question${count > 1 ? "s" : ""} · ${count}/${count} requis`;
+}
+
+export { escapeHtml as escapeLessonQuizHtml };

@@ -10,7 +10,7 @@ import {
 import { ArticleSubSessionBody } from "@/components/course/ArticleSubSessionBody";
 import { LessonQuiz } from "@/components/course/LessonQuiz";
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
-import { getLessonQuiz, readQuizPass } from "@/lib/lesson-quiz";
+import { resolveLessonQuiz, readQuizPass } from "@/lib/lesson-quiz";
 import {
   findArticleSubSession,
   getArticleSubSessionNav,
@@ -63,7 +63,7 @@ function ArticleSubSessionPanel({
   onSubSessionChange,
   onComplete,
 }: ArticleSubSessionPanelProps) {
-  const quiz = found.sub.quizId ? getLessonQuiz(found.sub.quizId) : null;
+  const quiz = found.sub.quizId || found.sub.quiz ? resolveLessonQuiz(found.sub) : null;
   const quizStorageKey = `${lessonId}::${effectiveSubSessionId}`;
   const [quizPassed, setQuizPassed] = useState(() => (quiz ? readQuizPass(quizStorageKey) : true));
 
@@ -152,7 +152,7 @@ function ArticleSubSessionPanel({
 
           {quiz && !canProceed ? (
             <p className="ml-auto text-xs text-muted-foreground">
-              Fè 5/5 sou quiz la pou kontinye.
+              Fè {quiz.passScore}/{quiz.passScore} sou quiz la pou kontinye.
             </p>
           ) : null}
 
