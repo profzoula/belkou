@@ -115,20 +115,20 @@ export function RichTextEditor({
   minHeightClassName = "min-h-[280px]",
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
-  const lastValue = useRef(value);
+  const lastValue = useRef<string | null>(null);
 
   useEffect(() => {
     if (!onRegisterFlush) return;
     onRegisterFlush(() => {
       const editor = editorRef.current;
-      if (!editor) return lastValue.current;
+      if (!editor) return lastValue.current ?? value;
       const html = sanitizeLessonHtml(editor.innerHTML);
       lastValue.current = html;
       onChange(html);
       return html;
     });
     return () => onRegisterFlush(null);
-  }, [onChange, onRegisterFlush]);
+  }, [onChange, onRegisterFlush, value]);
 
   useEffect(() => {
     const editor = editorRef.current;

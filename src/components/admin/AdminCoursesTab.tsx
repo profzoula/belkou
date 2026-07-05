@@ -438,6 +438,7 @@ export function AdminCoursesTab() {
     key: string,
     draft: LessonDraft,
     lessonType?: LessonDraft["type"],
+    lessonContent?: string,
   ): LessonDraft => {
     const type = draft.type ?? lessonType ?? "video";
     if (type !== "article") {
@@ -445,7 +446,7 @@ export function AdminCoursesTab() {
     }
 
     const flushed = lessonContentFlushers.current[key]?.();
-    const content = flushed ?? draft.content ?? "";
+    const content = flushed ?? draft.content ?? lessonContent ?? "";
     return { ...draft, type, content };
   };
 
@@ -458,7 +459,7 @@ export function AdminCoursesTab() {
       .flatMap((course) => (course.slug === courseSlug ? course.sections : []))
       .flatMap((section) => section.lessons)
       .find((item) => item.id === lessonId);
-    const draft = resolveLessonDraftForSave(key, baseDraft, lesson?.type);
+    const draft = resolveLessonDraftForSave(key, baseDraft, lesson?.type, lesson?.content);
 
     setSavingId(key);
     try {
@@ -1186,7 +1187,7 @@ export function AdminCoursesTab() {
                                 <Label>Contenu</Label>
                                 <LessonContentEditor
                                   key={key}
-                                  value={draft.content}
+                                  value={draft.content || lesson.content || ""}
                                   onChange={(content) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { content })
                                   }
