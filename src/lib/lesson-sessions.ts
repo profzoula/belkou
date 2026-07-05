@@ -10,6 +10,7 @@ export type ArticleSubSession = {
   html?: string;
   quizId?: string;
   quiz?: LessonQuiz;
+  isQuiz?: boolean;
 };
 
 export type ArticleSession = {
@@ -201,8 +202,89 @@ function collectBlocksUntilHeading(nodes: ChildNode[], start: number): { html: s
   return { html: sanitizeLessonHtml(parts.join("")), next: index };
 }
 
+function readSessionTitleFromRegex(attrs: string, inner: string, sessionNumber: number): string {
+  const fromAttr = attrs.match(/data-lesson-session-title="([^"]*)"/)?.[1]?.trim();
+  if (fromAttr) return fromAttr;
+  const text = inner.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() || `Session ${sessionNumber}`;
+}
+
+function parseHtmlSessionsFromRegex(raw: string): ArticleSession[] | null {
+  const html = sanitizeLessonHtml(raw);
+  const sessions: ArticleSession[] = [];
+  const h2Parts = html.split(/(?=<h2\b)/i).filter(Boolean);
+
+  for (const chunk of h2Parts) {
+    const h2Match = chunk.match(/^<h2\b([^>]*)>([\s\S]*?)<\/h2>/i);
+    if (!h2Match) continue;
+
+    const attrs = h2Match[1] ?? "";
+    const sessionAttr = attrs.match(/data-lesson-session="(\d+)"/)?.[1];
+    const sessionNumber = sessionAttr ? Number.parseInt(sessionAttr, 10) : NaN;
+    if (!Number.isFinite(sessionNumber)) continue;
+
+    const session: ArticleSession = {
+      number: sessionNumber,
+      title: readSessionTitleFromRegex(attrs, h2Match[2] ?? "", sessionNumber),
+      introBlocks: [],
+      subSessions: [],
+    };
+
+    const remainder = chunk.slice(h2Match[0].length);
+    const subParts = remainder.split(/(?=<h3\b)/i).filter(Boolean);
+    let introParts: string[] = [];
+    let subIndex = 0;
+
+    for (const subChunk of subParts) {
+      const h3Match = subChunk.match(/^<h3\b([^>]*)>([\s\S]*?)<\/h3>/i);
+      if (!h3Match) {
+        introParts.push(subChunk);
+        continue;
+      }
+
+      if (introParts.length) {
+        const introHtml = introParts.join("").trim();
+        if (introHtml) session.introHtml = introHtml;
+        introParts = [];
+      }
+
+      subIndex += 1;
+      const subAttrs = h3Match[1] ?? "";
+      const subTitleRaw = (h3Match[2] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      const sub = parseSubSessionTitle(subTitleRaw, sessionNumber, subIndex);
+      const isQuiz = /\bdata-lesson-quiz(?:=["']|>|\s)/i.test(subAttrs);
+      const legacyQuizId = subAttrs.match(/\bdata-lesson-quiz="([^"]+)"/i)?.[1]?.trim() || undefined;
+      const quizFromHeading = decodeLessonQuizData(subAttrs.match(/\bdata-lesson-quiz-data="([^"]+)"/i)?.[1] ?? "");
+      const bodyHtml = subChunk.slice(h3Match[0].length);
+      const { quiz: quizFromBody, introHtml } = extractQuizFromSubSessionHtml(bodyHtml);
+      const quiz = quizFromHeading ?? quizFromBody ?? undefined;
+
+      session.subSessions.push({
+        number: sub.number,
+        title: sub.title,
+        blocks: [],
+        html: introHtml || undefined,
+        quizId: !quiz && legacyQuizId ? legacyQuizId : undefined,
+        quiz,
+        isQuiz,
+      });
+    }
+
+    if (introParts.length) {
+      const introHtml = introParts.join("").trim();
+      if (introHtml) session.introHtml = introHtml;
+    }
+
+    sessions.push(session);
+  }
+
+  return sessions.length ? sessions : null;
+}
+
 function parseHtmlSessions(raw: string): ArticleSession[] | null {
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined") {
+    return parseHtmlSessionsFromRegex(raw);
+  }
 
   const doc = new DOMParser().parseFromString(sanitizeLessonHtml(raw), "text/html");
   const nodes = [...doc.body.childNodes];
@@ -247,6 +329,7 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       subIndex += 1;
       const text = element.textContent?.trim() ?? "";
       const sub = parseSubSessionTitle(text, current.number, subIndex);
+      const isQuiz = element.hasAttribute("data-lesson-quiz");
       const legacyQuizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
       const quizFromHeading = decodeLessonQuizData(element.getAttribute("data-lesson-quiz-data") ?? "");
       const body = collectBlocksUntilHeading(nodes, index);
@@ -260,6 +343,7 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
         html: introHtml || undefined,
         quizId,
         quiz,
+        isQuiz,
       });
       index = body.next - 1;
     }
@@ -363,10 +447,12 @@ export function getArticleSubSessionNav(
   currentId: string,
 ): ArticleSubSessionNav {
   const flat = sessions.flatMap((session) =>
-    session.subSessions.map((sub) => ({
-      id: buildArticleSubSessionId(lessonId, session.number, sub.number),
-      title: `${sub.number} ${sub.title}`,
-    })),
+    session.subSessions
+      .filter((sub) => !sub.isQuiz)
+      .map((sub) => ({
+        id: buildArticleSubSessionId(lessonId, session.number, sub.number),
+        title: `${sub.number} ${sub.title}`,
+      })),
   );
   const index = flat.findIndex((item) => item.id === currentId);
   if (index < 0) {

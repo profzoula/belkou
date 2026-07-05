@@ -1,3 +1,5 @@
+import type { ArticleSession } from "@/lib/lesson-sessions";
+
 export type LessonQuizOption = {
   id: string;
   label: string;
@@ -20,75 +22,76 @@ export type LessonQuiz = {
 
 const OPTION_IDS = ["a", "b", "c", "d"] as const;
 
+export const PREPARE_ANVIWONMAN_SESSION1_QUIZ: LessonQuiz = {
+  id: "prepare-anviwonnman-ch1",
+  title: "Quiz — Session 1: Prepare Anviwònman Devlopman an",
+  passScore: 5,
+  questions: [
+    {
+      id: "q1",
+      prompt: 'Ki objektif prensipal "Development Environment" la?',
+      options: [
+        { id: "a", label: "Pou fè òdinatè a pi bèl" },
+        { id: "b", label: "Pou pèmèt devlopè a kreye aplikasyon avèk tout zouti ki nesesè yo" },
+        { id: "c", label: "Pou jwe jwèt videyo sèlman" },
+        { id: "d", label: "Pou telechaje mizik" },
+      ],
+      correctOptionId: "b",
+      explanation: "Yon Development Environment se tout zouti devlopè a bezwen pou kreye aplikasyon.",
+    },
+    {
+      id: "q2",
+      prompt: "Ki kondisyon minimòm RAM atik la rekòmande pou VibeCoding?",
+      options: [
+        { id: "a", label: "4 GB" },
+        { id: "b", label: "6 GB" },
+        { id: "c", label: "8 GB" },
+        { id: "d", label: "16 GB" },
+      ],
+      correctOptionId: "c",
+      explanation: "Minimum se 8 GB RAM pou travay konfòtabman ak VibeCoding.",
+    },
+    {
+      id: "q3",
+      prompt: "Ki zouti Chrome DevTools ou itilize pou wè erè JavaScript epi teste kòd?",
+      options: [
+        { id: "a", label: "Elements" },
+        { id: "b", label: "Console" },
+        { id: "c", label: "Network" },
+        { id: "d", label: "Performance" },
+      ],
+      correctOptionId: "b",
+      explanation: "Tab Console pèmèt ou wè erè JavaScript epi teste kòd an tan reyèl.",
+    },
+    {
+      id: "q4",
+      prompt: "Ki zouti Chrome ki analize pèfòmans, SEO, Accessibility ak Best Practices yon sit entènèt?",
+      options: [
+        { id: "a", label: "DevTools" },
+        { id: "b", label: "Postman" },
+        { id: "c", label: "Lighthouse" },
+        { id: "d", label: "Docker Desktop" },
+      ],
+      correctOptionId: "c",
+      explanation: "Lighthouse evalye pèfòmans, SEO, aksè, Best Practices ak PWA.",
+    },
+    {
+      id: "q5",
+      prompt: "Ki zouti ki pèmèt ou estoke, pataje epi kolabore sou pwojè devlopman yo?",
+      options: [
+        { id: "a", label: "Android Studio" },
+        { id: "b", label: "GitHub" },
+        { id: "c", label: "Node.js" },
+        { id: "d", label: "Bun" },
+      ],
+      correctOptionId: "b",
+      explanation: "GitHub se platfòm pou estoke, pataje epi kolabore sou pwojè devlopman.",
+    },
+  ],
+};
+
 const QUIZZES: Record<string, LessonQuiz> = {
-  "prepare-anviwonnman-ch1": {
-    id: "prepare-anviwonnman-ch1",
-    title: "Quiz — Prepare Anviwònman Devlopman an",
-    passScore: 5,
-    questions: [
-      {
-        id: "q1",
-        prompt: "Kisa yon Development Environment ye?",
-        options: [
-          { id: "a", label: "Yon navigatè entènèt sèlman" },
-          { id: "b", label: "Tout ansanm zouti yon devlopè itilize pou kreye lojisyèl" },
-          { id: "c", label: "Yon platfòm pou achte aplikasyon sou entènèt" },
-          { id: "d", label: "Yon sistèm operasyon ki pa bezwen mizajou" },
-        ],
-        correctOptionId: "b",
-        explanation:
-          "Yon Development Environment gen ladan editè kòd, navigatè, AI, runtime, Git, Docker, elatriye.",
-      },
-      {
-        id: "q2",
-        prompt: "Ki minimòm RAM rekòmande pou travay konfòtabman ak VibeCoding?",
-        options: [
-          { id: "a", label: "4 Go" },
-          { id: "b", label: "8 Go" },
-          { id: "c", label: "16 Go" },
-          { id: "d", label: "2 Go" },
-        ],
-        correctOptionId: "b",
-        explanation: "Minimum se 8 Go RAM; 16 Go se ideyal pou Android Studio ak Docker ansanm.",
-      },
-      {
-        id: "q3",
-        prompt: "Poukisa Virtualization (Intel VT-x / AMD-V) enpòtan pou Android Emulator?",
-        options: [
-          { id: "a", label: "Li pèmèt w telechaje aplikasyon pi vit" },
-          { id: "b", label: "San li, Emulator a ap mache trè dousman" },
-          { id: "c", label: "Li obligatwa sèlman pou enstale Google Chrome" },
-          { id: "d", label: "Li nesesè sèlman sou Linux" },
-        ],
-        correctOptionId: "b",
-        explanation: "Android Emulator bezwen Virtualization aktive pou bon pèfòmans.",
-      },
-      {
-        id: "q4",
-        prompt: "Ki zouti Chrome ki evalye Performance, Accessibility, SEO ak PWA?",
-        options: [
-          { id: "a", label: "DevTools Console" },
-          { id: "b", label: "Lighthouse" },
-          { id: "c", label: "Responsive Mode" },
-          { id: "d", label: "Network Tab" },
-        ],
-        correctOptionId: "b",
-        explanation: "Lighthouse bay nòt ak rekòmandasyon sou pèfòmans, aksè, SEO ak PWA.",
-      },
-      {
-        id: "q5",
-        prompt: "Ki zouti sa a se yon Package Manager modèn ki pi rapid e ki itilize mwens espas pase npm?",
-        options: [
-          { id: "a", label: "Git" },
-          { id: "b", label: "Postman" },
-          { id: "c", label: "pnpm" },
-          { id: "d", label: "Docker Desktop" },
-        ],
-        correctOptionId: "c",
-        explanation: "pnpm se yon Package Manager modèn souvan itilize nan pwojè modèn.",
-      },
-    ],
-  },
+  "prepare-anviwonnman-ch1": PREPARE_ANVIWONMAN_SESSION1_QUIZ,
 };
 
 function escapeHtml(text: string): string {
@@ -186,7 +189,19 @@ export function encodeLessonQuizForStorage(quiz: LessonQuiz): string {
 export function buildLessonQuizDataBlockHtml(quiz: LessonQuiz): string {
   const encoded = encodeLessonQuizForStorage(quiz);
   const count = quiz.questions.length;
-  return `<div contenteditable="false" data-lesson-quiz-data="${encoded}" class="lesson-quiz-data-block"><strong>Quiz</strong> · ${count} question${count > 1 ? "s" : ""} · ${count}/${count} requis · cliquez « Questions » pour modifier</div>`;
+  return `<div contenteditable="false" class="lesson-quiz-data-block">${encoded}</div><p class="lesson-quiz-data-label"><strong>Quiz enregistré</strong> · ${count} question${count > 1 ? "s" : ""} · ${count}/${count} requis · cliquez « Questions » pour modifier</p>`;
+}
+
+function decodeQuizHolderContent(raw: string | null | undefined): LessonQuiz | null {
+  const trimmed = raw?.trim() ?? "";
+  if (!trimmed) return null;
+  return decodeLessonQuizData(trimmed);
+}
+
+function stripQuizLabelHtml(html: string): string {
+  return html
+    .replace(/<p\b[^>]*class="[^"]*lesson-quiz-data-label[^"]*"[^>]*>[\s\S]*?<\/p>/gi, "")
+    .trim();
 }
 
 export function extractQuizFromSubSessionHtml(html: string): {
@@ -198,17 +213,27 @@ export function extractQuizFromSubSessionHtml(html: string): {
 
   if (typeof document !== "undefined") {
     const doc = new DOMParser().parseFromString(trimmed, "text/html");
-    const holder = doc.body.querySelector("[data-lesson-quiz-data]");
+    const holder = doc.body.querySelector(".lesson-quiz-data-block, [data-lesson-quiz-data]");
     if (!holder) return { quiz: null, introHtml: trimmed };
-    const quiz = decodeLessonQuizData(holder.getAttribute("data-lesson-quiz-data") ?? "");
+    const quiz =
+      decodeQuizHolderContent(holder.getAttribute("data-lesson-quiz-data")) ??
+      decodeQuizHolderContent(holder.textContent);
     holder.remove();
+    doc.body.querySelectorAll(".lesson-quiz-data-label").forEach((node) => node.remove());
     return { quiz, introHtml: doc.body.innerHTML.trim() };
   }
 
-  const match = trimmed.match(/<div\b[^>]*\bdata-lesson-quiz-data="([^"]+)"[^>]*>[\s\S]*?<\/div>/i);
-  if (!match) return { quiz: null, introHtml: trimmed };
-  const quiz = decodeLessonQuizData(match[1] ?? "");
-  const introHtml = trimmed.replace(match[0], "").trim();
+  const divMatch = trimmed.match(/<div\b[^>]*class="[^"]*lesson-quiz-data-block[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+  if (divMatch) {
+    const quiz = decodeQuizHolderContent(divMatch[1]);
+    const introHtml = stripQuizLabelHtml(trimmed.replace(divMatch[0], ""));
+    return { quiz, introHtml };
+  }
+
+  const attrMatch = trimmed.match(/<div\b[^>]*\bdata-lesson-quiz-data="([^"]+)"[^>]*>[\s\S]*?<\/div>/i);
+  if (!attrMatch) return { quiz: null, introHtml: trimmed };
+  const quiz = decodeQuizHolderContent(attrMatch[1]);
+  const introHtml = stripQuizLabelHtml(trimmed.replace(attrMatch[0], ""));
   return { quiz, introHtml };
 }
 
@@ -238,6 +263,28 @@ export function resolveLessonQuiz(sub: { quizId?: string; quiz?: LessonQuiz }): 
   if (sub.quiz?.questions.length) return sub.quiz;
   if (sub.quizId) return getLessonQuiz(sub.quizId);
   return null;
+}
+
+export function findLessonQuizInLesson(
+  lessonId: string,
+  sessions: ArticleSession[],
+): { subSessionId: string; quiz: LessonQuiz } | null {
+  for (const session of sessions) {
+    for (const sub of session.subSessions) {
+      const quiz = resolveLessonQuiz(sub);
+      if (quiz) {
+        return {
+          subSessionId: `${lessonId}::${session.number}::${sub.number}`,
+          quiz,
+        };
+      }
+    }
+  }
+  return null;
+}
+
+export function lessonQuizPassStorageKey(lessonId: string): string {
+  return `${lessonId}::lesson-quiz-pass`;
 }
 
 export function quizStorageKey(storageKey: string): string {

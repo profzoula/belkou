@@ -26,7 +26,6 @@ import {
   buildLessonQuizDataBlockHtml,
   createEmptyLessonQuiz,
   decodeLessonQuizData,
-  encodeLessonQuizForStorage,
   getLessonQuiz,
   type LessonQuiz,
 } from "@/lib/lesson-quiz";
@@ -312,8 +311,8 @@ export function RichTextEditor({
   const findQuizDataBlock = (heading: Element): HTMLElement | null => {
     let node = heading.nextElementSibling;
     while (node) {
-      if (node.matches("h2[data-lesson-session], h3[data-lesson-subsession]")) break;
-      if (node.matches("[data-lesson-quiz-data]")) return node as HTMLElement;
+      if (node.matches("h2[data-lesson-session], h3[data-lesson-subsession], h3[data-lesson-quiz]")) break;
+      if (node.matches(".lesson-quiz-data-block, [data-lesson-quiz-data]")) return node as HTMLElement;
       node = node.nextElementSibling;
     }
     return null;
@@ -321,18 +320,20 @@ export function RichTextEditor({
 
   const syncQuizHeading = (heading: HTMLElement, quiz: LessonQuiz) => {
     heading.setAttribute("data-lesson-quiz", "");
-    heading.setAttribute("data-lesson-quiz-data", encodeLessonQuizForStorage(quiz));
+    heading.removeAttribute("data-lesson-quiz-data");
   };
 
   const loadQuizFromEditor = (heading: Element): LessonQuiz | null => {
-    const fromHeading = decodeLessonQuizData(heading.getAttribute("data-lesson-quiz-data") ?? "");
-    if (fromHeading) return fromHeading;
-
     const block = findQuizDataBlock(heading);
     if (block) {
-      const decoded = decodeLessonQuizData(block.getAttribute("data-lesson-quiz-data") ?? "");
+      const decoded =
+        decodeLessonQuizData(block.getAttribute("data-lesson-quiz-data") ?? "") ??
+        decodeLessonQuizData(block.textContent?.trim() ?? "");
       if (decoded) return decoded;
     }
+
+    const fromHeading = decodeLessonQuizData(heading.getAttribute("data-lesson-quiz-data") ?? "");
+    if (fromHeading) return fromHeading;
 
     const legacyId = heading.getAttribute("data-lesson-quiz")?.trim();
     if (legacyId) return getLessonQuiz(legacyId);
@@ -397,7 +398,6 @@ export function RichTextEditor({
 
   const handleQuizSave = (quiz: LessonQuiz) => {
     const blockHtml = buildLessonQuizDataBlockHtml(quiz);
-    const encoded = encodeLessonQuizForStorage(quiz);
 
     if (quizEditBlock) {
       quizEditBlock.outerHTML = blockHtml;
@@ -412,11 +412,11 @@ export function RichTextEditor({
 
     if (quizEditHeading) {
       syncQuizHeading(quizEditHeading, quiz);
-      if (!findQuizDataBlock(quizEditHeading)) {
-        quizEditHeading.insertAdjacentHTML("afterend", blockHtml);
+      const existingBlock = findQuizDataBlock(quizEditHeading);
+      if (existingBlock) {
+        existingBlock.outerHTML = blockHtml;
       } else {
-        const block = findQuizDataBlock(quizEditHeading);
-        if (block) block.outerHTML = blockHtml;
+        quizEditHeading.insertAdjacentHTML("afterend", blockHtml);
       }
       emitChange();
       return;
@@ -424,8 +424,9 @@ export function RichTextEditor({
 
     if (pendingQuizHeading) {
       insertHtml(
-        `<h3 data-lesson-subsession data-lesson-quiz data-lesson-quiz-data="${encoded}">${escapeHtml(pendingQuizHeading)}</h3>${blockHtml}<p>Reponn tout kesyon yo kòrèkteman pou w ka kontinye ak rès kou a.</p>`,
+        `<h3 data-lesson-subsession data-lesson-quiz>${escapeHtml(pendingQuizHeading)}</h3>${blockHtml}<p>Reponn tout kesyon yo kòrèkteman pou w ka kontinye ak rès kou a.</p>`,
       );
+      setPendingQuizHeading(null);
     }
   };
 

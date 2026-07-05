@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -10,7 +10,7 @@ import {
 import { ArticleSubSessionBody } from "@/components/course/ArticleSubSessionBody";
 import { LessonQuiz } from "@/components/course/LessonQuiz";
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
-import { resolveLessonQuiz, readQuizPass } from "@/lib/lesson-quiz";
+import { findLessonQuizInLesson, lessonQuizPassStorageKey, readQuizPass } from "@/lib/lesson-quiz";
 import {
   findArticleSubSession,
   getArticleSubSessionNav,
@@ -51,6 +51,7 @@ type ArticleSubSessionPanelProps = {
   effectiveSubSessionId: string;
   found: NonNullable<ReturnType<typeof findArticleSubSession>>;
   nav: ReturnType<typeof getArticleSubSessionNav>;
+  lessonQuiz: ReturnType<typeof findLessonQuizInLesson>;
   onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
 };
@@ -60,28 +61,43 @@ function ArticleSubSessionPanel({
   effectiveSubSessionId,
   found,
   nav,
+  lessonQuiz,
   onSubSessionChange,
   onComplete,
 }: ArticleSubSessionPanelProps) {
-  const quiz = found.sub.quizId || found.sub.quiz ? resolveLessonQuiz(found.sub) : null;
-  const quizStorageKey = `${lessonId}::${effectiveSubSessionId}`;
-  const [quizPassed, setQuizPassed] = useState(() => (quiz ? readQuizPass(quizStorageKey) : true));
+  const quizSectionRef = useRef<HTMLDivElement>(null);
+  const isLastStudentSub = !nav.nextId;
+  const requiresLessonQuiz = Boolean(lessonQuiz && isLastStudentSub);
+  const quizPassKey = lessonQuizPassStorageKey(lessonId);
+  const [quizVisible, setQuizVisible] = useState(false);
+  const [quizPassed, setQuizPassed] = useState(() =>
+    requiresLessonQuiz ? readQuizPass(quizPassKey) : true,
+  );
 
   useEffect(() => {
-    setQuizPassed(quiz ? readQuizPass(quizStorageKey) : true);
-  }, [quiz, quizStorageKey]);
+    setQuizPassed(requiresLessonQuiz ? readQuizPass(quizPassKey) : true);
+    setQuizVisible(false);
+  }, [effectiveSubSessionId, quizPassKey, requiresLessonQuiz]);
 
-  const canProceed = !quiz || quizPassed;
+  const canCompleteLesson = !requiresLessonQuiz || quizPassed;
 
   const goToSubSession = (subSessionId: string, markCurrentAsRead = false) => {
-    if (markCurrentAsRead && !canProceed) return;
     onSubSessionChange?.(subSessionId, markCurrentAsRead ? { markCurrentAsRead: true } : undefined);
   };
 
   const handleComplete = () => {
-    if (!canProceed) return;
+    if (!canCompleteLesson) return;
     onComplete?.();
   };
+
+  const openQuiz = () => {
+    setQuizVisible(true);
+    window.requestAnimationFrame(() => {
+      quizSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const showInlineQuiz = requiresLessonQuiz && lessonQuiz && (quizVisible || quizPassed);
 
   return (
     <div className="relative border-b border-border bg-card">
@@ -95,7 +111,7 @@ function ArticleSubSessionPanel({
           <ChevronLeft className="h-5 w-5" />
         </button>
       ) : null}
-      {nav.nextId && onSubSessionChange && canProceed ? (
+      {nav.nextId && onSubSessionChange ? (
         <button
           type="button"
           aria-label="Sous-session suivante"
@@ -115,23 +131,26 @@ function ArticleSubSessionPanel({
         </h1>
 
         <div className="mt-6 min-h-[200px] space-y-6">
-          {quiz ? (
-            <>
-              {found.sub.html ? (
-                <div
-                  className="lesson-html text-sm leading-relaxed text-muted-foreground sm:text-base"
-                  dangerouslySetInnerHTML={{ __html: found.sub.html }}
-                />
-              ) : null}
-              <LessonQuiz quiz={quiz} storageKey={quizStorageKey} onPass={() => setQuizPassed(true)} />
-            </>
-          ) : found.sub.quizId ? (
+          <ArticleSubSessionBody sub={found.sub} />
+
+          {showInlineQuiz ? (
+            <div ref={quizSectionRef} className="scroll-mt-24">
+              <LessonQuiz
+                quiz={lessonQuiz.quiz}
+                storageKey={quizPassKey}
+                onPass={() => {
+                  setQuizPassed(true);
+                  setQuizVisible(true);
+                }}
+              />
+            </div>
+          ) : null}
+
+          {requiresLessonQuiz && !lessonQuiz ? (
             <p className="text-sm text-destructive">
-              Quiz « {found.sub.quizId} » introvable — kontakte administratè a.
+              Quiz pa disponib — admin: klike « Questions », ajoute kesyon yo, epi Enregistrer.
             </p>
-          ) : (
-            <ArticleSubSessionBody sub={found.sub} />
-          )}
+          ) : null}
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
@@ -142,7 +161,7 @@ function ArticleSubSessionPanel({
                 Précédent
               </Button>
             ) : null}
-            {nav.nextId && onSubSessionChange && canProceed ? (
+            {nav.nextId && onSubSessionChange ? (
               <Button type="button" variant="outline" size="sm" onClick={() => goToSubSession(nav.nextId!, true)}>
                 Suivant
                 <ChevronRight className="ml-1 h-4 w-4" />
@@ -150,17 +169,22 @@ function ArticleSubSessionPanel({
             ) : null}
           </div>
 
-          {quiz && !canProceed ? (
-            <p className="ml-auto text-xs text-muted-foreground">
-              Fè {quiz.passScore}/{quiz.passScore} sou quiz la pou kontinye.
+          {requiresLessonQuiz && !canCompleteLesson ? (
+            <p className="text-xs text-muted-foreground">
+              Fè {lessonQuiz!.quiz.passScore}/{lessonQuiz!.quiz.passScore} sou quiz la pou kontinye kou a.
             </p>
           ) : null}
 
-          {onComplete && !nav.nextId && canProceed ? (
+          {onComplete && isLastStudentSub && requiresLessonQuiz && !canCompleteLesson ? (
+            <Button type="button" variant="hero" size="sm" onClick={openQuiz} className="ml-auto gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Quiz
+            </Button>
+          ) : onComplete && isLastStudentSub && canCompleteLesson ? (
             <Button type="button" variant="hero" size="sm" onClick={handleComplete} className="ml-auto">
               Marquer comme terminé
             </Button>
-          ) : nav.nextId && onSubSessionChange && canProceed ? (
+          ) : nav.nextId && onSubSessionChange ? (
             <Button
               type="button"
               variant="hero"
@@ -169,6 +193,10 @@ function ArticleSubSessionPanel({
               onClick={() => goToSubSession(nav.nextId!, true)}
             >
               Suivant · {nav.nextTitle}
+            </Button>
+          ) : onComplete && isLastStudentSub ? (
+            <Button type="button" variant="hero" size="sm" onClick={handleComplete} className="ml-auto">
+              Marquer comme terminé
             </Button>
           ) : null}
         </div>
@@ -198,6 +226,7 @@ export function LessonArticleContent({
         ? findArticleSubSession(sessions, parsed.sessionNumber, parsed.subNumber)
         : null;
     const nav = getArticleSubSessionNav(lessonId, sessions, effectiveSubSessionId);
+    const lessonQuiz = findLessonQuizInLesson(lessonId, sessions);
 
     if (found) {
       return (
@@ -206,6 +235,7 @@ export function LessonArticleContent({
           effectiveSubSessionId={effectiveSubSessionId}
           found={found}
           nav={nav}
+          lessonQuiz={lessonQuiz}
           onSubSessionChange={onSubSessionChange}
           onComplete={onComplete}
         />

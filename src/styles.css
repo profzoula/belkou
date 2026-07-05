@@ -379,6 +379,9 @@
     @apply mt-4 border-l-2 border-emerald-500/40 bg-emerald-50/40 pl-3 pt-1 text-base font-semibold text-foreground dark:bg-emerald-950/20;
   }
   .rich-text-editor .lesson-quiz-data-block {
+    @apply sr-only;
+  }
+  .rich-text-editor .lesson-quiz-data-label {
     @apply my-3 rounded-lg border border-dashed border-amber-400/70 bg-amber-50/80 px-3 py-2 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100;
   }
   .rich-text-editor:empty::before {

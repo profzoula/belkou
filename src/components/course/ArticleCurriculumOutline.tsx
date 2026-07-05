@@ -26,9 +26,12 @@ export function ArticleCurriculumOutline({
   return (
     <div className="space-y-1">
       {sessions.map((session) => {
-        const viewedInSession = session.subSessions.filter((sub) =>
-          viewedSubSessionIds.has(buildArticleSubSessionId(lesson.id, session.number, sub.number)),
+        const viewedInSession = session.subSessions.filter(
+          (sub) =>
+            !sub.isQuiz &&
+            viewedSubSessionIds.has(buildArticleSubSessionId(lesson.id, session.number, sub.number)),
         ).length;
+        const visibleSubCount = session.subSessions.filter((sub) => !sub.isQuiz).length;
 
         return (
           <div key={session.number} className="overflow-hidden rounded-lg border border-border/80">
@@ -40,16 +43,18 @@ export function ArticleCurriculumOutline({
                 <p className="truncate text-xs font-bold leading-snug text-foreground">{session.title}</p>
               </div>
               <span className="shrink-0 text-[10px] font-medium tabular-nums text-emerald-700 dark:text-emerald-400">
-                {viewedInSession}/{session.subSessions.length}
+                {viewedInSession}/{visibleSubCount}
               </span>
             </div>
 
             <ul className="py-1">
-              {session.subSessions.map((sub, index) => {
+              {session.subSessions
+                .filter((sub) => !sub.isQuiz)
+                .map((sub, index, visibleSubs) => {
                 const subId = buildArticleSubSessionId(lesson.id, session.number, sub.number);
                 const active = activeSubSessionId === subId;
                 const viewed = viewedSubSessionIds.has(subId);
-                const last = index === session.subSessions.length - 1;
+                const last = index === visibleSubs.length - 1;
 
                 return (
                   <li key={subId} className="relative pl-7">
