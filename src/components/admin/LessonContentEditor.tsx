@@ -95,11 +95,11 @@ export function LessonContentEditor({ value, onChange, className }: LessonConten
             rows={12}
             className="rounded-lg font-mono text-xs"
             placeholder={
-              "## Introduction\n\nTexte du module…\n\n### Section repliable\nContenu accordéon.\n\n- Point 1\n- **Gras**"
+              "## Session 1\n\nIntroduction…\n\n### 1.1 Première sous-session\nContenu…\n\n### 1.2 Deuxième sous-session\nContenu…"
             }
           />
           <p className="text-[11px] text-muted-foreground">
-            ## titre · ### section repliable · - liste · **gras** · _italique_
+            ## Session 1 · ### 1.1 sous-session · ### 1.2 sous-session
           </p>
         </>
       )}

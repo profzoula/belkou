@@ -5,7 +5,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { LessonArticleSessions } from "@/components/course/LessonArticleSessions";
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
+import { parseArticleSessions } from "@/lib/lesson-sessions";
 import { parseInlineMarkdown, parseLessonContent } from "@/lib/parse-lesson-content";
 
 type LessonArticleContentProps = {
@@ -32,6 +34,26 @@ function InlineText({ text }: { text: string }) {
 }
 
 export function LessonArticleContent({ title, content, onComplete }: LessonArticleContentProps) {
+  const sessions = parseArticleSessions(content);
+
+  if (sessions?.length) {
+    return (
+      <div className="prose-lesson border-b border-border bg-card px-4 py-8 sm:px-8 sm:py-10 md:px-10">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+        <div className="mt-6">
+          <LessonArticleSessions sessions={sessions} />
+        </div>
+        {onComplete ? (
+          <div className="mt-8 flex justify-end">
+            <Button type="button" variant="hero" size="sm" onClick={onComplete}>
+              Marquer comme terminé
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   if (isLessonHtml(content)) {
     const safeHtml = sanitizeLessonHtml(content);
 

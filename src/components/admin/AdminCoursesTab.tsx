@@ -916,10 +916,8 @@ export function AdminCoursesTab() {
             Dans chaque session, descendez jusqu&apos;à{" "}
             <strong className="text-foreground">Ajouter une leçon</strong> →{" "}
             <strong className="text-foreground">Module texte</strong>. Cliquez{" "}
-            <strong className="text-foreground">Modèle</strong> pour une structure prête, puis{" "}
-            <strong className="text-foreground">Section ▾</strong> pour les blocs repliables. Pas
-            besoin de Markdown — utilisez la barre d&apos;outils Visuel, puis{" "}
-            <strong className="text-foreground">Enregistrer</strong>.
+            <strong className="text-foreground">Modèle</strong> pour Session 1 + 1.1, 1.2 — ou boutons{" "}
+            <strong className="text-foreground">Session</strong> / <strong className="text-foreground">1.1</strong>.
           </p>
         </div>
 

@@ -94,16 +94,14 @@ function ToolbarDivider() {
   return <span className="mx-0.5 hidden h-6 w-px bg-border sm:block" />;
 }
 
-export const LESSON_VISUAL_STARTER_HTML = `<h2>Titre du module</h2>
-<p>Écrivez une courte introduction ici.</p>
-<ul>
-<li>Premier point important</li>
-<li>Deuxième point important</li>
-</ul>
-<details>
-<summary>Section repliable — cliquez pour ouvrir</summary>
-<p>Ajoutez les détails ici. Les élèves verront un accordéon.</p>
-</details>`;
+export const LESSON_SESSION_STARTER_HTML = `<h2 data-lesson-session="1">Session 1</h2>
+<p>Introduction de la session…</p>
+<h3 data-lesson-subsession>1.1 Première sous-session</h3>
+<p>Contenu de la sous-session 1.1…</p>
+<h3 data-lesson-subsession>1.2 Deuxième sous-session</h3>
+<p>Contenu de la sous-session 1.2…</p>`;
+
+export const LESSON_VISUAL_STARTER_HTML = LESSON_SESSION_STARTER_HTML;
 
 export function RichTextEditor({
   value,
@@ -182,11 +180,39 @@ export function RichTextEditor({
   const insertTemplate = () => {
     const editor = editorRef.current;
     const hasContent = Boolean(editor?.textContent?.trim());
-    if (hasContent && !window.confirm("Remplacer le contenu actuel par le modèle ?")) return;
+    if (hasContent && !window.confirm("Remplacer le contenu actuel par le modèle Session ?")) return;
     if (editor) {
-      editor.innerHTML = LESSON_VISUAL_STARTER_HTML;
+      editor.innerHTML = LESSON_SESSION_STARTER_HTML;
       emitChange();
     }
+  };
+
+  const countSessions = () => {
+    const html = editorRef.current?.innerHTML ?? value;
+    return (html.match(/data-lesson-session="/g) || []).length;
+  };
+
+  const insertSession = () => {
+    const next = countSessions() + 1;
+    insertHtml(`<h2 data-lesson-session="${next}">Session ${next}</h2><p>Introduction de la session…</p>`);
+  };
+
+  const insertSubSession = () => {
+    const html = editorRef.current?.innerHTML ?? value;
+    const sessionMatches = [...html.matchAll(/data-lesson-session="(\d+)"/g)];
+    const sessionNum = sessionMatches.length
+      ? Number.parseInt(sessionMatches[sessionMatches.length - 1][1], 10)
+      : 1;
+    const existingSubs = [
+      ...html.matchAll(new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi")),
+    ];
+    const nextSub = existingSubs.length + 1;
+    const label = `${sessionNum}.${nextSub}`;
+    const title = window.prompt(`Titre de la sous-session ${label}`, `Sous-session ${label}`);
+    if (!title?.trim()) return;
+    insertHtml(
+      `<h3 data-lesson-subsession>${label} ${escapeHtml(title.trim())}</h3><p>Contenu de la sous-session…</p>`,
+    );
   };
 
   return (
@@ -198,6 +224,8 @@ export function RichTextEditor({
             icon={<LayoutTemplate className="h-3.5 w-3.5" />}
             onClick={insertTemplate}
           />
+          <ToolbarPill label="Session" icon={<Heading2 className="h-3.5 w-3.5" />} onClick={insertSession} />
+          <ToolbarPill label="1.1" icon={<Heading3 className="h-3.5 w-3.5" />} onClick={insertSubSession} />
           <ToolbarPill
             label="Section ▾"
             icon={<PanelBottomOpen className="h-3.5 w-3.5" />}
@@ -246,9 +274,9 @@ export function RichTextEditor({
           </ToolbarButton>
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground px-0.5">
-          <strong className="text-foreground">Modèle</strong> = structure prête ·{" "}
-          <strong className="text-foreground">Section ▾</strong> = bloc repliable pour les élèves ·
-          collez depuis Word/Google Docs — listes et titres sont conservés automatiquement.
+          <strong className="text-foreground">Modèle</strong> = Session 1 + sous-sessions 1.1, 1.2 ·{" "}
+          <strong className="text-foreground">Session</strong> / <strong className="text-foreground">1.1</strong> pour
+          ajouter des blocs.
         </p>
       </div>
       <div
