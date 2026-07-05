@@ -223,7 +223,10 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       const fromAttr = element.getAttribute("data-lesson-session");
       const text = element.textContent?.trim() ?? "";
       const parsed = fromAttr
-        ? { number: Number.parseInt(fromAttr, 10), title: text.replace(/^Session\s*\d+\s*[—–-]?\s*/i, "").trim() || `Session ${fromAttr}` }
+        ? {
+            number: Number.parseInt(fromAttr, 10),
+            title: readArticleSessionTitle(element, Number.parseInt(fromAttr, 10)),
+          }
         : parseSessionTitle(text);
 
       if (parsed) {
@@ -268,8 +271,31 @@ export function parseArticleSessions(content: string): ArticleSession[] | null {
   return parseMarkdownSessions(trimmed);
 }
 
-export function formatSessionLabel(session: ArticleSession): string {
-  return `Session ${session.number}`;
+export function formatArticleSessionHeading(number: number, title: string): string {
+  const normalized = title.replace(new RegExp(`^Session\\s*${number}\\s*[—–-]?\\s*`, "i"), "").trim();
+  if (!normalized || normalized === `Session ${number}`) {
+    return `Session ${number}`;
+  }
+  return `Session ${number} — ${normalized}`;
+}
+
+export function readArticleSessionTitle(element: Element, sessionNumber: number): string {
+  const fromAttr = element.getAttribute("data-lesson-session-title")?.trim();
+  if (fromAttr) return fromAttr;
+  const text = element.textContent?.trim() ?? "";
+  return text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() || `Session ${sessionNumber}`;
+}
+
+export function syncArticleSessionHeadingMetadata(root: ParentNode): void {
+  root.querySelectorAll("h2[data-lesson-session]").forEach((heading) => {
+    const sessionNumber = heading.getAttribute("data-lesson-session");
+    if (!sessionNumber) return;
+    const number = Number.parseInt(sessionNumber, 10);
+    if (!Number.isFinite(number)) return;
+    const title = readArticleSessionTitle(heading, number);
+    heading.setAttribute("data-lesson-session-title", title);
+    heading.textContent = formatArticleSessionHeading(number, title);
+  });
 }
 
 export function formatSubSessionLabel(sub: ArticleSubSession): string {

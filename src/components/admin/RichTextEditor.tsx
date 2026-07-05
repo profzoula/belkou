@@ -16,9 +16,15 @@ import {
   Table,
   Underline,
   ClipboardCheck,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { normalizePastedLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
+import {
+  formatArticleSessionHeading,
+  readArticleSessionTitle,
+  syncArticleSessionHeadingMetadata,
+} from "@/lib/lesson-sessions";
 import { cn } from "@/lib/utils";
 
 export type RichTextEditorFlush = () => string;
@@ -98,7 +104,7 @@ function ToolbarDivider() {
   return <span className="mx-0.5 hidden h-6 w-px bg-border sm:block" />;
 }
 
-export const LESSON_SESSION_STARTER_HTML = `<h2 data-lesson-session="1">Session 1</h2>
+export const LESSON_SESSION_STARTER_HTML = `<h2 data-lesson-session="1" data-lesson-session-title="Session 1">Session 1</h2>
 <p>Introduction de la session…</p>
 <h3 data-lesson-subsession>1.1 Première sous-session</h3>
 <p>Contenu de la sous-session 1.1…</p>
@@ -120,14 +126,7 @@ export function RichTextEditor({
 
   useEffect(() => {
     if (!onRegisterFlush) return;
-    onRegisterFlush(() => {
-      const editor = editorRef.current;
-      if (!editor) return lastValue.current ?? value;
-      const html = sanitizeLessonHtml(editor.innerHTML);
-      lastValue.current = html;
-      onChange(html);
-      return html;
-    });
+    onRegisterFlush(() => flushEditorHtml());
     return () => onRegisterFlush(null);
   }, [onChange, onRegisterFlush, value]);
 
@@ -144,6 +143,16 @@ export function RichTextEditor({
     const html = sanitizeLessonHtml(editor.innerHTML);
     lastValue.current = html;
     onChange(html);
+  };
+
+  const flushEditorHtml = () => {
+    const editor = editorRef.current;
+    if (!editor) return lastValue.current ?? value;
+    syncArticleSessionHeadingMetadata(editor);
+    const html = sanitizeLessonHtml(editor.innerHTML);
+    lastValue.current = html;
+    onChange(html);
+    return html;
   };
 
   const exec = (command: string, commandValue?: string) => {
@@ -216,7 +225,55 @@ export function RichTextEditor({
 
   const insertSession = () => {
     const next = countSessions() + 1;
-    insertHtml(`<h2 data-lesson-session="${next}">Session ${next}</h2><p>Introduction de la session…</p>`);
+    const title = window.prompt(`Titre de la session ${next}`, `Session ${next}`);
+    if (!title?.trim()) return;
+    const sessionTitle = title.trim();
+    insertHtml(
+      `<h2 data-lesson-session="${next}" data-lesson-session-title="${escapeHtml(sessionTitle)}">${escapeHtml(formatArticleSessionHeading(next, sessionTitle))}</h2><p>Introduction de la session…</p>`,
+    );
+  };
+
+  const editSessionTitle = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const headings = [...editor.querySelectorAll("h2[data-lesson-session]")];
+    if (!headings.length) {
+      window.alert("Aucune session trouvée dans l'article.");
+      return;
+    }
+
+    let target: Element | null = null;
+    if (headings.length === 1) {
+      target = headings[0] ?? null;
+    } else {
+      const summary = headings
+        .map((heading) => {
+          const num = heading.getAttribute("data-lesson-session") ?? "?";
+          const number = Number.parseInt(num, 10);
+          const title = Number.isFinite(number)
+            ? readArticleSessionTitle(heading, number)
+            : heading.textContent?.trim() ?? "";
+          return `${num} — ${title}`;
+        })
+        .join("\n");
+      const picked = window.prompt(`Numéro de session à renommer:\n${summary}`, headings[0]?.getAttribute("data-lesson-session") ?? "1");
+      if (!picked?.trim()) return;
+      target = headings.find((heading) => heading.getAttribute("data-lesson-session") === picked.trim()) ?? null;
+      if (!target) {
+        window.alert("Session introuvable.");
+        return;
+      }
+    }
+
+    const sessionNumber = Number.parseInt(target.getAttribute("data-lesson-session") ?? "1", 10);
+    const currentTitle = readArticleSessionTitle(target, sessionNumber);
+    const nextTitle = window.prompt(`Titre de la session ${sessionNumber}`, currentTitle);
+    if (!nextTitle?.trim()) return;
+
+    target.setAttribute("data-lesson-session-title", nextTitle.trim());
+    target.textContent = formatArticleSessionHeading(sessionNumber, nextTitle.trim());
+    emitChange();
   };
 
   const insertSubSession = () => {
@@ -268,6 +325,7 @@ export function RichTextEditor({
             onClick={insertTemplate}
           />
           <ToolbarPill label="Session" icon={<Heading2 className="h-3.5 w-3.5" />} onClick={insertSession} />
+          <ToolbarPill label="Nom" icon={<Pencil className="h-3.5 w-3.5" />} onClick={editSessionTitle} />
           <ToolbarPill label="1.1" icon={<Heading3 className="h-3.5 w-3.5" />} onClick={insertSubSession} />
           <ToolbarPill
             label="Quiz"
@@ -323,8 +381,9 @@ export function RichTextEditor({
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground px-0.5">
           <strong className="text-foreground">Modèle</strong> = Session 1 + sous-sessions 1.1, 1.2 ·{" "}
-          <strong className="text-foreground">Session</strong> / <strong className="text-foreground">1.1</strong> pour
-          ajouter des blocs · <strong className="text-foreground">Quiz</strong> = 5 questions (5/5 requis).
+          <strong className="text-foreground">Session</strong> / <strong className="text-foreground">Nom</strong> pour
+          titrer ou renommer · <strong className="text-foreground">1.1</strong> pour ajouter des blocs ·{" "}
+          <strong className="text-foreground">Quiz</strong> = 5 questions (5/5 requis).
         </p>
       </div>
       <div
@@ -335,7 +394,11 @@ export function RichTextEditor({
         aria-multiline
         data-placeholder={placeholder}
         onInput={emitChange}
-        onBlur={emitChange}
+        onBlur={() => {
+          const editor = editorRef.current;
+          if (editor) syncArticleSessionHeadingMetadata(editor);
+          emitChange();
+        }}
         onPaste={(event) => {
           event.preventDefault();
           const html = event.clipboardData.getData("text/html");
