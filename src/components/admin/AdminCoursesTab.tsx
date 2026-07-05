@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -199,6 +199,7 @@ export function AdminCoursesTab() {
   const [newDescription, setNewDescription] = useState("");
   const [newFree, setNewFree] = useState(false);
   const [slugEdited, setSlugEdited] = useState(false);
+  const lessonContentFlushers = useRef<Record<string, () => string>>({});
 
   const syncDrafts = (list: AdminCourse[]) => {
     const nextDrafts: Record<string, LessonDraft> = {};
@@ -433,10 +434,31 @@ export function AdminCoursesTab() {
     }
   };
 
+  const resolveLessonDraftForSave = (
+    key: string,
+    draft: LessonDraft,
+    lessonType?: LessonDraft["type"],
+  ): LessonDraft => {
+    const type = draft.type ?? lessonType ?? "video";
+    if (type !== "article") {
+      return { ...draft, type };
+    }
+
+    const flushed = lessonContentFlushers.current[key]?.();
+    const content = flushed ?? draft.content ?? "";
+    return { ...draft, type, content };
+  };
+
   const saveLesson = async (courseSlug: string, lessonId: string) => {
     const key = `${courseSlug}:${lessonId}`;
-    const draft = drafts[key];
-    if (!draft) return;
+    const baseDraft = drafts[key];
+    if (!baseDraft) return;
+
+    const lesson = courses
+      .flatMap((course) => (course.slug === courseSlug ? course.sections : []))
+      .flatMap((section) => section.lessons)
+      .find((item) => item.id === lessonId);
+    const draft = resolveLessonDraftForSave(key, baseDraft, lesson?.type);
 
     setSavingId(key);
     try {
@@ -448,12 +470,18 @@ export function AdminCoursesTab() {
           duration: draft.duration,
           vimeo: draft.type === "video" ? draft.vimeo || undefined : undefined,
           preview: draft.preview,
-          content: draft.type === "article" ? draft.content : undefined,
-          type: draft.type === "resource" ? undefined : draft.type,
+          content: draft.type === "article" ? draft.content ?? "" : undefined,
+          type: (draft.type ?? lesson?.type ?? "video") === "resource"
+            ? undefined
+            : (draft.type ?? lesson?.type ?? "video"),
         },
       });
       setCourses(result.courses);
       syncDrafts(result.courses);
+      setDrafts((current) => ({
+        ...current,
+        [key]: draft,
+      }));
       toast.success("Leçon enregistrée");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Sauvegarde impossible");
@@ -472,6 +500,9 @@ export function AdminCoursesTab() {
 
     setAddingSectionId(sectionId);
     try {
+      const newLessonKey = `new:${selectedCourse.slug}:${sectionId}`;
+      const flushed = draft.type === "article" ? lessonContentFlushers.current[newLessonKey]?.() : undefined;
+      const content = flushed ?? draft.content;
       const result = await addLessonFn({
         data: {
           courseSlug: selectedCourse.slug,
@@ -481,7 +512,7 @@ export function AdminCoursesTab() {
           duration: draft.duration.trim() || undefined,
           vimeo: draft.type === "video" ? draft.vimeo.trim() || undefined : undefined,
           preview: draft.preview,
-          content: draft.type === "article" ? draft.content : undefined,
+          content: draft.type === "article" ? content : undefined,
         },
       });
       setCourses(result.courses);
@@ -1159,6 +1190,10 @@ export function AdminCoursesTab() {
                                   onChange={(content) =>
                                     updateDraft(selectedCourse.slug, lesson.id, { content })
                                   }
+                                  onRegisterFlush={(flush) => {
+                                    if (flush) lessonContentFlushers.current[key] = flush;
+                                    else delete lessonContentFlushers.current[key];
+                                  }}
                                 />
                               </div>
                               <div className="space-y-1.5 sm:col-span-2">
@@ -1303,6 +1338,11 @@ export function AdminCoursesTab() {
                           <LessonContentEditor
                             value={newLesson.content}
                             onChange={(content) => updateNewLessonDraft(section.id, { content })}
+                            onRegisterFlush={(flush) => {
+                              const newKey = `new:${selectedCourse.slug}:${section.id}`;
+                              if (flush) lessonContentFlushers.current[newKey] = flush;
+                              else delete lessonContentFlushers.current[newKey];
+                            }}
                           />
                         </div>
                       )}

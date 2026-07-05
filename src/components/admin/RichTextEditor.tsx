@@ -20,9 +20,12 @@ import { Button } from "@/components/ui/button";
 import { normalizePastedLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import { cn } from "@/lib/utils";
 
+export type RichTextEditorFlush = () => string;
+
 type RichTextEditorProps = {
   value: string;
   onChange: (html: string) => void;
+  onRegisterFlush?: (flush: RichTextEditorFlush | null) => void;
   placeholder?: string;
   className?: string;
   minHeightClassName?: string;
@@ -106,12 +109,26 @@ export const LESSON_VISUAL_STARTER_HTML = LESSON_SESSION_STARTER_HTML;
 export function RichTextEditor({
   value,
   onChange,
+  onRegisterFlush,
   placeholder = "Cliquez « Modèle » pour commencer, ou écrivez directement ici…",
   className,
   minHeightClassName = "min-h-[280px]",
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const lastValue = useRef(value);
+
+  useEffect(() => {
+    if (!onRegisterFlush) return;
+    onRegisterFlush(() => {
+      const editor = editorRef.current;
+      if (!editor) return lastValue.current;
+      const html = sanitizeLessonHtml(editor.innerHTML);
+      lastValue.current = html;
+      onChange(html);
+      return html;
+    });
+    return () => onRegisterFlush(null);
+  }, [onChange, onRegisterFlush]);
 
   useEffect(() => {
     const editor = editorRef.current;

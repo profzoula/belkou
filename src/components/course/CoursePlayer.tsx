@@ -712,7 +712,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       ) : null}
 
       <div className="site-container py-4 sm:py-6">
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-stretch">
         <aside className="order-2 lg:order-1 lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
           <CurriculumSidebar
             course={course}
@@ -728,23 +728,25 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </aside>
 
-        <main className="order-1 min-w-0 lg:order-2">
-          <CourseVideoArea
-            course={course}
-            lesson={activeLesson}
-            hasPaidAccess={hasPaidAccess}
-            welcomeLessonId={welcomeLesson?.id}
-            nextLessonTitle={nextLesson?.title}
-            onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
-            onLessonComplete={handleActiveLessonComplete}
-            getLockState={getLockState}
-            activeArticleSubSessionId={activeArticleSubSessionId}
-            onArticleSubSessionChange={setActiveArticleSubSessionId}
-          />
+        <main className="order-1 flex min-w-0 flex-col lg:order-2 lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
+          <div className="min-h-0 lg:flex-1 lg:overflow-y-auto">
+            <CourseVideoArea
+              course={course}
+              lesson={activeLesson}
+              hasPaidAccess={hasPaidAccess}
+              welcomeLessonId={welcomeLesson?.id}
+              nextLessonTitle={nextLesson?.title}
+              onNextLesson={nextLesson ? () => setActiveLessonId(nextLesson.id) : undefined}
+              onLessonComplete={handleActiveLessonComplete}
+              getLockState={getLockState}
+              activeArticleSubSessionId={activeArticleSubSessionId}
+              onArticleSubSessionChange={setActiveArticleSubSessionId}
+            />
+          </div>
 
-          <div className="border-b border-border px-3 sm:px-6">
+          <div className="shrink-0 border-t border-border bg-card px-3 sm:px-6 lg:max-h-[min(46vh,28rem)] lg:overflow-y-auto">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-0 bg-transparent p-0">
+              <TabsList className="sticky top-0 z-10 h-auto w-full justify-start gap-0 rounded-none border-0 border-b border-border bg-card/95 p-0 backdrop-blur supports-[backdrop-filter]:bg-card/80">
                 {[
                   { value: "overview", label: "Aperçu" },
                   { value: "qa", label: "Q&R" },

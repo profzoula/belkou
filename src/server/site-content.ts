@@ -86,11 +86,14 @@ async function writeJson<T>(key: string, value: T): Promise<{ ok: boolean; reaso
     return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };
   }
 
-  const { error } = await sb.from("site_content").upsert({
-    key,
-    value,
-    updated_at: new Date().toISOString(),
-  });
+  const { error } = await sb.from("site_content").upsert(
+    {
+      key,
+      value,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "key" },
+  );
 
   if (error) {
     if (isMissingTable(error.message)) {

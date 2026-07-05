@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { useEffect, useRef, useState } from "react";
+import { RichTextEditor, type RichTextEditorFlush } from "@/components/admin/RichTextEditor";
 import { Textarea } from "@/components/ui/textarea";
 import {
   lessonContentEditorMode,
@@ -8,19 +8,45 @@ import {
 } from "@/lib/lesson-html";
 import { cn } from "@/lib/utils";
 
+export type LessonContentEditorFlush = () => string;
+
 type LessonContentEditorProps = {
   value: string;
   onChange: (content: string) => void;
+  onRegisterFlush?: (flush: LessonContentEditorFlush | null) => void;
   className?: string;
 };
 
 type EditorMode = "visual" | "markdown";
 
-export function LessonContentEditor({ value, onChange, className }: LessonContentEditorProps) {
+export function LessonContentEditor({
+  value,
+  onChange,
+  onRegisterFlush,
+  className,
+}: LessonContentEditorProps) {
   const [mode, setMode] = useState<EditorMode>(() =>
     value.trim() ? lessonContentEditorMode(value) : "visual",
   );
   const [showMarkdown, setShowMarkdown] = useState(false);
+  const visualFlushRef = useRef<RichTextEditorFlush | null>(null);
+  const markdownRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!onRegisterFlush) return;
+    onRegisterFlush(() => {
+      if (mode === "visual" && visualFlushRef.current) {
+        return visualFlushRef.current();
+      }
+      if (mode === "markdown" && markdownRef.current) {
+        const next = markdownRef.current.value;
+        onChange(next);
+        return next;
+      }
+      return value;
+    });
+    return () => onRegisterFlush(null);
+  }, [mode, onChange, onRegisterFlush, value]);
 
   const switchMode = (next: EditorMode) => {
     if (next === mode) return;
@@ -86,10 +112,14 @@ export function LessonContentEditor({ value, onChange, className }: LessonConten
         <RichTextEditor
           value={lessonContentForVisualEditor(value)}
           onChange={onChange}
+          onRegisterFlush={(flush) => {
+            visualFlushRef.current = flush;
+          }}
         />
       ) : (
         <>
           <Textarea
+            ref={markdownRef}
             value={lessonContentForMarkdownEditor(value)}
             onChange={(event) => onChange(event.target.value)}
             rows={12}
