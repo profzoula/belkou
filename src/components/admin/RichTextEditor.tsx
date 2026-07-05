@@ -17,7 +17,7 @@ import {
   Underline,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { sanitizeLessonHtml } from "@/lib/lesson-html";
+import { normalizePastedLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import { cn } from "@/lib/utils";
 
 type RichTextEditorProps = {
@@ -248,7 +248,7 @@ export function RichTextEditor({
         <p className="text-[11px] leading-relaxed text-muted-foreground px-0.5">
           <strong className="text-foreground">Modèle</strong> = structure prête ·{" "}
           <strong className="text-foreground">Section ▾</strong> = bloc repliable pour les élèves ·
-          modifiez le texte directement dans la zone blanche.
+          collez depuis Word/Google Docs — listes et titres sont conservés automatiquement.
         </p>
       </div>
       <div
@@ -264,7 +264,7 @@ export function RichTextEditor({
           event.preventDefault();
           const html = event.clipboardData.getData("text/html");
           const text = event.clipboardData.getData("text/plain");
-          const inserted = sanitizeLessonHtml(html || text.replace(/\n/g, "<br>"));
+          const inserted = normalizePastedLessonHtml(html, text);
           document.execCommand("insertHTML", false, inserted);
           emitChange();
         }}

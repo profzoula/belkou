@@ -85,6 +85,219 @@ export function sanitizeLessonHtml(html: string): string {
   return DOMPurify.sanitize(html, LESSON_HTML_CONFIG);
 }
 
+function unwrapElement(element: Element) {
+  const parent = element.parentNode;
+  if (!parent) return;
+  while (element.firstChild) {
+    parent.insertBefore(element.firstChild, element);
+  }
+  parent.removeChild(element);
+}
+
+function isWordOrDocsHtml(html: string): boolean {
+  return /mso-|WordSection|docs-internal|SpellE|GramE|o:p>|xmlns:w=/i.test(html);
+}
+
+function plainTextToLessonHtml(text: string): string {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const blocks: string[] = [];
+  let listItems: string[] | null = null;
+  let listOrdered = false;
+
+  const flushList = () => {
+    if (!listItems?.length) {
+      listItems = null;
+      return;
+    }
+    const tag = listOrdered ? "ol" : "ul";
+    blocks.push(`<${tag}>${listItems.map((item) => `<li>${inlineMarkdownToHtml(item)}</li>`).join("")}</${tag}>`);
+    listItems = null;
+    listOrdered = false;
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\u00a0/g, " ");
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+
+    const bullet = trimmed.match(/^[•●◦▪\-*–—]\s+(.+)$/);
+    const numbered = trimmed.match(/^\d+[.)]\s+(.+)$/);
+    if (bullet) {
+      if (listOrdered && listItems) flushList();
+      listItems ??= [];
+      listItems.push(bullet[1].trim());
+      continue;
+    }
+    if (numbered) {
+      if (!listOrdered && listItems) flushList();
+      listOrdered = true;
+      listItems ??= [];
+      listItems.push(numbered[1].trim());
+      continue;
+    }
+
+    flushList();
+
+    if (trimmed.length <= 90 && trimmed.endsWith("?") && !trimmed.includes(". ")) {
+      blocks.push(`<h2>${inlineMarkdownToHtml(trimmed)}</h2>`);
+      continue;
+    }
+
+    if (trimmed.length <= 70 && trimmed.endsWith(":")) {
+      blocks.push(`<p><strong>${inlineMarkdownToHtml(trimmed.slice(0, -1))}</strong> :</p>`);
+      continue;
+    }
+
+    blocks.push(`<p>${inlineMarkdownToHtml(trimmed)}</p>`);
+  }
+
+  flushList();
+  return blocks.join("");
+}
+
+function mapHeadingTag(tag: string): string {
+  if (tag === "h1" || tag === "h4" || tag === "h5" || tag === "h6") return "h2";
+  return tag;
+}
+
+function normalizePastedDom(root: HTMLElement) {
+  root.querySelectorAll("style, meta, link, script, xml").forEach((node) => node.remove());
+
+  const stripTags = new Set(["span", "font", "u", "o:p", "w:sdt"]);
+  const toProcess = [...root.querySelectorAll("*")];
+
+  for (const element of toProcess) {
+    const tag = element.tagName.toLowerCase();
+
+    if (stripTags.has(tag)) {
+      unwrapElement(element);
+      continue;
+    }
+
+    if (tag === "h1" || tag === "h4" || tag === "h5" || tag === "h6") {
+      const replacement = document.createElement(mapHeadingTag(tag));
+      replacement.innerHTML = element.innerHTML;
+      element.replaceWith(replacement);
+      continue;
+    }
+
+    if (tag === "div" && !element.querySelector("ul, ol, table, details, pre, blockquote")) {
+      const replacement = document.createElement("p");
+      replacement.innerHTML = element.innerHTML;
+      element.replaceWith(replacement);
+      continue;
+    }
+
+    for (const attr of [...element.attributes]) {
+      element.removeAttribute(attr.name);
+    }
+  }
+
+  groupBulletParagraphs(root);
+}
+
+function groupBulletParagraphs(root: HTMLElement) {
+  const children = [...root.childNodes];
+  root.innerHTML = "";
+
+  let listItems: string[] | null = null;
+  let listOrdered = false;
+
+  const flushList = () => {
+    if (!listItems?.length) {
+      listItems = null;
+      return;
+    }
+    const list = document.createElement(listOrdered ? "ol" : "ul");
+    for (const item of listItems) {
+      const li = document.createElement("li");
+      li.innerHTML = item;
+      list.appendChild(li);
+    }
+    root.appendChild(list);
+    listItems = null;
+    listOrdered = false;
+  };
+
+  const appendBlock = (node: Node) => {
+    flushList();
+    root.appendChild(node);
+  };
+
+  for (const child of children) {
+    if (child.nodeType !== Node.ELEMENT_NODE) {
+      const text = child.textContent?.trim();
+      if (text) {
+        const p = document.createElement("p");
+        p.textContent = text;
+        appendBlock(p);
+      }
+      continue;
+    }
+
+    const element = child as HTMLElement;
+    if (element.tagName.toLowerCase() !== "p") {
+      appendBlock(element);
+      continue;
+    }
+
+    const text = element.textContent?.trim() ?? "";
+    const bullet = text.match(/^[•●◦▪\-*–—]\s+(.+)$/);
+    const numbered = text.match(/^\d+[.)]\s+(.+)$/);
+
+    if (bullet) {
+      if (listOrdered && listItems) flushList();
+      listItems ??= [];
+      listItems.push(inlineMarkdownToHtml(bullet[1].trim()));
+      element.remove();
+      continue;
+    }
+
+    if (numbered) {
+      if (!listOrdered && listItems) flushList();
+      listOrdered = true;
+      listItems ??= [];
+      listItems.push(inlineMarkdownToHtml(numbered[1].trim()));
+      element.remove();
+      continue;
+    }
+
+    appendBlock(element);
+  }
+
+  flushList();
+}
+
+function cleanPastedHtmlDocument(html: string): string {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  normalizePastedDom(doc.body);
+  return doc.body.innerHTML.trim();
+}
+
+/** Normalize clipboard content — keeps lists/headings, strips Word/Docs spell-check styling. */
+export function normalizePastedLessonHtml(html: string, plainText: string): string {
+  const trimmedHtml = html.trim();
+  const trimmedText = plainText.trim();
+
+  if (typeof document === "undefined") {
+    return sanitizeLessonHtml(trimmedHtml ? trimmedHtml : plainTextToLessonHtml(trimmedText));
+  }
+
+  if (!trimmedHtml || isWordOrDocsHtml(trimmedHtml)) {
+    return sanitizeLessonHtml(plainTextToLessonHtml(trimmedText));
+  }
+
+  const cleaned = cleanPastedHtmlDocument(trimmedHtml);
+  if (!cleaned.replace(/<[^>]+>/g, "").trim() && trimmedText) {
+    return sanitizeLessonHtml(plainTextToLessonHtml(trimmedText));
+  }
+
+  return sanitizeLessonHtml(cleaned);
+}
+
 export function lessonContentForEditor(content: string): string {
   return markdownToLessonHtml(content);
 }
