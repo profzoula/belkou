@@ -17,7 +17,10 @@ type LessonContentEditorProps = {
 type EditorMode = "visual" | "markdown";
 
 export function LessonContentEditor({ value, onChange, className }: LessonContentEditorProps) {
-  const [mode, setMode] = useState<EditorMode>(() => lessonContentEditorMode(value));
+  const [mode, setMode] = useState<EditorMode>(() =>
+    value.trim() ? lessonContentEditorMode(value) : "visual",
+  );
+  const [showMarkdown, setShowMarkdown] = useState(false);
 
   const switchMode = (next: EditorMode) => {
     if (next === mode) return;
@@ -33,31 +36,50 @@ export function LessonContentEditor({ value, onChange, className }: LessonConten
 
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="inline-flex rounded-lg border border-border bg-muted/30 p-0.5">
-        <button
-          type="button"
-          className={cn(
-            "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-            mode === "visual"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-          onClick={() => switchMode("visual")}
-        >
-          Visuel
-        </button>
-        <button
-          type="button"
-          className={cn(
-            "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-            mode === "markdown"
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-          onClick={() => switchMode("markdown")}
-        >
-          Markdown
-        </button>
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-lg border border-border bg-muted/30 p-0.5">
+          <button
+            type="button"
+            className={cn(
+              "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              mode === "visual"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+            onClick={() => {
+              setShowMarkdown(false);
+              switchMode("visual");
+            }}
+          >
+            Visuel
+          </button>
+          {showMarkdown ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                mode === "markdown"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              onClick={() => switchMode("markdown")}
+            >
+              Markdown
+            </button>
+          ) : null}
+        </div>
+        {!showMarkdown ? (
+          <button
+            type="button"
+            className="text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            onClick={() => {
+              setShowMarkdown(true);
+              switchMode("markdown");
+            }}
+          >
+            Mode Markdown (avancé)
+          </button>
+        ) : null}
       </div>
 
       {mode === "visual" ? (

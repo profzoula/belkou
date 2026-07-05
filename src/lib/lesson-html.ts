@@ -18,14 +18,26 @@ const LESSON_HTML_CONFIG = {
     "h2",
     "h3",
     "img",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "blockquote",
+    "pre",
+    "code",
+    "details",
+    "summary",
+    "hr",
   ],
-  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel"],
+  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class"],
 };
 
 export function isLessonHtml(content: string): boolean {
   const trimmed = content.trim();
   if (!trimmed) return false;
-  return trimmed.startsWith("<") || /<(?:p|h[2-3]|ul|ol|li|strong|em|br|img)\b/i.test(trimmed);
+  return trimmed.startsWith("<") || /<(?:p|h[2-3]|ul|ol|li|strong|em|br|img|table|details|blockquote|pre)\b/i.test(trimmed);
 }
 
 function escapeHtml(text: string): string {
@@ -61,9 +73,8 @@ export function markdownToLessonHtml(raw: string): string {
         return `<ul>${block.items.map((item) => `<li>${inlineMarkdownToHtml(item)}</li>`).join("")}</ul>`;
       }
       if (block.type === "accordion") {
-        const title = block.title ? `<h3>${escapeHtml(block.title)}</h3>` : "";
-        const body = block.body ? `<p>${inlineMarkdownToHtml(block.body)}</p>` : "";
-        return `${title}${body}`;
+        const body = block.body ? `<p>${inlineMarkdownToHtml(block.body)}</p>` : "<p></p>";
+        return `<details><summary>${escapeHtml(block.title)}</summary>${body}</details>`;
       }
       return `<p>${inlineMarkdownToHtml(block.text)}</p>`;
     })
@@ -90,6 +101,17 @@ function getTurndown(): TurndownService {
     turndown.addRule("h3Accordion", {
       filter: ["h3"],
       replacement: (content) => `### ${content}\n\n`,
+    });
+    turndown.addRule("detailsAccordion", {
+      filter: (node) => node.nodeName === "DETAILS",
+      replacement: (_content, node) => {
+        const element = node as HTMLElement;
+        const summary = element.querySelector("summary")?.textContent?.trim() ?? "";
+        const clone = element.cloneNode(true) as HTMLElement;
+        clone.querySelector("summary")?.remove();
+        const body = getTurndown().turndown(clone.innerHTML).trim();
+        return `### ${summary}\n\n${body}\n\n`;
+      },
     });
   }
   return turndown;

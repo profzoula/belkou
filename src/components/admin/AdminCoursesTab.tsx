@@ -915,9 +915,10 @@ export function AdminCoursesTab() {
           <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
             Dans chaque session, descendez jusqu&apos;à{" "}
             <strong className="text-foreground">Ajouter une leçon</strong> →{" "}
-            <strong className="text-foreground">Module texte</strong>. Choisissez l&apos;onglet{" "}
-            <strong className="text-foreground">Visuel</strong> (barre d&apos;outils) ou{" "}
-            <strong className="text-foreground">Markdown</strong> (##, ###, listes), puis{" "}
+            <strong className="text-foreground">Module texte</strong>. Cliquez{" "}
+            <strong className="text-foreground">Modèle</strong> pour une structure prête, puis{" "}
+            <strong className="text-foreground">Section ▾</strong> pour les blocs repliables. Pas
+            besoin de Markdown — utilisez la barre d&apos;outils Visuel, puis{" "}
             <strong className="text-foreground">Enregistrer</strong>.
           </p>
         </div>
@@ -1314,7 +1315,7 @@ export function AdminCoursesTab() {
                           </p>
                         ) : (
                           <p className="text-[11px] text-muted-foreground">
-                            Visuel ou Markdown — changez d&apos;onglet dans le champ Contenu.
+                            Cliquez <strong>Modèle</strong> dans l&apos;éditeur Visuel pour commencer.
                           </p>
                         )}
                         <label className="flex items-center gap-2 text-sm">

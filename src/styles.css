@@ -402,6 +402,48 @@
   .lesson-html b {
     @apply font-semibold text-foreground;
   }
+  .lesson-html details {
+    @apply my-4 overflow-hidden rounded-lg border border-border bg-muted/20;
+  }
+  .lesson-html summary {
+    @apply cursor-pointer list-none px-4 py-3 text-sm font-semibold text-foreground;
+  }
+  .lesson-html summary::-webkit-details-marker {
+    display: none;
+  }
+  .lesson-html details > :not(summary) {
+    @apply px-4 pb-4;
+  }
+  .lesson-html table {
+    @apply my-4 w-full border-collapse overflow-hidden rounded-lg border border-border text-sm;
+  }
+  .lesson-html th {
+    @apply border border-border bg-muted/50 px-3 py-2 text-left font-semibold text-foreground;
+  }
+  .lesson-html td {
+    @apply border border-border px-3 py-2;
+  }
+  .lesson-html blockquote {
+    @apply my-3 border-l-4 border-primary/40 pl-4 italic text-muted-foreground;
+  }
+  .lesson-html pre {
+    @apply my-3 overflow-x-auto rounded-lg border border-border bg-muted/40 p-3 font-mono text-xs;
+  }
+  .lesson-html code {
+    @apply font-mono text-[0.9em];
+  }
+  .lesson-html hr {
+    @apply my-6 border-border;
+  }
+  .rich-text-editor details {
+    @apply my-3 overflow-hidden rounded-lg border border-dashed border-primary/30 bg-primary/5;
+  }
+  .rich-text-editor summary {
+    @apply cursor-pointer list-none px-3 py-2 text-sm font-semibold;
+  }
+  .rich-text-editor summary::-webkit-details-marker {
+    display: none;
+  }
   .bg-course-hero {
     background: var(--course-hero);
   }
