@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
@@ -56,7 +56,13 @@ import {
   adminUpdateCourse,
   adminUpdateLesson,
   getAdminCourses,
+  refreshAdminSession,
 } from "@/lib/fns/admin";
+import {
+  clearAdminSessionToken,
+  isAdminAuthError,
+  syncAdminSessionToken,
+} from "@/lib/admin-session";
 import { slugifyTitle } from "@/lib/course-storage";
 import {
   formatScheduledPublishLabel,
@@ -152,7 +158,9 @@ function courseTypeBadge(isBase: boolean) {
 }
 
 export function AdminCoursesTab() {
+  const navigate = useNavigate();
   const loadFn = useServerFn(getAdminCourses);
+  const refreshSessionFn = useServerFn(refreshAdminSession);
   const saveLessonFn = useServerFn(adminUpdateLesson);
   const saveCourseFn = useServerFn(adminUpdateCourse);
   const publishFn = useServerFn(adminSetCoursePublished);
@@ -213,14 +221,36 @@ export function AdminCoursesTab() {
     setDrafts(nextDrafts);
   };
 
+  const ensureAdminSession = async (): Promise<boolean> => {
+    const ok = await syncAdminSessionToken(() => refreshSessionFn());
+    if (!ok) {
+      clearAdminSessionToken();
+      toast.error("Session expirée — reconnectez-vous");
+      navigate({ to: "/admin/login" });
+    }
+    return ok;
+  };
+
+  const handleAdminError = (error: unknown, fallback: string) => {
+    const message = error instanceof Error ? error.message : fallback;
+    if (isAdminAuthError(message)) {
+      clearAdminSessionToken();
+      toast.error("Session expirée — reconnectez-vous");
+      navigate({ to: "/admin/login" });
+      return;
+    }
+    toast.error(message);
+  };
+
   const load = async () => {
     setLoading(true);
     try {
+      if (!(await ensureAdminSession())) return;
       const result = await loadFn();
       setCourses(result.courses);
       syncDrafts(result.courses);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Chargement impossible");
+      handleAdminError(error, "Chargement impossible");
     } finally {
       setLoading(false);
     }
@@ -463,6 +493,7 @@ export function AdminCoursesTab() {
 
     setSavingId(key);
     try {
+      if (!(await ensureAdminSession())) return;
       const result = await saveLessonFn({
         data: {
           courseSlug,
@@ -485,7 +516,7 @@ export function AdminCoursesTab() {
       }));
       toast.success("Leçon enregistrée");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Sauvegarde impossible");
+      handleAdminError(error, "Sauvegarde impossible");
     } finally {
       setSavingId(null);
     }

@@ -1,6 +1,6 @@
 export const ADMIN_COOKIE_NAME = "belkou_admin";
 const COOKIE_NAME = ADMIN_COOKIE_NAME;
-const MAX_AGE_SEC = 60 * 60 * 24;
+const MAX_AGE_SEC = 60 * 60 * 24 * 7;
 
 type AdminPayload = {
   u: string;

@@ -26,6 +26,7 @@ export const startInstance = createStart(() => ({
       const token = getAdminSessionToken();
       if (token && !headers.has("Authorization")) {
         headers.set("Authorization", `Bearer ${token}`);
+        headers.set("X-Admin-Token", token);
       }
       return fetch(url, {
         ...init,

@@ -454,7 +454,10 @@ export const refreshAdminSession = createServerFn({ method: "GET" }).handler(asy
   if (!rawToken) return { ok: false as const };
   const admin = await verifyAdminSessionToken(rawToken, env.ADMIN_PASSWORD);
   if (!admin) return { ok: false as const };
-  return { ok: true as const, token: rawToken };
+
+  const renewed = await createAdminToken(admin, env.ADMIN_PASSWORD);
+  setResponseHeader("Set-Cookie", adminCookieHeader(renewed, isSecureRequest()));
+  return { ok: true as const, token: renewed };
 });
 
 export const getAdminCourses = createServerFn({ method: "GET" }).handler(async () => {
