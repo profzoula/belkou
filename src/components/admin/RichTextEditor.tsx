@@ -15,6 +15,7 @@ import {
   Quote,
   Table,
   Underline,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { normalizePastedLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
@@ -160,7 +161,11 @@ export function RichTextEditor({
   const insertLink = () => {
     const url = window.prompt("Collez l'URL du lien (https://…)");
     if (!url?.trim()) return;
-    exec("createLink", url.trim());
+    const selection = window.getSelection()?.toString().trim();
+    const label = selection || url.trim();
+    insertHtml(
+      `<a href="${escapeHtml(url.trim())}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`,
+    );
   };
 
   const insertImage = () => {
@@ -232,6 +237,22 @@ export function RichTextEditor({
     );
   };
 
+  const insertQuizSubSession = () => {
+    const html = editorRef.current?.innerHTML ?? value;
+    const sessionMatches = [...html.matchAll(/data-lesson-session="(\d+)"/g)];
+    const sessionNum = sessionMatches.length
+      ? Number.parseInt(sessionMatches[sessionMatches.length - 1][1], 10)
+      : 1;
+    const existingSubs = [
+      ...html.matchAll(new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi")),
+    ];
+    const nextSub = existingSubs.length + 1;
+    const label = `${sessionNum}.${nextSub}`;
+    insertHtml(
+      `<h3 data-lesson-subsession data-lesson-quiz="prepare-anviwonnman-ch1">${label} Quiz Chapit la</h3><p>Reponn tout 5 kesyon yo kòrèkteman (5/5) pou w ka kontinye ak rès kou a.</p>`,
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -248,6 +269,11 @@ export function RichTextEditor({
           />
           <ToolbarPill label="Session" icon={<Heading2 className="h-3.5 w-3.5" />} onClick={insertSession} />
           <ToolbarPill label="1.1" icon={<Heading3 className="h-3.5 w-3.5" />} onClick={insertSubSession} />
+          <ToolbarPill
+            label="Quiz"
+            icon={<ClipboardCheck className="h-3.5 w-3.5" />}
+            onClick={insertQuizSubSession}
+          />
           <ToolbarPill
             label="Section ▾"
             icon={<PanelBottomOpen className="h-3.5 w-3.5" />}
@@ -298,7 +324,7 @@ export function RichTextEditor({
         <p className="text-[11px] leading-relaxed text-muted-foreground px-0.5">
           <strong className="text-foreground">Modèle</strong> = Session 1 + sous-sessions 1.1, 1.2 ·{" "}
           <strong className="text-foreground">Session</strong> / <strong className="text-foreground">1.1</strong> pour
-          ajouter des blocs.
+          ajouter des blocs · <strong className="text-foreground">Quiz</strong> = 5 questions (5/5 requis).
         </p>
       </div>
       <div

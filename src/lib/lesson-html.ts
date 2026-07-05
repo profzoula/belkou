@@ -31,7 +31,7 @@ const LESSON_HTML_CONFIG = {
     "summary",
     "hr",
   ],
-  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "data-lesson-session", "data-lesson-subsession"],
+  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "data-lesson-session", "data-lesson-subsession", "data-lesson-quiz"],
 };
 
 export function isLessonHtml(content: string): boolean {
@@ -98,8 +98,17 @@ export function markdownToLessonHtml(raw: string): string {
     .join("");
 }
 
+function normalizeLessonLinks(html: string): string {
+  return html.replace(/<a\b([^>]*)>/gi, (_match, attrs: string) => {
+    const withoutTarget = attrs.replace(/\btarget\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+    const withoutRel = withoutTarget.replace(/\brel\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+    return `<a${withoutRel} target="_blank" rel="noopener noreferrer">`;
+  });
+}
+
 export function sanitizeLessonHtml(html: string): string {
-  return DOMPurify.sanitize(stripClipboardArtifacts(html), LESSON_HTML_CONFIG);
+  const sanitized = DOMPurify.sanitize(stripClipboardArtifacts(html), LESSON_HTML_CONFIG);
+  return normalizeLessonLinks(sanitized);
 }
 
 function unwrapElement(element: Element) {

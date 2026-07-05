@@ -6,6 +6,7 @@ export type ArticleSubSession = {
   title: string;
   blocks: LessonContentBlock[];
   html?: string;
+  quizId?: string;
 };
 
 export type ArticleSession = {
@@ -240,12 +241,14 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       subIndex += 1;
       const text = element.textContent?.trim() ?? "";
       const sub = parseSubSessionTitle(text, current.number, subIndex);
+      const quizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
       const body = collectBlocksUntilHeading(nodes, index);
       current.subSessions.push({
         number: sub.number,
         title: sub.title,
         blocks: [],
         html: body.html || undefined,
+        quizId,
       });
       index = body.next - 1;
     }
