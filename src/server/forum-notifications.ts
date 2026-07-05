@@ -4,12 +4,13 @@ import { getSupabaseAdmin, supabaseListRegistrations } from "@/server/supabase-r
 
 export type BelKouNotification = {
   id: string;
-  type: "forum_post" | "forum_reply";
+  type: "forum_post" | "forum_reply" | "course_lesson";
   title: string;
   body: string | null;
   courseSlug: string | null;
   postId: string | null;
   replyId: string | null;
+  lessonId: string | null;
   readAt: string | null;
   createdAt: string;
 };
@@ -23,6 +24,7 @@ function mapNotification(row: Record<string, unknown>): BelKouNotification {
     courseSlug: row.course_slug ? String(row.course_slug) : null,
     postId: row.post_id ? String(row.post_id) : null,
     replyId: row.reply_id ? String(row.reply_id) : null,
+    lessonId: row.lesson_id ? String(row.lesson_id) : null,
     readAt: row.read_at ? String(row.read_at) : null,
     createdAt: String(row.created_at),
   };
@@ -88,6 +90,7 @@ export async function insertNotifications(
     courseSlug?: string;
     postId?: string;
     replyId?: string;
+    lessonId?: string;
   }>,
 ): Promise<void> {
   const sb = getSupabaseAdmin();
@@ -101,6 +104,7 @@ export async function insertNotifications(
     course_slug: item.courseSlug ?? null,
     post_id: item.postId ?? null,
     reply_id: item.replyId ?? null,
+    lesson_id: item.lessonId ?? null,
     created_at: new Date().toISOString(),
   }));
 
@@ -163,6 +167,52 @@ export async function notifyForumReply(params: {
       replyId: params.replyId,
     })),
   );
+}
+
+export async function notifyCourseNewLesson(params: {
+  courseSlug: string;
+  courseTitle: string;
+  lessonId: string;
+  lessonTitle: string;
+}): Promise<void> {
+  const recipients = await listEnrolledUserIdsForCourse(params.courseSlug);
+  if (!recipients.length) return;
+
+  await insertNotifications(
+    recipients.map((userId) => ({
+      userId,
+      type: "course_lesson" as const,
+      title: `Nouvelle vidéo — ${params.courseTitle}`,
+      body: `${params.lessonTitle} est maintenant disponible`,
+      courseSlug: params.courseSlug,
+      lessonId: params.lessonId,
+    })),
+  );
+}
+
+export async function notifyCourseLessonIfVideoAdded(params: {
+  courseSlug: string;
+  lessonId: string;
+  hadVideo: boolean;
+}): Promise<void> {
+  if (params.hadVideo) return;
+
+  const { getResolvedCourseBySlug } = await import("@/server/site-content");
+  const { getLessonById, getLessonVimeo } = await import("@/lib/courses");
+
+  const course = await getResolvedCourseBySlug(params.courseSlug);
+  if (!course) return;
+
+  const lesson = getLessonById(course, params.lessonId);
+  if (!lesson || lesson.type !== "video") return;
+  if (!getLessonVimeo(lesson, course)) return;
+
+  await notifyCourseNewLesson({
+    courseSlug: params.courseSlug,
+    courseTitle: course.title,
+    lessonId: params.lessonId,
+    lessonTitle: lesson.title,
+  });
 }
 
 export async function listNotificationsForUser(

@@ -372,6 +372,36 @@
     overflow-wrap: anywhere;
     word-break: break-word;
   }
+  .rich-text-editor:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+  .lesson-html h2 {
+    @apply pt-2 font-display text-xl font-bold text-foreground;
+  }
+  .lesson-html h3 {
+    @apply pt-1 text-base font-semibold text-foreground;
+  }
+  .lesson-html p {
+    @apply leading-relaxed;
+  }
+  .lesson-html ul {
+    @apply list-disc space-y-1.5 pl-5;
+  }
+  .lesson-html ol {
+    @apply list-decimal space-y-1.5 pl-5;
+  }
+  .lesson-html a {
+    @apply font-medium text-primary underline underline-offset-2;
+  }
+  .lesson-html img {
+    @apply my-3 max-w-full rounded-lg border border-border;
+  }
+  .lesson-html strong,
+  .lesson-html b {
+    @apply font-semibold text-foreground;
+  }
   .bg-course-hero {
     background: var(--course-hero);
   }

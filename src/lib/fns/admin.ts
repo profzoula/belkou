@@ -527,11 +527,26 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { updateLessonOverride, getResolvedCourses } = await import("@/server/site-content");
+    const { updateLessonOverride, getResolvedCourseBySlug, getResolvedCourses } = await import(
+      "@/server/site-content"
+    );
     const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
+    const { getLessonById, getLessonVimeo } = await import("@/lib/courses");
+
+    const courseBefore = await getResolvedCourseBySlug(data.courseSlug);
+    const lessonBefore = courseBefore ? getLessonById(courseBefore, data.lessonId) : undefined;
+    const hadVideo = Boolean(
+      lessonBefore &&
+        lessonBefore.type === "video" &&
+        getLessonVimeo(lessonBefore, courseBefore),
+    );
 
     let duration = data.duration;
-    if (data.vimeo?.trim()) {
+    let vimeo = data.vimeo;
+    if (data.type === "article") {
+      vimeo = "";
+      duration = data.duration?.trim() || "5 min";
+    } else if (data.vimeo?.trim()) {
       const resolved = await fetchVimeoDurationLabel(data.vimeo);
       if (resolved) duration = resolved;
     } else if (data.type === "video") {
@@ -542,7 +557,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
       courseSlug: data.courseSlug,
       lessonId: data.lessonId,
       patch: {
-        vimeo: data.vimeo,
+        vimeo,
         preview: data.preview,
         title: data.title,
         duration,
@@ -554,6 +569,13 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     if (!result.ok) {
       throw new Error(result.reason ?? "Sauvegarde impossible");
     }
+
+    const { notifyCourseLessonIfVideoAdded } = await import("@/server/forum-notifications");
+    void notifyCourseLessonIfVideoAdded({
+      courseSlug: data.courseSlug,
+      lessonId: data.lessonId,
+      hadVideo,
+    }).catch(() => undefined);
 
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
   });
@@ -715,6 +737,15 @@ export const adminAddLesson = createServerFn({ method: "POST" })
 
     if (!result.ok) {
       throw new Error(result.reason ?? "Ajout impossible");
+    }
+
+    if (result.lessonId && data.type !== "article") {
+      const { notifyCourseLessonIfVideoAdded } = await import("@/server/forum-notifications");
+      void notifyCourseLessonIfVideoAdded({
+        courseSlug: data.courseSlug,
+        lessonId: result.lessonId,
+        hadVideo: false,
+      }).catch(() => undefined);
     }
 
     return {

@@ -5,6 +5,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import { parseInlineMarkdown, parseLessonContent } from "@/lib/parse-lesson-content";
 
 type LessonArticleContentProps = {
@@ -31,6 +32,27 @@ function InlineText({ text }: { text: string }) {
 }
 
 export function LessonArticleContent({ title, content, onComplete }: LessonArticleContentProps) {
+  if (isLessonHtml(content)) {
+    const safeHtml = sanitizeLessonHtml(content);
+
+    return (
+      <div className="prose-lesson border-b border-border bg-card px-4 py-8 sm:px-8 sm:py-10 md:px-10">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+        <div
+          className="lesson-html mt-6 space-y-4 text-sm leading-relaxed text-muted-foreground sm:text-base"
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
+        />
+        {onComplete ? (
+          <div className="mt-8 flex justify-end">
+            <Button type="button" variant="hero" size="sm" onClick={onComplete}>
+              Marquer comme terminé
+            </Button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   const blocks = parseLessonContent(content);
   const accordionBlocks = blocks.filter((block) => block.type === "accordion");
   const introBlocks = blocks.filter((block) => block.type !== "accordion");

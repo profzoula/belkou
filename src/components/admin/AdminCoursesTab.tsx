@@ -9,6 +9,7 @@ import {
   CalendarClock,
   ChevronDown,
   ExternalLink,
+  FileText,
   Gift,
   Pencil,
   Plus,
@@ -35,6 +36,7 @@ import {
   type AdminCourseTab,
 } from "@/lib/admin-courses";
 import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
+import { LessonContentEditor } from "@/components/admin/LessonContentEditor";
 import { AdminCourseResourcesEditor } from "@/components/admin/AdminCourseResourcesEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCoursePrice, getCourseDisplayDuration, isFreeCourse } from "@/lib/courses";
@@ -444,9 +446,9 @@ export function AdminCoursesTab() {
           lessonId,
           title: draft.title,
           duration: draft.duration,
-          vimeo: draft.vimeo || undefined,
+          vimeo: draft.type === "video" ? draft.vimeo || undefined : undefined,
           preview: draft.preview,
-          content: draft.content,
+          content: draft.type === "article" ? draft.content : undefined,
           type: draft.type === "resource" ? undefined : draft.type,
         },
       });
@@ -908,6 +910,18 @@ export function AdminCoursesTab() {
           }}
         />
 
+        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm">
+          <p className="font-semibold">Vidéos et modules texte</p>
+          <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
+            Dans chaque session, descendez jusqu&apos;à{" "}
+            <strong className="text-foreground">Ajouter une leçon</strong> →{" "}
+            <strong className="text-foreground">Module texte</strong>. Choisissez l&apos;onglet{" "}
+            <strong className="text-foreground">Visuel</strong> (barre d&apos;outils) ou{" "}
+            <strong className="text-foreground">Markdown</strong> (##, ###, listes), puis{" "}
+            <strong className="text-foreground">Enregistrer</strong>.
+          </p>
+        </div>
+
         <Accordion
           type="multiple"
           key={selectedCourse.sections
@@ -1035,6 +1049,29 @@ export function AdminCoursesTab() {
                           </div>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
+                          {lesson.type !== "resource" && (
+                            <div className="space-y-1.5">
+                              <Label>Type</Label>
+                              <Select
+                                value={draft.type === "resource" ? "video" : draft.type}
+                                onValueChange={(value) => {
+                                  const type = value as "video" | "article";
+                                  updateDraft(selectedCourse.slug, lesson.id, {
+                                    type,
+                                    ...(type === "article" ? { vimeo: "", duration: draft.duration || "5 min" } : {}),
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className="rounded-lg">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="video">Vidéo</SelectItem>
+                                  <SelectItem value="article">Module texte</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
                           <div className="space-y-1.5 sm:col-span-2">
                             <Label>Titre</Label>
                             <Input
@@ -1045,7 +1082,7 @@ export function AdminCoursesTab() {
                               className="rounded-lg"
                             />
                           </div>
-                          {lesson.type === "video" && (
+                          {draft.type === "video" && (
                             <>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <Label>Vimeo (ID ou lien)</Label>
@@ -1102,7 +1139,7 @@ export function AdminCoursesTab() {
                               </div>
                             </>
                           )}
-                          {lesson.type === "article" && (
+                          {draft.type === "article" && (
                             <>
                               <div className="space-y-1.5">
                                 <Label>Durée de lecture</Label>
@@ -1116,20 +1153,14 @@ export function AdminCoursesTab() {
                                 />
                               </div>
                               <div className="space-y-1.5 sm:col-span-2">
-                                <Label>Contenu (Markdown)</Label>
-                                <Textarea
+                                <Label>Contenu</Label>
+                                <LessonContentEditor
+                                  key={key}
                                   value={draft.content}
-                                  onChange={(e) =>
-                                    updateDraft(selectedCourse.slug, lesson.id, { content: e.target.value })
+                                  onChange={(content) =>
+                                    updateDraft(selectedCourse.slug, lesson.id, { content })
                                   }
-                                  rows={12}
-                                  className="rounded-lg font-mono text-xs"
-                                  placeholder={"## Introduction\n\nTexte du module…\n\n### Section repliable\nContenu affiché dans un accordéon.\n\n- Point 1\n- Point 2"}
                                 />
-                                <p className="text-[11px] text-muted-foreground">
-                                  Utilisez ## pour un titre, ### pour une section repliable (style NetAcad), - pour
-                                  une liste, **gras** pour mettre en évidence.
-                                </p>
                               </div>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <label className="flex items-center gap-2 text-sm">
@@ -1160,7 +1191,31 @@ export function AdminCoursesTab() {
                     );
                   })}
                   <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
-                    <p className="text-sm font-semibold">Ajouter une leçon</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold">Ajouter une leçon</p>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={newLesson.type === "video" ? "default" : "outline"}
+                          className="h-8 rounded-lg text-xs"
+                          onClick={() => updateNewLessonDraft(section.id, { type: "video" })}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1" />
+                          Vidéo
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={newLesson.type === "article" ? "default" : "outline"}
+                          className="h-8 rounded-lg text-xs"
+                          onClick={() => updateNewLessonDraft(section.id, { type: "article" })}
+                        >
+                          <FileText className="h-3.5 w-3.5 mr-1" />
+                          Module texte
+                        </Button>
+                      </div>
+                    </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <Label>Type</Label>
@@ -1245,14 +1300,10 @@ export function AdminCoursesTab() {
                         </div>
                       ) : (
                         <div className="space-y-1.5 sm:col-span-2">
-                          <Label htmlFor={`new-lesson-content-${section.id}`}>Contenu (Markdown)</Label>
-                          <Textarea
-                            id={`new-lesson-content-${section.id}`}
+                          <Label htmlFor={`new-lesson-content-${section.id}`}>Contenu</Label>
+                          <LessonContentEditor
                             value={newLesson.content}
-                            onChange={(e) => updateNewLessonDraft(section.id, { content: e.target.value })}
-                            rows={8}
-                            className="rounded-lg font-mono text-xs"
-                            placeholder={"## Introduction\n\nTexte…\n\n### Section repliable\nDétails…"}
+                            onChange={(content) => updateNewLessonDraft(section.id, { content })}
                           />
                         </div>
                       )}
@@ -1263,7 +1314,7 @@ export function AdminCoursesTab() {
                           </p>
                         ) : (
                           <p className="text-[11px] text-muted-foreground">
-                            ## titre · ### section repliable · - liste · **gras**
+                            Visuel ou Markdown — changez d&apos;onglet dans le champ Contenu.
                           </p>
                         )}
                         <label className="flex items-center gap-2 text-sm">

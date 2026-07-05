@@ -21,14 +21,38 @@ import { cn } from "@/lib/utils";
 
 type NotificationItem = {
   id: string;
-  type: "forum_post" | "forum_reply";
+  type: "forum_post" | "forum_reply" | "course_lesson";
   title: string;
   body: string | null;
   courseSlug: string | null;
   postId: string | null;
+  lessonId: string | null;
   readAt: string | null;
   createdAt: string;
 };
+
+function notificationHref(item: NotificationItem) {
+  if (item.type === "course_lesson" && item.courseSlug && item.lessonId) {
+    return {
+      to: "/courses/$slug/learn" as const,
+      params: { slug: item.courseSlug },
+      search: { lesson: item.lessonId },
+    };
+  }
+
+  if (item.courseSlug && item.postId) {
+    return {
+      to: "/forum/$courseSlug/$postId" as const,
+      params: { courseSlug: item.courseSlug, postId: item.postId },
+    };
+  }
+
+  if (item.courseSlug) {
+    return { to: "/forum/$courseSlug" as const, params: { courseSlug: item.courseSlug } };
+  }
+
+  return { to: "/forum" as const };
+}
 
 function formatWhen(iso: string) {
   try {
@@ -130,12 +154,7 @@ export function NotificationBell({ className }: { className?: string }) {
         ) : (
           <div className="max-h-80 overflow-y-auto py-1">
             {items.map((item) => {
-              const href =
-                item.courseSlug && item.postId
-                  ? { to: "/forum/$courseSlug/$postId" as const, params: { courseSlug: item.courseSlug, postId: item.postId } }
-                  : item.courseSlug
-                    ? { to: "/forum/$courseSlug" as const, params: { courseSlug: item.courseSlug } }
-                    : { to: "/forum" as const };
+              const href = notificationHref(item);
 
               return (
                 <DropdownMenuItem key={item.id} asChild className="cursor-pointer px-4 py-3">
@@ -157,8 +176,13 @@ export function NotificationBell({ className }: { className?: string }) {
         )}
         <DropdownMenuSeparator className="m-0" />
         <DropdownMenuItem asChild className="px-4 py-2.5">
+          <Link to="/dashboard" onClick={() => setOpen(false)}>
+            Mes cours
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="px-4 py-2.5">
           <Link to="/forum" onClick={() => setOpen(false)}>
-            Ouvrir le forum
+            Forum
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
