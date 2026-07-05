@@ -40,6 +40,23 @@ export function isLessonHtml(content: string): boolean {
   return trimmed.startsWith("<") || /<(?:p|h[2-3]|ul|ol|li|strong|em|br|img|table|details|blockquote|pre)\b/i.test(trimmed);
 }
 
+function stripClipboardArtifacts(html: string): string {
+  return html
+    .replace(/<!--\s*StartFragment\s*-->/gi, "")
+    .replace(/<!--\s*EndFragment\s*-->/gi, "")
+    .replace(/\bStartFragment\b/gi, "")
+    .replace(/\bEndFragment\b/gi, "");
+}
+
+function stripClipboardArtifactsText(text: string): string {
+  return text
+    .replace(/<!--\s*StartFragment\s*-->/gi, "")
+    .replace(/<!--\s*EndFragment\s*-->/gi, "")
+    .replace(/\bStartFragment\b/gi, "")
+    .replace(/\bEndFragment\b/gi, "")
+    .trim();
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -82,7 +99,7 @@ export function markdownToLessonHtml(raw: string): string {
 }
 
 export function sanitizeLessonHtml(html: string): string {
-  return DOMPurify.sanitize(html, LESSON_HTML_CONFIG);
+  return DOMPurify.sanitize(stripClipboardArtifacts(html), LESSON_HTML_CONFIG);
 }
 
 function unwrapElement(element: Element) {
@@ -99,7 +116,7 @@ function isWordOrDocsHtml(html: string): boolean {
 }
 
 function plainTextToLessonHtml(text: string): string {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const lines = stripClipboardArtifactsText(text).replace(/\r\n/g, "\n").split("\n");
   const blocks: string[] = [];
   let listItems: string[] | null = null;
   let listOrdered = false;
@@ -165,6 +182,17 @@ function mapHeadingTag(tag: string): string {
 
 function normalizePastedDom(root: HTMLElement) {
   root.querySelectorAll("style, meta, link, script, xml").forEach((node) => node.remove());
+
+  const comments: Comment[] = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+  let comment = walker.nextNode();
+  while (comment) {
+    comments.push(comment as Comment);
+    comment = walker.nextNode();
+  }
+  for (const node of comments) {
+    node.remove();
+  }
 
   const stripTags = new Set(["span", "font", "u", "o:p", "w:sdt"]);
   const toProcess = [...root.querySelectorAll("*")];
@@ -279,8 +307,8 @@ function cleanPastedHtmlDocument(html: string): string {
 
 /** Normalize clipboard content — keeps lists/headings, strips Word/Docs spell-check styling. */
 export function normalizePastedLessonHtml(html: string, plainText: string): string {
-  const trimmedHtml = html.trim();
-  const trimmedText = plainText.trim();
+  const trimmedHtml = stripClipboardArtifacts(html.trim());
+  const trimmedText = stripClipboardArtifactsText(plainText);
 
   if (typeof document === "undefined") {
     return sanitizeLessonHtml(trimmedHtml ? trimmedHtml : plainTextToLessonHtml(trimmedText));

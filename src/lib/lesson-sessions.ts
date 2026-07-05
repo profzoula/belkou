@@ -127,13 +127,28 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
         startSession(session.number, session.title);
         continue;
       }
+      if (currentSub) {
+        currentSub.lines.push(line);
+      } else if (current) {
+        introLines.push(line);
+      }
+      continue;
     }
 
     if (trimmed.startsWith("### ") && current) {
-      flushSub();
-      subIndex += 1;
-      const sub = parseSubSessionTitle(trimmed.slice(4).trim(), current.number, subIndex);
-      currentSub = sub;
+      const heading = trimmed.slice(4).trim();
+      if (SUBSESSION_HEADING_RE.test(heading)) {
+        flushSub();
+        subIndex += 1;
+        const sub = parseSubSessionTitle(heading, current.number, subIndex);
+        currentSub = sub;
+        continue;
+      }
+      if (currentSub) {
+        currentSub.lines.push(line);
+      } else {
+        introLines.push(line);
+      }
       continue;
     }
 
@@ -150,14 +165,27 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
   return sessions.length ? sessions : null;
 }
 
+function isStructuralSessionH2(element: Element): boolean {
+  if (element.hasAttribute("data-lesson-session")) return true;
+  return parseSessionTitle(element.textContent ?? "") !== null;
+}
+
+function isStructuralSubSessionH3(element: Element): boolean {
+  if (element.hasAttribute("data-lesson-subsession")) return true;
+  const text = element.textContent?.trim() ?? "";
+  return SUBSESSION_HEADING_RE.test(text);
+}
+
 function collectBlocksUntilHeading(nodes: ChildNode[], start: number): { html: string; next: number } {
   const parts: string[] = [];
   let index = start + 1;
   while (index < nodes.length) {
     const node = nodes[index];
     if (node.nodeType === Node.ELEMENT_NODE) {
-      const tag = (node as Element).tagName.toLowerCase();
-      if (tag === "h2" || tag === "h3") break;
+      const element = node as Element;
+      const tag = element.tagName.toLowerCase();
+      if (tag === "h2" && isStructuralSessionH2(element)) break;
+      if (tag === "h3" && isStructuralSubSessionH3(element)) break;
     }
     if (node.nodeType === Node.ELEMENT_NODE) {
       parts.push((node as Element).outerHTML);
