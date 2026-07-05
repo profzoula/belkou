@@ -557,3 +557,23 @@
   animation: promo-glow 2.2s ease-in-out infinite;
   animation-delay: 0.4s;
 }
+
+.lesson-quiz-option:focus-visible {
+  outline: 2px solid oklch(0.50 0.18 272 / 0.45);
+  outline-offset: 2px;
+}
+
+.lesson-quiz-success-banner {
+  animation: lesson-quiz-success-in 0.45s var(--transition-smooth) both;
+}
+
+@keyframes lesson-quiz-success-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

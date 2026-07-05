@@ -158,7 +158,14 @@ function ArticleSubSessionPanel({
           <ArticleSubSessionBody sub={found.sub} />
 
           {showInlineQuiz ? (
-            <div ref={quizSectionRef} className="scroll-mt-24">
+            <div ref={quizSectionRef} className="scroll-mt-24 pt-4">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-border" />
+                <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  Evalyasyon
+                </span>
+                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-border to-border" />
+              </div>
               <LessonQuiz
                 quiz={lessonQuiz.quiz}
                 storageKey={quizPassKey}
