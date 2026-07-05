@@ -1,5 +1,5 @@
 import type { Course } from "@/lib/courses";
-import { isBaseCourseSlug } from "@/lib/courses";
+import { getLessonVimeo, isBaseCourseSlug } from "@/lib/courses";
 import { isCourseContentLive, isCourseListed, isScheduledInFuture } from "@/lib/course-publish";
 
 export type AdminCourse = Omit<Course, "thumbnail"> & {
@@ -23,7 +23,7 @@ export type AdminCourseTab = "published" | "scheduled" | "hidden" | "draft";
 export function getCourseMetrics(course: Course) {
   const lessons = course.sections.flatMap((section) => section.lessons);
   const videos = lessons.filter((lesson) => lesson.type === "video");
-  const missingVimeo = videos.filter((lesson) => !lesson.vimeo?.trim()).length;
+  const missingVimeo = videos.filter((lesson) => !getLessonVimeo(lesson, course)).length;
   return {
     lessonCount: lessons.length,
     videoCount: videos.length,
@@ -32,9 +32,9 @@ export function getCourseMetrics(course: Course) {
 }
 
 export function getAdminCourseTab(course: AdminCourse): AdminCourseTab {
-  if (course.missingVimeo > 0) return "draft";
   if (course.isScheduled) return "scheduled";
   if (course.isLive) return "published";
+  if (course.missingVimeo > 0) return "draft";
   return "hidden";
 }
 

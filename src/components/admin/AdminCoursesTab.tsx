@@ -283,7 +283,13 @@ export function AdminCoursesTab() {
       setCourses(result.courses);
       syncDrafts(result.courses);
       setShowScheduleFor(null);
-      toast.success(published ? "Cours publié" : "Cours masqué");
+      if (published && course.missingVimeo > 0) {
+        toast.success(
+          `Cours publié — ${course.missingVimeo} leçon${course.missingVimeo > 1 ? "s" : ""} sans vidéo`,
+        );
+      } else {
+        toast.success(published ? "Cours publié" : "Cours masqué");
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Mise à jour impossible");
     } finally {
@@ -1519,7 +1525,7 @@ export function AdminCoursesTab() {
                                 type="button"
                                 size="sm"
                                 className="h-7 rounded-lg text-xs"
-                                disabled={schedulingSlug === course.slug || course.missingVimeo > 0}
+                                disabled={schedulingSlug === course.slug}
                                 onClick={() => saveSchedule(course.slug, editorScheduleDraft)}
                               >
                                 OK
@@ -1540,11 +1546,7 @@ export function AdminCoursesTab() {
                             <div className="flex items-center gap-2">
                               <Switch
                                 checked={course.isLive}
-                                disabled={
-                                  togglingSlug === course.slug ||
-                                  course.missingVimeo > 0 ||
-                                  course.isScheduled
-                                }
+                                disabled={togglingSlug === course.slug || course.isScheduled}
                                 onCheckedChange={(checked) => togglePublished(course, checked)}
                                 className="data-[state=checked]:bg-[#1a2744]"
                               />
