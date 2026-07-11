@@ -27,8 +27,19 @@ export function CourseVideoPlayer({
 }: CourseVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const resumeAppliedRef = useRef(false);
+  const onLessonCompleteRef = useRef(onLessonComplete);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
   const [ended, setEnded] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [buffering, setBuffering] = useState(false);
+
+  onLessonCompleteRef.current = onLessonComplete;
+  onTimeUpdateRef.current = onTimeUpdate;
+
+  useEffect(() => {
+    resumeAppliedRef.current = false;
+  }, [lessonKey, startAtSeconds]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -36,14 +47,15 @@ export function CourseVideoPlayer({
 
     setEnded(false);
     setLoading(true);
+    setBuffering(false);
 
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
 
-    const handleLoaded = () => {
-      setLoading(false);
+    const applyResumePosition = () => {
+      if (resumeAppliedRef.current) return;
       if (startAtSeconds > 0 && Number.isFinite(startAtSeconds)) {
         try {
           video.currentTime = startAtSeconds;
@@ -51,31 +63,54 @@ export function CourseVideoPlayer({
           /* ignore */
         }
       }
+      resumeAppliedRef.current = true;
+    };
+
+    const handleLoaded = () => {
+      setLoading(false);
+      applyResumePosition();
     };
 
     const handleEnded = () => {
       setEnded(true);
-      onLessonComplete?.();
+      onLessonCompleteRef.current?.();
     };
 
     const handleTimeUpdate = () => {
-      onTimeUpdate?.(video.currentTime);
+      onTimeUpdateRef.current?.(video.currentTime);
     };
+
+    const handleWaiting = () => setBuffering(true);
+    const handlePlaying = () => setBuffering(false);
 
     video.addEventListener("loadedmetadata", handleLoaded);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("playing", handlePlaying);
 
     if (playback.kind === "hls") {
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = playback.url;
       } else if (Hls.isSupported()) {
-        const hls = new Hls({ enableWorker: true });
+        const hls = new Hls({
+          enableWorker: true,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 120,
+        });
         hlsRef.current = hls;
         hls.loadSource(playback.url);
         hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => setLoading(false));
-        hls.on(Hls.Events.ERROR, () => setLoading(false));
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          setLoading(false);
+          applyResumePosition();
+        });
+        hls.on(Hls.Events.ERROR, (_event, data) => {
+          if (data.fatal) {
+            setLoading(false);
+            setBuffering(false);
+          }
+        });
       } else {
         setLoading(false);
       }
@@ -91,12 +126,14 @@ export function CourseVideoPlayer({
       video.removeEventListener("loadedmetadata", handleLoaded);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("playing", handlePlaying);
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
     };
-  }, [lessonKey, onLessonComplete, onTimeUpdate, playback.kind, playback.posterUrl, playback.url, startAtSeconds]);
+  }, [lessonKey, playback.kind, playback.posterUrl, playback.url]);
 
   const replay = () => {
     const video = videoRef.current;
@@ -113,10 +150,10 @@ export function CourseVideoPlayer({
         className="h-full w-full"
         controls
         playsInline
-        preload="metadata"
+        preload={playback.kind === "mp4" ? "auto" : "metadata"}
       />
 
-      {loading ? (
+      {loading || buffering ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40">
           <Loader2 className="h-8 w-8 animate-spin text-white/80" />
         </div>

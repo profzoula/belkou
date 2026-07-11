@@ -693,6 +693,13 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
   const [activeArticleSubSessionId, setActiveArticleSubSessionId] = useState<string | null>(null);
   const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(new Set());
+  const [resumeAtSeconds, setResumeAtSeconds] = useState(0);
+
+  useEffect(() => {
+    setResumeAtSeconds(playbackByLessonId[activeLessonId] ?? 0);
+    // Only restore saved position when switching lessons — not on every 15s autosave.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLessonId]);
 
   useEffect(() => {
     lastPlaybackSaveRef.current = 0;
@@ -952,7 +959,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             onNextLesson={nextLesson ? () => selectLesson(nextLesson.id) : undefined}
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
-            startAtSeconds={playbackByLessonId[activeLesson.id] ?? 0}
+            startAtSeconds={resumeAtSeconds}
             onPlaybackTimeUpdate={(currentTime) => handlePlaybackTimeUpdate(activeLesson.id, currentTime)}
             activeArticleSubSessionId={activeArticleSubSessionId}
             onArticleSubSessionChange={handleArticleSubSessionChange}
