@@ -126,3 +126,54 @@ export async function uploadSourceVideo(params: {
 
   return { ok: true, storagePath };
 }
+
+async function listStoragePaths(prefix: string): Promise<string[]> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return [];
+
+  const normalized = prefix.replace(/\/+$/, "");
+  const { data, error } = await sb.storage.from(BUCKET).list(normalized);
+  if (error || !data?.length) return [];
+
+  const paths: string[] = [];
+  for (const entry of data) {
+    const entryPath = `${normalized}/${entry.name}`;
+    if (entry.metadata) {
+      paths.push(entryPath);
+      continue;
+    }
+    paths.push(...(await listStoragePaths(entryPath)));
+  }
+  return paths;
+}
+
+export async function deleteVideoStorageFiles(
+  video: VideoRecord,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return { ok: false, reason: "Supabase non configuré" };
+  }
+
+  const paths = new Set<string>();
+  if (video.storagePath) paths.add(video.storagePath);
+  if (video.posterPath) paths.add(video.posterPath);
+  if (video.previewPath) paths.add(video.previewPath);
+  if (video.hlsPath) paths.add(video.hlsPath);
+
+  for (const prefix of [`source/${video.id}`, `hls/${video.id}`]) {
+    for (const path of await listStoragePaths(prefix)) {
+      paths.add(path);
+    }
+  }
+
+  const toRemove = [...paths];
+  if (!toRemove.length) return { ok: true };
+
+  const { error } = await sb.storage.from(BUCKET).remove(toRemove);
+  if (error) {
+    return { ok: false, reason: error.message };
+  }
+
+  return { ok: true };
+}

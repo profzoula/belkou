@@ -143,3 +143,20 @@ export async function updateVideoRecord(
   }
   return true;
 }
+
+export async function deleteVideoRecord(id: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };
+  }
+
+  const { error } = await sb.from("videos").delete().eq("id", id);
+  if (error) {
+    if (isMissingTable(error.message)) {
+      return { ok: false, reason: "Table videos manquante" };
+    }
+    return { ok: false, reason: error.message };
+  }
+
+  return { ok: true };
+}

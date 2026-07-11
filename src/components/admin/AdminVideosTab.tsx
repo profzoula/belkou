@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Film, Loader2, Upload } from "lucide-react";
+import { Film, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAdminCourses } from "@/lib/fns/admin";
-import { adminListVideos, adminUploadVideo } from "@/lib/fns/videos";
+import { adminDeleteVideo, adminListVideos, adminUploadVideo } from "@/lib/fns/videos";
 import type { AdminCourse } from "@/lib/admin-courses";
 import {
   formatVideoDuration,
@@ -66,6 +66,7 @@ function statusBadgeClass(status: VideoRecord["status"]): string {
 export function AdminVideosTab() {
   const listVideosFn = useServerFn(adminListVideos);
   const uploadFn = useServerFn(adminUploadVideo);
+  const deleteFn = useServerFn(adminDeleteVideo);
   const listCoursesFn = useServerFn(getAdminCourses);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +74,7 @@ export function AdminVideosTab() {
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [courseSlug, setCourseSlug] = useState("");
   const [lessonId, setLessonId] = useState("");
@@ -147,6 +149,27 @@ export function AdminVideosTab() {
       toast.error(error instanceof Error ? error.message : "Upload impossible");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const removeVideo = async (video: VideoRecord) => {
+    if (
+      !window.confirm(
+        `Supprimer « ${video.title} » ?\n\nLe fichier MP4/HLS sera effacé. Les leçons liées devront être reliées à une autre vidéo.`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(video.id);
+    try {
+      await deleteFn({ data: { videoId: video.id } });
+      setVideos((current) => current.filter((item) => item.id !== video.id));
+      toast.success("Vidéo supprimée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -276,11 +299,28 @@ export function AdminVideosTab() {
                     </p>
                   ) : null}
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(video.status)}`}
-                >
-                  {formatVideoStatusLabel(video.status)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(video.status)}`}
+                  >
+                    {formatVideoStatusLabel(video.status)}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    disabled={deletingId === video.id}
+                    onClick={() => void removeVideo(video)}
+                    aria-label={`Supprimer ${video.title}`}
+                  >
+                    {deletingId === video.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

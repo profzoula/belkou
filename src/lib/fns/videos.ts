@@ -91,6 +91,31 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
 
 export type AdminVideosResponse = { videos: VideoRecord[] };
 
+export const adminDeleteVideo = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ videoId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { deleteVideoRecord, getVideoRecord } = await import("@/server/videos");
+    const { deleteVideoStorageFiles } = await import("@/server/video-storage");
+
+    const video = await getVideoRecord(data.videoId);
+    if (!video) {
+      throw new Error("Vidéo introuvable");
+    }
+
+    const storageResult = await deleteVideoStorageFiles(video);
+    if (!storageResult.ok) {
+      throw new Error(storageResult.reason);
+    }
+
+    const deleted = await deleteVideoRecord(data.videoId);
+    if (!deleted.ok) {
+      throw new Error(deleted.reason);
+    }
+
+    return { ok: true as const };
+  });
+
 export const getLessonVideoPlayback = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
