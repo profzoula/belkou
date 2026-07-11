@@ -26,6 +26,7 @@ import {
   getAllLessons,
   getContinueLearnSearch,
   getCourseActionLabel,
+  getCourseDisplayDuration,
   getFirstPreviewVideoLesson,
   getLessonDisplayDuration,
   getPlayableLearnSearch,
@@ -529,7 +530,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <section className="mb-10">
             <h2 className="text-xl font-bold mb-4">Contenu du cours</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {course.sections.length} sections · {countLessons(course)} leçons · {course.totalDuration} · Niveau{" "}
+              {course.sections.length} sections · {countLessons(course)} leçons · {getCourseDisplayDuration(course)} · Niveau{" "}
               {course.skillLevel}
             </p>
             <Accordion type="multiple" defaultValue={course.sections.slice(0, 1).map((s) => s.id)} className="rounded-xl border border-border px-4">

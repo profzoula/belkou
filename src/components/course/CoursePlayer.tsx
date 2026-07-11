@@ -24,6 +24,7 @@ import {
   countLessons,
   formatCount,
   getAllLessons,
+  getCourseDisplayDuration,
   getLessonDisplayDuration,
   getLessonVimeo,
   getSectionDurationMinutes,
@@ -190,14 +191,22 @@ function CourseVideoArea({
 
   if (!locked && vimeo) {
     return (
-      <VimeoPlayer
-        video={vimeo}
-        title={lesson.title}
-        lessonKey={lesson.id}
-        nextLessonTitle={nextLessonTitle}
-        onNextLesson={onNextLesson}
-        onLessonComplete={onLessonComplete}
-      />
+      <>
+        <VimeoPlayer
+          video={vimeo}
+          title={lesson.title}
+          lessonKey={lesson.id}
+          nextLessonTitle={nextLessonTitle}
+          onNextLesson={onNextLesson}
+          onLessonComplete={onLessonComplete}
+        />
+        <div className="border-b border-border bg-gradient-to-r from-violet-600/10 via-card to-emerald-600/10 px-4 py-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Leçon vidéo</p>
+          <h2 className="mt-0.5 font-display text-lg font-bold leading-snug text-foreground sm:text-xl">
+            {lesson.title}
+          </h2>
+        </div>
+      </>
     );
   }
 
@@ -353,7 +362,7 @@ function CurriculumSidebar({
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-sm font-bold">Contenu du cours</h2>
         <p className="text-xs text-muted-foreground">
-          {course.sections.length} sections · {countLessons(course)} leçons · {course.totalDuration}
+          {course.sections.length} sections · {countLessons(course)} leçons · {getCourseDisplayDuration(course)}
         </p>
       </div>
 
@@ -859,7 +868,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   <span className="text-muted-foreground">
                     {formatCount(course.studentsCount)} étudiants
                   </span>
-                  <span className="text-muted-foreground">{course.totalDuration}</span>
+                  <span className="text-muted-foreground">{getCourseDisplayDuration(course)}</span>
                 </div>
 
                 <p className="mt-2 text-xs text-muted-foreground">
@@ -925,7 +934,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       </div>
                       <div className="flex justify-between gap-4 py-2">
                         <dt className="text-muted-foreground">Vidéo</dt>
-                        <dd className="font-medium">{course.totalDuration}</dd>
+                        <dd className="font-medium">{getCourseDisplayDuration(course)}</dd>
                       </div>
                     </dl>
                   </div>

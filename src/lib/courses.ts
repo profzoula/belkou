@@ -289,8 +289,16 @@ export function formatCourseDurationLabel(totalMinutes: number): string {
   return `${minutes}min`;
 }
 
+/** Total shown in curriculum — sum of every lesson duration visible in the sidebar. */
+export function getCourseContentDurationMinutes(course: { sections: CourseSection[] }): number {
+  return course.sections.reduce(
+    (sum, section) => sum + getSectionDurationMinutes(section, course),
+    0,
+  );
+}
+
 export function getCourseDisplayDuration(course: { sections: CourseSection[] }): string {
-  return formatCourseDurationLabel(getCourseVideoDurationMinutes(course));
+  return formatCourseDurationLabel(getCourseContentDurationMinutes(course));
 }
 
 /** Progress weighted by video duration (hours/minutes), not lesson count. */

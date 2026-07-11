@@ -123,8 +123,11 @@ function ArticleSubSessionPanel({
     <CompleteLessonButton nextLessonTitle={nextLessonTitle} onComplete={handleComplete} />
   );
 
+  const isFirstSubInSession = found.sub.number === found.session.subSessions[0]?.number;
+  const sessionIntro = isFirstSubInSession ? found.session.introHtml?.trim() : "";
+
   return (
-    <div className="relative border-b border-border bg-card">
+    <div className="lesson-article-panel relative border-b border-border bg-gradient-to-b from-emerald-50/40 via-card to-card dark:from-emerald-950/20">
       {nav.prevId && onSubSessionChange ? (
         <button
           type="button"
@@ -147,14 +150,24 @@ function ArticleSubSessionPanel({
       ) : null}
 
       <div className="px-4 py-6 sm:px-10 sm:py-10 md:px-14">
-        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
-          Session {found.session.number} · {found.sub.number}
-        </p>
-        <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
-          {found.sub.title}
-        </h1>
+        <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 p-[1px] shadow-sm dark:border-emerald-800">
+          <div className="rounded-[15px] bg-card/95 px-5 py-4 backdrop-blur-sm sm:px-6">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              Session {found.session.number} · {found.sub.number}
+            </p>
+            <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
+              {found.sub.title}
+            </h1>
+          </div>
+        </div>
 
-        <div className="mt-6 min-h-[200px] space-y-6">
+        <div className="mt-2 min-h-[200px]">
+          {sessionIntro ? (
+            <div
+              className="lesson-html lesson-article-rich lesson-session-intro mb-8 overflow-hidden rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/90 via-card to-card p-5 shadow-sm dark:border-emerald-800/40 dark:from-emerald-950/30 sm:p-6"
+              dangerouslySetInnerHTML={{ __html: sessionIntro }}
+            />
+          ) : null}
           <ArticleSubSessionBody sub={found.sub} />
 
           {showInlineQuiz ? (

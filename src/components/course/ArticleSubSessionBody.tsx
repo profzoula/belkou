@@ -22,7 +22,7 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
   if (sub.html) {
     return (
       <div
-        className="lesson-html text-sm leading-relaxed text-muted-foreground sm:text-base"
+        className="lesson-html lesson-article-rich text-sm leading-relaxed text-muted-foreground sm:text-base"
         dangerouslySetInnerHTML={{ __html: sub.html }}
       />
     );
@@ -33,20 +33,23 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
   }
 
   return (
-    <div className="space-y-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+    <div className="lesson-article-rich space-y-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
       {sub.blocks.map((block, index) => {
         if (block.type === "heading") {
           return (
-            <h4 key={index} className="font-display text-base font-bold text-foreground">
+            <h4
+              key={index}
+              className="mt-4 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/60 px-4 py-2 font-display text-base font-bold text-foreground dark:bg-emerald-950/25"
+            >
               {block.text}
             </h4>
           );
         }
         if (block.type === "list") {
           return (
-            <ul key={index} className="list-disc space-y-1 pl-5">
+            <ul key={index} className="lesson-rich-list space-y-2 rounded-xl border border-border bg-muted/25 p-4">
               {block.items.map((item) => (
-                <li key={item}>
+                <li key={item} className="relative list-none pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500">
                   <InlineText text={item} />
                 </li>
               ))}
@@ -55,16 +58,21 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
         }
         if (block.type === "accordion") {
           return (
-            <details key={index} className="rounded-md border border-border px-3 py-2">
-              <summary className="cursor-pointer font-semibold text-foreground">{block.title}</summary>
-              <p className="mt-2">
+            <details
+              key={index}
+              className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+            >
+              <summary className="cursor-pointer bg-muted/30 px-4 py-3 font-semibold text-foreground transition-colors group-open:bg-primary/5">
+                {block.title}
+              </summary>
+              <p className="border-t border-border px-4 py-3">
                 <InlineText text={block.body} />
               </p>
             </details>
           );
         }
         return (
-          <p key={index}>
+          <p key={index} className="leading-relaxed">
             <InlineText text={block.text} />
           </p>
         );

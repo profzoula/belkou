@@ -549,11 +549,16 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     if (data.type === "article") {
       vimeo = "";
       duration = data.duration?.trim() || "5 min";
-    } else if (data.vimeo?.trim()) {
-      const resolved = await fetchVimeoDurationLabel(data.vimeo);
-      if (resolved) duration = resolved;
-    } else if (data.type === "video") {
-      duration = "";
+    } else {
+      const effectiveVimeo =
+        data.vimeo !== undefined ? data.vimeo.trim() : lessonBefore?.vimeo?.trim() || "";
+      if (effectiveVimeo) {
+        const resolved = await fetchVimeoDurationLabel(effectiveVimeo);
+        if (resolved) duration = resolved;
+        else if (data.type === "video" && !data.duration?.trim()) duration = "";
+      } else if (data.type === "video") {
+        duration = "";
+      }
     }
 
     const result = await updateLessonOverride({
