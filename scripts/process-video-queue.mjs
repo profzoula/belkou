@@ -370,7 +370,13 @@ async function processVideo(video) {
 
 async function main() {
   if (!dryRun) {
-    await ensureFfmpeg();
+    try {
+      await ensureFfmpeg();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`[BelKou] FFmpeg unavailable — HLS conversion skipped: ${message}`);
+      process.exit(0);
+    }
   } else {
     console.log("Dry run — FFmpeg check skipped.");
   }

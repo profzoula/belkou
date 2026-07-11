@@ -1,4 +1,5 @@
-import { spawn } from "node:child_process";
+import { spawn, execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -9,6 +10,8 @@ import { Readable } from "node:stream";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const clientRoot = join(root, "dist", "client");
 const workerUrl = pathToFileURL(join(root, "dist", "server", "index.js")).href;
+
+const execFileAsync = promisify(execFile);
 
 function loadDevVars() {
   const devVarsPath = join(root, ".dev.vars");
@@ -141,6 +144,16 @@ function shouldTryStatic(pathname) {
   );
 }
 
+async function logFfmpegStatus() {
+  try {
+    const { stdout } = await execFileAsync("ffmpeg", ["-version"]);
+    const firstLine = stdout.split("\n")[0]?.trim() ?? "ffmpeg OK";
+    console.log(`[BelKou] ${firstLine}`);
+  } catch {
+    console.warn("[BelKou] FFmpeg not found in PATH — HLS conversion disabled until installed");
+  }
+}
+
 function startVideoWorker() {
   if (process.env.ENABLE_VIDEO_WORKER === "false") {
     console.log("Video worker disabled (ENABLE_VIDEO_WORKER=false)");
@@ -218,5 +231,6 @@ createServer(async (req, res) => {
   }
 }).listen(port, host, () => {
   console.log(`BelKou server listening on http://${host}:${port}`);
+  void logFfmpegStatus();
   startVideoWorker();
 });
