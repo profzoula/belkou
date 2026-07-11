@@ -40,8 +40,8 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
       .object({
         title: z.string().min(1),
         contentType: z.string().min(1),
-        dataBase64: z.string().min(1),
         fileName: z.string().min(1),
+        fileSize: z.number().int().positive(),
         courseSlug: z.string().optional(),
         lessonId: z.string().optional(),
       })
@@ -50,12 +50,20 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { createVideoRecord, listVideoRecords, updateVideoRecord } = await import("@/server/videos");
-    const { uploadSourceVideo } = await import("@/server/video-storage");
+    const { createSourceVideoUploadUrl } = await import("@/server/video-storage");
+
+    const contentType = data.contentType.trim().toLowerCase();
+    if (!["video/mp4", "video/quicktime"].includes(contentType)) {
+      throw new Error("Format non supporté — MP4 ou MOV requis");
+    }
+    if (data.fileSize > 2 * 1024 * 1024 * 1024) {
+      throw new Error("Fichier trop volumineux (max 2 Go)");
+    }
 
     const created = await createVideoRecord({
       title: data.title,
       filename: data.fileName,
-      originalSize: Math.ceil((data.dataBase64.length * 3) / 4),
+      originalSize: data.fileSize,
       storagePath: "",
       courseSlug: data.courseSlug,
       lessonId: data.lessonId,
@@ -64,29 +72,58 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
       throw new Error(created.reason);
     }
 
-    const uploaded = await uploadSourceVideo({
+    const signed = await createSourceVideoUploadUrl({
       videoId: created.video.id,
-      contentType: data.contentType,
-      dataBase64: data.dataBase64,
       fileName: data.fileName,
     });
-    if (!uploaded.ok) {
+    if (!signed.ok) {
       await updateVideoRecord(created.video.id, {
         status: "failed",
-        errorMessage: uploaded.reason,
+        errorMessage: signed.reason,
       });
-      throw new Error(uploaded.reason);
+      throw new Error(signed.reason);
     }
 
-    await updateVideoRecord(created.video.id, {
+    return {
+      ok: true as const,
+      video: created.video,
+      signedUrl: signed.signedUrl,
+      token: signed.token,
+      storagePath: signed.storagePath,
+    };
+  });
+
+export const adminFinalizeVideoUpload = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        videoId: z.string().uuid(),
+        storagePath: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getVideoRecord, listVideoRecords, updateVideoRecord } = await import("@/server/videos");
+
+    const video = await getVideoRecord(data.videoId);
+    if (!video) {
+      throw new Error("Vidéo introuvable");
+    }
+
+    await updateVideoRecord(data.videoId, {
       status: "queued",
-      storagePath: uploaded.storagePath,
+      storagePath: data.storagePath,
       errorMessage: null,
     });
 
     const videos = await listVideoRecords();
-    const video = videos.find((item) => item.id === created.video.id) ?? created.video;
-    return { ok: true as const, video };
+    const updated = videos.find((item) => item.id === data.videoId) ?? {
+      ...video,
+      status: "queued" as const,
+      storagePath: data.storagePath,
+    };
+    return { ok: true as const, video: updated };
   });
 
 export type AdminVideosResponse = { videos: VideoRecord[] };

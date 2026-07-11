@@ -63,6 +63,7 @@ import {
   syncAdminSessionToken,
 } from "@/lib/admin-session";
 import { slugifyTitle } from "@/lib/course-storage";
+import { cn } from "@/lib/utils";
 import {
   formatScheduledPublishLabel,
   fromDatetimeLocalValue,
@@ -1151,6 +1152,9 @@ export function AdminCoursesTab() {
                             <>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <Label>Vidéo uploadée</Label>
+                                <p className="text-[11px] text-muted-foreground">
+                                  Upload MP4/MOV d&apos;abord dans Admin → Vidéos, puis choisissez-la ici.
+                                </p>
                                 <Select
                                   value={draft.videoId || "__none__"}
                                   onValueChange={(value) =>

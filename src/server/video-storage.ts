@@ -127,6 +127,37 @@ export async function uploadSourceVideo(params: {
   return { ok: true, storagePath };
 }
 
+export async function createSourceVideoUploadUrl(params: {
+  videoId: string;
+  fileName: string;
+}): Promise<
+  | { ok: true; signedUrl: string; token: string; storagePath: string }
+  | { ok: false; reason: string }
+> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };
+  }
+
+  const safeName = sanitizeFileName(params.fileName);
+  const storagePath = `source/${params.videoId}/${safeName}`;
+  const { data, error } = await sb.storage.from(BUCKET).createSignedUploadUrl(storagePath);
+
+  if (error || !data?.signedUrl || !data.token) {
+    if (error?.message.includes("Bucket not found")) {
+      return { ok: false, reason: "Bucket course-videos manquant — exécutez supabase/videos_storage.sql" };
+    }
+    return { ok: false, reason: error?.message ?? "URL d'upload introuvable" };
+  }
+
+  return {
+    ok: true,
+    signedUrl: data.signedUrl,
+    token: data.token,
+    storagePath,
+  };
+}
+
 async function listStoragePaths(prefix: string): Promise<string[]> {
   const sb = getSupabaseAdmin();
   if (!sb) return [];

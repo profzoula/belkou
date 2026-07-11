@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAdminCourses } from "@/lib/fns/admin";
-import { adminDeleteVideo, adminListVideos, adminUploadVideo } from "@/lib/fns/videos";
+import { adminDeleteVideo, adminFinalizeVideoUpload, adminListVideos, adminUploadVideo } from "@/lib/fns/videos";
 import type { AdminCourse } from "@/lib/admin-courses";
 import {
   formatVideoDuration,
@@ -25,25 +25,18 @@ import {
 const ACCEPT = "video/mp4,video/quicktime,.mp4,.mov";
 const MAX_BYTES = 2 * 1024 * 1024 * 1024;
 
-function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== "string") {
-        reject(new Error("Lecture impossible"));
-        return;
-      }
-      const base64 = result.split(",")[1];
-      if (!base64) {
-        reject(new Error("Fichier invalide"));
-        return;
-      }
-      resolve(base64);
-    };
-    reader.onerror = () => reject(new Error("Lecture impossible"));
-    reader.readAsDataURL(file);
+async function uploadFileToSignedUrl(file: File, signedUrl: string): Promise<void> {
+  const response = await fetch(signedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
+    },
+    body: file,
   });
+
+  if (!response.ok) {
+    throw new Error(`Upload stockage échoué (${response.status})`);
+  }
 }
 
 function defaultTitleFromFileName(fileName: string): string {
@@ -66,6 +59,7 @@ function statusBadgeClass(status: VideoRecord["status"]): string {
 export function AdminVideosTab() {
   const listVideosFn = useServerFn(adminListVideos);
   const uploadFn = useServerFn(adminUploadVideo);
+  const finalizeFn = useServerFn(adminFinalizeVideoUpload);
   const deleteFn = useServerFn(adminDeleteVideo);
   const listCoursesFn = useServerFn(getAdminCourses);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -128,18 +122,27 @@ export function AdminVideosTab() {
 
     setUploading(true);
     try {
-      const dataBase64 = await readFileAsBase64(selectedFile);
-      const result = await uploadFn({
+      const prepared = await uploadFn({
         data: {
           title: title.trim(),
           contentType: selectedFile.type || "video/mp4",
-          dataBase64,
           fileName: selectedFile.name,
+          fileSize: selectedFile.size,
           courseSlug: courseSlug || undefined,
           lessonId: lessonId || undefined,
         },
       });
-      toast.success("Vidéo uploadée — en file d'attente pour traitement HLS");
+
+      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl);
+
+      const result = await finalizeFn({
+        data: {
+          videoId: prepared.video.id,
+          storagePath: prepared.storagePath,
+        },
+      });
+
+      toast.success("Vidéo uploadée — reliez-la dans Admin → Cours si besoin");
       setVideos((current) => [result.video, ...current.filter((item) => item.id !== result.video.id)]);
       setSelectedFile(null);
       setTitle("");
@@ -178,7 +181,7 @@ export function AdminVideosTab() {
       <div>
         <h2 className="font-display text-2xl font-bold">Vidéos</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Upload MP4 — conversion HLS (1080/720/480) aktivite nan Sprint 2.
+          1) Upload MP4/MOV ici · 2) Admin → Cours → liez chaque leçon vidéo. Conversion HLS : Sprint 2.
         </p>
       </div>
 
@@ -201,6 +204,9 @@ export function AdminVideosTab() {
 
           <div className="space-y-1.5">
             <Label>Cours (optionnel)</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Pour lier une leçon, préférez Admin → Cours après l&apos;upload.
+            </p>
             <Select
               value={courseSlug || "__none__"}
               onValueChange={(value) => {
