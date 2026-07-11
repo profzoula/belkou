@@ -1,8 +1,6 @@
 [variables]
 NIXPACKS_NODE_VERSION = "22"
-
-[phases.setup]
-aptPkgs = ["ffmpeg"]
+NIXPACKS_APT_PACKAGES = "ffmpeg"
 
 [phases.install]
 cmds = ["npm ci"]
