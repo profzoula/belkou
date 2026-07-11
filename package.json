@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "process-videos": "node scripts/process-video-queue.mjs",
     "process-videos:once": "node scripts/process-video-queue.mjs --once",
+    "mark-videos-ready": "node scripts/mark-queued-videos-ready.mjs",
     "verify-videos": "node scripts/verify-video-setup.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."

@@ -159,9 +159,9 @@ export function CourseVideoPlayer({
         </div>
       ) : null}
 
-      {playback.status !== "ready" ? (
+      {playback.status === "processing" ? (
         <div className="absolute left-3 top-3 rounded-full bg-amber-500/90 px-2.5 py-1 text-[11px] font-semibold text-white">
-          {playback.status === "processing" ? "Conversion HLS…" : "En file d'attente"}
+          Optimisation vidéo…
         </div>
       ) : null}
 

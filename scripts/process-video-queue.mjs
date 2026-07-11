@@ -232,7 +232,8 @@ async function claimNextVideo() {
   let query = sb
     .from("videos")
     .select("*")
-    .eq("status", "queued")
+    .eq("status", "ready")
+    .is("hls_path", null)
     .not("storage_path", "is", null)
     .order("created_at", { ascending: true })
     .limit(1);
@@ -246,17 +247,22 @@ async function claimNextVideo() {
   const video = data?.[0];
   if (!video) return null;
 
-  if (!videoIdArg && video.status !== "queued") return null;
+  if (!videoIdArg && (video.status !== "ready" || video.hls_path)) return null;
 
   if (dryRun) return video;
 
-  const { data: claimed, error: claimError } = await sb
+  let claimUpdate = sb
     .from("videos")
     .update({ status: "processing", error_message: null, updated_at: new Date().toISOString() })
-    .eq("id", video.id)
-    .eq("status", videoIdArg ? video.status : "queued")
-    .select("*")
-    .maybeSingle();
+    .eq("id", video.id);
+
+  if (videoIdArg) {
+    claimUpdate = claimUpdate.eq("status", video.status);
+  } else {
+    claimUpdate = claimUpdate.eq("status", "ready").is("hls_path", null);
+  }
+
+  const { data: claimed, error: claimError } = await claimUpdate.select("*").maybeSingle();
 
   if (claimError) throw new Error(claimError.message);
   return claimed;

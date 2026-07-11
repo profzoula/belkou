@@ -112,7 +112,7 @@ export const adminFinalizeVideoUpload = createServerFn({ method: "POST" })
     }
 
     await updateVideoRecord(data.videoId, {
-      status: "queued",
+      status: "ready",
       storagePath: data.storagePath,
       errorMessage: null,
     });
@@ -120,7 +120,7 @@ export const adminFinalizeVideoUpload = createServerFn({ method: "POST" })
     const videos = await listVideoRecords();
     const updated = videos.find((item) => item.id === data.videoId) ?? {
       ...video,
-      status: "queued" as const,
+      status: "ready" as const,
       storagePath: data.storagePath,
     };
     return { ok: true as const, video: updated };
