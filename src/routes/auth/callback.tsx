@@ -46,7 +46,7 @@ function AuthCallbackPage() {
 
       if (authError) {
         const friendly = authError.includes("PKCE")
-          ? "Ouvrez le lien de confirmation dans le même navigateur où vous avez créé le compte, ou demandez un nouvel email de confirmation."
+          ? "Connexion Google interrompue. Réessayez dans le même navigateur (pas en navigation privée), ou connectez-vous avec email et mot de passe."
           : authError;
         setError(friendly);
         return;

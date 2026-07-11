@@ -22,26 +22,12 @@ import {
   type VideoRecord,
 } from "@/lib/videos";
 
-const ACCEPT = "video/mp4,video/quicktime,.mp4,.mov";
-const MAX_BYTES = 2 * 1024 * 1024 * 1024;
-
-async function uploadFileToSignedUrl(file: File, signedUrl: string): Promise<void> {
-  const response = await fetch(signedUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-    },
-    body: file,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Upload stockage échoué (${response.status})`);
-  }
-}
-
-function defaultTitleFromFileName(fileName: string): string {
-  return fileName.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
-}
+import {
+  defaultVideoTitleFromFileName,
+  uploadFileToSignedUrl,
+  VIDEO_UPLOAD_ACCEPT,
+  VIDEO_UPLOAD_MAX_BYTES,
+} from "@/lib/admin-video-upload";
 
 function statusBadgeClass(status: VideoRecord["status"]): string {
   switch (status) {
@@ -102,7 +88,7 @@ export function AdminVideosTab() {
   const onFileChange = (file: File | null) => {
     setSelectedFile(file);
     if (file && !title.trim()) {
-      setTitle(defaultTitleFromFileName(file.name));
+      setTitle(defaultVideoTitleFromFileName(file.name));
     }
   };
 
@@ -115,7 +101,7 @@ export function AdminVideosTab() {
       toast.error("Titre requis");
       return;
     }
-    if (selectedFile.size > MAX_BYTES) {
+    if (selectedFile.size > VIDEO_UPLOAD_MAX_BYTES) {
       toast.error("Fichier trop volumineux (max 2 Go)");
       return;
     }
@@ -256,7 +242,7 @@ export function AdminVideosTab() {
               id="video-file"
               ref={fileRef}
               type="file"
-              accept={ACCEPT}
+              accept={VIDEO_UPLOAD_ACCEPT}
               onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
             />
             {selectedFile ? (

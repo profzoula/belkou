@@ -1,3 +1,4 @@
+import { spawn } from "node:child_process";
 import { createServer } from "node:http";
 import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -139,6 +140,47 @@ function shouldTryStatic(pathname) {
     Boolean(extname(pathname))
   );
 }
+
+function startVideoWorker() {
+  if (process.env.ENABLE_VIDEO_WORKER === "false") {
+    console.log("Video worker disabled (ENABLE_VIDEO_WORKER=false)");
+    return;
+  }
+
+  const workerScript = join(root, "scripts", "process-video-queue.mjs");
+  const pollMs = Number(process.env.VIDEO_WORKER_POLL_MS) || 60_000;
+  let running = false;
+
+  const runCycle = () =>
+    new Promise((resolve) => {
+      const proc = spawn(process.execPath, [workerScript], {
+        cwd: root,
+        env: process.env,
+        stdio: "inherit",
+      });
+      proc.on("exit", () => resolve());
+      proc.on("error", (error) => {
+        console.warn("[BelKou] Video worker unavailable:", error.message);
+        resolve();
+      });
+    });
+
+  const tick = async () => {
+    if (running) return;
+    running = true;
+    try {
+      await runCycle();
+    } finally {
+      running = false;
+    }
+  };
+
+  void tick();
+  setInterval(() => void tick(), pollMs);
+  console.log(`Video worker active — poll every ${Math.round(pollMs / 1000)}s (requires ffmpeg)`);
+}
+
+startVideoWorker();
 
 createServer(async (req, res) => {
   try {

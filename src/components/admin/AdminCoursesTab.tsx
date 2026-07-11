@@ -37,6 +37,7 @@ import {
 } from "@/lib/admin-courses";
 import { AdminCourseThumbnailEditor } from "@/components/admin/AdminCourseThumbnailEditor";
 import { LessonContentEditor } from "@/components/admin/LessonContentEditor";
+import { LessonVideoUpload } from "@/components/admin/LessonVideoUpload";
 import { AdminCourseResourcesEditor } from "@/components/admin/AdminCourseResourcesEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCoursePrice, formatCourseDurationLabel, getCourseDisplayDuration, isFreeCourse } from "@/lib/courses";
@@ -452,6 +453,15 @@ export function AdminCoursesTab() {
       .then((result) => setVideoLibrary(result.videos))
       .catch(() => undefined);
   }, [view, listVideosFn]);
+
+  const handleLessonVideoUploaded = (
+    video: VideoRecord,
+    onPatch: (patch: Partial<LessonDraft | NewLessonDraft>) => void,
+  ) => {
+    setVideoLibrary((current) => [video, ...current.filter((item) => item.id !== video.id)]);
+    applyVideoSelection(video.id, onPatch);
+    toast.success("Vidéo uploadée et liée à la leçon");
+  };
 
   const applyVideoSelection = (videoId: string, onPatch: (patch: Partial<LessonDraft | NewLessonDraft>) => void) => {
     const trimmed = videoId.trim();
@@ -1152,9 +1162,17 @@ export function AdminCoursesTab() {
                             <>
                               <div className="space-y-1.5 sm:col-span-2">
                                 <Label>Vidéo uploadée</Label>
-                                <p className="text-[11px] text-muted-foreground">
-                                  Upload MP4/MOV d&apos;abord dans Admin → Vidéos, puis choisissez-la ici.
-                                </p>
+                                <LessonVideoUpload
+                                  courseSlug={selectedCourse.slug}
+                                  lessonId={lesson.id}
+                                  defaultTitle={draft.title || lesson.title}
+                                  disabled={savingId === lesson.id}
+                                  onUploaded={(video) =>
+                                    handleLessonVideoUploaded(video, (patch) =>
+                                      updateDraft(selectedCourse.slug, lesson.id, patch),
+                                    )
+                                  }
+                                />
                                 <Select
                                   value={draft.videoId || "__none__"}
                                   onValueChange={(value) =>
@@ -1176,7 +1194,7 @@ export function AdminCoursesTab() {
                                   </SelectContent>
                                 </Select>
                                 <p className="text-[11px] text-muted-foreground">
-                                  Uploadez d&apos;abord dans Admin → Vidéos, puis liez la leçon ici.
+                                  Ou choisissez une vidéo déjà uploadée dans la bibliothèque.
                                 </p>
                               </div>
                               <div className="space-y-1.5">
@@ -1341,6 +1359,15 @@ export function AdminCoursesTab() {
                       {newLesson.type === "video" ? (
                         <div className="space-y-1.5 sm:col-span-2">
                           <Label htmlFor={`new-lesson-video-${section.id}`}>Vidéo uploadée</Label>
+                          <LessonVideoUpload
+                            courseSlug={selectedCourse.slug}
+                            defaultTitle={newLesson.title}
+                            onUploaded={(video) =>
+                              handleLessonVideoUploaded(video, (patch) =>
+                                updateNewLessonDraft(section.id, patch),
+                              )
+                            }
+                          />
                           <Select
                             value={newLesson.videoId || "__none__"}
                             onValueChange={(value) =>

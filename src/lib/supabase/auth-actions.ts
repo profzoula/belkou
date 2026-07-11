@@ -50,20 +50,11 @@ export async function finishAuthCallback(search: URLSearchParams): Promise<{
 
 /** OAuth return URL — must match Supabase → Authentication → URL Configuration. */
 export function getAuthCallbackUrl(): string {
-  const siteUrl = siteConfig.siteUrl.replace(/\/$/, "");
-
-  if (typeof window === "undefined") {
-    return `${siteUrl}/auth/callback`;
+  if (typeof window !== "undefined") {
+    return `${window.location.origin.replace(/\/$/, "")}/auth/callback`;
   }
 
-  const { hostname, origin } = window.location;
-  const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
-
-  if (isLocal) {
-    return `${origin.replace(/\/$/, "")}/auth/callback`;
-  }
-
-  return `${siteUrl}/auth/callback`;
+  return `${siteConfig.siteUrl.replace(/\/$/, "")}/auth/callback`;
 }
 
 function persistReferralCookieForOAuth() {

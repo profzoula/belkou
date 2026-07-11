@@ -18,7 +18,7 @@ export function getSupabase(): SupabaseClient | null {
       path: "/",
     },
     auth: {
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       persistSession: true,
       autoRefreshToken: true,
     },

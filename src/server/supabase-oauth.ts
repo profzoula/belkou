@@ -62,7 +62,10 @@ export async function handleOAuthCallback(request: Request): Promise<Response> {
 
   if (error) {
     console.error("OAuth callback:", error.message);
-    return Response.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`, 302);
+    const message = error.message.includes("PKCE")
+      ? "Connexion Google interrompue. Réessayez dans le même navigateur (pas en navigation privée)."
+      : error.message;
+    return Response.redirect(`${origin}/login?error=${encodeURIComponent(message)}`, 302);
   }
 
   try {

@@ -3,6 +3,22 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 import { renderErrorPage } from "./lib/error-page";
 import { getAdminSessionToken } from "./lib/admin-session";
 
+const oauthCallbackMiddleware = createMiddleware().server(async ({ request, next }) => {
+  const url = new URL(request.url);
+  const isGoogleOAuthReturn =
+    url.pathname === "/auth/callback" &&
+    request.method === "GET" &&
+    url.searchParams.has("code") &&
+    !url.searchParams.has("token_hash");
+
+  if (isGoogleOAuthReturn) {
+    const { handleOAuthCallback } = await import("@/server/supabase-oauth");
+    return handleOAuthCallback(request);
+  }
+
+  return next();
+});
+
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
     return await next();
@@ -19,7 +35,7 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
 });
 
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware],
+  requestMiddleware: [oauthCallbackMiddleware, errorMiddleware],
   serverFns: {
     fetch: (url, init) => {
       const headers = new Headers(init?.headers);
