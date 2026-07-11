@@ -29,8 +29,11 @@ import {
   VIDEO_UPLOAD_MAX_BYTES,
 } from "@/lib/admin-video-upload";
 
-function statusBadgeClass(status: VideoRecord["status"]): string {
-  switch (status) {
+function statusBadgeClass(video: Pick<VideoRecord, "status" | "storagePath">): string {
+  if (!video.storagePath?.trim() || video.status === "failed") {
+    return "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300";
+  }
+  switch (video.status) {
     case "ready":
       return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
     case "processing":
@@ -290,15 +293,19 @@ export function AdminVideosTab() {
                       {video.lessonId ? ` · ${video.lessonId}` : ""}
                     </p>
                   ) : null}
-                  {video.status === "failed" && video.errorMessage ? (
+                  {(!video.storagePath?.trim() || video.status === "failed") && video.errorMessage ? (
                     <p className="text-xs text-destructive">{video.errorMessage}</p>
+                  ) : !video.storagePath?.trim() ? (
+                    <p className="text-xs text-destructive">
+                      Fichier manquant — supprimez et ré-uploadez le MP4.
+                    </p>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(video.status)}`}
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusBadgeClass(video)}`}
                   >
-                    {formatVideoStatusLabel(video.status)}
+                    {formatVideoStatusLabel(video)}
                   </span>
                   <Button
                     type="button"

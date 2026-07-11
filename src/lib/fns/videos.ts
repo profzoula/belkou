@@ -29,9 +29,22 @@ async function requireAdmin(): Promise<void> {
 
 export const adminListVideos = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
-  const { listVideoRecords } = await import("@/server/videos");
+  const { listVideoRecords, updateVideoRecord } = await import("@/server/videos");
   const videos = await listVideoRecords();
-  return { videos };
+
+  for (const video of videos) {
+    if (video.storagePath?.trim()) continue;
+    if (video.status === "processing") continue;
+    if (video.status === "failed" && video.errorMessage) continue;
+
+    await updateVideoRecord(video.id, {
+      status: "failed",
+      errorMessage: "Upload incomplet — supprimez et ré-uploadez le MP4",
+    });
+  }
+
+  const refreshed = await listVideoRecords();
+  return { videos: refreshed };
 });
 
 export const adminUploadVideo = createServerFn({ method: "POST" })

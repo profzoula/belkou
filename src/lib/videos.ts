@@ -28,14 +28,19 @@ export type VideoPlaybackSource = {
   status: string;
 };
 
-export function formatVideoStatusLabel(status: VideoStatus): string {
-  switch (status) {
+export function formatVideoStatusLabel(
+  video: Pick<VideoRecord, "status" | "storagePath" | "hlsPath">,
+): string {
+  if (!video.storagePath?.trim()) {
+    return video.status === "failed" ? "Échec" : "Upload incomplet";
+  }
+  switch (video.status) {
     case "queued":
       return "En file";
     case "processing":
       return "Traitement";
     case "ready":
-      return "Prêt";
+      return video.hlsPath ? "Prêt" : "Prêt (MP4)";
     case "failed":
       return "Échec";
   }

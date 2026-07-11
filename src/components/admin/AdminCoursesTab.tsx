@@ -1188,7 +1188,7 @@ export function AdminCoursesTab() {
                                     <SelectItem value="__none__">— Aucune —</SelectItem>
                                     {videoLibrary.map((video) => (
                                       <SelectItem key={video.id} value={video.id}>
-                                        {video.title} · {formatVideoStatusLabel(video.status)}
+                                        {video.title} · {formatVideoStatusLabel(video)}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -1383,7 +1383,7 @@ export function AdminCoursesTab() {
                               <SelectItem value="__none__">— Aucune —</SelectItem>
                               {videoLibrary.map((video) => (
                                 <SelectItem key={video.id} value={video.id}>
-                                  {video.title} · {formatVideoStatusLabel(video.status)}
+                                  {video.title} · {formatVideoStatusLabel(video)}
                                 </SelectItem>
                               ))}
                             </SelectContent>
