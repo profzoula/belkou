@@ -235,6 +235,7 @@ async function claimNextVideo() {
     .eq("status", "ready")
     .is("hls_path", null)
     .not("storage_path", "is", null)
+    .neq("storage_path", "")
     .order("created_at", { ascending: true })
     .limit(1);
 
@@ -247,7 +248,7 @@ async function claimNextVideo() {
   const video = data?.[0];
   if (!video) return null;
 
-  if (!videoIdArg && (video.status !== "ready" || video.hls_path)) return null;
+  if (!videoIdArg && (video.status !== "ready" || video.hls_path || !video.storage_path?.trim())) return null;
 
   if (dryRun) return video;
 
@@ -384,7 +385,7 @@ async function main() {
   do {
     const video = await claimNextVideo();
     if (!video) {
-      console.log("No queued videos.");
+      console.log("No videos pending HLS conversion.");
       break;
     }
 

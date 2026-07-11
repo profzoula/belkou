@@ -41,6 +41,7 @@ const { data, error } = await sb
   .update({ status: "ready", updated_at: new Date().toISOString() })
   .eq("status", "queued")
   .not("storage_path", "is", null)
+  .neq("storage_path", "")
   .select("id, title");
 
 if (error) {

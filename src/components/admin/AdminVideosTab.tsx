@@ -290,6 +290,9 @@ export function AdminVideosTab() {
                       {video.lessonId ? ` · ${video.lessonId}` : ""}
                     </p>
                   ) : null}
+                  {video.status === "failed" && video.errorMessage ? (
+                    <p className="text-xs text-destructive">{video.errorMessage}</p>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-2">
                   <span
