@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { VideoUploadProgressBar } from "@/components/admin/VideoUploadProgressBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +34,8 @@ export function LessonVideoUpload({
   const finalizeFn = useServerFn(adminFinalizeVideoUpload);
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadPhase, setUploadPhase] = useState<string | null>(null);
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const upload = async () => {
@@ -52,6 +55,8 @@ export function LessonVideoUpload({
     }
 
     setUploading(true);
+    setUploadPhase("Préparation de l'upload…");
+    setUploadPercent(3);
     try {
       const prepared = await uploadFn({
         data: {
@@ -64,7 +69,15 @@ export function LessonVideoUpload({
         },
       });
 
-      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl);
+      setUploadPhase("Envoi du fichier vers Supabase…");
+      setUploadPercent(8);
+
+      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl, (filePercent) => {
+        setUploadPercent(8 + Math.round(filePercent * 0.84));
+      });
+
+      setUploadPhase("Finalisation…");
+      setUploadPercent(95);
 
       const result = await finalizeFn({
         data: {
@@ -73,6 +86,9 @@ export function LessonVideoUpload({
         },
       });
 
+      setUploadPercent(100);
+      setUploadPhase("Terminé");
+
       onUploaded(result.video);
       setSelectedFile(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -80,6 +96,8 @@ export function LessonVideoUpload({
       toast.error(error instanceof Error ? error.message : "Upload impossible");
     } finally {
       setUploading(false);
+      setUploadPhase(null);
+      setUploadPercent(0);
     }
   };
 
@@ -110,11 +128,18 @@ export function LessonVideoUpload({
           {uploading ? "Upload..." : "Uploader"}
         </Button>
       </div>
-      {selectedFile && (
+      {uploading && uploadPhase ? (
+        <VideoUploadProgressBar
+          phase={uploadPhase}
+          percent={uploadPercent}
+          fileName={selectedFile?.name}
+        />
+      ) : null}
+      {selectedFile && !uploading ? (
         <p className="text-[11px] text-muted-foreground">
           {selectedFile.name} · {formatVideoSize(selectedFile.size)}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

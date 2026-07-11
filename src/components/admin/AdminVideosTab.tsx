@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Film, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { VideoUploadProgressBar } from "@/components/admin/VideoUploadProgressBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,6 +58,8 @@ export function AdminVideosTab() {
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadPhase, setUploadPhase] = useState<string | null>(null);
+  const [uploadPercent, setUploadPercent] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [courseSlug, setCourseSlug] = useState("");
@@ -110,6 +113,8 @@ export function AdminVideosTab() {
     }
 
     setUploading(true);
+    setUploadPhase("Préparation de l'upload…");
+    setUploadPercent(3);
     try {
       const prepared = await uploadFn({
         data: {
@@ -122,7 +127,15 @@ export function AdminVideosTab() {
         },
       });
 
-      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl);
+      setUploadPhase("Envoi du fichier vers Supabase…");
+      setUploadPercent(8);
+
+      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl, (filePercent) => {
+        setUploadPercent(8 + Math.round(filePercent * 0.84));
+      });
+
+      setUploadPhase("Finalisation…");
+      setUploadPercent(95);
 
       const result = await finalizeFn({
         data: {
@@ -130,6 +143,9 @@ export function AdminVideosTab() {
           storagePath: prepared.storagePath,
         },
       });
+
+      setUploadPercent(100);
+      setUploadPhase("Terminé");
 
       toast.success("Vidéo uploadée — reliez-la dans Admin → Cours si besoin");
       setVideos((current) => [result.video, ...current.filter((item) => item.id !== result.video.id)]);
@@ -141,6 +157,8 @@ export function AdminVideosTab() {
       toast.error(error instanceof Error ? error.message : "Upload impossible");
     } finally {
       setUploading(false);
+      setUploadPhase(null);
+      setUploadPercent(0);
     }
   };
 
@@ -255,6 +273,16 @@ export function AdminVideosTab() {
             ) : null}
           </div>
         </div>
+
+        {uploading && uploadPhase ? (
+          <div className="mt-4">
+            <VideoUploadProgressBar
+              phase={uploadPhase}
+              percent={uploadPercent}
+              fileName={selectedFile?.name}
+            />
+          </div>
+        ) : null}
 
         <div className="mt-5 flex justify-end">
           <Button type="button" variant="hero" disabled={uploading} onClick={() => void upload()}>
