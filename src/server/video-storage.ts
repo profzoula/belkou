@@ -127,6 +127,28 @@ export async function uploadSourceVideo(params: {
   return { ok: true, storagePath };
 }
 
+export async function verifySourceVideoExists(
+  storagePath: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return { ok: false, reason: "Supabase non configuré" };
+  }
+
+  const { data, error } = await sb.storage.from(BUCKET).exists(storagePath);
+  if (error) {
+    return { ok: false, reason: error.message };
+  }
+  if (!data) {
+    return {
+      ok: false,
+      reason: "Fichier introuvable dans le stockage — l'upload n'a pas abouti",
+    };
+  }
+
+  return { ok: true };
+}
+
 export async function createSourceVideoUploadUrl(params: {
   videoId: string;
   fileName: string;

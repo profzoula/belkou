@@ -124,6 +124,16 @@ export const adminFinalizeVideoUpload = createServerFn({ method: "POST" })
       throw new Error("Vidéo introuvable");
     }
 
+    const { verifySourceVideoExists } = await import("@/server/video-storage");
+    const exists = await verifySourceVideoExists(data.storagePath);
+    if (!exists.ok) {
+      await updateVideoRecord(data.videoId, {
+        status: "failed",
+        errorMessage: exists.reason,
+      });
+      throw new Error(exists.reason);
+    }
+
     await updateVideoRecord(data.videoId, {
       status: "ready",
       storagePath: data.storagePath,

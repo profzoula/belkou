@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   defaultVideoTitleFromFileName,
-  uploadFileToSignedUrl,
+  uploadVideoToSignedStorage,
   VIDEO_UPLOAD_ACCEPT,
   VIDEO_UPLOAD_MAX_BYTES,
 } from "@/lib/admin-video-upload";
@@ -72,9 +72,17 @@ export function LessonVideoUpload({
       setUploadPhase("Envoi du fichier vers Supabase…");
       setUploadPercent(8);
 
-      await uploadFileToSignedUrl(selectedFile, prepared.signedUrl, (filePercent) => {
-        setUploadPercent(8 + Math.round(filePercent * 0.84));
-      });
+      await uploadVideoToSignedStorage(
+        selectedFile,
+        {
+          signedUrl: prepared.signedUrl,
+          token: prepared.token,
+          storagePath: prepared.storagePath,
+        },
+        (filePercent) => {
+          setUploadPercent(8 + Math.round(filePercent * 0.84));
+        },
+      );
 
       setUploadPhase("Finalisation…");
       setUploadPercent(95);
