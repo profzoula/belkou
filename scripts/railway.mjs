@@ -148,21 +148,33 @@ function startVideoWorker() {
   }
 
   const workerScript = join(root, "scripts", "process-video-queue.mjs");
+  const nodeBin = (process.execPath && process.execPath.trim()) || "node";
   const pollMs = Number(process.env.VIDEO_WORKER_POLL_MS) || 60_000;
   let running = false;
 
+  if (!existsSync(workerScript)) {
+    console.warn(`[BelKou] Video worker script missing: ${workerScript}`);
+    return;
+  }
+
   const runCycle = () =>
     new Promise((resolve) => {
-      const proc = spawn(process.execPath, [workerScript], {
-        cwd: root,
-        env: process.env,
-        stdio: "inherit",
-      });
-      proc.on("exit", () => resolve());
-      proc.on("error", (error) => {
-        console.warn("[BelKou] Video worker unavailable:", error.message);
+      try {
+        const proc = spawn(nodeBin, [workerScript], {
+          cwd: root,
+          env: process.env,
+          stdio: "inherit",
+        });
+        proc.on("exit", () => resolve());
+        proc.on("error", (error) => {
+          console.warn("[BelKou] Video worker unavailable:", error.message);
+          resolve();
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn("[BelKou] Video worker spawn failed:", message);
         resolve();
-      });
+      }
     });
 
   const tick = async () => {
@@ -170,6 +182,9 @@ function startVideoWorker() {
     running = true;
     try {
       await runCycle();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn("[BelKou] Video worker cycle failed:", message);
     } finally {
       running = false;
     }
@@ -179,8 +194,6 @@ function startVideoWorker() {
   setInterval(() => void tick(), pollMs);
   console.log(`Video worker active — poll every ${Math.round(pollMs / 1000)}s (requires ffmpeg)`);
 }
-
-startVideoWorker();
 
 createServer(async (req, res) => {
   try {
@@ -205,4 +218,5 @@ createServer(async (req, res) => {
   }
 }).listen(port, host, () => {
   console.log(`BelKou server listening on http://${host}:${port}`);
+  startVideoWorker();
 });
