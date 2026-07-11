@@ -153,12 +153,12 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
   const courseSummaries = courses.map((course) => {
     const lessons = course.sections.flatMap((section) => section.lessons);
     const videos = lessons.filter((lesson) => lesson.type === "video");
-    const missingVimeo = videos.filter((lesson) => !lesson.vimeo?.trim()).length;
+    const missingVideo = videos.filter((lesson) => !lesson.videoId?.trim()).length;
     const previews = lessons.filter((lesson) => lesson.preview).length;
 
     totalLessons += lessons.length;
     videoLessons += videos.length;
-    lessonsWithoutVideo += missingVimeo;
+    lessonsWithoutVideo += missingVideo;
     previewLessons += previews;
 
     return {
@@ -167,7 +167,7 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
       plan: course.plan ?? "premium",
       lessonCount: lessons.length,
       videoCount: videos.length,
-      missingVimeo,
+      missingVideo,
     };
   });
 
@@ -519,7 +519,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
       .object({
         courseSlug: z.string().min(1),
         lessonId: z.string().min(1),
-        vimeo: z.string().optional(),
+        videoId: z.string().optional(),
         preview: z.boolean().optional(),
         title: z.string().optional(),
         duration: z.string().optional(),
@@ -533,30 +533,31 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     const { updateLessonOverride, getResolvedCourseBySlug, getResolvedCourses } = await import(
       "@/server/site-content"
     );
-    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
-    const { getLessonById, getLessonVimeo } = await import("@/lib/courses");
+    const { getVideoRecord } = await import("@/server/videos");
+    const { formatCourseDurationLabel } = await import("@/lib/courses");
+    const { getLessonById, lessonHasVideo } = await import("@/lib/courses");
 
     const courseBefore = await getResolvedCourseBySlug(data.courseSlug);
     const lessonBefore = courseBefore ? getLessonById(courseBefore, data.lessonId) : undefined;
-    const hadVideo = Boolean(
-      lessonBefore &&
-        lessonBefore.type === "video" &&
-        getLessonVimeo(lessonBefore, courseBefore),
-    );
+    const hadVideo = Boolean(lessonBefore && lessonBefore.type === "video" && lessonHasVideo(lessonBefore));
 
     let duration = data.duration;
-    let vimeo = data.vimeo;
+    let videoId = data.videoId;
     if (data.type === "article") {
-      vimeo = "";
+      videoId = "";
       duration = data.duration?.trim() || "5 min";
-    } else {
-      const effectiveVimeo =
-        data.vimeo !== undefined ? data.vimeo.trim() : lessonBefore?.vimeo?.trim() || "";
-      if (effectiveVimeo) {
-        const resolved = await fetchVimeoDurationLabel(effectiveVimeo);
-        if (resolved) duration = resolved;
-        else if (data.type === "video" && !data.duration?.trim()) duration = "";
-      } else if (data.type === "video") {
+    } else if (data.type === "video" || lessonBefore?.type === "video") {
+      const effectiveVideoId =
+        data.videoId !== undefined ? data.videoId.trim() : lessonBefore?.videoId?.trim() || "";
+      videoId = effectiveVideoId || undefined;
+      if (effectiveVideoId) {
+        const video = await getVideoRecord(effectiveVideoId);
+        if (video?.durationSeconds) {
+          duration = formatCourseDurationLabel(Math.round(video.durationSeconds / 60));
+        } else if (!data.duration?.trim()) {
+          duration = "";
+        }
+      } else {
         duration = "";
       }
     }
@@ -565,7 +566,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
       courseSlug: data.courseSlug,
       lessonId: data.lessonId,
       patch: {
-        vimeo,
+        videoId,
         preview: data.preview,
         title: data.title,
         duration,
@@ -586,18 +587,6 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     }).catch(() => undefined);
 
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
-  });
-
-export const adminResolveVimeoDuration = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => z.object({ vimeo: z.string().min(1) }).parse(data))
-  .handler(async ({ data }) => {
-    await requireAdmin();
-    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
-    const duration = await fetchVimeoDurationLabel(data.vimeo);
-    if (!duration) {
-      throw new Error("Durée Vimeo introuvable. Vérifiez l'ID ou le lien.");
-    }
-    return { duration };
   });
 
 export const adminUpdateCourse = createServerFn({ method: "POST" })
@@ -708,7 +697,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         title: z.string().min(1),
         type: z.enum(["video", "article"]).optional(),
         duration: z.string().optional(),
-        vimeo: z.string().optional(),
+        videoId: z.string().optional(),
         preview: z.boolean().optional(),
         content: z.string().optional(),
       })
@@ -717,15 +706,18 @@ export const adminAddLesson = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { addLessonToCourse, getResolvedCourses } = await import("@/server/site-content");
-    const { fetchVimeoDurationLabel } = await import("@/server/vimeo-metadata");
+    const { getVideoRecord } = await import("@/server/videos");
+    const { formatCourseDurationLabel } = await import("@/lib/courses");
 
     const isArticle = data.type === "article";
     let duration = data.duration;
     if (isArticle) {
       duration = data.duration?.trim() || "5 min";
-    } else if (data.vimeo?.trim()) {
-      const resolved = await fetchVimeoDurationLabel(data.vimeo);
-      duration = resolved || "";
+    } else if (data.videoId?.trim()) {
+      const video = await getVideoRecord(data.videoId.trim());
+      duration = video?.durationSeconds
+        ? formatCourseDurationLabel(Math.round(video.durationSeconds / 60))
+        : "";
     } else {
       duration = "";
     }
@@ -737,7 +729,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         title: data.title,
         type: data.type,
         duration,
-        vimeo: data.vimeo,
+        videoId: data.videoId,
         preview: data.preview,
         content: data.content,
       },
@@ -949,7 +941,6 @@ export const adminSaveSiteSettings = createServerFn({ method: "POST" })
         promoEnabled: z.boolean().optional(),
         promoMessage: z.string().optional(),
         promoMessageShort: z.string().optional(),
-        vimeoPreviewDefault: z.string().optional(),
       })
       .parse(data),
   )

@@ -131,8 +131,8 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
                   className="inline-flex items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium"
                 >
                   {course.title}
-                  {course.missingVimeo > 0 && (
-                    <span className="ml-1.5 text-amber-600">({course.missingVimeo} sans Vimeo)</span>
+                  {course.missingVideo > 0 && (
+                    <span className="ml-1.5 text-amber-600">({course.missingVideo} sans vidéo)</span>
                   )}
                 </span>
               ))}
@@ -142,8 +142,8 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
             <Button variant="hero" size="sm" onClick={() => onNavigate("courses")}>
               Gérer les cours
             </Button>
-            <Button variant="outline" size="sm" onClick={() => onNavigate("courses")}>
-              Vidéos Vimeo
+            <Button variant="outline" size="sm" onClick={() => onNavigate("videos")}>
+              Bibliothèque vidéos
             </Button>
             <Button variant="outline" size="sm" onClick={() => onNavigate("inscriptions")}>
               Inscriptions

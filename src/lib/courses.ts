@@ -1,10 +1,6 @@
 import { Bot, type LucideIcon } from "lucide-react";
 import type { CourseResource } from "@/lib/course-resources";
 import { siteConfig } from "@/lib/site-config";
-import { parseVimeoRef, type VimeoRef } from "@/lib/vimeo";
-
-/** Preview intro — https://vimeo.com/1204014571 */
-export const DEFAULT_PREVIEW_VIMEO = "1204014571";
 
 export type CourseLesson = {
   id: string;
@@ -12,8 +8,8 @@ export type CourseLesson = {
   duration: string;
   type: "video" | "article" | "resource";
   preview?: boolean;
-  /** Vimeo ID or full URL (https://vimeo.com/123456789 or private link with hash). */
-  vimeo?: string;
+  /** Self-hosted video (Supabase `videos` table UUID). */
+  videoId?: string;
   /** Markdown — titres ##, sections repliables ### Titre */
   content?: string;
 };
@@ -99,8 +95,8 @@ export const courses: Course[] = [
         id: "intro",
         title: "Introduction",
         lessons: [
-          { id: "intro-welcome", title: "Bienvenue dans le cours", duration: "4min", type: "video", preview: true, vimeo: DEFAULT_PREVIEW_VIMEO },
-          { id: "intro-tools", title: "Outils : Cursor, Claude & Replit", duration: "12min", type: "video", preview: true, vimeo: DEFAULT_PREVIEW_VIMEO },
+          { id: "intro-welcome", title: "Bienvenue dans le cours", duration: "4min", type: "video", preview: true },
+          { id: "intro-tools", title: "Outils : Cursor, Claude & Replit", duration: "12min", type: "video", preview: true },
           { id: "intro-setup", title: "Configuration de l'environnement", duration: "8min", type: "video" },
           { id: "intro-first", title: "Votre premier prompt efficace", duration: "11min", type: "video" },
         ],
@@ -121,7 +117,14 @@ export const courses: Course[] = [
         lessons: [
           { id: "deploy-host", title: "Héberger sur Railway / Cloudflare", duration: "16min", type: "video" },
           { id: "deploy-domain", title: "Domaine et HTTPS", duration: "10min", type: "video" },
-          { id: "deploy-launch", title: "Checklist de lancement", duration: "8 min", type: "article", content: "## Checklist de lancement\n\nAvant de mettre votre app en ligne, vérifiez chaque point ci-dessous.\n\n### Domaine & HTTPS\nConfigurez votre nom de domaine et activez HTTPS (Cloudflare ou hébergeur).\n\n### Variables d'environnement\nVérifiez que toutes les clés API sont définies en production — jamais dans le code source.\n\n### Paiement & emails\nTestez un achat réel ou en mode test, et confirmez la réception des emails transactionnels." },
+          {
+            id: "deploy-launch",
+            title: "Checklist de lancement",
+            duration: "8 min",
+            type: "article",
+            content:
+              "## Checklist de lancement\n\nAvant de mettre votre app en ligne, vérifiez chaque point ci-dessous.\n\n### Domaine & HTTPS\nConfigurez votre nom de domaine et activez HTTPS (Cloudflare ou hébergeur).\n\n### Variables d'environnement\nVérifiez que toutes les clés API sont définies en production — jamais dans le code source.\n\n### Paiement & emails\nTestez un achat réel ou en mode test, et confirmez la réception des emails transactionnels.",
+          },
         ],
       },
     ],
@@ -134,6 +137,15 @@ export function getCourseBySlug(slug: string): Course | undefined {
 
 export function getAllLessons(course: { sections: CourseSection[] }): CourseLesson[] {
   return course.sections.flatMap((section) => section.lessons);
+}
+
+export function getLessonVideoId(lesson: CourseLesson): string | null {
+  const trimmed = lesson.videoId?.trim();
+  return trimmed || null;
+}
+
+export function lessonHasVideo(lesson: CourseLesson): boolean {
+  return lesson.type === "video" && Boolean(getLessonVideoId(lesson));
 }
 
 export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title">): boolean {
@@ -172,7 +184,7 @@ export function getPreviewLearnSearch(
   return preview ? { lesson: preview.id } : undefined;
 }
 
-/** Prefer a preview with Vimeo; fall back to welcome lesson metadata. */
+/** Prefer a preview with video; fall back to welcome lesson metadata. */
 export function getPlayableLearnSearch(
   course: { sections: CourseSection[] },
 ): { lesson: string } | undefined {
@@ -247,12 +259,9 @@ export function getVideoLessons(course: { sections: CourseSection[] }): CourseLe
   return getAllLessons(course).filter((lesson) => lesson.type === "video");
 }
 
-export function getLessonDisplayDuration(
-  lesson: CourseLesson,
-  course?: { sections: CourseSection[] },
-): string | null {
+export function getLessonDisplayDuration(lesson: CourseLesson): string | null {
   if (lesson.type === "video") {
-    if (!getLessonVimeo(lesson, course)) return null;
+    if (!lessonHasVideo(lesson)) return null;
     const trimmed = lesson.duration?.trim();
     return trimmed || null;
   }
@@ -261,19 +270,16 @@ export function getLessonDisplayDuration(
   return trimmed || null;
 }
 
-export function getSectionDurationMinutes(
-  section: CourseSection,
-  course?: { sections: CourseSection[] },
-): number {
+export function getSectionDurationMinutes(section: CourseSection): number {
   return section.lessons.reduce((sum, lesson) => {
-    if (!getLessonDisplayDuration(lesson, course)) return sum;
+    if (!getLessonDisplayDuration(lesson)) return sum;
     return sum + parseLessonDurationMinutes(lesson.duration ?? "");
   }, 0);
 }
 
 export function getCourseVideoDurationMinutes(course: { sections: CourseSection[] }): number {
   return getVideoLessons(course).reduce((sum, lesson) => {
-    if (!getLessonVimeo(lesson, course)) return sum;
+    if (!lessonHasVideo(lesson)) return sum;
     return sum + parseLessonDurationMinutes(lesson.duration ?? "");
   }, 0);
 }
@@ -291,10 +297,7 @@ export function formatCourseDurationLabel(totalMinutes: number): string {
 
 /** Total shown in curriculum — sum of every lesson duration visible in the sidebar. */
 export function getCourseContentDurationMinutes(course: { sections: CourseSection[] }): number {
-  return course.sections.reduce(
-    (sum, section) => sum + getSectionDurationMinutes(section, course),
-    0,
-  );
+  return course.sections.reduce((sum, section) => sum + getSectionDurationMinutes(section), 0);
 }
 
 export function getCourseDisplayDuration(course: { sections: CourseSection[] }): string {
@@ -317,7 +320,7 @@ export function computeCourseProgressPercent(
 
   let completedMinutes = 0;
   for (const lesson of lessons) {
-    if (!completedSet.has(lesson.id) || !getLessonVimeo(lesson, course)) continue;
+    if (!completedSet.has(lesson.id) || !lessonHasVideo(lesson)) continue;
     completedMinutes += parseLessonDurationMinutes(lesson.duration ?? "");
   }
 
@@ -336,41 +339,12 @@ export function formatCoursePrice(price: number): string {
   return isFreeCourse({ price }) ? "Gratuit" : `$${price}`;
 }
 
-const previewVimeoFallback =
-  typeof import.meta !== "undefined" ? import.meta.env.VITE_VIMEO_PREVIEW_ID?.trim() : undefined;
-
-export function getLessonVimeo(
-  lesson: CourseLesson,
-  course?: { sections: CourseSection[] },
-): VimeoRef | null {
-  const trimmed = lesson.vimeo?.trim();
-  if (trimmed) {
-    return parseVimeoRef(trimmed);
-  }
-
-  if (!lesson.preview || !previewVimeoFallback) {
-    return null;
-  }
-
-  if (course) {
-    const welcome = getWelcomePreviewLesson(course);
-    if (welcome?.id !== lesson.id) return null;
-  } else if (!isWelcomePreviewLesson(lesson)) {
-    return null;
-  }
-
-  return parseVimeoRef(previewVimeoFallback);
-}
-
-export function isPreviewVideoAvailable(
-  lesson: CourseLesson,
-  course?: { sections: CourseSection[] },
-): boolean {
-  return lesson.type === "video" && Boolean(lesson.preview) && Boolean(getLessonVimeo(lesson, course));
+export function isPreviewVideoAvailable(lesson: CourseLesson): boolean {
+  return lesson.type === "video" && Boolean(lesson.preview) && lessonHasVideo(lesson);
 }
 
 export function getPreviewVideoLessons(course: { sections: CourseSection[] }): CourseLesson[] {
-  return getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson, course));
+  return getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson));
 }
 
 export function getFirstPreviewVideoLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {

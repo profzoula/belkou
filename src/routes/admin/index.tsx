@@ -10,6 +10,7 @@ import { AdminRegistrationsTab } from "@/components/admin/AdminRegistrationsTab"
 import { AdminServicesTab } from "@/components/admin/AdminServicesTab";
 import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminStudentsTab } from "@/components/admin/AdminStudentsTab";
+import { AdminVideosTab } from "@/components/admin/AdminVideosTab";
 import { adminLogout, getAdminOverview, refreshAdminSession } from "@/lib/fns/admin";
 import { clearAdminSessionToken, getAdminSessionToken, setAdminSessionToken } from "@/lib/admin-session";
 import { seoHead } from "@/lib/seo";
@@ -92,6 +93,8 @@ function AdminDashboardPage() {
       )}
 
       {section === "courses" && <AdminCoursesTab key={refreshKey} />}
+
+      {section === "videos" && <AdminVideosTab key={refreshKey} />}
 
       {section === "services" && <AdminServicesTab key={refreshKey} />}
 

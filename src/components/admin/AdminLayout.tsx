@@ -3,6 +3,7 @@ import {
   BookOpen,
   Briefcase,
   DollarSign,
+  Film,
   GraduationCap,
   LayoutDashboard,
   LogOut,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 export type AdminSection =
   | "overview"
   | "courses"
+  | "videos"
   | "services"
   | "students"
   | "inscriptions"
@@ -27,6 +29,7 @@ export type AdminSection =
 const navItems: { id: AdminSection; label: string; icon: typeof Users }[] = [
   { id: "overview", label: "Dashboard", icon: LayoutDashboard },
   { id: "courses", label: "Cours", icon: BookOpen },
+  { id: "videos", label: "Vidéos", icon: Film },
   { id: "services", label: "Services", icon: Briefcase },
   { id: "students", label: "Étudiants", icon: GraduationCap },
   { id: "inscriptions", label: "Inscriptions", icon: Users },

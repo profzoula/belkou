@@ -61,7 +61,7 @@ export function AdminSettingsTab() {
       <div>
         <h1 className="font-display text-2xl font-bold">Paramètres du site</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Dates, promo et Vimeo par défaut. Sauvegardé dans Supabase (prioritaire sur le code).
+          Dates et promo. Sauvegardé dans Supabase (prioritaire sur le code).
         </p>
       </div>
 
@@ -88,17 +88,6 @@ export function AdminSettingsTab() {
               setSettings((s) => s && { ...s, statsStudentsBase: Number(e.target.value) || 0 })
             }
             className="rounded-lg"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vimeo-default">Vimeo preview par défaut (ID ou URL)</Label>
-          <Input
-            id="vimeo-default"
-            value={settings.vimeoPreviewDefault ?? ""}
-            onChange={(e) => setSettings((s) => s && { ...s, vimeoPreviewDefault: e.target.value })}
-            className="rounded-lg"
-            placeholder="1204014571"
           />
         </div>
 

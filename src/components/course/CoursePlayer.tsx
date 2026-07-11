@@ -26,10 +26,11 @@ import {
   getAllLessons,
   getCourseDisplayDuration,
   getLessonDisplayDuration,
-  getLessonVimeo,
+  getLessonVideoId,
   getSectionDurationMinutes,
   getSectionForLesson,
   getWelcomePreviewLesson,
+  lessonHasVideo,
   type CourseLesson,
 } from "@/lib/courses";
 import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
@@ -41,13 +42,15 @@ import {
   isScheduledInFuture,
 } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
-import { completeLesson, getCourseProgress } from "@/lib/fns/progress";
+import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
-import { VimeoPlayer } from "@/components/course/VimeoPlayer";
+import { getLessonVideoPlayback } from "@/lib/fns/videos";
+import type { VideoPlaybackSource } from "@/server/video-storage";
+import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
 import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
 import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
@@ -70,6 +73,8 @@ function CourseVideoArea({
   onNextLesson,
   onLessonComplete,
   getLockState,
+  startAtSeconds = 0,
+  onPlaybackTimeUpdate,
   activeArticleSubSessionId,
   onArticleSubSessionChange,
 }: {
@@ -81,14 +86,60 @@ function CourseVideoArea({
   onNextLesson?: () => void;
   onLessonComplete?: () => void;
   getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
+  startAtSeconds?: number;
+  onPlaybackTimeUpdate?: (currentTime: number) => void;
   activeArticleSubSessionId?: string | null;
   onArticleSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
 }) {
+  const { session } = useAuth();
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLockState(lesson);
-  const vimeo = getLessonVimeo(lesson, course);
+  const videoId = getLessonVideoId(lesson);
+  const playbackFn = useServerFn(getLessonVideoPlayback);
+  const [playback, setPlayback] = useState<VideoPlaybackSource | null>(null);
+  const [playbackError, setPlaybackError] = useState<string | null>(null);
+  const [playbackLoading, setPlaybackLoading] = useState(false);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
+
+  useEffect(() => {
+    if (locked || lesson.type !== "video" || !videoId) {
+      setPlayback(null);
+      setPlaybackError(null);
+      setPlaybackLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setPlaybackLoading(true);
+    setPlaybackError(null);
+
+    playbackFn({
+      data: {
+        courseSlug: course.slug,
+        lessonId: lesson.id,
+        videoId,
+        preview: lesson.preview,
+        accessToken: session?.access_token,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setPlayback(result);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setPlayback(null);
+          setPlaybackError(error instanceof Error ? error.message : "Lecture impossible");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPlaybackLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course.slug, lesson.id, lesson.preview, lesson.type, locked, playbackFn, session?.access_token, videoId]);
 
   if (lesson.type === "article") {
     if (!locked) {
@@ -189,13 +240,15 @@ function CourseVideoArea({
     );
   }
 
-  if (!locked && vimeo) {
+  if (!locked && playback) {
     return (
       <>
-        <VimeoPlayer
-          video={vimeo}
+        <CourseVideoPlayer
+          playback={playback}
           title={lesson.title}
           lessonKey={lesson.id}
+          startAtSeconds={startAtSeconds}
+          onTimeUpdate={onPlaybackTimeUpdate}
           nextLessonTitle={nextLessonTitle}
           onNextLesson={onNextLesson}
           onLessonComplete={onLessonComplete}
@@ -207,6 +260,32 @@ function CourseVideoArea({
           </h2>
         </div>
       </>
+    );
+  }
+
+  if (!locked && lesson.type === "video" && videoId && playbackLoading) {
+    return (
+      <div className="flex aspect-video w-full items-center justify-center bg-black text-sm text-white/80">
+        Chargement de la vidéo…
+      </div>
+    );
+  }
+
+  if (!locked && lesson.type === "video" && videoId && playbackError) {
+    return (
+      <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
+        <p className="font-semibold">{lesson.title}</p>
+        <p className="text-sm text-muted-foreground">{playbackError}</p>
+      </div>
+    );
+  }
+
+  if (!locked && lesson.type === "video" && !videoId) {
+    return (
+      <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
+        <p className="font-semibold">{lesson.title}</p>
+        <p className="text-sm text-muted-foreground">Vidéo en cours de préparation.</p>
+      </div>
     );
   }
 
@@ -370,7 +449,7 @@ function CurriculumSidebar({
         <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
           {course.sections.map((section) => {
             const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
-            const sectionDuration = getSectionDurationMinutes(section, course);
+            const sectionDuration = getSectionDurationMinutes(section);
 
             return (
               <AccordionItem key={section.id} value={section.id} className="border-border">
@@ -392,7 +471,7 @@ function CurriculumSidebar({
                       const active = lesson.id === activeLessonId;
                       const { locked } = getLockState(lesson);
                       const done = completedSet.has(lesson.id);
-                      const lessonDuration = getLessonDisplayDuration(lesson, course);
+                      const lessonDuration = getLessonDisplayDuration(lesson);
                       const articleSessions =
                         lesson.type === "article" && lesson.content
                           ? parseArticleSessions(lesson.content)
@@ -476,11 +555,15 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const accessFn = useServerFn(getCourseAccess);
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
+  const savePlaybackFn = useServerFn(saveLessonPlayback);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
-  const [progress, setProgress] = useState<{ completedLessonIds: string[]; progressPercent: number } | null>(
-    null,
-  );
+  const [progress, setProgress] = useState<{
+    completedLessonIds: string[];
+    playbackByLessonId: Record<string, number>;
+    progressPercent: number;
+  } | null>(null);
   const markedLessonsRef = useRef(new Set<string>());
+  const lastPlaybackSaveRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -536,7 +619,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       })
       .catch(() => {
         if (!cancelled) {
-          setProgress({ completedLessonIds: [], progressPercent: 0 });
+          setProgress({ completedLessonIds: [], playbackByLessonId: {}, progressPercent: 0 });
         }
       });
 
@@ -549,6 +632,40 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
   const orderedLessonIds = useMemo(() => allLessons.map((lesson) => lesson.id), [allLessons]);
   const completedLessonIds = progress?.completedLessonIds ?? [];
+  const playbackByLessonId = progress?.playbackByLessonId ?? {};
+
+  const handlePlaybackTimeUpdate = useCallback(
+    (lessonId: string, currentTime: number) => {
+      if (!session?.access_token || !hasPaidAccess) return;
+      if (currentTime < 5) return;
+
+      const now = Date.now();
+      if (now - lastPlaybackSaveRef.current < 15_000) return;
+      lastPlaybackSaveRef.current = now;
+
+      setProgress((current) =>
+        current
+          ? {
+              ...current,
+              playbackByLessonId: {
+                ...current.playbackByLessonId,
+                [lessonId]: Math.floor(currentTime),
+              },
+            }
+          : current,
+      );
+
+      void savePlaybackFn({
+        data: {
+          accessToken: session.access_token,
+          courseSlug: course.slug,
+          lessonId,
+          currentTimeSeconds: currentTime,
+        },
+      }).catch(() => undefined);
+    },
+    [course.slug, hasPaidAccess, savePlaybackFn, session?.access_token],
+  );
 
   const getLockState = useCallback(
     (lesson: CourseLesson) =>
@@ -576,6 +693,10 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
   const [activeArticleSubSessionId, setActiveArticleSubSessionId] = useState<string | null>(null);
   const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    lastPlaybackSaveRef.current = 0;
+  }, [activeLessonId]);
 
   const selectLesson = useCallback(
     (lessonId: string) => {
@@ -679,6 +800,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         .then((result) => {
           setProgress((current) => ({
             completedLessonIds: [...new Set([...(current?.completedLessonIds ?? []), lessonId])],
+            playbackByLessonId: current?.playbackByLessonId ?? {},
             progressPercent: result.progressPercent,
           }));
         })
@@ -688,6 +810,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             const completedLessonIds = (current?.completedLessonIds ?? []).filter((id) => id !== lessonId);
             return {
               completedLessonIds,
+              playbackByLessonId: current?.playbackByLessonId ?? {},
               progressPercent: computeCourseProgressPercent(course, completedLessonIds),
             };
           });
@@ -706,6 +829,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
     setProgress((current) => ({
       completedLessonIds: optimisticCompleted,
+      playbackByLessonId: current?.playbackByLessonId ?? {},
       progressPercent: computeCourseProgressPercent(course, optimisticCompleted),
     }));
 
@@ -828,6 +952,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             onNextLesson={nextLesson ? () => selectLesson(nextLesson.id) : undefined}
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
+            startAtSeconds={playbackByLessonId[activeLesson.id] ?? 0}
+            onPlaybackTimeUpdate={(currentTime) => handlePlaybackTimeUpdate(activeLesson.id, currentTime)}
             activeArticleSubSessionId={activeArticleSubSessionId}
             onArticleSubSessionChange={handleArticleSubSessionChange}
           />

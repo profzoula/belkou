@@ -38,7 +38,7 @@ export function storedCourseToCourse(stored: StoredCourse): Course {
 export function patchLessonInStoredCourse(
   course: StoredCourse,
   lessonId: string,
-  patch: Partial<Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration" | "content" | "type">>,
+  patch: Partial<Pick<CourseLesson, "videoId" | "preview" | "title" | "duration" | "content" | "type">>,
 ): StoredCourse {
   return {
     ...course,
@@ -104,12 +104,12 @@ export type AddLessonInput = {
   title: string;
   type?: "video" | "article";
   duration?: string;
-  vimeo?: string;
+  videoId?: string;
   preview?: boolean;
   content?: string;
 };
 
-export function buildNewLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
+export function buildNewLesson(input: AddLessonInput): CourseLesson {
   const id = `${slugifyTitle(input.title) || "lesson"}-${Date.now().toString(36)}`;
   const type = input.type ?? "video";
 
@@ -124,21 +124,21 @@ export function buildNewLesson(input: AddLessonInput, previewVimeo?: string): Co
     };
   }
 
-  const hasVimeo = Boolean(input.vimeo?.trim() || (input.preview && previewVimeo?.trim()));
+  const hasVideo = Boolean(input.videoId?.trim());
 
   return {
     id,
     title: input.title,
-    duration: hasVimeo ? (input.duration?.trim() ?? "") : "",
+    duration: hasVideo ? (input.duration?.trim() ?? "") : "",
     type: "video",
     preview: input.preview ?? false,
-    vimeo: input.vimeo || (input.preview ? previewVimeo : undefined),
+    videoId: input.videoId?.trim() || undefined,
   };
 }
 
 /** @deprecated Use buildNewLesson */
-export function buildNewVideoLesson(input: AddLessonInput, previewVimeo?: string): CourseLesson {
-  return buildNewLesson({ ...input, type: "video" }, previewVimeo);
+export function buildNewVideoLesson(input: AddLessonInput): CourseLesson {
+  return buildNewLesson({ ...input, type: "video" });
 }
 
 export function addLessonToStoredCourse(
@@ -260,7 +260,7 @@ export function courseToStored(course: Course): StoredCourse {
   };
 }
 
-export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo: string): StoredCourse {
+export function buildDefaultStoredCourse(input: CreateCourseInput): StoredCourse {
   const plan = input.plan ?? "premium";
   const defaultPrice = siteConfig.plans[plan].price;
   const price = input.free ? 0 : defaultPrice;
@@ -299,7 +299,6 @@ export function buildDefaultStoredCourse(input: CreateCourseInput, previewVimeo:
             duration: "5min",
             type: "video",
             preview: true,
-            vimeo: previewVimeo,
           },
         ],
       } satisfies CourseSection,

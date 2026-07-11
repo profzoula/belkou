@@ -198,14 +198,14 @@ export async function notifyCourseLessonIfVideoAdded(params: {
   if (params.hadVideo) return;
 
   const { getResolvedCourseBySlug } = await import("@/server/site-content");
-  const { getLessonById, getLessonVimeo } = await import("@/lib/courses");
+  const { getLessonById, lessonHasVideo } = await import("@/lib/courses");
 
   const course = await getResolvedCourseBySlug(params.courseSlug);
   if (!course) return;
 
   const lesson = getLessonById(course, params.lessonId);
   if (!lesson || lesson.type !== "video") return;
-  if (!getLessonVimeo(lesson, course)) return;
+  if (!lessonHasVideo(lesson)) return;
 
   await notifyCourseNewLesson({
     courseSlug: params.courseSlug,

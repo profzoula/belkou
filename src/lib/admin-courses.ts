@@ -1,5 +1,5 @@
-import type { Course } from "@/lib/courses";
-import { getLessonVimeo, isBaseCourseSlug } from "@/lib/courses";
+import type { Course, CourseLesson } from "@/lib/courses";
+import { isBaseCourseSlug, lessonHasVideo } from "@/lib/courses";
 import { isCourseContentLive, isCourseListed, isScheduledInFuture } from "@/lib/course-publish";
 
 export type AdminCourse = Omit<Course, "thumbnail"> & {
@@ -15,26 +15,26 @@ export type AdminCourse = Omit<Course, "thumbnail"> & {
   isBase: boolean;
   lessonCount: number;
   videoCount: number;
-  missingVimeo: number;
+  missingVideo: number;
 };
 
 export type AdminCourseTab = "published" | "scheduled" | "hidden" | "draft";
 
-export function getCourseMetrics(course: Course) {
+export function getCourseMetrics(course: { sections: { lessons: CourseLesson[] }[] }) {
   const lessons = course.sections.flatMap((section) => section.lessons);
   const videos = lessons.filter((lesson) => lesson.type === "video");
-  const missingVimeo = videos.filter((lesson) => !getLessonVimeo(lesson, course)).length;
+  const missingVideo = videos.filter((lesson) => !lessonHasVideo(lesson)).length;
   return {
     lessonCount: lessons.length,
     videoCount: videos.length,
-    missingVimeo,
+    missingVideo,
   };
 }
 
 export function getAdminCourseTab(course: AdminCourse): AdminCourseTab {
   if (course.isScheduled) return "scheduled";
   if (course.isLive) return "published";
-  if (course.missingVimeo > 0) return "draft";
+  if (course.missingVideo > 0) return "draft";
   return "hidden";
 }
 

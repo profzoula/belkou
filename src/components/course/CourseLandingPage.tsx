@@ -548,7 +548,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                           hasPaidAccess,
                         });
                         const learnSearch = locked ? undefined : { lesson: lesson.id };
-                        const lessonDuration = getLessonDisplayDuration(lesson, course);
+                        const lessonDuration = getLessonDisplayDuration(lesson);
                         const row = (
                           <>
                             <span>

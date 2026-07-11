@@ -4,5 +4,4 @@ export type SiteSettings = {
   promoEnabled?: boolean;
   promoMessage?: string;
   promoMessageShort?: string;
-  vimeoPreviewDefault?: string;
 };

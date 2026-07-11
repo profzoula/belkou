@@ -1,5 +1,5 @@
 import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
-import { courses as baseCourses, DEFAULT_PREVIEW_VIMEO, getAllLessons, isBaseCourseSlug, isWelcomePreviewLesson } from "@/lib/courses";
+import { courses as baseCourses, getAllLessons, isBaseCourseSlug, isWelcomePreviewLesson } from "@/lib/courses";
 import {
   addLessonToStoredCourse,
   addSectionToStoredCourse,
@@ -31,7 +31,7 @@ import { isCourseListed } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type CourseLessonOverride = Partial<
-  Pick<CourseLesson, "vimeo" | "preview" | "title" | "duration" | "content" | "type">
+  Pick<CourseLesson, "videoId" | "preview" | "title" | "duration" | "content" | "type">
 >;
 
 export type CourseMetaOverride = CourseMetaPatch;
@@ -247,42 +247,6 @@ function applySectionOrder(course: Course, sectionOrder?: string[]): Course {
   return { ...course, sections: ordered };
 }
 
-function getWelcomeLessonIdForDefaultVimeo(course: Course): string | undefined {
-  const lessons = getAllLessons(course);
-  const welcome =
-    lessons.find((lesson) => lesson.id === "intro-welcome") ??
-    lessons.find(
-      (lesson) =>
-        lesson.type === "video" && lesson.preview && isWelcomePreviewLesson(lesson),
-    ) ??
-    lessons.find((lesson) => lesson.type === "video" && lesson.preview);
-  return welcome?.id;
-}
-
-function applyDefaultVimeo(course: Course, defaultVimeo?: string): Course {
-  if (!defaultVimeo) return course;
-
-  const welcomeLessonId = getWelcomeLessonIdForDefaultVimeo(course);
-
-  return {
-    ...course,
-    sections: course.sections.map((section) => ({
-      ...section,
-      lessons: section.lessons.map((lesson) => {
-        if (
-          lesson.preview &&
-          !lesson.vimeo?.trim() &&
-          lesson.type === "video" &&
-          lesson.id === welcomeLessonId
-        ) {
-          return { ...lesson, vimeo: defaultVimeo };
-        }
-        return lesson;
-      }),
-    })),
-  };
-}
-
 export async function getCourseOverrides(): Promise<CourseOverridesMap> {
   return readJson<CourseOverridesMap>(COURSE_OVERRIDES_KEY, {});
 }
@@ -300,20 +264,13 @@ export async function saveStoredAdminCourses(courses: StoredCourse[]) {
 }
 
 async function resolveCourseList(): Promise<Course[]> {
-  const [overrides, settings, stored] = await Promise.all([
-    getCourseOverrides(),
-    getSiteSettings(),
-    getStoredAdminCourses(),
-  ]);
-  const defaultVimeo = settings.vimeoPreviewDefault?.trim();
+  const [overrides, stored] = await Promise.all([getCourseOverrides(), getStoredAdminCourses()]);
 
-  const baseResolved = baseCourses.map((course) =>
-    applyDefaultVimeo(mergeCourse(course, overrides[course.slug]), defaultVimeo),
-  );
+  const baseResolved = baseCourses.map((course) => mergeCourse(course, overrides[course.slug]));
 
   const adminResolved = stored.map((storedCourse) => {
     const course = storedCourseToCourse(storedCourse);
-    return applyDefaultVimeo(mergeCourse(course, overrides[course.slug]), defaultVimeo);
+    return mergeCourse(course, overrides[course.slug]);
   });
 
   return [...baseResolved, ...adminResolved];
@@ -351,7 +308,6 @@ export function getDefaultSiteSettings(): SiteSettings {
     promoEnabled: siteConfig.promo.enabled,
     promoMessage: siteConfig.promo.message,
     promoMessageShort: siteConfig.promo.messageShort,
-    vimeoPreviewDefault: undefined,
   };
 }
 
@@ -445,9 +401,7 @@ export async function addLessonToCourse(params: { courseSlug: string; input: Add
     return { ok: false, reason: "Titre requis" };
   }
 
-  const settings = await getSiteSettings();
-  const previewVimeo = settings.vimeoPreviewDefault?.trim() || DEFAULT_PREVIEW_VIMEO;
-  const lesson = buildNewLesson({ ...params.input, title }, previewVimeo);
+  const lesson = buildNewLesson({ ...params.input, title });
 
   if (isBaseCourseSlug(params.courseSlug)) {
     const base = baseCourses.find((course) => course.slug === params.courseSlug);
@@ -769,9 +723,7 @@ export async function createAdminCourse(input: CreateCourseInput) {
     return { ok: false as const, reason: "Un cours avec ce slug existe déjà" };
   }
 
-  const settings = await getSiteSettings();
-  const previewVimeo = settings.vimeoPreviewDefault?.trim() || DEFAULT_PREVIEW_VIMEO;
-  const course = buildDefaultStoredCourse({ ...input, slug }, previewVimeo);
+  const course = buildDefaultStoredCourse({ ...input, slug });
   const stored = await getStoredAdminCourses();
   stored.push(course);
 
