@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { ChevronRight, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { VideoPlaybackSource } from "@/server/video-storage";
+import type { VideoPlaybackSource } from "@/lib/videos";
 
 type CourseVideoPlayerProps = {
   playback: VideoPlaybackSource;

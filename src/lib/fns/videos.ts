@@ -6,11 +6,9 @@ import {
   getAdminFromRequestSources,
 } from "@/lib/admin-auth";
 import type { VideoRecord } from "@/lib/videos";
-import { getServerEnvResolved } from "@/server/env";
-import { createVideoRecord, listVideoRecords } from "@/server/videos";
-import { uploadSourceVideo } from "@/server/video-storage";
 
 async function requireAdmin(): Promise<void> {
+  const { getServerEnvResolved } = await import("@/server/env");
   const env = await getServerEnvResolved();
   if (!env.ADMIN_PASSWORD) {
     throw new Error("Admin non configuré");
@@ -31,6 +29,7 @@ async function requireAdmin(): Promise<void> {
 
 export const adminListVideos = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
+  const { listVideoRecords } = await import("@/server/videos");
   const videos = await listVideoRecords();
   return { videos };
 });
@@ -50,7 +49,8 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { updateVideoRecord } = await import("@/server/videos");
+    const { createVideoRecord, listVideoRecords, updateVideoRecord } = await import("@/server/videos");
+    const { uploadSourceVideo } = await import("@/server/video-storage");
 
     const created = await createVideoRecord({
       title: data.title,

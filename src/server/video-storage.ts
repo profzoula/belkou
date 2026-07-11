@@ -1,5 +1,5 @@
 import { formatCourseDurationLabel } from "@/lib/courses";
-import type { VideoRecord } from "@/lib/videos";
+import type { VideoPlaybackSource, VideoRecord } from "@/lib/videos";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 const BUCKET = "course-videos";
@@ -35,14 +35,6 @@ export function formatDurationFromSeconds(seconds: number): string {
   const totalMinutes = Math.max(1, Math.round(seconds / 60));
   return formatCourseDurationLabel(totalMinutes);
 }
-
-export type VideoPlaybackSource = {
-  kind: "hls" | "mp4";
-  url: string;
-  posterUrl?: string;
-  durationSeconds?: number | null;
-  status: string;
-};
 
 export async function resolveVideoPlayback(
   video: VideoRecord,

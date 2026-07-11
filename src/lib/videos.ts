@@ -20,6 +20,14 @@ export type VideoRecord = {
   updatedAt: string;
 };
 
+export type VideoPlaybackSource = {
+  kind: "hls" | "mp4";
+  url: string;
+  posterUrl?: string;
+  durationSeconds?: number | null;
+  status: string;
+};
+
 export function formatVideoStatusLabel(status: VideoStatus): string {
   switch (status) {
     case "queued":

@@ -49,7 +49,7 @@ import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback } from "@/lib/fns/videos";
-import type { VideoPlaybackSource } from "@/server/video-storage";
+import type { VideoPlaybackSource } from "@/lib/videos";
 import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
 import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
