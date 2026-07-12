@@ -78,6 +78,7 @@ function CourseVideoArea({
   onPlaybackTimeUpdate,
   activeArticleSubSessionId,
   onArticleSubSessionChange,
+  onVideoPlay,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
@@ -91,6 +92,7 @@ function CourseVideoArea({
   onPlaybackTimeUpdate?: (currentTime: number) => void;
   activeArticleSubSessionId?: string | null;
   onArticleSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
+  onVideoPlay?: () => void;
 }) {
   const { session } = useAuth();
   const Icon = getCourseIcon(course.slug);
@@ -253,6 +255,7 @@ function CourseVideoArea({
           nextLessonTitle={nextLessonTitle}
           onNextLesson={onNextLesson}
           onLessonComplete={onLessonComplete}
+          onPlay={onVideoPlay}
         />
         <div className="border-b border-border bg-gradient-to-r from-violet-600/10 via-card to-emerald-600/10 px-4 py-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Leçon vidéo</p>
@@ -424,6 +427,7 @@ function CurriculumSidebar({
   completedLessonIds,
   onSelectLesson,
   onSelectArticleSubSession,
+  variant = "sidebar",
 }: {
   course: PublicCourse;
   activeLessonId: string;
@@ -433,17 +437,22 @@ function CurriculumSidebar({
   completedLessonIds: string[];
   onSelectLesson: (lessonId: string) => void;
   onSelectArticleSubSession: (lessonId: string, subSessionId: string) => void;
+  variant?: "sidebar" | "tab";
 }) {
   const defaultSections = course.sections.map((section) => section.id);
   const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds]);
+  const summary = `${course.sections.length} sections · ${countLessons(course)} leçons · ${getCourseDisplayDuration(course)}`;
 
   return (
-    <div className="flex h-full flex-col border-t border-border bg-card lg:border-t-0 lg:border-r">
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-sm font-bold">Contenu du cours</h2>
-        <p className="text-xs text-muted-foreground">
-          {course.sections.length} sections · {countLessons(course)} leçons · {getCourseDisplayDuration(course)}
-        </p>
+    <div
+      className={cn(
+        "flex h-full flex-col bg-card",
+        variant === "sidebar" ? "border-t border-border lg:border-t-0 lg:border-r" : "",
+      )}
+    >
+      <div className={cn("border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
+        {variant === "sidebar" ? <h2 className="text-sm font-bold">Contenu du cours</h2> : null}
+        <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-0")}>{summary}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -737,6 +746,24 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   }, [access, getLockState, initialLessonId, allLessons, welcomeLesson, course]);
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
+  const [playerTab, setPlayerTab] = useState(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      const lesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0];
+      return lesson?.type === "video" ? "curriculum" : "overview";
+    }
+    return "overview";
+  });
+
+  const openCurriculumTab = useCallback(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      setPlayerTab("curriculum");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia("(max-width: 1023px)").matches) return;
+    setPlayerTab(activeLesson.type === "video" ? "curriculum" : "overview");
+  }, [activeLesson.id, activeLesson.type]);
   const activeArticleSessions = useMemo(() => {
     if (activeLesson?.type !== "article" || !activeLesson.content) return null;
     return parseArticleSessions(activeLesson.content);
@@ -957,10 +984,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             onPlaybackTimeUpdate={(currentTime) => handlePlaybackTimeUpdate(activeLesson.id, currentTime)}
             activeArticleSubSessionId={activeArticleSubSessionId}
             onArticleSubSessionChange={handleArticleSubSessionChange}
+            onVideoPlay={openCurriculumTab}
           />
         </div>
 
-        <aside className="order-2 lg:order-none lg:col-start-1 lg:row-span-full lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
+        <aside className="order-2 hidden lg:block lg:order-none lg:col-start-1 lg:row-span-full lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
           <CurriculumSidebar
             course={course}
             activeLessonId={activeLessonId}
@@ -974,24 +1002,43 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </aside>
 
         <div className="order-3 min-w-0 border-b border-border px-3 sm:px-6 lg:col-start-2 lg:row-start-2">
-            <Tabs defaultValue="overview" className="w-full">
+            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
               <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-0 bg-transparent p-0">
                 {[
                   { value: "overview", label: "Aperçu" },
-                  { value: "qa", label: "Q&R" },
-                  { value: "notes", label: "Notes" },
+                  { value: "curriculum", label: "Contenu du cours", mobileOnly: true },
+                  { value: "qa", label: "Q&R", desktopOnly: true },
+                  { value: "notes", label: "Notes", desktopOnly: true },
                   { value: "resources", label: "Ressources" },
-                  { value: "reviews", label: "Avis" },
+                  { value: "reviews", label: "Avis", desktopOnly: true },
                 ].map((tab) => (
                   <TabsTrigger
                     key={tab.value}
                     value={tab.value}
-                    className="rounded-none border-b-2 border-transparent px-3 py-3 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                    className={cn(
+                      "rounded-none border-b-2 border-transparent px-3 py-3 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+                      tab.mobileOnly && "lg:hidden",
+                      tab.desktopOnly && "hidden lg:inline-flex",
+                    )}
                   >
                     {tab.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
+
+              <TabsContent value="curriculum" className="mt-0 pb-8 pt-0 lg:hidden">
+                <CurriculumSidebar
+                  variant="tab"
+                  course={course}
+                  activeLessonId={activeLessonId}
+                  activeArticleSubSessionId={activeArticleSubSessionId}
+                  viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+                  getLockState={getLockState}
+                  completedLessonIds={completedLessonIds}
+                  onSelectLesson={selectLesson}
+                  onSelectArticleSubSession={handleSelectArticleSubSession}
+                />
+              </TabsContent>
 
               <TabsContent value="overview" className="mt-0 px-1 pb-8 pt-6 sm:px-0">
                 <h1 className="font-display text-xl font-bold leading-snug sm:text-2xl md:text-3xl">

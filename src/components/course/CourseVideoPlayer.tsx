@@ -13,6 +13,7 @@ type CourseVideoPlayerProps = {
   onNextLesson?: () => void;
   onLessonComplete?: () => void;
   onTimeUpdate?: (currentTime: number) => void;
+  onPlay?: () => void;
 };
 
 function describeVideoError(video: HTMLVideoElement): string {
@@ -38,12 +39,14 @@ export function CourseVideoPlayer({
   onNextLesson,
   onLessonComplete,
   onTimeUpdate,
+  onPlay,
 }: CourseVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const resumeAppliedRef = useRef(false);
   const onLessonCompleteRef = useRef(onLessonComplete);
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onPlayRef = useRef(onPlay);
   const [ended, setEnded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [buffering, setBuffering] = useState(false);
@@ -51,6 +54,7 @@ export function CourseVideoPlayer({
 
   onLessonCompleteRef.current = onLessonComplete;
   onTimeUpdateRef.current = onTimeUpdate;
+  onPlayRef.current = onPlay;
 
   useEffect(() => {
     resumeAppliedRef.current = false;
@@ -103,6 +107,7 @@ export function CourseVideoPlayer({
     const handlePlaying = () => {
       setBuffering(false);
       setLoading(false);
+      onPlayRef.current?.();
     };
 
     const handleVideoError = () => {
