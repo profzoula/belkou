@@ -63,11 +63,14 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
   };
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-border bg-card p-5 space-y-4">
+    <form
+      onSubmit={submit}
+      className="space-y-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+    >
       <div>
-        <h2 className="text-lg font-bold">Nouveau sujet</h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Posez une question ou proposez une idée — les autres inscrits recevront une notification.
+        <h2 className="text-lg font-bold">Nouvelle publication</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Partagez une question ou une idée avec les autres inscrits.
         </p>
       </div>
 
@@ -107,8 +110,8 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
         />
       </div>
 
-      <Button type="submit" variant="hero" disabled={loading}>
-        {loading ? "Publication..." : "Publier le sujet"}
+      <Button type="submit" variant="hero" disabled={loading} className="w-full sm:w-auto">
+        {loading ? "Publication..." : "Publier"}
       </Button>
     </form>
   );

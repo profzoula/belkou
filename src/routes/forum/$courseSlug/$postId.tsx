@@ -2,16 +2,15 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { ArrowLeft, Lightbulb, MessageCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { ForumPostCard, ForumReplyCard } from "@/components/forum/ForumPostCard";
 import { createCourseForumReply, getForumThread } from "@/lib/fns/forum";
 import { useAuth } from "@/hooks/use-auth";
 import { seoHead } from "@/lib/seo";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/forum/$courseSlug/$postId")({
   head: () =>
@@ -23,19 +22,6 @@ export const Route = createFileRoute("/forum/$courseSlug/$postId")({
     }),
   component: ForumThreadPage,
 });
-
-function formatWhen(iso: string) {
-  try {
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
-}
 
 function ForumThreadPage() {
   const { courseSlug, postId } = Route.useParams();
@@ -104,8 +90,8 @@ function ForumThreadPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-3xl">
-        <div className="mb-6 flex flex-wrap items-center gap-2 text-sm">
+      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg mx-auto">
+        <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="gap-1 px-0">
             <Link to="/forum/$courseSlug" params={{ courseSlug }}>
               <ArrowLeft className="h-4 w-4" />
@@ -114,28 +100,9 @@ function ForumThreadPage() {
           </Button>
         </div>
 
-        <article className="rounded-lg border border-border bg-card p-5 sm:p-6">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <Badge
-              variant="secondary"
-              className={cn("gap-1", post.kind === "suggestion" && "bg-amber-100 text-amber-900")}
-            >
-              {post.kind === "suggestion" ? (
-                <Lightbulb className="h-3 w-3" />
-              ) : (
-                <MessageCircle className="h-3 w-3" />
-              )}
-              {post.kind === "suggestion" ? "Suggestion" : "Question"}
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              {post.authorName} · {formatWhen(post.createdAt)}
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold leading-snug">{post.title}</h1>
-          <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{post.body}</p>
-        </article>
+        <ForumPostCard post={post} courseSlug={courseSlug} linkToThread={false} />
 
-        <section className="mt-8 space-y-4">
+        <section className="mt-6 space-y-4">
           <h2 className="text-lg font-bold">
             {replies.length} réponse{replies.length > 1 ? "s" : ""}
           </h2>
@@ -147,25 +114,31 @@ function ForumThreadPage() {
           ) : (
             <ul className="space-y-3">
               {replies.map((reply) => (
-                <li key={reply.id} className="rounded-lg border border-border bg-muted/20 p-4">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
-                    {reply.authorName} · {formatWhen(reply.createdAt)}
-                  </p>
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{reply.body}</p>
+                <li key={reply.id}>
+                  <ForumReplyCard
+                    authorName={reply.authorName}
+                    authorEmail={reply.authorEmail}
+                    body={reply.body}
+                    createdAt={reply.createdAt}
+                  />
                 </li>
               ))}
             </ul>
           )}
         </section>
 
-        <form onSubmit={submitReply} className="mt-8 rounded-lg border border-border bg-card p-5 space-y-3">
-          <h3 className="font-semibold">Votre réponse</h3>
+        <form
+          onSubmit={submitReply}
+          className="mt-6 space-y-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+        >
+          <h3 className="font-semibold">Répondre</h3>
           <Textarea
             value={replyBody}
             onChange={(e) => setReplyBody(e.target.value)}
-            placeholder="Partagez votre avis, votre expérience ou une piste de solution..."
+            placeholder="Écrivez votre réponse..."
             rows={4}
             maxLength={8000}
+            className="resize-none border-border/80"
           />
           <Button type="submit" variant="hero" disabled={submitting || !replyBody.trim()}>
             {submitting ? "Envoi..." : "Publier la réponse"}
