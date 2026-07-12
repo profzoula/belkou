@@ -936,21 +936,14 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       ) : null}
 
       <div className="site-container py-4 sm:py-6">
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
-        <aside className="order-2 lg:order-1 lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
-          <CurriculumSidebar
-            course={course}
-            activeLessonId={activeLessonId}
-            activeArticleSubSessionId={activeArticleSubSessionId}
-            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
-            getLockState={getLockState}
-            completedLessonIds={completedLessonIds}
-            onSelectLesson={selectLesson}
-            onSelectArticleSubSession={handleSelectArticleSubSession}
-          />
-        </aside>
-
-        <main className="order-1 min-w-0 lg:order-2">
+        <div className="flex flex-col max-lg:overflow-visible overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <div
+          className={cn(
+            "order-1 z-30 min-w-0 lg:col-start-2 lg:row-start-1",
+            activeLesson.type === "video" &&
+              "max-lg:sticky max-lg:top-14 max-lg:bg-card max-lg:shadow-sm",
+          )}
+        >
           <CourseVideoArea
             course={course}
             lesson={activeLesson}
@@ -965,8 +958,22 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             activeArticleSubSessionId={activeArticleSubSessionId}
             onArticleSubSessionChange={handleArticleSubSessionChange}
           />
+        </div>
 
-          <div className="border-b border-border px-3 sm:px-6">
+        <aside className="order-2 lg:order-none lg:col-start-1 lg:row-span-full lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
+          <CurriculumSidebar
+            course={course}
+            activeLessonId={activeLessonId}
+            activeArticleSubSessionId={activeArticleSubSessionId}
+            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+            getLockState={getLockState}
+            completedLessonIds={completedLessonIds}
+            onSelectLesson={selectLesson}
+            onSelectArticleSubSession={handleSelectArticleSubSession}
+          />
+        </aside>
+
+        <div className="order-3 min-w-0 border-b border-border px-3 sm:px-6 lg:col-start-2 lg:row-start-2">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-0 bg-transparent p-0">
                 {[
@@ -1129,8 +1136,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </TabsContent>
               ))}
             </Tabs>
-          </div>
-        </main>
+        </div>
         </div>
       </div>
     </div>
