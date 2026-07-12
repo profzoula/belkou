@@ -975,7 +975,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </aside>
 
-        <div className="order-1 flex min-w-0 flex-col max-lg:max-h-[calc(100dvh-3.5rem)] max-lg:overflow-hidden lg:col-start-2">
+        <div className="flex min-w-0 flex-col max-lg:min-h-0 max-lg:max-h-[calc(100dvh-3.5rem)] max-lg:flex-1 max-lg:overflow-hidden lg:col-start-2">
         <div className="z-30 min-w-0 shrink-0">
           <CourseVideoArea
             course={course}
@@ -994,8 +994,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </div>
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-border px-3 sm:px-6">
-            <Tabs value={playerTab} onValueChange={setPlayerTab} className="flex w-full max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col">
+        <div className="flex min-w-0 flex-col border-b border-border px-3 sm:px-6 max-lg:min-h-0 max-lg:flex-1">
+            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col">
               <TabsList className="h-auto w-full shrink-0 justify-start gap-0 rounded-none border-0 bg-transparent p-0">
                 {[
                   { value: "overview", label: "Aperçu" },
