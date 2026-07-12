@@ -90,11 +90,27 @@ export async function updateRegistrationDetails(
         id,
       )
       .run();
-    await supabaseUpdateRegistrationDetails(id, normalized);
+    await supabaseUpdateRegistrationDetails(id, {
+      full_name: normalized.full_name,
+      email: normalized.email,
+      whatsapp: normalized.whatsapp,
+      country: normalized.country,
+      level: normalized.level,
+      plan: normalized.plan,
+      course_slug: normalized.course_slug ?? null,
+    });
     return getRegistrationById(db, id);
   }
 
-  await supabaseUpdateRegistrationDetails(id, normalized);
+  await supabaseUpdateRegistrationDetails(id, {
+    full_name: normalized.full_name,
+    email: normalized.email,
+    whatsapp: normalized.whatsapp,
+    country: normalized.country,
+    level: normalized.level,
+    plan: normalized.plan,
+    course_slug: normalized.course_slug ?? null,
+  });
   const existing = devStore.get(id);
   if (existing) {
     const next = { ...existing, ...normalized, updated_at: updatedAt };
@@ -115,12 +131,17 @@ export async function saveRegistration(
     email: normalizeRegistrationEmail(data.email),
   };
   const record: RegistrationRecord = {
-    ...normalized,
+    full_name: normalized.full_name,
+    email: normalized.email,
+    whatsapp: normalized.whatsapp,
+    country: normalized.country,
+    level: normalized.level,
+    plan: normalized.plan,
+    course_slug: normalized.course_slug ?? null,
     id: crypto.randomUUID(),
     payment_status: options?.payment_status ?? "pending",
     stripe_session_id: null,
     referral_code: null,
-    course_slug: normalized.course_slug ?? null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

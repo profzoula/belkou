@@ -11,7 +11,6 @@ type ServiceCardProps = {
 
 export function ServiceCard({ service }: ServiceCardProps) {
   const Icon = service.icon;
-  const isLink = service.action.type === "link";
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:border-primary/20 hover:shadow-md">
@@ -48,7 +47,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <p className="mt-3 text-lg font-bold">{service.priceLabel}</p>
 
         <div className="mt-4">
-          {isLink ? (
+          {service.action.type === "link" ? (
             <Button asChild variant="hero" className="w-full rounded-lg">
               <Link to={service.action.href}>{service.action.label}</Link>
             </Button>

@@ -1364,7 +1364,7 @@ export function AdminCoursesTab() {
                             defaultTitle={newLesson.title}
                             onUploaded={(video) =>
                               handleLessonVideoUploaded(video, (patch) =>
-                                updateNewLessonDraft(section.id, patch),
+                                updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
                               )
                             }
                           />
@@ -1372,7 +1372,7 @@ export function AdminCoursesTab() {
                             value={newLesson.videoId || "__none__"}
                             onValueChange={(value) =>
                               applyVideoSelection(value, (patch) =>
-                                updateNewLessonDraft(section.id, patch),
+                                updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
                               )
                             }
                           >

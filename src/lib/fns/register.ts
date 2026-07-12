@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { registrationSchema } from "@/lib/schemas/registration";
-import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
 import { getDb } from "@/server/env";
 import {

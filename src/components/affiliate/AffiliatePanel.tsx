@@ -21,11 +21,15 @@ type AffiliatePanelProps = {
   accessToken: string;
 };
 
+type AffiliateDashboardData =
+  | Awaited<ReturnType<typeof getAffiliateDashboard>>
+  | { affiliate: null; error: "load_failed" };
+
 export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
   const { user } = useAuth();
   const dashboardFn = useServerFn(getAffiliateDashboard);
   const withdrawFn = useServerFn(requestAffiliateWithdrawalFn);
-  const [data, setData] = useState<Awaited<ReturnType<typeof getAffiliateDashboard>> | null>(null);
+  const [data, setData] = useState<AffiliateDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);

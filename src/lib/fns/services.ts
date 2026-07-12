@@ -38,7 +38,14 @@ export const submitServiceBooking = createServerFn({ method: "POST" })
       throw new Error("Service introuvable.");
     }
 
-    await checkRateLimit(`service-booking:${data.email.toLowerCase()}`, RATE_LIMITS.register);
+    const allowed = checkRateLimit(
+      `service-booking:${data.email.toLowerCase()}`,
+      RATE_LIMITS.register.limit,
+      RATE_LIMITS.register.windowMs,
+    );
+    if (!allowed) {
+      throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
+    }
 
     const { createServiceBooking } = await import("@/server/site-content");
     const saved = await createServiceBooking({

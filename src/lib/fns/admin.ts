@@ -739,11 +739,13 @@ export const adminAddLesson = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Ajout impossible");
     }
 
-    if (result.lessonId && data.type !== "article") {
+    const lessonId = "lessonId" in result ? result.lessonId : undefined;
+
+    if (lessonId && data.type !== "article") {
       const { notifyCourseLessonIfVideoAdded } = await import("@/server/forum-notifications");
       void notifyCourseLessonIfVideoAdded({
         courseSlug: data.courseSlug,
-        lessonId: result.lessonId,
+        lessonId,
         hadVideo: false,
       }).catch(() => undefined);
     }
@@ -751,7 +753,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
     return {
       ok: true as const,
       courses: adminCoursesResponse(await getResolvedCourses()),
-      lessonId: result.lessonId,
+      lessonId,
     };
   });
 
@@ -772,10 +774,12 @@ export const adminAddSection = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Ajout impossible");
     }
 
+    const sectionId = "sectionId" in result ? result.sectionId : undefined;
+
     return {
       ok: true as const,
       courses: adminCoursesResponse(await getResolvedCourses()),
-      sectionId: result.sectionId,
+      sectionId,
     };
   });
 
@@ -985,10 +989,15 @@ export const adminCreateService = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Création impossible");
     }
 
+    const service = "service" in result ? result.service : undefined;
+    if (!service) {
+      throw new Error("Création impossible");
+    }
+
     return {
       ok: true as const,
       services: await ensureServicesInitialized(),
-      createdSlug: result.service.slug,
+      createdSlug: service.slug,
     };
   });
 

@@ -47,7 +47,7 @@ import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
-import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
+import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback } from "@/lib/fns/videos";
 import type { VideoPlaybackSource } from "@/lib/videos";
@@ -206,9 +206,9 @@ function CourseVideoArea({
             ? `Vous êtes inscrit — contenu disponible le ${startLabel}`
             : reason === "schedule" && startLabel
               ? `Contenu disponible le ${startLabel}`
-              : lesson.type === "article"
-                ? "Contenu texte — disponible après inscription."
-                : "Ressources téléchargeables — disponible après inscription."}
+              : lesson.type === "resource"
+                ? "Ressources téléchargeables — disponible après inscription."
+                : "Contenu texte — disponible après inscription."}
         </p>
         {enrolledWaiting ? (
           welcomeLessonId && lesson.id !== welcomeLessonId ? (
@@ -377,20 +377,18 @@ function EnrolledExtraTab({
   contentLive: boolean;
   startLabel: string | null;
 }) {
-  const whatsappUrl = getWhatsappGroupUrl("premium");
-
   if (tab === "qa") {
     return (
       <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
         <h3 className="font-semibold text-foreground">Questions & réponses</h3>
-        <p>Posez vos questions dans le groupe WhatsApp de la cohorte ou écrivez à {siteConfig.contactEmail}.</p>
-        {whatsappUrl && (
-          <Button asChild variant="soft" size="sm">
-            <a href={whatsappUrl} target="_blank" rel="noreferrer">
-              Ouvrir WhatsApp
-            </a>
-          </Button>
-        )}
+        <p>
+          Posez vos questions sur le forum du cours — les réponses et discussions restent accessibles à toute la cohorte.
+        </p>
+        <Button asChild variant="soft" size="sm">
+          <Link to="/forum/$courseSlug" params={{ courseSlug: course.slug }}>
+            Ouvrir le forum
+          </Link>
+        </Button>
       </div>
     );
   }
@@ -446,8 +444,8 @@ function CurriculumSidebar({
   return (
     <div
       className={cn(
-        "flex h-full flex-col bg-card",
-        variant === "sidebar" ? "border-t border-border lg:border-t-0 lg:border-r" : "",
+        "flex flex-col bg-card",
+        variant === "sidebar" ? "h-full border-t border-border lg:border-t-0 lg:border-r" : "",
       )}
     >
       <div className={cn("border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
@@ -455,7 +453,7 @@ function CurriculumSidebar({
         <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-0")}>{summary}</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className={cn(variant === "sidebar" && "flex-1 overflow-y-auto")}>
         <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
           {course.sections.map((section) => {
             const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
@@ -964,13 +962,21 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
       <div className="site-container py-4 sm:py-6">
         <div className="flex flex-col max-lg:overflow-visible overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
-        <div
-          className={cn(
-            "order-1 z-30 min-w-0 lg:col-start-2 lg:row-start-1",
-            activeLesson.type === "video" &&
-              "max-lg:sticky max-lg:top-14 max-lg:bg-card max-lg:shadow-sm",
-          )}
-        >
+        <aside className="hidden lg:block lg:col-start-1 lg:sticky lg:top-[calc(3.5rem+1rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:overflow-hidden lg:self-start">
+          <CurriculumSidebar
+            course={course}
+            activeLessonId={activeLessonId}
+            activeArticleSubSessionId={activeArticleSubSessionId}
+            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+            getLockState={getLockState}
+            completedLessonIds={completedLessonIds}
+            onSelectLesson={selectLesson}
+            onSelectArticleSubSession={handleSelectArticleSubSession}
+          />
+        </aside>
+
+        <div className="order-1 flex min-w-0 flex-col max-lg:max-h-[calc(100dvh-3.5rem)] max-lg:overflow-hidden lg:col-start-2">
+        <div className="z-30 min-w-0 shrink-0">
           <CourseVideoArea
             course={course}
             lesson={activeLesson}
@@ -988,22 +994,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </div>
 
-        <aside className="order-2 hidden lg:block lg:order-none lg:col-start-1 lg:row-span-full lg:sticky lg:top-[calc(var(--site-header-height,3.5rem)+1rem)] lg:max-h-[calc(100dvh-var(--site-header-height,3.5rem)-2rem)] lg:overflow-hidden">
-          <CurriculumSidebar
-            course={course}
-            activeLessonId={activeLessonId}
-            activeArticleSubSessionId={activeArticleSubSessionId}
-            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
-            getLockState={getLockState}
-            completedLessonIds={completedLessonIds}
-            onSelectLesson={selectLesson}
-            onSelectArticleSubSession={handleSelectArticleSubSession}
-          />
-        </aside>
-
-        <div className="order-3 min-w-0 border-b border-border px-3 sm:px-6 lg:col-start-2 lg:row-start-2">
-            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
-              <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-0 bg-transparent p-0">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-border px-3 sm:px-6">
+            <Tabs value={playerTab} onValueChange={setPlayerTab} className="flex w-full max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col">
+              <TabsList className="h-auto w-full shrink-0 justify-start gap-0 rounded-none border-0 bg-transparent p-0">
                 {[
                   { value: "overview", label: "Aperçu" },
                   { value: "curriculum", label: "Contenu du cours", mobileOnly: true },
@@ -1026,7 +1019,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 ))}
               </TabsList>
 
-              <TabsContent value="curriculum" className="mt-0 pb-8 pt-0 lg:hidden">
+              <TabsContent value="curriculum" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto pb-8 pt-0 lg:hidden">
                 <CurriculumSidebar
                   variant="tab"
                   course={course}
@@ -1040,7 +1033,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 />
               </TabsContent>
 
-              <TabsContent value="overview" className="mt-0 px-1 pb-8 pt-6 sm:px-0">
+              <TabsContent value="overview" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 pb-8 pt-6 sm:px-0">
                 <h1 className="font-display text-xl font-bold leading-snug sm:text-2xl md:text-3xl">
                   {course.title}
                 </h1>
@@ -1140,7 +1133,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </div>
               </TabsContent>
 
-              <TabsContent value="resources" className="mt-0 px-1 pb-8 pt-6 sm:px-0">
+              <TabsContent value="resources" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 pb-8 pt-6 sm:px-0">
                 {hasPaidAccess ? (
                   <CourseResourcesPanel resources={course.resources ?? []} />
                 ) : (
@@ -1159,7 +1152,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               </TabsContent>
 
               {["qa", "notes", "reviews"].map((tab) => (
-                <TabsContent key={tab} value={tab} className="px-1 py-12 text-center sm:px-0">
+                <TabsContent key={tab} value={tab} className="max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 py-12 text-center sm:px-0">
                   {hasPaidAccess ? (
                     <EnrolledExtraTab
                       tab={tab}
@@ -1183,6 +1176,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </TabsContent>
               ))}
             </Tabs>
+        </div>
         </div>
         </div>
       </div>

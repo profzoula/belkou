@@ -117,8 +117,9 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
   const startSession = (number: number, title: string) => {
     flushSub();
     flushIntro();
-    current = { number, title, introBlocks: [], subSessions: [] };
-    sessions.push(current);
+    const session: ArticleSession = { number, title, introBlocks: [], subSessions: [] };
+    current = session;
+    sessions.push(session);
     subIndex = 0;
   };
 
@@ -140,13 +141,16 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
       continue;
     }
 
-    if (trimmed.startsWith("### ") && current) {
+    if (trimmed.startsWith("### ")) {
+      if (!current) continue;
+      const session = current as ArticleSession;
+
       const heading = trimmed.slice(4).trim();
       if (SUBSESSION_HEADING_RE.test(heading)) {
         flushSub();
         subIndex += 1;
-        const sub = parseSubSessionTitle(heading, current.number, subIndex);
-        currentSub = sub;
+        const sub = parseSubSessionTitle(heading, session.number, subIndex);
+        currentSub = { ...sub, lines: [] };
         continue;
       }
       if (currentSub) {
@@ -293,8 +297,9 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
   let subIndex = 0;
 
   const startSession = (number: number, title: string) => {
-    current = { number, title, introBlocks: [], subSessions: [] };
-    sessions.push(current);
+    const session: ArticleSession = { number, title, introBlocks: [], subSessions: [] };
+    current = session;
+    sessions.push(session);
     subIndex = 0;
   };
 
@@ -325,10 +330,12 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       }
     }
 
-    if (tag === "h3" && current) {
+    if (tag === "h3") {
+      if (!current) continue;
+      const session: ArticleSession = current;
       subIndex += 1;
       const text = element.textContent?.trim() ?? "";
-      const sub = parseSubSessionTitle(text, current.number, subIndex);
+      const sub = parseSubSessionTitle(text, session.number, subIndex);
       const isQuiz = element.hasAttribute("data-lesson-quiz");
       const legacyQuizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
       const quizFromHeading = decodeLessonQuizData(element.getAttribute("data-lesson-quiz-data") ?? "");
@@ -336,7 +343,7 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       const { quiz: quizFromBody, introHtml } = extractQuizFromSubSessionHtml(body.html || "");
       const quiz = quizFromHeading ?? quizFromBody ?? undefined;
       const quizId = !quiz && legacyQuizId ? legacyQuizId : undefined;
-      current.subSessions.push({
+      session.subSessions.push({
         number: sub.number,
         title: sub.title,
         blocks: [],

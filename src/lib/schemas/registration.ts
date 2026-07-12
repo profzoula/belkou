@@ -27,7 +27,7 @@ export const registrationSchema = z.object({
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
-export type RegistrationRecord = RegistrationInput & {
+export type RegistrationRecord = Omit<RegistrationInput, "course_slug" | "referral_code"> & {
   id: string;
   payment_status: "pending" | "paid" | "manual_pending";
   stripe_session_id: string | null;

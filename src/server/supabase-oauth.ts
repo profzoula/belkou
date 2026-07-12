@@ -48,7 +48,10 @@ export async function handleOAuthCallback(request: Request): Promise<Response> {
     },
     cookies: {
       getAll() {
-        return parseCookieHeader(request.headers.get("Cookie") ?? "");
+        return parseCookieHeader(request.headers.get("Cookie") ?? "").map((cookie) => ({
+          name: cookie.name,
+          value: cookie.value ?? "",
+        }));
       },
       setAll(cookiesToSet) {
         for (const { name, value, options } of cookiesToSet) {

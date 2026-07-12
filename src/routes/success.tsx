@@ -118,9 +118,9 @@ function SuccessPage() {
   const whatsappUrl = isPaid ? getWhatsappGroupUrl(planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
   const registrationEmail = status?.email;
-  const emailMatchesUser =
-    Boolean(user?.email && registrationEmail) &&
-    user.email!.toLowerCase() === registrationEmail!.toLowerCase();
+  const emailMatchesUser = Boolean(
+    user?.email && registrationEmail && user.email.toLowerCase() === registrationEmail.toLowerCase(),
+  );
 
   return (
     <div className="min-h-screen bg-background">

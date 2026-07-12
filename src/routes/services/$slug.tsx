@@ -5,17 +5,21 @@ import { Footer } from "@/components/site/Footer";
 import { ServiceBookingForm } from "@/components/services/ServiceBookingForm";
 import { getPublicServiceBySlug } from "@/lib/fns/services";
 import { serializableToServiceItem } from "@/lib/service-storage";
+import type { ServiceItem } from "@/lib/service-storage";
 import { formatCount } from "@/lib/courses";
 import { seoHead } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/services/$slug")({
-  head: ({ loaderData }) =>
-    seoHead({
-      title: `${loaderData.title} — Services BelKou`,
-      description: loaderData.description,
-      path: `/services/${loaderData.slug}`,
-    }),
+  head: ({ loaderData }) => {
+    const service = loaderData as ServiceItem | undefined;
+    if (!service) return {};
+    return seoHead({
+      title: `${service.title} — Services BelKou`,
+      description: service.description,
+      path: `/services/${service.slug}`,
+    });
+  },
   loader: async ({ params }) => {
     const service = await getPublicServiceBySlug({ data: { slug: params.slug } });
     if (!service) throw notFound();
@@ -28,7 +32,10 @@ export const Route = createFileRoute("/services/$slug")({
 });
 
 function ServiceDetailPage() {
-  const service = Route.useLoaderData();
+  const service = Route.useLoaderData() as ServiceItem | undefined;
+
+  if (!service) return null;
+
   const Icon = service.icon;
 
   return (

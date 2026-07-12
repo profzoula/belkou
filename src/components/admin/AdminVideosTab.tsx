@@ -41,8 +41,6 @@ function statusBadgeClass(video: Pick<VideoRecord, "status" | "storagePath">): s
       return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
     case "processing":
       return "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200";
-    case "failed":
-      return "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300";
     default:
       return "bg-muted text-muted-foreground";
   }

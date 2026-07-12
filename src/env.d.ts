@@ -24,6 +24,29 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+interface D1PreparedStatement {
+  bind(...values: unknown[]): D1PreparedStatement;
+  first<T = unknown>(colName?: string): Promise<T | null>;
+  run(): Promise<D1Response>;
+  all<T = unknown>(): Promise<D1Result<T>>;
+}
+
+interface D1Result<T = unknown> {
+  results?: T[];
+  success: boolean;
+  error?: string;
+}
+
+interface D1Response {
+  success: boolean;
+  error?: string;
+}
+
+interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+  exec(query: string): Promise<D1Response>;
+}
+
 interface CloudflareEnv {
   DB?: D1Database;
   STRIPE_SECRET_KEY?: string;

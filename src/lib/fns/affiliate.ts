@@ -31,7 +31,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email || !user.id) {
-      return { affiliate: null as const, error: "not_authenticated" as const };
+      return { affiliate: null, error: "not_authenticated" as const };
     }
 
     const email = normalizeRegistrationEmail(user.email);

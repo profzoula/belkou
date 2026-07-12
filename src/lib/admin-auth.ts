@@ -44,7 +44,7 @@ async function hmacVerify(message: string, signature: string, secret: string): P
     return await crypto.subtle.verify(
       "HMAC",
       key,
-      fromBase64Url(signature),
+      fromBase64Url(signature) as BufferSource,
       new TextEncoder().encode(message),
     );
   } catch {
