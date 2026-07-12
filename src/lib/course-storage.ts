@@ -270,7 +270,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput): StoredCourse
   return {
     slug: input.slug,
     title: input.title,
-    instructor: input.instructor ?? "BelKou, Prof Zoula",
+    instructor: input.instructor ?? "BelKou, Mackenson Lundi",
     rating: 4.8,
     ratingsCount: 0,
     studentsCount: siteConfig.stats.courseStudentsBase,

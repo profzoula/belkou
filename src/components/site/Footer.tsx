@@ -29,6 +29,7 @@ const footerColumns: FooterColumn[] = [
     title: "Entreprise",
     items: [
       { name: "Comment ça marche", href: "/#how-it-works" },
+      { name: "À propos", href: "/about" },
       { name: "Témoignages", href: "/#testimonials" },
       { name: "FAQ", href: "/faq" },
       { name: "Contact", href: `mailto:${siteConfig.contactEmail}` },

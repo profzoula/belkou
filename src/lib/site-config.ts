@@ -72,6 +72,20 @@ export const siteConfig = {
   social: {
     twitter: envString(import.meta.env.VITE_TWITTER_HANDLE, "@BelKou"),
   },
+  founder: {
+    name: envString(import.meta.env.VITE_FOUNDER_NAME, "Mackenson Lundi"),
+    role: envString(
+      import.meta.env.VITE_FOUNDER_ROLE,
+      "IT · Software Development · Web Developer · Fondateur BelKou",
+    ),
+    bio: envString(
+      import.meta.env.VITE_FOUNDER_BIO,
+      "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou (Prof Zoula). Il forme Haïti et la diaspora à créer des applications et des SaaS grâce à l'IA, avec Cursor, Claude et les outils du développement moderne.",
+    ),
+    avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/mackenson-lundi.png"),
+    githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),
+    linkedinUrl: envString(import.meta.env.VITE_FOUNDER_LINKEDIN_URL, ""),
+  },
 } as const;
 
 export type PlanId = "premium" | "vip";

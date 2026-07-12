@@ -68,9 +68,9 @@ export const courses: Course[] = [
   {
     slug: "apps-ia-cursor-claude",
     title: "Apps IA avec Cursor & Claude Code",
-    instructor: "BelKou, Prof Zoula",
+    instructor: "BelKou, Mackenson Lundi",
     rating: 4.8,
-    ratingsCount: 25,
+    ratingsCount: 38,
     studentsCount: siteConfig.stats.studentsBase,
     totalDuration: "8h total",
     lastUpdated: "juin 2026",

@@ -15,6 +15,12 @@ interface ImportMetaEnv {
   readonly VITE_PAYPAL_EMAIL?: string;
   readonly VITE_BANK_INSTRUCTIONS?: string;
   readonly VITE_TWITTER_HANDLE?: string;
+  readonly VITE_FOUNDER_NAME?: string;
+  readonly VITE_FOUNDER_ROLE?: string;
+  readonly VITE_FOUNDER_BIO?: string;
+  readonly VITE_FOUNDER_AVATAR_URL?: string;
+  readonly VITE_FOUNDER_GITHUB_URL?: string;
+  readonly VITE_FOUNDER_LINKEDIN_URL?: string;
   readonly VITE_SITE_URL?: string;
   readonly VITE_SUPABASE_URL?: string;
   readonly VITE_SUPABASE_ANON_KEY?: string;

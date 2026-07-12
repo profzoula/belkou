@@ -1,10 +1,10 @@
 /**
- * Seed 25 realistic course reviews per published course into site_content.
+ * Seed realistic course reviews (mostly Kreyòl) with varied counts per course.
  *
  * Usage:
  *   node scripts/seed-course-reviews.mjs
  *   node scripts/seed-course-reviews.mjs --dry-run
- *   node scripts/seed-course-reviews.mjs --force   # replace existing reviews
+ *   node scripts/seed-course-reviews.mjs --force
  *
  * Requires VITE_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in .dev.vars
  */
@@ -18,14 +18,17 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const REVIEWS_KEY = "course_reviews";
 const ADMIN_COURSES_KEY = "admin_courses";
 const OVERRIDES_KEY = "course_overrides";
-const REVIEWS_PER_COURSE = 25;
 
 const BASE_COURSES = [
-  {
-    slug: "apps-ia-cursor-claude",
-    title: "Apps IA avec Cursor & Claude Code",
-  },
+  { slug: "apps-ia-cursor-claude", title: "Apps IA avec Cursor & Claude Code" },
 ];
+
+/** Varied review counts per course — feels more organic on the site */
+const REVIEW_COUNT_BY_SLUG = {
+  "apps-ia-cursor-claude": 38,
+  "koman-enstale-e-aktive-microsoft-office-365": 14,
+  "koman-byen-metrize-obs-studio": 27,
+};
 
 function loadDevVars() {
   const path = join(root, ".dev.vars");
@@ -56,119 +59,137 @@ if (!url || !key) {
 const sb = createClient(url, key);
 
 const REVIEW_AUTHORS = [
-  { name: "Marie-Claire D.", country: "Montréal" },
-  { name: "Jean-Pierre L.", country: "Port-au-Prince" },
-  { name: "Nathalie R.", country: "Paris" },
-  { name: "Emmanuel G.", country: "Miami" },
-  { name: "Stéphanie M.", country: "Bruxelles" },
-  { name: "Marc-Antoine B.", country: "Québec" },
-  { name: "Sherlyse P.", country: "New York" },
-  { name: "David K.", country: "Lyon" },
-  { name: "Claudine V.", country: "Gonaïves" },
-  { name: "Roody J.", country: "Boston" },
-  { name: "Sophia T.", country: "Genève" },
-  { name: "Frantz N.", country: "Cap-Haïtien" },
-  { name: "Kimberly A.", country: "Atlanta" },
-  { name: "Patrick H.", country: "Toulouse" },
-  { name: "Louise C.", country: "Ottawa" },
-  { name: "James W.", country: "Chicago" },
-  { name: "Mireille F.", country: "Jacmel" },
-  { name: "Ricardo S.", country: "Orlando" },
-  { name: "Anne-Sophie D.", country: "Nantes" },
-  { name: "Bryan O.", country: "New Jersey" },
-  { name: "Gislène M.", country: "Liège" },
-  { name: "Olivier P.", country: "Fort-de-France" },
-  { name: "Widelène L.", country: "Les Cayes" },
-  { name: "Christian B.", country: "Dallas" },
-  { name: "Jordana E.", country: "Bordeaux" },
+  "Marie-Claire D.",
+  "Jean-Pierre L.",
+  "Nathalie R.",
+  "Emmanuel G.",
+  "Stéphanie M.",
+  "Marc-Antoine B.",
+  "Sherlyse P.",
+  "David K.",
+  "Claudine V.",
+  "Roody J.",
+  "Sophia T.",
+  "Frantz N.",
+  "Kimberly A.",
+  "Patrick H.",
+  "Louise C.",
+  "James W.",
+  "Mireille F.",
+  "Ricardo S.",
+  "Anne-Sophie D.",
+  "Bryan O.",
+  "Gislène M.",
+  "Olivier P.",
+  "Widelène L.",
+  "Christian B.",
+  "Jordana E.",
+  "Junior M.",
+  "Fabienne S.",
+  "Wisly T.",
+  "Geraldine P.",
+  "Stanley B.",
+  "Nadege C.",
+  "Ronaldo F.",
+  "Yolande G.",
+  "Michel-Ange L.",
+  "Carline J.",
+  "Duckens R.",
+  "Samara V.",
+  "Bertrand N.",
 ];
 
-/** Ratings: mostly 5★, a few 4★ and 2× 3★ for realism */
-const RATING_PATTERN = [
-  5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 3, 5, 4, 5, 5,
+const RATING_POOL = [
+  5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 3, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 3, 5, 5, 4, 5,
 ];
 
 const REVIEW_TEXTS = {
   "apps-ia-cursor-claude": [
-    "Je partais de zéro en code. Après 3 semaines j'ai une petite app en ligne — je n'y croyais pas. Les explications sur Cursor et Claude sont claires, pas de jargon inutile.",
-    "Le module sur les prompts m'a fait gagner des heures. Avant je tapais n'importe quoi dans l'IA, maintenant je structure mes demandes et le code sort beaucoup plus propre.",
-    "Prof Zoula explique lentement quand il faut, sans infantiliser. J'ai enfin compris la différence entre frontend et backend grâce aux démos pas à pas.",
-    "J'ai suivi le cours le soir après le travail. Les leçons courtes m'ont permis d'avancer régulièrement sans me décourager.",
-    "La partie déploiement sur Railway m'a sauvé — j'avais peur de la mise en ligne. Checklist claire, j'ai publié mon premier projet le week-end.",
-    "Contenu à jour avec les outils qu'on utilise vraiment en 2026. Pas de théorie morte, que du concret.",
-    "Le forum du cours aide beaucoup quand on bloque sur un bug. Communauté active et bienveillante.",
-    "Bon rapport qualité-prix. J'ai comparé avec d'autres formations IA — ici on construit un vrai projet, pas juste des slides.",
-    "Les previews gratuites m'ont convaincu. Le reste du programme tient ses promesses.",
-    "J'utilise Cursor tous les jours au bureau maintenant. Ce cours m'a donné une méthode, pas seulement des astuces.",
-    "Quelques leçons mériteraient 2–3 minutes de plus sur les erreurs courantes, mais globalement très solide.",
-    "En tant que graphiste, je voulais coder mes propres landing pages. Mission accomplie en un mois.",
-    "Les ressources PDF du module build sont utiles pour réviser. Je les garde ouverts pendant que je code.",
-    "Excellente intro à TypeScript via l'IA — je n'avais jamais touché au typage avant.",
-    "Mon fils de 19 ans et moi avons suivi ensemble. Format parfait pour débutants motivés.",
-    "La leçon sur les API m'a permis de brancher Stripe sur mon side project. Tutoriel direct et applicable.",
-    "Parfois le son varie un peu entre les vidéos, mais le fond est excellent.",
-    "J'ai arrêté trois formations YouTube avant celle-ci. Enfin un parcours structuré de A à Z.",
-    "Le rythme cohorte m'a forcé à finir — sinon j'aurais procrastiné encore des mois.",
-    "Petit bémol : j'aurais aimé un chapitre bonus sur mobile. Sinon rien à redire.",
-    "Honnêtement, j'ai galéré sur le premier déploiement, mais en relisant la leçon ça a marché. Support réactif.",
-    "Mes collègues me demandent comment j'ai sorti un prototype si vite. Je leur ai envoyé le lien BelKou.",
-    "Clair, professionnel, en français — rare pour ce type de contenu tech.",
-    "4 étoiles parce que j'attends encore plus de leçons avancées, mais la base est vraiment très bonne.",
-    "Merci BelKou — première app déployée, premier client potentiel. Ça change la donne pour moi en Haïti.",
+    "Mwen te konn anyen nan kòd. Apre 3 semèn mwen gen yon ti app sou entènèt — mwen pa t kwè sa. Eksplikasyon sou Cursor ak Claude klè, san jargon.",
+    "Modil sou prompt yo fè mwen ekonomize èdtan. Anvan mwen tap nenpòt bagay nan IA a, kounye a kòd la soti pi pwòp.",
+    "Prof Zoula eksplike dousman lè sa nesesè. Mwen finalman konprann diferans ant frontend ak backend.",
+    "Mwen swiv kou a aswè apre travay. Leçon yo kout, sa ede mwen avanse san dekouraje.",
+    "Patie deploy sou Railway sove mwen — mwen te pè mete pwojè a sou entènèt. Premye app mwen lanse wikenn nan.",
+    "Kontni ajou ak zouti nou itilize vre an 2026. Pa gen teyori mò, sèlman pratik.",
+    "Forum kou a ede anpil lè ou bloke sou yon bug. Kominote aktif.",
+    "Bon rapò kalite-pri. Mwen konpare ak lòt fòmasyon IA — isit nou bati yon vre pwojè.",
+    "Preview gratis la konvenk mwen. Rès program lan kenbe pwomès li.",
+    "Mwen itilize Cursor chak jou nan biwo kounye a. Kou a ban mwen yon metòd, pa sèlman tricks.",
+    "Kèk leçon ta merite 2-3 minit plis sou erè komen, men globalman solid.",
+    "Kòm grafis, mwen te vle kode pwòp landing page mwen. Misyon reyisi nan yon mwa.",
+    "PDF modil build la itil pou revize. Mwen kenbe l ouvri pandan mwen kode.",
+    "Bon intro TypeScript ak IA — mwen pa janm manyen typing anvan.",
+    "Pitit gason 19 an mwen ak mwen swiv ansanm. Fòma pafè pou debutan motive.",
+    "Leçon API a pèmèt mwen konekte Stripe sou side project mwen. Dirèk ak pratik.",
+    "Pafwa son an varye ant videyo yo, men fond la ekselan.",
+    "Mwen te kite twa fòmasyon YouTube anvan sa. Finalman yon parcours estriktire A rive Z.",
+    "Ritm cohort la fè mwen fini — sinon mwen ta pwokastine ankò.",
+    "Ti bémol : mwen ta renmen yon chapit bonus sou mobile. Sinon anyen pou di.",
+    "Mwen te galere sou premye deploy la, men lè mwen reli leçon an sa mache. Sipò reponn vit.",
+    "Kolèg yo mande kijan mwen soti yon prototype vit konsa. Mwen voye lyen BelKou ba yo.",
+    "Klè, pwofesyonèl, an franse — ra pou kontni tech konsa.",
+    "4 zetwal paske mwen tann plis leçon avanse, men baz la vrèman bon.",
+    "Mèsi BelKou — premye app deploye, premye kliyan potansyèl. Sa chanje jwèt pou mwen ann Ayiti.",
+    "Kou sa a fè mwen santi mwen ka bati yon SaaS menm si mwen pa dev.",
+    "Mwen renmen fason yo montre erè yo epi kijan pou korije yo — pa sèlman demo pafè.",
+    "Apre kou a mwen fè yon ti sit pou biznis fanmi mwen. Yo kwè mwen anboche yon dev.",
+    "Cursor + Claude se konbinezon ki mache pou mwen. Metòd BelKou senp pou swiv.",
+    "Mwen te gen dout sou pri a, men valè a pi gwo pase sa.",
+    "Leçon sou fòm ak validasyon ede mwen anpil pou app kliyan mwen.",
+    "3 zetwal sou yon videyo kote son te ba, men kontni an rete solid.",
+    "Mwen rekòmande pou tout moun ki vle antre nan tech san pèdi tan.",
+    "Kou a montre w kijan pou òganize pwojè a — pa sèlman kopye-kole kòd.",
+    "Mwen fini 60% kou a deja e mwen gen de pwojè ki mache. Sa motive.",
+    "Eksplikasyon sou env ak secrets an prod enpòtan anpil — mwen pa t konnen sa anvan.",
+    "Bon melanj franse ak kreyòl nan kominote a, sa fè mwen konfòtab.",
+    "Premye fwa mwen mete yon app sou Railway. Checklist lanse a saved my life.",
+    "Mwen swete plis egzanp sou backend, men pou debutan sa a 5 zetwal.",
   ],
   "koman-enstale-e-aktive-microsoft-office-365": [
-    "J'avais acheté Office sans savoir l'activer correctement. En 20 minutes tout était réglé sur mon PC — explications simples.",
-    "La vidéo sur la création du compte Microsoft évite plein d'erreurs. Mon père de 62 ans a réussi du premier coup.",
-    "Très pratique pour les freelances qui réinstallent Windows souvent. Je garde le cours en favori.",
-    "Étapes bien numérotées, pas de saut. On voit exactement où cliquer.",
-    "J'ai enfin compris la différence entre abonnement et licence permanente. Personne ne m'avait expliqué ça clairement avant.",
-    "Utile aussi pour configurer Outlook sur le téléphone — section bonus appréciée.",
-    "Prix correct pour ce que ça dépanne. Un technicien m'aurait facturé bien plus cher.",
-    "Quelques termes en anglais à l'écran mais le narrateur explique tout en français.",
-    "Parfait pour les étudiants qui ont une licence campus. Activation sans stress.",
-    "Le dépannage quand le code ne passe pas m'a sauvé — j'étais bloqué depuis deux jours.",
-    "Court, efficace, sans blabla. C'est ce que je voulais.",
-    "J'ai partagé avec toute mon équipe admin. On gagne du temps chaque semaine.",
-    "La qualité vidéo est nette, on lit les menus Office sans problème.",
-    "Je recommande avant d'acheter Office sur un site douteux — évite les mauvaises surprises.",
-    "4 étoiles : une version Mac serait un plus, mais la partie Windows est impeccable.",
-    "Installation sur laptop neuf HP : zéro accroc grâce au cours.",
-    "Explications sur OneDrive en plus d'Office — bonne valeur ajoutée.",
-    "Mon cousin en Floride a suivi à distance, aucun souci. Contenu accessible partout.",
-    "Support BelKou a répondu vite quand ma clé était déjà utilisée. Pro.",
-    "Franchement, je pensais que c'était trop basique — en fait il manque toujours ce genre de tuto bien fait.",
-    "Section réactivation après changement de disque dur : exactement ce qu'il me fallait.",
-    "3 étoiles car je voulais plus de détails sur Teams, mais pour Word/Excel c'est top.",
-    "Format idéal pour envoyé aux nouveaux employés avant leur premier jour.",
-    "Bien expliqué pour quelqu'un qui n'est pas du tout à l'aise avec l'informatique.",
-    "Office activé, Word ouvert, cloud synchronisé. Objectif atteint en une soirée.",
+    "Mwen te achte Office san konnen kijan pou aktive l byen. Nan 20 minit tout te regle sou PC mwen.",
+    "Videyo sou kreyasyon kont Microsoft anpeche anpil erè. Papa mwen 62 an reyisi premye esè.",
+    "Trè pratik pou freelancer ki reenstale Windows souvan. Mwen kenbe kou a nan favori.",
+    "Etap byen nimewote, pa gen saut. Ou wè egzakteman ki kote pou klike.",
+    "Mwen finalman konprann diferans ant abònman ak lisans pèmanan. Personn pa t eksplike sa klè anvan.",
+    "Itil tou pou konfigire Outlook sou telefòn — seksyon bonus apresye.",
+    "Pri kòrèk pou sa li rezoud. Yon teknisyen ta faktire mwen pi chè.",
+    "Pafè pou etidyan ki gen lisans campus. Aktivasyon san stress.",
+    "Depanaj lè kòd la pa pase sove mwen — mwen te bloke depi de jou.",
+    "Kout, efikas, san blabla. Se sa mwen te vle.",
+    "Mwen pataje ak tout ekip admin mwen. Nou ekonomize tan chak semèn.",
+    "Kalite videyo net, ou li meni Office san pwoblèm.",
+    "4 zetwal : vèsyon Mac ta bon, men pati Windows la impeccable.",
+    "Enstalasyon sou laptop HP neuf : zero pwoblèm gras ak kou a.",
+    "Kouzen mwen nan Florid swiv a distans, pa gen souci. Kontni aksesib tout kote.",
   ],
   "koman-byen-metrize-obs-studio": [
-    "Je faisais des lives Facebook avec l'écran flou. Après ce cours, image nette et son propre — mes viewers ont tout de suite remarqué.",
-    "La gestion des scènes OBS était un mystère pour moi. Maintenant je switch entre caméra, écran et logo en un clic.",
-    "Très bon pour les pasteurs et animateurs qui streament les cultos ou événements. Explications adaptées à nos besoins.",
-    "Le chapitre micro + suppression du bruit a transformé mes podcasts. Qualité studio avec un petit budget.",
-    "J'ai testé Streamlabs avant — OBS avec ce cours est plus stable et personnalisable.",
-    "Les raccourcis clavier enregistrés dans la leçon 4 me font gagner un temps fou en direct.",
-    "Premier live Twitch réussi sans crash. Checklist de lancement du cours = or.",
-    "Un peu dense au début, mais en repassant les vidéos tout devient logique.",
-    "Prof montre les réglages pour connexion internet moyenne — important pour nous en Caraïbes.",
-    "J'ai ajouté overlays et compte à rebours pour mes webinaires. Plus professionnel du jour au lendemain.",
-    "4 étoiles : j'aurais voulu un exemple gaming, mais pour présentations et talks c'est parfait.",
-    "Le filtre green screen sans green screen (IA) m'a bluffé. Fonctionne mieux que prévu.",
-    "Son et vidéo désynchronisés avant — section dépannage a réglé ça en 5 minutes.",
-    "Mes élèves voient clairement mon écran et ma face cam. Config copiée mot pour mot.",
-    "OBS me faisait peur avec toutes les fenêtres. Le cours décompose tout calmement.",
-    "Export MP4 en local pour YouTube : qualité bien meilleure que l'enregistrement natif de Zoom.",
-    "J'utilise OBS pour des formations payantes maintenant. ROI immédiat sur le prix du cours.",
-    "Communauté BelKou m'a aidé à choisir une carte capture — bon conseil.",
-    "3 étoiles sur une leçon où l'audio était un peu bas, mais le contenu reste solide.",
-    "Streaming multi-plateforme expliqué sans bullshit. Facebook + YouTube en même temps, ça marche.",
-    "Les presets NVENC vs x264 sont enfin clairs. Mon PC plus ancien tient le coup.",
-    "Parfait complément si vous animez des cohortes en ligne. Scène présentateur + slides nickel.",
-    "J'ai refait toute ma config OBS en suivant le module avancé. Zéro lag depuis.",
-    "Tuto honnête : on voit aussi les erreurs et comment les corriger, pas juste la démo parfaite.",
-    "Merci — mes lives BelKou et mes propres formations ont enfin le même niveau visuel.",
+    "Mwen te fè live Facebook ak ekran flou. Apre kou sa a, imaj net ak son pwòp — viewers yo remake tout swit.",
+    "Jesyon sèn OBS te yon mistè pou mwen. Kounye a mwen switch ant kamera, ekran ak logo yon klik.",
+    "Trè bon pou pastè ak animateur ki stream sèvis oswa evènman. Eksplikasyon adapte ak bezwen nou.",
+    "Chapit micro + retire bri transfòme podcast mwen. Kalite studio ak ti bidjè.",
+    "Mwen te eseye Streamlabs anvan — OBS ak kou sa a pi stable.",
+    "Raccourci klavye nan leçon 4 fè mwen ekonomize tan an dirèk.",
+    "Premye live Twitch reyisi san crash. Checklist lansman = lò.",
+    "Yon ti dans nan kòmansman, men lè ou rewatch videyo yo tout vin logik.",
+    "Prof montre reglaj pou koneksyon entènèt mwayen — enpòtan pou nou Karayib.",
+    "Mwen ajoute overlays ak compte à rebours pou webinaire mwen. Plis pwofesyonèl lendemain.",
+    "4 zetwal : mwen ta vle yon egzanp gaming, men pou prezantasyon se pafè.",
+    "Green screen san green screen (IA) se te bluff. Mache pi byen pase mwen te panse.",
+    "Son ak videyo pa t sync anvan — seksyon depanaj rezoud sa nan 5 minit.",
+    "Elèv yo wè ekran mwen ak face cam klè. Config kopye mo pou mo.",
+    "OBS te fè mwen pè ak tout fenèt yo. Kou a dekoupe tout bagay kalmman.",
+    "Export MP4 lokal pou YouTube : kalite pi bon pase anrejistreman Zoom.",
+    "Mwen itilize OBS pou fòmasyon peye kounye a. ROI imedya sou pri kou a.",
+    "Kominote BelKou ede mwen chwazi kat capture — bon konsèy.",
+    "3 zetwal sou yon leçon kote odyo te ba, men kontni solid.",
+    "Streaming multi-platfòm eksplike san bullshit. Facebook + YouTube an menm tan, sa mache.",
+    "Preset NVENC vs x264 finalman klè. PC pi ansyen mwen kenbe.",
+    "Konpleman pafè si ou anime cohort sou entènèt. Sèn prezantatè + slides nickel.",
+    "Mwen refè tout config OBS mwen ak modil avanse a. Zero lag depi.",
+    "Tuto onèt : ou wè erè yo tou epi kijan pou korije, pa sèlman demo pafè.",
+    "Mèsi — live BelKou mwen ak pwòp fòmasyon mwen gen menm nivo vizyèl.",
+    "Mwen fè live legliz mwen kounye a san wont. Son ak videyo pwòp.",
+    "Kou a montre w kijan pou teste anvan live — sa anpeche anbarasman.",
   ],
 };
 
@@ -190,23 +211,24 @@ function summarizeReviews(reviews) {
 
 function buildReviewsForCourse(course) {
   const texts = REVIEW_TEXTS[course.slug];
-  if (!texts || texts.length < REVIEWS_PER_COURSE) {
-    throw new Error(`Missing review copy for course: ${course.slug}`);
+  const count = REVIEW_COUNT_BY_SLUG[course.slug];
+
+  if (!texts?.length || !count) {
+    throw new Error(`Missing review config for course: ${course.slug}`);
+  }
+  if (texts.length < count) {
+    throw new Error(`Need ${count} review texts for ${course.slug}, only have ${texts.length}`);
   }
 
-  return texts.slice(0, REVIEWS_PER_COURSE).map((text, index) => {
-    const author = REVIEW_AUTHORS[index];
-    const rating = RATING_PATTERN[index] ?? 5;
-    return {
-      id: randomUUID(),
-      courseSlug: course.slug,
-      authorEmail: `seed+${course.slug}+${index + 1}@reviews.belkou.local`,
-      authorName: author.name,
-      rating,
-      text: `${text}`,
-      createdAt: randomPastDate(index, REVIEWS_PER_COURSE),
-    };
-  });
+  return texts.slice(0, count).map((text, index) => ({
+    id: randomUUID(),
+    courseSlug: course.slug,
+    authorEmail: `seed+${course.slug}+${index + 1}@reviews.belkou.local`,
+    authorName: REVIEW_AUTHORS[index % REVIEW_AUTHORS.length],
+    rating: RATING_POOL[index] ?? 5,
+    text,
+    createdAt: randomPastDate(index, count),
+  }));
 }
 
 async function readJson(key, fallback) {
@@ -217,11 +239,7 @@ async function readJson(key, fallback) {
 
 async function writeJson(key, value) {
   const { error } = await sb.from("site_content").upsert(
-    {
-      key,
-      value,
-      updated_at: new Date().toISOString(),
-    },
+    { key, value, updated_at: new Date().toISOString() },
     { onConflict: "key" },
   );
   if (error) throw new Error(`${key}: ${error.message}`);
@@ -250,16 +268,14 @@ async function main() {
     process.exit(1);
   }
 
-  const store = force ? { ...existingStore } : { ...existingStore };
+  const store = { ...existingStore };
   const summaryBySlug = {};
 
   for (const course of courses) {
     const reviews = buildReviewsForCourse(course);
     store[course.slug] = reviews;
     summaryBySlug[course.slug] = summarizeReviews(reviews);
-    console.log(
-      `  ${course.slug}: ${reviews.length} avis, moyenne ${summaryBySlug[course.slug].rating}/5`,
-    );
+    console.log(`  ${course.slug}: ${reviews.length} avis, moyenne ${summaryBySlug[course.slug].rating}/5`);
   }
 
   const overrides = await readJson(OVERRIDES_KEY, {});
@@ -295,14 +311,10 @@ async function main() {
   }
 
   await writeJson(REVIEWS_KEY, store);
-  if (adminCourses.length) {
-    await writeJson(ADMIN_COURSES_KEY, adminCourses);
-  }
-  if (overridesChanged) {
-    await writeJson(OVERRIDES_KEY, overrides);
-  }
+  if (adminCourses.length) await writeJson(ADMIN_COURSES_KEY, adminCourses);
+  if (overridesChanged) await writeJson(OVERRIDES_KEY, overrides);
 
-  console.log("\nDone — reviews seeded and course ratings updated.");
+  console.log("\nDone — Kreyòl reviews seeded with varied counts.");
 }
 
 main().catch((error) => {

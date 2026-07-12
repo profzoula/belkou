@@ -14,6 +14,7 @@ const links = [
   { href: "/courses", label: "Cours", route: true },
   { href: "/services", label: "Services", route: true },
   { href: "#how-it-works", label: "Comment ça marche", route: false },
+  { href: "/about", label: "À propos", route: true },
   { href: "/faq", label: "FAQ", route: true },
 ];
 
