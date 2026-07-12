@@ -85,6 +85,9 @@ export const siteConfig = {
     avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/mackenson-lundi.png"),
     githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),
     linkedinUrl: envString(import.meta.env.VITE_FOUNDER_LINKEDIN_URL, ""),
+    facebookUrl: envString(import.meta.env.VITE_FOUNDER_FACEBOOK_URL, "https://www.facebook.com/profzoula"),
+    instagramUrl: envString(import.meta.env.VITE_FOUNDER_INSTAGRAM_URL, "https://www.instagram.com/profzoula/"),
+    tiktokUrl: envString(import.meta.env.VITE_FOUNDER_TIKTOK_URL, "https://www.tiktok.com/@profzoula"),
   },
 } as const;
 
