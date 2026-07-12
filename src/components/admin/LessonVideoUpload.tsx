@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   defaultVideoTitleFromFileName,
+  formatVideoUploadMaxLabel,
+  getVideoUploadLimitHint,
   uploadVideoToSignedStorage,
   VIDEO_UPLOAD_ACCEPT,
   VIDEO_UPLOAD_MAX_BYTES,
@@ -44,7 +46,7 @@ export function LessonVideoUpload({
       return;
     }
     if (selectedFile.size > VIDEO_UPLOAD_MAX_BYTES) {
-      toast.error("Fichier trop volumineux (max 2 Go)");
+      toast.error(`Fichier trop volumineux (max ${formatVideoUploadMaxLabel()})`);
       return;
     }
 
@@ -75,6 +77,7 @@ export function LessonVideoUpload({
       await uploadVideoToSignedStorage(
         selectedFile,
         {
+          videoId: prepared.video.id,
           signedUrl: prepared.signedUrl,
           token: prepared.token,
           storagePath: prepared.storagePath,
@@ -112,6 +115,7 @@ export function LessonVideoUpload({
   return (
     <div className="rounded-lg border border-dashed border-border/80 bg-muted/20 p-3 space-y-2">
       <Label className="text-xs text-muted-foreground">Uploader une vidéo pour cette leçon</Label>
+      <p className="text-[11px] text-muted-foreground">{getVideoUploadLimitHint()}</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <Input
           ref={fileRef}

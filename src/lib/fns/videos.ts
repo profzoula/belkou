@@ -6,6 +6,7 @@ import {
   getAdminFromRequestSources,
 } from "@/lib/admin-auth";
 import type { VideoRecord } from "@/lib/videos";
+import { formatVideoUploadMaxLabel, VIDEO_UPLOAD_MAX_BYTES } from "@/lib/video-upload-limits";
 
 async function requireAdmin(): Promise<void> {
   const { getServerEnvResolved } = await import("@/server/env");
@@ -69,8 +70,8 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
     if (!["video/mp4", "video/quicktime"].includes(contentType)) {
       throw new Error("Format non supporté — MP4 ou MOV requis");
     }
-    if (data.fileSize > 2 * 1024 * 1024 * 1024) {
-      throw new Error("Fichier trop volumineux (max 2 Go)");
+    if (data.fileSize > VIDEO_UPLOAD_MAX_BYTES) {
+      throw new Error(`Fichier trop volumineux (max ${formatVideoUploadMaxLabel()})`);
     }
 
     const created = await createVideoRecord({

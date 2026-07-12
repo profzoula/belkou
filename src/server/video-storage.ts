@@ -1,9 +1,9 @@
 import { formatCourseDurationLabel } from "@/lib/courses";
 import type { VideoPlaybackSource, VideoRecord } from "@/lib/videos";
+import { VIDEO_UPLOAD_MAX_BYTES } from "@/lib/video-upload-limits";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 const BUCKET = "course-videos";
-const MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 const ALLOWED_TYPES = new Set(["video/mp4", "video/quicktime"]);
@@ -49,22 +49,7 @@ export async function resolveVideoPlayback(
     if (poster.ok) posterUrl = poster.url;
   }
 
-  if (video.status === "ready" && video.hlsPath) {
-    const hls = await createSignedStorageUrl(video.hlsPath);
-    if (hls.ok) {
-      return {
-        ok: true,
-        playback: {
-          kind: "hls",
-          url: hls.url,
-          posterUrl,
-          durationSeconds: video.durationSeconds,
-          status: video.status,
-        },
-      };
-    }
-  }
-
+  // Prefer MP4 — private bucket signed URLs only cover one file; HLS segments would 403.
   if (video.storagePath) {
     const mp4 = await createSignedStorageUrl(video.storagePath);
     if (mp4.ok) {
@@ -80,6 +65,22 @@ export async function resolveVideoPlayback(
       };
     }
     return { ok: false, reason: mp4.reason };
+  }
+
+  if (video.status === "ready" && video.hlsPath) {
+    const hls = await createSignedStorageUrl(video.hlsPath);
+    if (hls.ok) {
+      return {
+        ok: true,
+        playback: {
+          kind: "hls",
+          url: hls.url,
+          posterUrl,
+          durationSeconds: video.durationSeconds,
+          status: video.status,
+        },
+      };
+    }
   }
 
   return { ok: false, reason: "Fichier vidéo introuvable" };
@@ -105,8 +106,9 @@ export async function uploadSourceVideo(params: {
   if (!buffer.length) {
     return { ok: false, reason: "Fichier vide" };
   }
-  if (buffer.length > MAX_BYTES) {
-    return { ok: false, reason: "Fichier trop volumineux (max 2 Go)" };
+  if (buffer.length > VIDEO_UPLOAD_MAX_BYTES) {
+    const mb = VIDEO_UPLOAD_MAX_BYTES / (1024 * 1024);
+    return { ok: false, reason: `Fichier trop volumineux (max ${mb} Mo)` };
   }
 
   const safeName = sanitizeFileName(params.fileName);

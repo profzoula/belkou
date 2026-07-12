@@ -53,6 +53,10 @@ export type Course = {
   resources?: CourseResource[];
 };
 
+export function getDisplayedCourseStudentsCount(course: Pick<Course, "studentsCount">): number {
+  return Math.max(course.studentsCount, siteConfig.stats.courseStudentsBase);
+}
+
 /** Slugs hardcodés — les autres cours se créent via l'admin. */
 export const BASE_COURSE_SLUGS = ["apps-ia-cursor-claude"] as const;
 

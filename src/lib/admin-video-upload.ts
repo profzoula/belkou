@@ -1,7 +1,13 @@
+import { getAdminSessionToken } from "@/lib/admin-session";
 import { getSupabase } from "@/lib/supabase/client";
+import {
+  formatVideoUploadMaxLabel,
+  getVideoUploadLimitHint,
+  VIDEO_UPLOAD_ACCEPT,
+  VIDEO_UPLOAD_MAX_BYTES,
+} from "@/lib/video-upload-limits";
 
-export const VIDEO_UPLOAD_ACCEPT = "video/mp4,video/quicktime,.mp4,.mov";
-export const VIDEO_UPLOAD_MAX_BYTES = 2 * 1024 * 1024 * 1024;
+export { VIDEO_UPLOAD_ACCEPT, VIDEO_UPLOAD_MAX_BYTES, formatVideoUploadMaxLabel, getVideoUploadLimitHint };
 
 const BUCKET = "course-videos";
 
@@ -22,6 +28,57 @@ function fileWithNormalizedType(file: File): File {
   const contentType = normalizeVideoContentType(file);
   if (file.type === contentType) return file;
   return new File([file], file.name, { type: contentType, lastModified: file.lastModified });
+}
+
+async function uploadViaServerApi(
+  file: File,
+  params: { videoId: string; storagePath: string },
+  onProgress?: (percent: number) => void,
+): Promise<void> {
+  const formData = new FormData();
+  formData.append("videoId", params.videoId);
+  formData.append("storagePath", params.storagePath);
+  formData.append("file", file);
+
+  const token = getAdminSessionToken();
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/admin/upload-video");
+    xhr.withCredentials = true;
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      xhr.setRequestHeader("X-Admin-Token", token);
+    }
+
+    xhr.upload.onprogress = (event) => {
+      if (!onProgress || !event.lengthComputable) return;
+      onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress?.(100);
+        resolve();
+        return;
+      }
+
+      let message = `Upload serveur échoué (${xhr.status})`;
+      try {
+        const body = JSON.parse(xhr.responseText) as { error?: string; message?: string };
+        message = body.error ?? body.message ?? message;
+      } catch {
+        if (xhr.responseText?.trim()) {
+          message = xhr.responseText.trim().slice(0, 200);
+        }
+      }
+      reject(new Error(message));
+    };
+
+    xhr.onerror = () => reject(new Error("Upload serveur échoué (réseau)"));
+    xhr.onabort = () => reject(new Error("Upload annulé"));
+    xhr.send(formData);
+  });
 }
 
 async function uploadWithXhrFormData(
@@ -102,9 +159,27 @@ async function uploadWithSupabaseClient(
   onProgress?.(100);
 }
 
+async function uploadDirectToSupabase(
+  file: File,
+  params: {
+    signedUrl: string;
+    token: string;
+    storagePath: string;
+  },
+  onProgress?: (percent: number) => void,
+): Promise<void> {
+  try {
+    await uploadWithXhrFormData(file, params.signedUrl, onProgress);
+    return;
+  } catch {
+    await uploadWithSupabaseClient(file, params.storagePath, params.token, onProgress);
+  }
+}
+
 export async function uploadVideoToSignedStorage(
   file: File,
   params: {
+    videoId: string;
     signedUrl: string;
     token: string;
     storagePath: string;
@@ -114,24 +189,15 @@ export async function uploadVideoToSignedStorage(
   const typedFile = fileWithNormalizedType(file);
 
   try {
-    await uploadWithXhrFormData(typedFile, params.signedUrl, onProgress);
+    await uploadViaServerApi(typedFile, { videoId: params.videoId, storagePath: params.storagePath }, onProgress);
     return;
-  } catch (xhrError) {
+  } catch (serverError) {
     try {
-      await uploadWithSupabaseClient(typedFile, params.storagePath, params.token, onProgress);
-    } catch (clientError) {
-      const xhrMsg = xhrError instanceof Error ? xhrError.message : "Upload échoué";
-      const clientMsg = clientError instanceof Error ? clientError.message : xhrMsg;
-      throw new Error(clientMsg);
+      await uploadDirectToSupabase(typedFile, params, onProgress);
+    } catch (directError) {
+      const serverMsg = serverError instanceof Error ? serverError.message : "Upload échoué";
+      const directMsg = directError instanceof Error ? directError.message : serverMsg;
+      throw new Error(directMsg);
     }
   }
-}
-
-/** @deprecated Use uploadVideoToSignedStorage */
-export async function uploadFileToSignedUrl(
-  file: File,
-  signedUrl: string,
-  onProgress?: (percent: number) => void,
-): Promise<void> {
-  await uploadWithXhrFormData(fileWithNormalizedType(file), signedUrl, onProgress);
 }

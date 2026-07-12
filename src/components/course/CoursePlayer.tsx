@@ -25,6 +25,7 @@ import {
   formatCount,
   getAllLessons,
   getCourseDisplayDuration,
+  getDisplayedCourseStudentsCount,
   getLessonDisplayDuration,
   getLessonVideoId,
   getSectionDurationMinutes,
@@ -999,7 +1000,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     </span>
                   </span>
                   <span className="text-muted-foreground">
-                    {formatCount(course.studentsCount)} étudiants
+                    {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
                   </span>
                   <span className="text-muted-foreground">{getCourseDisplayDuration(course)}</span>
                 </div>
@@ -1051,7 +1052,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       </div>
                       <div className="flex justify-between gap-4 border-b border-border py-2">
                         <dt className="text-muted-foreground">Étudiants</dt>
-                        <dd className="font-medium">{formatCount(course.studentsCount)}</dd>
+                        <dd className="font-medium">{formatCount(getDisplayedCourseStudentsCount(course))}</dd>
                       </div>
                       <div className="flex justify-between gap-4 border-b border-border py-2">
                         <dt className="text-muted-foreground">Langues</dt>

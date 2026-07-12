@@ -25,6 +25,8 @@ export const siteConfig = {
   },
   stats: {
     studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 2684),
+    /** Minimum shown on course pages when stored count is lower (e.g. new admin courses). */
+    courseStudentsBase: Number(import.meta.env.VITE_COURSE_STUDENTS_BASE ?? 754),
     tools: "20+",
     rating: "4.9",
   },

@@ -27,6 +27,7 @@ import {
   getContinueLearnSearch,
   getCourseActionLabel,
   getCourseDisplayDuration,
+  getDisplayedCourseStudentsCount,
   getFirstPreviewVideoLesson,
   getLessonDisplayDuration,
   getPlayableLearnSearch,
@@ -506,7 +507,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <span className="text-primary underline">{formatCount(course.ratingsCount)} avis</span>
             <span className="inline-flex items-center gap-1 text-muted-foreground">
               <Users className="h-4 w-4" />
-              {formatCount(course.studentsCount)} étudiants
+              {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
             </span>
             {courseDiscount > 0 && (
               <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off aujourd&apos;hui</span>

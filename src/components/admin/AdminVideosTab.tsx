@@ -25,6 +25,8 @@ import {
 
 import {
   defaultVideoTitleFromFileName,
+  formatVideoUploadMaxLabel,
+  getVideoUploadLimitHint,
   uploadVideoToSignedStorage,
   VIDEO_UPLOAD_ACCEPT,
   VIDEO_UPLOAD_MAX_BYTES,
@@ -108,7 +110,7 @@ export function AdminVideosTab() {
       return;
     }
     if (selectedFile.size > VIDEO_UPLOAD_MAX_BYTES) {
-      toast.error("Fichier trop volumineux (max 2 Go)");
+      toast.error(`Fichier trop volumineux (max ${formatVideoUploadMaxLabel()})`);
       return;
     }
 
@@ -133,6 +135,7 @@ export function AdminVideosTab() {
       await uploadVideoToSignedStorage(
         selectedFile,
         {
+          videoId: prepared.video.id,
           signedUrl: prepared.signedUrl,
           token: prepared.token,
           storagePath: prepared.storagePath,
@@ -274,6 +277,7 @@ export function AdminVideosTab() {
               accept={VIDEO_UPLOAD_ACCEPT}
               onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
             />
+            <p className="text-[11px] text-muted-foreground">{getVideoUploadLimitHint()}</p>
             {selectedFile ? (
               <p className="text-xs text-muted-foreground">
                 {selectedFile.name} · {formatVideoSize(selectedFile.size)}

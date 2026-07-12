@@ -34,6 +34,7 @@ import { Route as ForumCourseSlugIndexRouteImport } from './routes/forum/$course
 import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$courseSlug/$postId'
 import { Route as CoursesSlugLearnRouteImport } from './routes/courses/$slug/learn'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as ApiAdminUploadVideoRouteImport } from './routes/api/admin/upload-video'
 
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
@@ -160,6 +161,11 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUploadVideoRoute = ApiAdminUploadVideoRouteImport.update({
+  id: '/api/admin/upload-video',
+  path: '/api/admin/upload-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/courses/': typeof CoursesIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesIndexRoute
   '/forum': typeof ForumIndexRoute
   '/services': typeof ServicesIndexRoute
+  '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/courses/': typeof CoursesIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
@@ -267,6 +276,7 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/forum/'
     | '/services/'
+    | '/api/admin/upload-video'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/forum'
     | '/services'
+    | '/api/admin/upload-video'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/forum/'
     | '/services/'
+    | '/api/admin/upload-video'
     | '/api/stripe/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   CoursesIndexRoute: typeof CoursesIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
+  ApiAdminUploadVideoRoute: typeof ApiAdminUploadVideoRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ForumCourseSlugPostIdRoute: typeof ForumCourseSlugPostIdRoute
   ForumCourseSlugIndexRoute: typeof ForumCourseSlugIndexRoute
@@ -531,6 +544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/upload-video': {
+      id: '/api/admin/upload-video'
+      path: '/api/admin/upload-video'
+      fullPath: '/api/admin/upload-video'
+      preLoaderRoute: typeof ApiAdminUploadVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -568,6 +588,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoursesIndexRoute: CoursesIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
+  ApiAdminUploadVideoRoute: ApiAdminUploadVideoRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ForumCourseSlugPostIdRoute: ForumCourseSlugPostIdRoute,
   ForumCourseSlugIndexRoute: ForumCourseSlugIndexRoute,

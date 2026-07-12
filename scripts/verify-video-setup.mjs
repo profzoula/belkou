@@ -63,6 +63,13 @@ async function main() {
       ok = false;
     } else {
       console.log(`✓ Bucket course-videos (public=${bucket.public})`);
+      const limitMb = bucket.file_size_limit
+        ? Math.round(bucket.file_size_limit / 1024 / 1024)
+        : null;
+      if (limitMb) {
+        console.log(`  Bucket file_size_limit: ${limitMb} MB`);
+      }
+      console.warn("⚠ Supabase Free plan: global max 50 MB per file (Storage → Settings)");
       const mimes = bucket.allowed_mime_types ?? [];
       const needed = ["video/mp4", "video/mp2t", "application/vnd.apple.mpegurl", "image/jpeg"];
       const missing = needed.filter((mime) => !mimes.includes(mime));

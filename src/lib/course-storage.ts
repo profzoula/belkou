@@ -271,7 +271,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput): StoredCourse
     instructor: input.instructor ?? "BelKou, Prof Zoula",
     rating: 4.8,
     ratingsCount: 0,
-    studentsCount: 0,
+    studentsCount: siteConfig.stats.courseStudentsBase,
     totalDuration: "1h total",
     lastUpdated: new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
     language: "Français",

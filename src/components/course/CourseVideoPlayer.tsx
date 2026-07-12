@@ -15,6 +15,20 @@ type CourseVideoPlayerProps = {
   onTimeUpdate?: (currentTime: number) => void;
 };
 
+function describeVideoError(video: HTMLVideoElement): string {
+  const code = video.error?.code;
+  if (code === MediaError.MEDIA_ERR_NETWORK) {
+    return "Erreur réseau — vérifiez votre connexion";
+  }
+  if (code === MediaError.MEDIA_ERR_DECODE) {
+    return "Format vidéo non supporté par le navigateur";
+  }
+  if (code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+    return "Fichier vidéo introuvable ou accès refusé";
+  }
+  return "Lecture vidéo impossible";
+}
+
 export function CourseVideoPlayer({
   playback,
   title,
@@ -33,6 +47,7 @@ export function CourseVideoPlayer({
   const [ended, setEnded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [buffering, setBuffering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   onLessonCompleteRef.current = onLessonComplete;
   onTimeUpdateRef.current = onTimeUpdate;
@@ -48,11 +63,15 @@ export function CourseVideoPlayer({
     setEnded(false);
     setLoading(true);
     setBuffering(false);
+    setError(null);
 
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
+
+    video.removeAttribute("src");
+    video.load();
 
     const applyResumePosition = () => {
       if (resumeAppliedRef.current) return;
@@ -66,7 +85,7 @@ export function CourseVideoPlayer({
       resumeAppliedRef.current = true;
     };
 
-    const handleLoaded = () => {
+    const markReady = () => {
       setLoading(false);
       applyResumePosition();
     };
@@ -81,13 +100,24 @@ export function CourseVideoPlayer({
     };
 
     const handleWaiting = () => setBuffering(true);
-    const handlePlaying = () => setBuffering(false);
+    const handlePlaying = () => {
+      setBuffering(false);
+      setLoading(false);
+    };
 
-    video.addEventListener("loadedmetadata", handleLoaded);
+    const handleVideoError = () => {
+      setLoading(false);
+      setBuffering(false);
+      setError(describeVideoError(video));
+    };
+
+    video.addEventListener("loadedmetadata", markReady);
+    video.addEventListener("canplay", markReady);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
+    video.addEventListener("error", handleVideoError);
 
     if (playback.kind === "hls") {
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
@@ -101,18 +131,20 @@ export function CourseVideoPlayer({
         hlsRef.current = hls;
         hls.loadSource(playback.url);
         hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          setLoading(false);
-          applyResumePosition();
-        });
+        hls.on(Hls.Events.MANIFEST_PARSED, markReady);
         hls.on(Hls.Events.ERROR, (_event, data) => {
-          if (data.fatal) {
-            setLoading(false);
-            setBuffering(false);
-          }
+          if (!data.fatal) return;
+          setLoading(false);
+          setBuffering(false);
+          setError(
+            data.type === Hls.ErrorTypes.NETWORK_ERROR
+              ? "Segments HLS inaccessibles — réessayez ou contactez le support"
+              : "Lecture HLS impossible",
+          );
         });
       } else {
         setLoading(false);
+        setError("HLS non supporté par ce navigateur");
       }
     } else {
       video.src = playback.url;
@@ -122,22 +154,34 @@ export function CourseVideoPlayer({
       video.poster = playback.posterUrl;
     }
 
+    const loadTimeout = window.setTimeout(() => {
+      if (video.readyState < HTMLMediaElement.HAVE_METADATA) {
+        setLoading(false);
+        setBuffering(false);
+        setError("Chargement trop long — vérifiez votre connexion");
+      }
+    }, 30_000);
+
     return () => {
-      video.removeEventListener("loadedmetadata", handleLoaded);
+      window.clearTimeout(loadTimeout);
+      video.removeEventListener("loadedmetadata", markReady);
+      video.removeEventListener("canplay", markReady);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
+      video.removeEventListener("error", handleVideoError);
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
     };
-  }, [lessonKey, playback.kind, playback.posterUrl, playback.url]);
+  }, [lessonKey, playback.kind, playback.posterUrl, playback.url, startAtSeconds]);
 
   const replay = () => {
     const video = videoRef.current;
     if (!video) return;
+    setError(null);
     video.currentTime = 0;
     void video.play().catch(() => undefined);
     setEnded(false);
@@ -156,6 +200,16 @@ export function CourseVideoPlayer({
       {loading || buffering ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40">
           <Loader2 className="h-8 w-8 animate-spin text-white/80" />
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 px-6 text-center">
+          <p className="text-sm font-semibold text-white">Lecture impossible</p>
+          <p className="max-w-md text-xs text-white/75">{error}</p>
+          <Button type="button" size="sm" variant="secondary" onClick={replay}>
+            Réessayer
+          </Button>
         </div>
       ) : null}
 
