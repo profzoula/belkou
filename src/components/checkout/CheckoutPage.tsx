@@ -17,7 +17,6 @@ import { planDetails, type PlanId } from "@/lib/plans";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
-import { getPublicSiteDisplay } from "@/lib/fns/site-display";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
@@ -44,9 +43,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
   const navigate = useNavigate();
   const submitFn = useServerFn(submitRegistration);
   const loadCourseFn = useServerFn(getPublicCourse);
-  const siteDisplayFn = useServerFn(getPublicSiteDisplay);
   const [course, setCourse] = useState<PublicCourse | null>(null);
-  const [cohortStartDate, setCohortStartDate] = useState(siteConfig.cohortStartDate);
   const CourseIcon = courseSlug ? getCourseIcon(courseSlug) : null;
 
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(initialPlan ?? "premium");
@@ -67,12 +64,6 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
     const stored = getStoredReferralCode();
     if (stored) setForm((s) => ({ ...s, referral_code: stored }));
   }, [refCode]);
-
-  useEffect(() => {
-    void siteDisplayFn({})
-      .then((result) => setCohortStartDate(result.cohortStartDate))
-      .catch(() => undefined);
-  }, [siteDisplayFn]);
 
   useEffect(() => {
     if (!courseSlug) {
@@ -185,8 +176,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-snug text-foreground">
-                    Accès complet à <strong>{productTitle}</strong>
-                    {course ? "" : ", formation BelKou en cohorte"}.
+                    Accès complet à <strong>{productTitle}</strong>.
                   </p>
                 </div>
                 <span className="shrink-0 text-xs font-bold text-emerald-700">Inclus</span>
@@ -237,7 +227,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                                 Économisez ${save}
                               </span>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès cohorte</p>
+                            <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
                           </div>
                         </div>
                       </label>
@@ -437,7 +427,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                   <Link to="/legal/cgv" className="text-primary underline">
                     conditions générales
                   </Link>
-                  . Cohorte BelKou — début {cohortStartDate}. Pas de remboursement après paiement.
+                  . Pas de remboursement après paiement.
                 </span>
               </label>
 
@@ -451,7 +441,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
               </Button>
 
               <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                Début cohorte : {cohortStartDate}
+                Paiement sécurisé · accès personnel au cours acheté
               </p>
             </div>
           </aside>

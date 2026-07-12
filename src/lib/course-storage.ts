@@ -1,4 +1,5 @@
 import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
+import { getCourseStudentDisplayBase, getCourseDisplayLanguage, DEFAULT_COURSE_LANGUAGE } from "@/lib/courses";
 import { getCourseIcon } from "@/lib/course-icons";
 import { siteConfig } from "@/lib/site-config";
 
@@ -26,6 +27,7 @@ export function storedCourseToCourse(stored: StoredCourse): Course {
   const icon = getCourseIcon(stored.thumbnail.iconKey ?? stored.slug);
   return {
     ...stored,
+    language: getCourseDisplayLanguage(stored.language),
     thumbnail: {
       gradient: stored.thumbnail.gradient,
       label: stored.thumbnail.label,
@@ -273,10 +275,10 @@ export function buildDefaultStoredCourse(input: CreateCourseInput): StoredCourse
     instructor: input.instructor ?? "BelKou, Mackenson Lundi",
     rating: 4.8,
     ratingsCount: 0,
-    studentsCount: siteConfig.stats.courseStudentsBase,
+    studentsCount: getCourseStudentDisplayBase(input.slug),
     totalDuration: "1h total",
     lastUpdated: new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
-    language: "Français",
+    language: DEFAULT_COURSE_LANGUAGE,
     captions: true,
     skillLevel: "Débutant",
     price,

@@ -53,8 +53,38 @@ export type Course = {
   resources?: CourseResource[];
 };
 
-export function getDisplayedCourseStudentsCount(course: Pick<Course, "studentsCount">): number {
-  return Math.max(course.studentsCount, siteConfig.stats.courseStudentsBase);
+export const DEFAULT_COURSE_LANGUAGE = "Créole";
+
+export function getCourseDisplayLanguage(language?: string): string {
+  const value = language?.trim();
+  if (!value || value === "Français" || value.toLowerCase() === "francais") {
+    return DEFAULT_COURSE_LANGUAGE;
+  }
+  return value;
+}
+
+const COURSE_STUDENT_DISPLAY_BASE: Record<string, number> = {
+  "apps-ia-cursor-claude": 1247,
+  "koman-byen-metrize-obs-studio": 831,
+  "koman-enstale-e-aktive-microsoft-office-365": 417,
+};
+
+export function getCourseStudentDisplayBase(slug: string): number {
+  const known = COURSE_STUDENT_DISPLAY_BASE[slug];
+  if (known !== undefined) return known;
+
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash * 31 + slug.charCodeAt(i)) >>> 0;
+  }
+  return siteConfig.stats.courseStudentsBase + (hash % 614);
+}
+
+export function getDisplayedCourseStudentsCount(
+  course: Pick<Course, "studentsCount" | "slug">,
+): number {
+  const floor = getCourseStudentDisplayBase(course.slug);
+  return Math.max(course.studentsCount, floor);
 }
 
 /** Slugs hardcodés — les autres cours se créent via l'admin. */
@@ -71,10 +101,10 @@ export const courses: Course[] = [
     instructor: "BelKou, Mackenson Lundi",
     rating: 4.8,
     ratingsCount: 38,
-    studentsCount: siteConfig.stats.studentsBase,
+    studentsCount: 1247,
     totalDuration: "8h total",
     lastUpdated: "juin 2026",
-    language: "Français",
+    language: DEFAULT_COURSE_LANGUAGE,
     captions: true,
     skillLevel: "Débutant",
     price: siteConfig.plans.premium.price,

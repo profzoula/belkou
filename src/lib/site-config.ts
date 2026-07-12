@@ -18,7 +18,7 @@ export const siteConfig = {
       "https://chat.whatsapp.com/GqWxIE5pfafFOB3krHd0uA",
     ),
   },
-  cohortStartDate: envString(import.meta.env.VITE_COHORT_START_DATE, "28 juin 2026"),
+  cohortStartDate: envString(import.meta.env.VITE_COHORT_START_DATE, ""),
   location: "USA · En ligne",
   promo: {
     enabled: false,
@@ -28,9 +28,9 @@ export const siteConfig = {
     messageShort: "Ebook gratuit — 50 premières places",
   },
   stats: {
-    studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 2684),
+    studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 2785),
     /** Minimum shown on course pages when stored count is lower (e.g. new admin courses). */
-    courseStudentsBase: Number(import.meta.env.VITE_COURSE_STUDENTS_BASE ?? 754),
+    courseStudentsBase: Number(import.meta.env.VITE_COURSE_STUDENTS_BASE ?? 285),
     tools: "20+",
     rating: "4.9",
   },
@@ -80,7 +80,7 @@ export const siteConfig = {
     ),
     bio: envString(
       import.meta.env.VITE_FOUNDER_BIO,
-      "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou (Prof Zoula). Il forme Haïti et la diaspora à créer des applications et des SaaS grâce à l'IA, avec Cursor, Claude et les outils du développement moderne.",
+      "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou. Il forme Haïti et la diaspora à créer des applications et des SaaS grâce à l'IA, avec Cursor, Claude et les outils du développement moderne.",
     ),
     avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/mackenson-lundi.png"),
     githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),

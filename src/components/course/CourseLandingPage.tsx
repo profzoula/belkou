@@ -246,7 +246,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = course.scheduledPublishAt
     ? formatScheduledPublishLabel(course.scheduledPublishAt)
-    : siteConfig.cohortStartDate;
+    : null;
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
@@ -602,10 +602,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 {hasPaidAccess
                   ? canStartCourse
                     ? "Vous êtes inscrit à cette formation"
-                    : `Inscription confirmée — début le ${startLabel}`
+                    : `Inscription confirmée${startLabel ? ` — début le ${startLabel}` : ""}`
                   : scheduledSoon
                     ? `Formation BelKou — début le ${startLabel}`
-                    : `Formation BelKou — cohorte ${siteConfig.cohortStartDate}`}
+                    : "Cours BelKou — accès à vie après achat"}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {hasPaidAccess

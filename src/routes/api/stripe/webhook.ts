@@ -4,8 +4,6 @@ import { updateRegistrationPayment, getRegistrationByStripeSession } from "@/ser
 import { verifyWebhook } from "@/server/stripe";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
 import { getWhatsappGroupUrl } from "@/lib/site-config";
-import { resolveCohortStartDate } from "@/lib/site-display";
-import { getSiteSettings } from "@/server/site-content";
 import { earnAffiliateCommission } from "@/server/affiliates";
 
 function webhookOk() {
@@ -53,7 +51,6 @@ export const Route = createFileRoute("/api/stripe/webhook")({
 
               if (record && email && !wasPaid) {
                 try {
-                  const settings = await getSiteSettings();
                   await sendEmail({
                     to: email,
                     subject: "Paiement confirmé — BelKou",
@@ -61,7 +58,6 @@ export const Route = createFileRoute("/api/stripe/webhook")({
                       record.full_name,
                       record.plan,
                       getWhatsappGroupUrl(record.plan),
-                      resolveCohortStartDate(settings),
                     ),
                   });
                 } catch (emailError) {

@@ -35,9 +35,8 @@ function CgvPage() {
         lesquelles {siteName} propose ses services de formation en ligne
         spécialisée dans le développement d'applications utilisant
         l'intelligence artificielle (IA) et les technologies SaaS (Software as a
-        Service). La formation est dispensée en français, sous forme de cohorte,
-        avec un programme structuré sur une durée recommandée de{" "}
-        {siteConfig.formation.durationRecommended}.
+        Service). Les formations sont dispensées en français, sous forme de cours en ligne
+        à la carte, avec des programmes structurés et un accès à vie au contenu acheté.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">
@@ -69,7 +68,7 @@ function CgvPage() {
       <p>
         Les prix sont indiqués en dollars américains (USD) et sont fermes et
         définitifs au moment de l'inscription. {siteName} se réserve le droit
-        de modifier ses tarifs pour les futures cohortes.
+        de modifier ses tarifs pour les futures inscriptions.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">
@@ -99,9 +98,8 @@ function CgvPage() {
       </h2>
       <p>
         Après confirmation du paiement, le Client reçoit par email les
-        informations d'accès à la formation, incluant le lien d'invitation au
-        groupe WhatsApp correspondant à son plan. La formation débute à la date
-        de la cohorte en cours ({siteConfig.cohortStartDate}). L'accès au
+        informations d'accès au cours acheté, incluant le lien d'invitation au
+        groupe WhatsApp correspondant à son plan lorsque applicable. L'accès au
         contenu est personnel et non transférable.
       </p>
 
@@ -133,8 +131,8 @@ function CgvPage() {
       <p>
         Les modalités exactes du mentorat (fréquence, durée des sessions) sont
         communiquées au Client après son inscription. Le mentorat est valable
-        pour la durée de la cohorte en cours et ne peut être reporté sur une
-        cohorte ultérieure sauf accord préalable de {siteName}.
+        pour la durée du cours concerné et ne peut être reporté sur un autre
+        cours sauf accord préalable de {siteName}.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">

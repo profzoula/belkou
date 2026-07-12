@@ -59,12 +59,12 @@ export function registrationPendingEmail(params: {
   `;
 }
 
-export function paymentConfirmedEmail(name: string, plan: string, whatsappUrl: string, cohortDate: string) {
+export function paymentConfirmedEmail(name: string, plan: string, whatsappUrl: string) {
   const groupLabel = plan === "vip" ? "VIP VibeCode" : "Premium VibeCode";
   return `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
       <h1 style="font-size:22px;">Paiement confirmé — merci ${name} !</h1>
-      <p>Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Début de la formation : <strong>${cohortDate}</strong>.</p>
+      <p>Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Accédez à vos cours depuis votre espace BelKou.</p>
       ${
         whatsappUrl
           ? `<p><a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre ${groupLabel} sur WhatsApp</a></p>`

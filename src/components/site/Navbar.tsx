@@ -13,7 +13,6 @@ import { PromoTopbar } from "@/components/site/PromoTopbar";
 const links = [
   { href: "/courses", label: "Cours", route: true },
   { href: "/services", label: "Services", route: true },
-  { href: "#how-it-works", label: "Comment ça marche", route: false },
   { href: "/about", label: "À propos", route: true },
   { href: "/faq", label: "FAQ", route: true },
 ];
@@ -70,6 +69,14 @@ function NavActions({
             className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
           >
             Programme affilié
+          </Link>
+          <Link
+            to="/dashboard"
+            hash="account"
+            onClick={onNavigate}
+            className="touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            Paramètres du compte
           </Link>
           <button
             type="button"

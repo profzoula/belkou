@@ -161,8 +161,8 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
             <p className="mt-1 text-xl font-bold">{stats.pending + stats.manual_pending}</p>
           </div>
           <div className="rounded-lg bg-muted/40 px-4 py-3">
-            <p className="text-muted-foreground">Prochaine cohorte</p>
-            <p className="mt-1 text-xl font-bold">{siteConfig.cohortStartDate}</p>
+            <p className="text-muted-foreground">Cours au catalogue</p>
+            <p className="mt-1 text-xl font-bold">{content.courseCount}</p>
           </div>
         </div>
       </div>

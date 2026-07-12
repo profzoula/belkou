@@ -92,8 +92,7 @@ export function FormationObjectivesPanel() {
               </div>
 
               <p className="text-xs text-muted-foreground leading-relaxed px-0.5">
-                Accès à vie au contenu après la cohorte · Début{" "}
-                <span className="font-medium text-foreground">{siteConfig.cohortStartDate}</span>
+                Accès à vie au contenu du cours acheté — progressez à votre rythme.
               </p>
             </div>
           </div>

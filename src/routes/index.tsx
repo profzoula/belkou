@@ -4,7 +4,6 @@ import { Hero } from "@/components/site/Hero";
 import { ImpactStats } from "@/components/site/ImpactStats";
 import { TrendingCourses } from "@/components/site/TrendingCourses";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
-import { PlatformBenefits } from "@/components/site/PlatformBenefits";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { Testimonials } from "@/components/site/Testimonials";
 import { CTA } from "@/components/site/CTA";
@@ -53,7 +52,6 @@ function Index() {
       <main className="overflow-x-hidden max-w-full">
         <TrendingCourses courses={courses} />
         <UpcomingCourses courses={upcomingCourses} />
-        <PlatformBenefits />
         <HowItWorks />
         <Testimonials />
         <CTA />

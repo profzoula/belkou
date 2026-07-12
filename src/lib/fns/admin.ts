@@ -41,7 +41,6 @@ async function sendPaymentConfirmed(
         fullName,
         plan,
         getWhatsappGroupUrl(plan),
-        siteConfig.cohortStartDate,
       ),
     });
   } catch (error) {

@@ -19,6 +19,7 @@ async function enrichCourseStudentsCount(course: Course): Promise<Course> {
     ...course,
     studentsCount: getDisplayedCourseStudentsCount({
       studentsCount: Math.max(course.studentsCount, paidCount),
+      slug: course.slug,
     }),
   };
 }
@@ -55,6 +56,7 @@ export const getPublicCourses = createServerFn({ method: "GET" }).handler(async 
       ...course,
       studentsCount: getDisplayedCourseStudentsCount({
         studentsCount: Math.max(course.studentsCount, paidCount),
+        slug: course.slug,
       }),
     };
     return toPublicCourse(enriched);

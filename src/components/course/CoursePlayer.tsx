@@ -47,10 +47,8 @@ import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
-import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback } from "@/lib/fns/videos";
-import { getPublicSiteDisplay } from "@/lib/fns/site-display";
 import type { VideoPlaybackSource } from "@/lib/videos";
 import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
 import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
@@ -437,7 +435,7 @@ function EnrolledExtraTab({
       <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
         <h3 className="font-semibold text-foreground">Questions & réponses</h3>
         <p>
-          Posez vos questions sur le forum du cours — les réponses et discussions restent accessibles à toute la cohorte.
+          Posez vos questions sur le forum du cours — les réponses et discussions restent accessibles à toute la communauté.
         </p>
         <Button asChild variant="soft" size="sm">
           <Link to="/forum/$courseSlug" params={{ courseSlug: course.slug }}>
@@ -627,9 +625,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
   const savePlaybackFn = useServerFn(saveLessonPlayback);
-  const siteDisplayFn = useServerFn(getPublicSiteDisplay);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
-  const [cohortStartDate, setCohortStartDate] = useState(siteConfig.cohortStartDate);
   const [progress, setProgress] = useState<{
     completedLessonIds: string[];
     playbackByLessonId: Record<string, number>;
@@ -637,12 +633,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   } | null>(null);
   const markedLessonsRef = useRef(new Set<string>());
   const lastPlaybackSaveRef = useRef(0);
-
-  useEffect(() => {
-    void siteDisplayFn({})
-      .then((result) => setCohortStartDate(result.cohortStartDate))
-      .catch(() => undefined);
-  }, [siteDisplayFn]);
 
   useEffect(() => {
     let cancelled = false;
@@ -798,7 +788,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
-  const scheduleLabel = startLabel ?? cohortStartDate;
   const enrolledWaiting = hasPaidAccess && !contentLive;
 
   useEffect(() => {
@@ -1135,7 +1124,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     <div>
                       <p className="font-semibold">Planifiez votre apprentissage</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Fixez un rappel pour avancer régulièrement — cohorte BelKou : {scheduleLabel}.
+                        {startLabel
+                          ? `Ce cours sera disponible le ${startLabel}. Organisez votre planning pour être prêt.`
+                          : "Avancez à votre rythme — fixez un rappel pour progresser régulièrement sur ce cours."}
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button size="sm" variant="outline" className="rounded-full" asChild>

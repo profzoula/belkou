@@ -67,17 +67,6 @@ export function AdminSettingsTab() {
 
       <form onSubmit={save} className="surface rounded-xl p-5 sm:p-6 space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="cohort">Date de début de cohorte</Label>
-          <Input
-            id="cohort"
-            value={settings.cohortStartDate ?? ""}
-            onChange={(e) => setSettings((s) => s && { ...s, cohortStartDate: e.target.value })}
-            className="rounded-lg"
-            placeholder="28 juin 2026"
-          />
-        </div>
-
-        <div className="space-y-2">
           <Label htmlFor="students">Base compteur étudiants (site public)</Label>
           <Input
             id="students"
