@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { Course } from "@/lib/courses";
-import { getCourseDisplayDuration } from "@/lib/courses";
+import { getCourseDisplayDuration, getDisplayedCourseStudentsCount } from "@/lib/courses";
 import { getResolvedCourseBySlug } from "@/server/site-content";
+import { countPaidEnrollmentsForCourse, getPaidEnrollmentCountsByCourse } from "@/server/enrollment-stats";
 
 export type PublicCourse = Omit<Course, "thumbnail"> & {
   thumbnail: {
@@ -11,6 +12,16 @@ export type PublicCourse = Omit<Course, "thumbnail"> & {
     imageUrl?: string;
   };
 };
+
+async function enrichCourseStudentsCount(course: Course): Promise<Course> {
+  const paidCount = await countPaidEnrollmentsForCourse(course.slug);
+  return {
+    ...course,
+    studentsCount: getDisplayedCourseStudentsCount({
+      studentsCount: Math.max(course.studentsCount, paidCount),
+    }),
+  };
+}
 
 function toPublicCourse(course: Course): PublicCourse {
   return {
@@ -29,11 +40,23 @@ export const getPublicCourse = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const course = await getResolvedCourseBySlug(data.slug);
     if (!course) return null;
-    return toPublicCourse(course);
+    const enriched = await enrichCourseStudentsCount(course);
+    return toPublicCourse(enriched);
   });
 
 export const getPublicCourses = createServerFn({ method: "GET" }).handler(async () => {
   const { getPublishedCourses } = await import("@/server/site-content");
   const courses = await getPublishedCourses();
-  return courses.map(toPublicCourse);
+  const paidCounts = await getPaidEnrollmentCountsByCourse();
+
+  return courses.map((course) => {
+    const paidCount = paidCounts[course.slug] ?? 0;
+    const enriched = {
+      ...course,
+      studentsCount: getDisplayedCourseStudentsCount({
+        studentsCount: Math.max(course.studentsCount, paidCount),
+      }),
+    };
+    return toPublicCourse(enriched);
+  });
 });

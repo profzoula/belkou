@@ -50,8 +50,11 @@ import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback } from "@/lib/fns/videos";
+import { getPublicSiteDisplay } from "@/lib/fns/site-display";
 import type { VideoPlaybackSource } from "@/lib/videos";
 import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
+import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
+import { CourseReviewsPanel } from "@/components/course/CourseReviewsPanel";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
 import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
 import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
@@ -102,8 +105,35 @@ function CourseVideoArea({
   const [playback, setPlayback] = useState<VideoPlaybackSource | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [playbackLoading, setPlaybackLoading] = useState(false);
+  const refreshPlaybackRef = useRef<(() => Promise<VideoPlaybackSource | null>) | null>(null);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
+
+  const loadPlayback = useCallback(async (): Promise<VideoPlaybackSource | null> => {
+    if (locked || lesson.type !== "video" || !videoId) return null;
+
+    const result = await playbackFn({
+      data: {
+        courseSlug: course.slug,
+        lessonId: lesson.id,
+        videoId,
+        preview: lesson.preview,
+        accessToken: session?.access_token,
+      },
+    });
+    return result;
+  }, [
+    course.slug,
+    lesson.id,
+    lesson.preview,
+    lesson.type,
+    locked,
+    playbackFn,
+    session?.access_token,
+    videoId,
+  ]);
+
+  refreshPlaybackRef.current = loadPlayback;
 
   useEffect(() => {
     if (locked || lesson.type !== "video" || !videoId) {
@@ -117,15 +147,7 @@ function CourseVideoArea({
     setPlaybackLoading(true);
     setPlaybackError(null);
 
-    playbackFn({
-      data: {
-        courseSlug: course.slug,
-        lessonId: lesson.id,
-        videoId,
-        preview: lesson.preview,
-        accessToken: session?.access_token,
-      },
-    })
+    void loadPlayback()
       .then((result) => {
         if (!cancelled) setPlayback(result);
       })
@@ -142,7 +164,24 @@ function CourseVideoArea({
     return () => {
       cancelled = true;
     };
-  }, [course.slug, lesson.id, lesson.preview, lesson.type, locked, playbackFn, session?.access_token, videoId]);
+  }, [lesson.id, lesson.type, loadPlayback, locked, videoId]);
+
+  useEffect(() => {
+    if (!playback?.urlExpiresAt || locked || lesson.type !== "video") return;
+
+    const refreshInMs = playback.urlExpiresAt - Date.now() - 5 * 60 * 1000;
+    const scheduleRefresh = (delay: number) =>
+      window.setTimeout(() => {
+        void refreshPlaybackRef.current?.()
+          .then((next) => {
+            if (next) setPlayback(next);
+          })
+          .catch(() => undefined);
+      }, Math.max(delay, 0));
+
+    const timer = scheduleRefresh(refreshInMs);
+    return () => window.clearTimeout(timer);
+  }, [lesson.type, locked, playback?.urlExpiresAt]);
 
   if (lesson.type === "article") {
     if (!locked) {
@@ -256,6 +295,16 @@ function CourseVideoArea({
           onNextLesson={onNextLesson}
           onLessonComplete={onLessonComplete}
           onPlay={onVideoPlay}
+          onPlaybackError={() => {
+            void refreshPlaybackRef.current?.()
+              .then((next) => {
+                if (next) {
+                  setPlayback(next);
+                  setPlaybackError(null);
+                }
+              })
+              .catch(() => undefined);
+          }}
         />
         <div className="border-b border-border bg-gradient-to-r from-violet-600/10 via-card to-emerald-600/10 px-4 py-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Leçon vidéo</p>
@@ -371,11 +420,17 @@ function EnrolledExtraTab({
   course,
   contentLive,
   startLabel,
+  activeLessonId,
+  allLessons,
+  accessToken,
 }: {
   tab: string;
   course: PublicCourse;
   contentLive: boolean;
   startLabel: string | null;
+  activeLessonId: string;
+  allLessons: CourseLesson[];
+  accessToken: string;
 }) {
   if (tab === "qa") {
     return (
@@ -394,25 +449,33 @@ function EnrolledExtraTab({
   }
 
   if (tab === "notes") {
+    if (!contentLive && startLabel) {
+      return (
+        <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
+          <h3 className="font-semibold text-foreground">Notes de cours</h3>
+          <p>Les notes seront disponibles quand le contenu complet sera publié le {startLabel}.</p>
+        </div>
+      );
+    }
+
     return (
-      <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
-        <h3 className="font-semibold text-foreground">Notes de cours</h3>
-        <p>
-          Prenez vos notes dans votre app préférée (Notion, Google Docs, carnet). Les notes intégrées BelKou arrivent
-          bientôt.
-        </p>
-      </div>
+      <CourseNotesPanel
+        courseSlug={course.slug}
+        lessons={allLessons}
+        activeLessonId={activeLessonId}
+        accessToken={accessToken}
+      />
     );
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
-      <h3 className="font-semibold text-foreground">Avis</h3>
-      <p>
-        Merci pour votre confiance sur <strong className="text-foreground">{course.title}</strong>. Vous pourrez laisser
-        un avis après avoir suivi une partie du cours.
-      </p>
-    </div>
+    <CourseReviewsPanel
+      courseSlug={course.slug}
+      courseTitle={course.title}
+      accessToken={accessToken}
+      fallbackRating={course.rating}
+      fallbackCount={course.ratingsCount}
+    />
   );
 }
 
@@ -564,7 +627,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
   const savePlaybackFn = useServerFn(saveLessonPlayback);
+  const siteDisplayFn = useServerFn(getPublicSiteDisplay);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+  const [cohortStartDate, setCohortStartDate] = useState(siteConfig.cohortStartDate);
   const [progress, setProgress] = useState<{
     completedLessonIds: string[];
     playbackByLessonId: Record<string, number>;
@@ -572,6 +637,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   } | null>(null);
   const markedLessonsRef = useRef(new Set<string>());
   const lastPlaybackSaveRef = useRef(0);
+
+  useEffect(() => {
+    void siteDisplayFn({})
+      .then((result) => setCohortStartDate(result.cohortStartDate))
+      .catch(() => undefined);
+  }, [siteDisplayFn]);
 
   useEffect(() => {
     let cancelled = false;
@@ -727,6 +798,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
+  const scheduleLabel = startLabel ?? cohortStartDate;
   const enrolledWaiting = hasPaidAccess && !contentLive;
 
   useEffect(() => {
@@ -1063,8 +1135,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     <div>
                       <p className="font-semibold">Planifiez votre apprentissage</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Fixez un rappel pour avancer régulièrement — cohorte BelKou :{" "}
-                        {siteConfig.cohortStartDate}.
+                        Fixez un rappel pour avancer régulièrement — cohorte BelKou : {scheduleLabel}.
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <Button size="sm" variant="outline" className="rounded-full" asChild>
@@ -1153,13 +1224,18 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
               {["qa", "notes", "reviews"].map((tab) => (
                 <TabsContent key={tab} value={tab} className="max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 py-12 text-center sm:px-0">
-                  {hasPaidAccess ? (
+                  {hasPaidAccess && session?.access_token ? (
                     <EnrolledExtraTab
                       tab={tab}
                       course={course}
                       contentLive={contentLive}
                       startLabel={courseStartsAtLabel(course)}
+                      activeLessonId={activeLessonId}
+                      allLessons={allLessons}
+                      accessToken={session.access_token}
                     />
+                  ) : hasPaidAccess ? (
+                    <p className="text-sm text-muted-foreground">Reconnectez-vous pour accéder à cette section.</p>
                   ) : (
                     <>
                       <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />

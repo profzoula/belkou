@@ -130,6 +130,8 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
         scheduledPublishAt: meta.scheduledPublishAt ?? undefined,
       }),
       ...(meta.resources !== undefined && { resources: meta.resources }),
+      ...(meta.rating !== undefined && { rating: meta.rating }),
+      ...(meta.ratingsCount !== undefined && { ratingsCount: meta.ratingsCount }),
       thumbnail: {
         ...merged.thumbnail,
         ...(meta.thumbnailLabel !== undefined && { label: meta.thumbnailLabel }),
@@ -313,7 +315,18 @@ export function getDefaultSiteSettings(): SiteSettings {
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   const stored = await readJson<SiteSettings>(SITE_SETTINGS_KEY, {});
-  return { ...getDefaultSiteSettings(), ...stored };
+  const defaults = getDefaultSiteSettings();
+  return {
+    ...defaults,
+    ...stored,
+    cohortStartDate: stored.cohortStartDate?.trim() || defaults.cohortStartDate,
+    statsStudentsBase:
+      typeof stored.statsStudentsBase === "number" && stored.statsStudentsBase > 0
+        ? stored.statsStudentsBase
+        : defaults.statsStudentsBase,
+    promoMessage: stored.promoMessage?.trim() || defaults.promoMessage,
+    promoMessageShort: stored.promoMessageShort?.trim() || defaults.promoMessageShort,
+  };
 }
 
 export async function saveSiteSettings(settings: SiteSettings) {

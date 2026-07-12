@@ -14,6 +14,7 @@ type CourseVideoPlayerProps = {
   onLessonComplete?: () => void;
   onTimeUpdate?: (currentTime: number) => void;
   onPlay?: () => void;
+  onPlaybackError?: () => void;
 };
 
 function describeVideoError(video: HTMLVideoElement): string {
@@ -40,12 +41,14 @@ export function CourseVideoPlayer({
   onLessonComplete,
   onTimeUpdate,
   onPlay,
+  onPlaybackError,
 }: CourseVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const resumeAppliedRef = useRef(false);
   const onLessonCompleteRef = useRef(onLessonComplete);
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onPlaybackErrorRef = useRef(onPlaybackError);
   const onPlayRef = useRef(onPlay);
   const [ended, setEnded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -55,6 +58,7 @@ export function CourseVideoPlayer({
   onLessonCompleteRef.current = onLessonComplete;
   onTimeUpdateRef.current = onTimeUpdate;
   onPlayRef.current = onPlay;
+  onPlaybackErrorRef.current = onPlaybackError;
 
   useEffect(() => {
     resumeAppliedRef.current = false;
@@ -114,6 +118,11 @@ export function CourseVideoPlayer({
       setLoading(false);
       setBuffering(false);
       setError(describeVideoError(video));
+      onPlaybackErrorRef.current?.();
+    };
+
+    const blockDownloadGesture = (event: Event) => {
+      event.preventDefault();
     };
 
     video.addEventListener("loadedmetadata", markReady);
@@ -123,6 +132,8 @@ export function CourseVideoPlayer({
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("playing", handlePlaying);
     video.addEventListener("error", handleVideoError);
+    video.addEventListener("contextmenu", blockDownloadGesture);
+    video.addEventListener("dragstart", blockDownloadGesture);
 
     if (playback.kind === "hls") {
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
@@ -176,6 +187,8 @@ export function CourseVideoPlayer({
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("playing", handlePlaying);
       video.removeEventListener("error", handleVideoError);
+      video.removeEventListener("contextmenu", blockDownloadGesture);
+      video.removeEventListener("dragstart", blockDownloadGesture);
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
@@ -193,13 +206,20 @@ export function CourseVideoPlayer({
   };
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-black">
+    <div
+      className="relative aspect-video w-full select-none overflow-hidden bg-black"
+      onContextMenu={(event) => event.preventDefault()}
+    >
       <video
         ref={videoRef}
         className="h-full w-full"
         controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        disableRemotePlayback
         playsInline
         preload={playback.kind === "mp4" ? "auto" : "metadata"}
+        onContextMenu={(event) => event.preventDefault()}
       />
 
       {loading || buffering ? (

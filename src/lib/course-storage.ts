@@ -68,6 +68,8 @@ export type CourseMetaPatch = {
   published?: boolean;
   scheduledPublishAt?: string | null;
   resources?: import("@/lib/course-resources").CourseResource[];
+  rating?: number;
+  ratingsCount?: number;
 };
 
 export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPatch): StoredCourse {

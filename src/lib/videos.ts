@@ -23,6 +23,7 @@ export type VideoRecord = {
 export type VideoPlaybackSource = {
   kind: "hls" | "mp4";
   url: string;
+  urlExpiresAt?: number;
   posterUrl?: string;
   durationSeconds?: number | null;
   status: string;

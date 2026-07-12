@@ -1,20 +1,24 @@
+import { envString } from "@/lib/env-string";
+
 export const siteConfig = {
   name: "BelKou",
-  siteUrl: import.meta.env.VITE_SITE_URL ?? "https://belkou.online",
+  siteUrl: envString(import.meta.env.VITE_SITE_URL, "https://belkou.online"),
   logo: "/favicon/logo.svg",
   tagline: "Plateforme de cours IA & SaaS en français",
-  contactEmail: import.meta.env.VITE_CONTACT_EMAIL ?? "profzoula@gmail.com",
-  contactWhatsApp: import.meta.env.VITE_WHATSAPP_PHONE ?? "9413010414",
+  contactEmail: envString(import.meta.env.VITE_CONTACT_EMAIL, "profzoula@gmail.com"),
+  contactWhatsApp: envString(import.meta.env.VITE_WHATSAPP_PHONE, "9413010414"),
   whatsappGroups: {
     premium:
-      import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ??
-      import.meta.env.VITE_WHATSAPP_GROUP_URL ??
-      "https://chat.whatsapp.com/J4iP9lv5gYlHrWiLXHuNgD",
-    vip:
-      import.meta.env.VITE_WHATSAPP_GROUP_VIP ??
+      envString(
+        import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ?? import.meta.env.VITE_WHATSAPP_GROUP_URL,
+        "https://chat.whatsapp.com/J4iP9lv5gYlHrWiLXHuNgD",
+      ),
+    vip: envString(
+      import.meta.env.VITE_WHATSAPP_GROUP_VIP,
       "https://chat.whatsapp.com/GqWxIE5pfafFOB3krHd0uA",
+    ),
   },
-  cohortStartDate: import.meta.env.VITE_COHORT_START_DATE ?? "28 juin 2026",
+  cohortStartDate: envString(import.meta.env.VITE_COHORT_START_DATE, "28 juin 2026"),
   location: "USA · En ligne",
   promo: {
     enabled: false,
@@ -60,13 +64,13 @@ export const siteConfig = {
     "Virement bancaire",
   ],
   manualPayment: {
-    moncash: import.meta.env.VITE_MONCASH_NUMBER ?? "",
-    zelle: import.meta.env.VITE_ZELLE_EMAIL ?? "",
-    paypal: import.meta.env.VITE_PAYPAL_EMAIL ?? "",
-    bankNote: import.meta.env.VITE_BANK_INSTRUCTIONS ?? "",
+    moncash: envString(import.meta.env.VITE_MONCASH_NUMBER, ""),
+    zelle: envString(import.meta.env.VITE_ZELLE_EMAIL, ""),
+    paypal: envString(import.meta.env.VITE_PAYPAL_EMAIL, ""),
+    bankNote: envString(import.meta.env.VITE_BANK_INSTRUCTIONS, ""),
   },
   social: {
-    twitter: import.meta.env.VITE_TWITTER_HANDLE ?? "@BelKou",
+    twitter: envString(import.meta.env.VITE_TWITTER_HANDLE, "@BelKou"),
   },
 } as const;
 

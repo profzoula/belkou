@@ -15,6 +15,8 @@
     "repair-video-paths": "node scripts/repair-video-storage-paths.mjs",
     "verify-videos": "node scripts/verify-video-setup.mjs",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "seed-reviews": "node scripts/seed-course-reviews.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

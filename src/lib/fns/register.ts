@@ -19,6 +19,13 @@ import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates"
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
 import { getWelcomePreviewLesson } from "@/lib/courses";
+import { resolveCohortStartDate } from "@/lib/site-display";
+
+async function resolveCohortDateForEmails(): Promise<string> {
+  const { getSiteSettings } = await import("@/server/site-content");
+  const settings = await getSiteSettings();
+  return resolveCohortStartDate(settings);
+}
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -33,6 +40,16 @@ function manualPaymentHtml() {
   }
   if (siteConfig.manualPayment.bankNote) {
     lines.push(`<li>${siteConfig.manualPayment.bankNote}</li>`);
+  }
+  if (
+    !siteConfig.manualPayment.moncash &&
+    !siteConfig.manualPayment.zelle &&
+    !siteConfig.manualPayment.paypal &&
+    !siteConfig.manualPayment.bankNote
+  ) {
+    lines.push(
+      `<li>Contactez-nous par email : <strong>${siteConfig.contactEmail}</strong> ou WhatsApp pour les instructions de paiement.</li>`,
+    );
   }
   lines.push("</ul><p>Envoyez la preuve de paiement sur WhatsApp après avoir payé.</p>");
   return lines.join("");
@@ -213,6 +230,7 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
 
       if (!wasPaid) {
         try {
+          const cohortStartDate = await resolveCohortDateForEmails();
           await sendEmail({
             to: record.email,
             subject: "Paiement confirmé — BelKou",
@@ -220,7 +238,7 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
               record.full_name,
               record.plan,
               getWhatsappGroupUrl(record.plan),
-              siteConfig.cohortStartDate,
+              cohortStartDate,
             ),
           });
         } catch (error) {

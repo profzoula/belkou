@@ -4,7 +4,17 @@ import { VIDEO_UPLOAD_MAX_BYTES } from "@/lib/video-upload-limits";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 const BUCKET = "course-videos";
-const SIGNED_URL_TTL_SECONDS = 60 * 60;
+export const SIGNED_URL_TTL_SECONDS = 60 * 60;
+const SIGNED_URL_REFRESH_BUFFER_MS = 5 * 60 * 1000;
+
+export function signedUrlExpiresAtMs(): number {
+  return Date.now() + SIGNED_URL_TTL_SECONDS * 1000;
+}
+
+export function shouldRefreshSignedUrl(expiresAtMs?: number): boolean {
+  if (!expiresAtMs) return false;
+  return Date.now() >= expiresAtMs - SIGNED_URL_REFRESH_BUFFER_MS;
+}
 
 const ALLOWED_TYPES = new Set(["video/mp4", "video/quicktime"]);
 
@@ -14,7 +24,7 @@ function sanitizeFileName(fileName: string): string {
 
 export async function createSignedStorageUrl(
   storagePath: string,
-): Promise<{ ok: true; url: string } | { ok: false; reason: string }> {
+): Promise<{ ok: true; url: string; urlExpiresAt: number } | { ok: false; reason: string }> {
   const sb = getSupabaseAdmin();
   if (!sb) {
     return { ok: false, reason: "Supabase non configuré" };
@@ -22,13 +32,15 @@ export async function createSignedStorageUrl(
 
   const { data, error } = await sb.storage
     .from(BUCKET)
-    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS);
+    .createSignedUrl(storagePath, SIGNED_URL_TTL_SECONDS, {
+      download: false,
+    });
 
   if (error || !data?.signedUrl) {
     return { ok: false, reason: error?.message ?? "URL signée introuvable" };
   }
 
-  return { ok: true, url: data.signedUrl };
+  return { ok: true, url: data.signedUrl, urlExpiresAt: signedUrlExpiresAtMs() };
 }
 
 export function formatDurationFromSeconds(seconds: number): string {
@@ -58,6 +70,7 @@ export async function resolveVideoPlayback(
         playback: {
           kind: "mp4",
           url: mp4.url,
+          urlExpiresAt: mp4.urlExpiresAt,
           posterUrl,
           durationSeconds: video.durationSeconds,
           status: video.status,
@@ -75,6 +88,7 @@ export async function resolveVideoPlayback(
         playback: {
           kind: "hls",
           url: hls.url,
+          urlExpiresAt: hls.urlExpiresAt,
           posterUrl,
           durationSeconds: video.durationSeconds,
           status: video.status,

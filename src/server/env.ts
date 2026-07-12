@@ -31,7 +31,31 @@ function fromProcessEnv(): Record<string, string | undefined> {
 }
 
 export function getServerEnv(): ServerEnv {
-  return envSchema.parse(fromProcessEnv());
+  const parsed = envSchema.parse(fromProcessEnv());
+  logMissingProductionEnv(parsed);
+  return parsed;
+}
+
+const PRODUCTION_ENV_CHECKS = [
+  { key: "SUPABASE_SERVICE_ROLE_KEY", label: "Supabase service role" },
+  { key: "STRIPE_SECRET_KEY", label: "Stripe secret key" },
+  { key: "STRIPE_WEBHOOK_SECRET", label: "Stripe webhook secret" },
+  { key: "RESEND_API_KEY", label: "Resend email API" },
+  { key: "ADMIN_PASSWORD", label: "Admin password" },
+] as const;
+
+let envWarningLogged = false;
+
+function logMissingProductionEnv(env: ServerEnv): void {
+  if (envWarningLogged || process.env.NODE_ENV === "test") return;
+  envWarningLogged = true;
+
+  const missing = PRODUCTION_ENV_CHECKS.filter((check) => !String(env[check.key] ?? "").trim());
+  if (!missing.length) return;
+
+  console.warn(
+    `[BelKou] Variables serveur manquantes: ${missing.map((item) => item.label).join(", ")}. Certaines fonctionnalités seront limitées.`,
+  );
 }
 
 export async function getDb(): Promise<D1Database | null> {

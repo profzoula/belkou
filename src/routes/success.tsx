@@ -62,7 +62,11 @@ function ManualPaymentInfo() {
   ].filter(Boolean) as { label: string; value: string }[];
 
   if (!items.length) {
-    return <p className="text-sm text-muted-foreground">Contactez-nous sur WhatsApp pour les détails de paiement.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        Contactez-nous sur WhatsApp ou par email ({siteConfig.contactEmail}) pour les détails de paiement.
+      </p>
+    );
   }
 
   return (
