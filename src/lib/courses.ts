@@ -8,8 +8,10 @@ export type CourseLesson = {
   duration: string;
   type: "video" | "article" | "resource";
   preview?: boolean;
-  /** Self-hosted video (Supabase `videos` table UUID). */
+  /** Self-hosted video (Supabase `videos` table UUID). Max ~50 Mo. */
   videoId?: string;
+  /** Vimeo URL for larger videos (e.g. https://vimeo.com/123456789). */
+  vimeoUrl?: string;
   /** Markdown — titres ##, sections repliables ### Titre */
   content?: string;
 };
@@ -178,8 +180,13 @@ export function getLessonVideoId(lesson: CourseLesson): string | null {
   return trimmed || null;
 }
 
+export function getLessonVimeoUrl(lesson: CourseLesson): string | null {
+  const trimmed = lesson.vimeoUrl?.trim();
+  return trimmed || null;
+}
+
 export function lessonHasVideo(lesson: CourseLesson): boolean {
-  return lesson.type === "video" && Boolean(getLessonVideoId(lesson));
+  return lesson.type === "video" && Boolean(getLessonVideoId(lesson) || getLessonVimeoUrl(lesson));
 }
 
 export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title">): boolean {

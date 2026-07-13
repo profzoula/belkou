@@ -46,7 +46,9 @@ export function LessonVideoUpload({
       return;
     }
     if (selectedFile.size > VIDEO_UPLOAD_MAX_BYTES) {
-      toast.error(`Fichier trop volumineux (max ${formatVideoUploadMaxLabel()})`);
+      toast.error(
+        `Fichier trop volumineux (max ${formatVideoUploadMaxLabel()}). Uploadez sur Vimeo et collez le lien dans le champ « Lien Vimeo ».`,
+      );
       return;
     }
 
@@ -150,6 +152,11 @@ export function LessonVideoUpload({
       {selectedFile && !uploading ? (
         <p className="text-[11px] text-muted-foreground">
           {selectedFile.name} · {formatVideoSize(selectedFile.size)}
+          {selectedFile.size > VIDEO_UPLOAD_MAX_BYTES ? (
+            <span className="block text-amber-600 dark:text-amber-400">
+              Trop volumineux — utilisez Vimeo et collez le lien dans le champ dédié.
+            </span>
+          ) : null}
         </p>
       ) : null}
     </div>

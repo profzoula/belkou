@@ -237,3 +237,61 @@ export const getLessonVideoPlayback = createServerFn({ method: "POST" })
 
     return resolved.playback;
   });
+
+export const getLessonVimeoPlayback = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        courseSlug: z.string().min(1),
+        lessonId: z.string().min(1),
+        preview: z.boolean().optional(),
+        accessToken: z.string().optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { getResolvedCourseBySlug } = await import("@/server/site-content");
+    const { getLessonById, getLessonVimeoUrl } = await import("@/lib/courses");
+    const { hasPaidAccessToCourse, pickRegistrationForCourse } = await import("@/lib/course-access");
+    const { getUserFromAccessToken } = await import("@/server/supabase-auth");
+    const { listRegistrationsByEmail } = await import("@/server/db");
+    const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
+    const { getDb } = await import("@/server/env");
+    const { vimeoUrlToEmbedUrl } = await import("@/lib/vimeo");
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) throw new Error("Cours introuvable");
+
+    const lesson = getLessonById(course, data.lessonId);
+    if (!lesson || lesson.type !== "video") throw new Error("Leçon introuvable");
+
+    const vimeoUrl = getLessonVimeoUrl(lesson);
+    if (!vimeoUrl) throw new Error("Vidéo Vimeo non configurée");
+
+    if (!data.preview) {
+      const token = data.accessToken?.trim();
+      if (!token) throw new Error("Connexion requise");
+
+      const user = await getUserFromAccessToken(token);
+      if (!user?.email) throw new Error("Connexion requise");
+
+      const db = await getDb();
+      const email = normalizeRegistrationEmail(user.email);
+      const rows = await listRegistrationsByEmail(db, email);
+      const registration = pickRegistrationForCourse(rows, data.courseSlug);
+      if (!hasPaidAccessToCourse(registration, data.courseSlug)) {
+        throw new Error("Accès non autorisé");
+      }
+    } else if (!lesson.preview) {
+      throw new Error("Preview non disponible");
+    }
+
+    const embedUrl = vimeoUrlToEmbedUrl(vimeoUrl);
+    if (!embedUrl) throw new Error("URL Vimeo invalide");
+
+    return {
+      kind: "vimeo" as const,
+      url: embedUrl,
+      status: "ready",
+    };
+  });

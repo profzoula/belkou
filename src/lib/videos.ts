@@ -21,7 +21,7 @@ export type VideoRecord = {
 };
 
 export type VideoPlaybackSource = {
-  kind: "hls" | "mp4";
+  kind: "hls" | "mp4" | "vimeo";
   url: string;
   urlExpiresAt?: number;
   posterUrl?: string;

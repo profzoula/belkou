@@ -137,6 +137,7 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
   await requireAdmin();
   const db = await getDb();
   const { getResolvedCourses, getServiceBookings } = await import("@/server/site-content");
+  const { lessonHasVideo } = await import("@/lib/courses");
   const [registrations, stats, courses, serviceBookings] = await Promise.all([
     listRegistrations(db),
     getRegistrationStats(db),
@@ -152,7 +153,7 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
   const courseSummaries = courses.map((course) => {
     const lessons = course.sections.flatMap((section) => section.lessons);
     const videos = lessons.filter((lesson) => lesson.type === "video");
-    const missingVideo = videos.filter((lesson) => !lesson.videoId?.trim()).length;
+    const missingVideo = videos.filter((lesson) => !lessonHasVideo(lesson)).length;
     const previews = lessons.filter((lesson) => lesson.preview).length;
 
     totalLessons += lessons.length;
@@ -519,6 +520,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
         courseSlug: z.string().min(1),
         lessonId: z.string().min(1),
         videoId: z.string().optional(),
+        vimeoUrl: z.string().optional(),
         preview: z.boolean().optional(),
         title: z.string().optional(),
         duration: z.string().optional(),
@@ -535,29 +537,55 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
     const { getVideoRecord } = await import("@/server/videos");
     const { formatCourseDurationLabel } = await import("@/lib/courses");
     const { getLessonById, lessonHasVideo } = await import("@/lib/courses");
+    const { isValidVimeoUrl } = await import("@/lib/vimeo");
 
     const courseBefore = await getResolvedCourseBySlug(data.courseSlug);
     const lessonBefore = courseBefore ? getLessonById(courseBefore, data.lessonId) : undefined;
     const hadVideo = Boolean(lessonBefore && lessonBefore.type === "video" && lessonHasVideo(lessonBefore));
 
     let duration = data.duration;
-    let videoId = data.videoId;
+    let videoId: string | undefined;
+    let vimeoUrl: string | undefined;
+
     if (data.type === "article") {
       videoId = "";
+      vimeoUrl = "";
       duration = data.duration?.trim() || "5 min";
     } else if (data.type === "video" || lessonBefore?.type === "video") {
+      const effectiveVimeoUrl =
+        data.vimeoUrl !== undefined ? data.vimeoUrl.trim() : lessonBefore?.vimeoUrl?.trim() || "";
       const effectiveVideoId =
         data.videoId !== undefined ? data.videoId.trim() : lessonBefore?.videoId?.trim() || "";
-      videoId = effectiveVideoId || undefined;
-      if (effectiveVideoId) {
+
+      if (data.vimeoUrl !== undefined && effectiveVimeoUrl) {
+        if (!isValidVimeoUrl(effectiveVimeoUrl)) {
+          throw new Error("URL Vimeo invalide — ex. https://vimeo.com/123456789");
+        }
+        vimeoUrl = effectiveVimeoUrl;
+        videoId = "";
+        duration = data.duration?.trim() || lessonBefore?.duration?.trim() || "";
+      } else if (data.videoId !== undefined && effectiveVideoId) {
         const video = await getVideoRecord(effectiveVideoId);
+        videoId = effectiveVideoId;
+        vimeoUrl = "";
         if (video?.durationSeconds) {
           duration = formatCourseDurationLabel(Math.round(video.durationSeconds / 60));
         } else if (!data.duration?.trim()) {
-          duration = "";
+          duration = lessonBefore?.duration?.trim() || "";
         }
-      } else {
+      } else if (data.vimeoUrl !== undefined || data.videoId !== undefined) {
+        videoId = "";
+        vimeoUrl = "";
         duration = "";
+      } else {
+        videoId = lessonBefore?.videoId;
+        vimeoUrl = lessonBefore?.vimeoUrl;
+        if (effectiveVideoId) {
+          const video = await getVideoRecord(effectiveVideoId);
+          if (video?.durationSeconds) {
+            duration = formatCourseDurationLabel(Math.round(video.durationSeconds / 60));
+          }
+        }
       }
     }
 
@@ -566,6 +594,7 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
       lessonId: data.lessonId,
       patch: {
         videoId,
+        vimeoUrl,
         preview: data.preview,
         title: data.title,
         duration,
@@ -697,6 +726,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         type: z.enum(["video", "article"]).optional(),
         duration: z.string().optional(),
         videoId: z.string().optional(),
+        vimeoUrl: z.string().optional(),
         preview: z.boolean().optional(),
         content: z.string().optional(),
       })
@@ -707,16 +737,29 @@ export const adminAddLesson = createServerFn({ method: "POST" })
     const { addLessonToCourse, getResolvedCourses } = await import("@/server/site-content");
     const { getVideoRecord } = await import("@/server/videos");
     const { formatCourseDurationLabel } = await import("@/lib/courses");
+    const { isValidVimeoUrl } = await import("@/lib/vimeo");
 
     const isArticle = data.type === "article";
     let duration = data.duration;
+    let videoId = data.videoId?.trim() || undefined;
+    let vimeoUrl = data.vimeoUrl?.trim() || undefined;
+
     if (isArticle) {
       duration = data.duration?.trim() || "5 min";
-    } else if (data.videoId?.trim()) {
-      const video = await getVideoRecord(data.videoId.trim());
+      videoId = undefined;
+      vimeoUrl = undefined;
+    } else if (vimeoUrl) {
+      if (!isValidVimeoUrl(vimeoUrl)) {
+        throw new Error("URL Vimeo invalide — ex. https://vimeo.com/123456789");
+      }
+      videoId = undefined;
+      duration = data.duration?.trim() || "";
+    } else if (videoId) {
+      const video = await getVideoRecord(videoId);
       duration = video?.durationSeconds
         ? formatCourseDurationLabel(Math.round(video.durationSeconds / 60))
         : "";
+      vimeoUrl = undefined;
     } else {
       duration = "";
     }
@@ -728,7 +771,8 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         title: data.title,
         type: data.type,
         duration,
-        videoId: data.videoId,
+        videoId,
+        vimeoUrl,
         preview: data.preview,
         content: data.content,
       },

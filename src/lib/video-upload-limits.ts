@@ -24,7 +24,7 @@ export function formatVideoUploadMaxLabel(): string {
 
 export function getVideoUploadLimitHint(): string {
   if (VIDEO_UPLOAD_MAX_MB <= 50) {
-    return `Max ${formatVideoUploadMaxLabel()} par fichier (limite Supabase Free). Compressez le MP4 ou passez au plan Pro pour des vidéos plus longues.`;
+    return `Max ${formatVideoUploadMaxLabel()} par fichier (limite Supabase Free). Au-delà, uploadez sur Vimeo et collez le lien ci-dessous.`;
   }
-  return `Max ${formatVideoUploadMaxLabel()} par fichier.`;
+  return `Max ${formatVideoUploadMaxLabel()} par fichier. Pour des fichiers plus lourds, utilisez Vimeo.`;
 }

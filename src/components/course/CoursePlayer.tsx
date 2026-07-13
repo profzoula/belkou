@@ -28,6 +28,7 @@ import {
   getDisplayedCourseStudentsCount,
   getLessonDisplayDuration,
   getLessonVideoId,
+  getLessonVimeoUrl,
   getSectionDurationMinutes,
   getSectionForLesson,
   getWelcomePreviewLesson,
@@ -48,9 +49,10 @@ import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { cn } from "@/lib/utils";
-import { getLessonVideoPlayback } from "@/lib/fns/videos";
+import { getLessonVideoPlayback, getLessonVimeoPlayback } from "@/lib/fns/videos";
 import type { VideoPlaybackSource } from "@/lib/videos";
 import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
+import { VimeoVideoPlayer } from "@/components/course/VimeoVideoPlayer";
 import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
 import { CourseReviewsPanel } from "@/components/course/CourseReviewsPanel";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
@@ -99,7 +101,9 @@ function CourseVideoArea({
   const Icon = getCourseIcon(course.slug);
   const { locked, reason } = getLockState(lesson);
   const videoId = getLessonVideoId(lesson);
+  const vimeoUrl = getLessonVimeoUrl(lesson);
   const playbackFn = useServerFn(getLessonVideoPlayback);
+  const vimeoPlaybackFn = useServerFn(getLessonVimeoPlayback);
   const [playback, setPlayback] = useState<VideoPlaybackSource | null>(null);
   const [playbackError, setPlaybackError] = useState<string | null>(null);
   const [playbackLoading, setPlaybackLoading] = useState(false);
@@ -108,7 +112,20 @@ function CourseVideoArea({
   const enrolledWaiting = hasPaidAccess && reason === "schedule";
 
   const loadPlayback = useCallback(async (): Promise<VideoPlaybackSource | null> => {
-    if (locked || lesson.type !== "video" || !videoId) return null;
+    if (locked || lesson.type !== "video") return null;
+
+    if (vimeoUrl) {
+      return vimeoPlaybackFn({
+        data: {
+          courseSlug: course.slug,
+          lessonId: lesson.id,
+          preview: lesson.preview,
+          accessToken: session?.access_token,
+        },
+      });
+    }
+
+    if (!videoId) return null;
 
     const result = await playbackFn({
       data: {
@@ -129,12 +146,14 @@ function CourseVideoArea({
     playbackFn,
     session?.access_token,
     videoId,
+    vimeoPlaybackFn,
+    vimeoUrl,
   ]);
 
   refreshPlaybackRef.current = loadPlayback;
 
   useEffect(() => {
-    if (locked || lesson.type !== "video" || !videoId) {
+    if (locked || lesson.type !== "video" || (!videoId && !vimeoUrl)) {
       setPlayback(null);
       setPlaybackError(null);
       setPlaybackLoading(false);
@@ -162,7 +181,7 @@ function CourseVideoArea({
     return () => {
       cancelled = true;
     };
-  }, [lesson.id, lesson.type, loadPlayback, locked, videoId]);
+  }, [lesson.id, lesson.type, loadPlayback, locked, videoId, vimeoUrl]);
 
   useEffect(() => {
     if (!playback?.urlExpiresAt || locked || lesson.type !== "video") return;
@@ -281,8 +300,18 @@ function CourseVideoArea({
   }
 
   if (!locked && playback) {
-    return (
-      <>
+    const player =
+      playback.kind === "vimeo" ? (
+        <VimeoVideoPlayer
+          embedUrl={playback.url}
+          title={lesson.title}
+          lessonKey={lesson.id}
+          nextLessonTitle={nextLessonTitle}
+          onNextLesson={onNextLesson}
+          onLessonComplete={onLessonComplete}
+          onPlay={onVideoPlay}
+        />
+      ) : (
         <CourseVideoPlayer
           playback={playback}
           title={lesson.title}
@@ -304,6 +333,11 @@ function CourseVideoArea({
               .catch(() => undefined);
           }}
         />
+      );
+
+    return (
+      <>
+        {player}
         <div className="border-b border-border bg-gradient-to-r from-violet-600/10 via-card to-emerald-600/10 px-4 py-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Leçon vidéo</p>
           <h2 className="mt-0.5 font-display text-lg font-bold leading-snug text-foreground sm:text-xl">
@@ -314,7 +348,7 @@ function CourseVideoArea({
     );
   }
 
-  if (!locked && lesson.type === "video" && videoId && playbackLoading) {
+  if (!locked && lesson.type === "video" && (videoId || vimeoUrl) && playbackLoading) {
     return (
       <div className="flex aspect-video w-full items-center justify-center bg-black text-sm text-white/80">
         Chargement de la vidéo…
@@ -322,7 +356,7 @@ function CourseVideoArea({
     );
   }
 
-  if (!locked && lesson.type === "video" && videoId && playbackError) {
+  if (!locked && lesson.type === "video" && (videoId || vimeoUrl) && playbackError) {
     return (
       <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
         <p className="font-semibold">{lesson.title}</p>
@@ -331,7 +365,7 @@ function CourseVideoArea({
     );
   }
 
-  if (!locked && lesson.type === "video" && !videoId) {
+  if (!locked && lesson.type === "video" && !videoId && !vimeoUrl) {
     return (
       <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
         <p className="font-semibold">{lesson.title}</p>

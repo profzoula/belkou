@@ -77,6 +77,7 @@ type LessonDraft = {
   title: string;
   duration: string;
   videoId: string;
+  vimeoUrl: string;
   preview: boolean;
   content: string;
   type: "video" | "article" | "resource";
@@ -98,6 +99,7 @@ type NewLessonDraft = {
   title: string;
   duration: string;
   videoId: string;
+  vimeoUrl: string;
   preview: boolean;
   content: string;
   type: "video" | "article";
@@ -126,6 +128,7 @@ function lessonToDraft(lesson: AdminCourse["sections"][number]["lessons"][number
     title: lesson.title,
     duration: lesson.duration,
     videoId: lesson.videoId ?? "",
+    vimeoUrl: lesson.vimeoUrl ?? "",
     preview: Boolean(lesson.preview),
     content: lesson.content ?? "",
     type: lesson.type,
@@ -150,6 +153,7 @@ const emptyNewLesson = (): NewLessonDraft => ({
   title: "",
   duration: "",
   videoId: "",
+  vimeoUrl: "",
   preview: false,
   content: "",
   type: "video",
@@ -472,9 +476,22 @@ export function AdminCoursesTab() {
     const video = videoLibrary.find((item) => item.id === trimmed);
     onPatch({
       videoId: trimmed,
+      vimeoUrl: "",
       duration: video?.durationSeconds
         ? formatCourseDurationLabel(Math.max(1, Math.round(video.durationSeconds / 60)))
         : "",
+    });
+  };
+
+  const applyVimeoUrl = (url: string, onPatch: (patch: Partial<LessonDraft | NewLessonDraft>) => void) => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      onPatch({ vimeoUrl: "", duration: "" });
+      return;
+    }
+    onPatch({
+      vimeoUrl: trimmed,
+      videoId: "",
     });
   };
 
@@ -514,7 +531,8 @@ export function AdminCoursesTab() {
           lessonId,
           title: draft.title,
           duration: draft.duration,
-          videoId: draft.type === "video" ? draft.videoId || undefined : undefined,
+          videoId: draft.type === "video" ? draft.videoId : undefined,
+          vimeoUrl: draft.type === "video" ? draft.vimeoUrl : undefined,
           preview: draft.preview,
           content: draft.type === "article" ? draft.content ?? "" : undefined,
           type: (draft.type ?? lesson?.type ?? "video") === "resource"
@@ -556,7 +574,8 @@ export function AdminCoursesTab() {
           title: draft.title.trim(),
           type: draft.type,
           duration: draft.duration.trim() || undefined,
-          videoId: draft.type === "video" ? draft.videoId.trim() || undefined : undefined,
+          videoId: draft.type === "video" ? draft.videoId.trim() : undefined,
+          vimeoUrl: draft.type === "video" ? draft.vimeoUrl.trim() : undefined,
           preview: draft.preview,
           content: draft.type === "article" ? content : undefined,
         },
@@ -1134,7 +1153,9 @@ export function AdminCoursesTab() {
                                   const type = value as "video" | "article";
                                   updateDraft(selectedCourse.slug, lesson.id, {
                                     type,
-                                    ...(type === "article" ? { videoId: "", duration: draft.duration || "5 min" } : {}),
+                                    ...(type === "article"
+                                      ? { videoId: "", vimeoUrl: "", duration: draft.duration || "5 min" }
+                                      : {}),
                                   });
                                 }}
                               >
@@ -1161,49 +1182,79 @@ export function AdminCoursesTab() {
                           {draft.type === "video" && (
                             <>
                               <div className="space-y-1.5 sm:col-span-2">
-                                <Label>Vidéo uploadée</Label>
-                                <LessonVideoUpload
-                                  courseSlug={selectedCourse.slug}
-                                  lessonId={lesson.id}
-                                  defaultTitle={draft.title || lesson.title}
-                                  disabled={savingId === lesson.id}
-                                  onUploaded={(video) =>
-                                    handleLessonVideoUploaded(video, (patch) =>
+                                <Label>Vidéo uploadée (max 50 Mo)</Label>
+                                {!draft.vimeoUrl ? (
+                                  <>
+                                    <LessonVideoUpload
+                                      courseSlug={selectedCourse.slug}
+                                      lessonId={lesson.id}
+                                      defaultTitle={draft.title || lesson.title}
+                                      disabled={savingId === lesson.id}
+                                      onUploaded={(video) =>
+                                        handleLessonVideoUploaded(video, (patch) =>
+                                          updateDraft(selectedCourse.slug, lesson.id, patch),
+                                        )
+                                      }
+                                    />
+                                    <Select
+                                      value={draft.videoId || "__none__"}
+                                      onValueChange={(value) =>
+                                        applyVideoSelection(value, (patch) =>
+                                          updateDraft(selectedCourse.slug, lesson.id, patch),
+                                        )
+                                      }
+                                    >
+                                      <SelectTrigger className="rounded-lg">
+                                        <SelectValue placeholder="Choisir une vidéo" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="__none__">— Aucune —</SelectItem>
+                                        {videoLibrary.map((video) => (
+                                          <SelectItem key={video.id} value={video.id}>
+                                            {video.title} · {formatVideoStatusLabel(video)}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <p className="text-[11px] text-muted-foreground">
+                                      Ou choisissez une vidéo déjà uploadée dans la bibliothèque.
+                                    </p>
+                                  </>
+                                ) : (
+                                  <p className="text-[11px] text-muted-foreground">
+                                    Upload désactivé — cette leçon utilise Vimeo.
+                                  </p>
+                                )}
+                              </div>
+                              <div className="space-y-1.5 sm:col-span-2">
+                                <Label htmlFor={`lesson-vimeo-${lesson.id}`}>Lien Vimeo (&gt; 50 Mo)</Label>
+                                <Input
+                                  id={`lesson-vimeo-${lesson.id}`}
+                                  value={draft.vimeoUrl}
+                                  onChange={(e) =>
+                                    applyVimeoUrl(e.target.value, (patch) =>
                                       updateDraft(selectedCourse.slug, lesson.id, patch),
                                     )
                                   }
+                                  className="rounded-lg"
+                                  placeholder="https://vimeo.com/123456789"
                                 />
-                                <Select
-                                  value={draft.videoId || "__none__"}
-                                  onValueChange={(value) =>
-                                    applyVideoSelection(value, (patch) =>
-                                      updateDraft(selectedCourse.slug, lesson.id, patch),
-                                    )
-                                  }
-                                >
-                                  <SelectTrigger className="rounded-lg">
-                                    <SelectValue placeholder="Choisir une vidéo" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="__none__">— Aucune —</SelectItem>
-                                    {videoLibrary.map((video) => (
-                                      <SelectItem key={video.id} value={video.id}>
-                                        {video.title} · {formatVideoStatusLabel(video)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
                                 <p className="text-[11px] text-muted-foreground">
-                                  Ou choisissez une vidéo déjà uploadée dans la bibliothèque.
+                                  Pour les vidéos lourdes : uploadez sur Vimeo, puis collez le lien ici.
                                 </p>
                               </div>
                               <div className="space-y-1.5">
-                                <Label>Durée (auto)</Label>
+                                <Label>{draft.vimeoUrl ? "Durée" : "Durée (auto)"}</Label>
                                 <Input
-                                  value={draft.duration || "—"}
-                                  readOnly
-                                  className="rounded-lg bg-muted/40"
-                                  placeholder="Auto depuis la vidéo"
+                                  value={draft.vimeoUrl ? draft.duration : draft.duration || "—"}
+                                  readOnly={!draft.vimeoUrl}
+                                  onChange={(e) =>
+                                    draft.vimeoUrl
+                                      ? updateDraft(selectedCourse.slug, lesson.id, { duration: e.target.value })
+                                      : undefined
+                                  }
+                                  className={cn("rounded-lg", !draft.vimeoUrl && "bg-muted/40")}
+                                  placeholder={draft.vimeoUrl ? "Ex. 22min" : "Auto depuis la vidéo"}
                                 />
                               </div>
                               <div className="space-y-1.5 sm:col-span-2">
@@ -1336,15 +1387,24 @@ export function AdminCoursesTab() {
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor={`new-lesson-duration-${section.id}`}>
-                          {newLesson.type === "article" ? "Durée de lecture" : "Durée (auto)"}
+                          {newLesson.type === "article"
+                            ? "Durée de lecture"
+                            : newLesson.vimeoUrl
+                              ? "Durée"
+                              : "Durée (auto)"}
                         </Label>
                         {newLesson.type === "video" ? (
                           <Input
                             id={`new-lesson-duration-${section.id}`}
-                            value={newLesson.duration || "—"}
-                            readOnly
-                            className="rounded-lg bg-muted/40"
-                            placeholder="Auto depuis la vidéo"
+                            value={newLesson.vimeoUrl ? newLesson.duration : newLesson.duration || "—"}
+                            readOnly={!newLesson.vimeoUrl}
+                            onChange={(e) =>
+                              newLesson.vimeoUrl
+                                ? updateNewLessonDraft(section.id, { duration: e.target.value })
+                                : undefined
+                            }
+                            className={cn("rounded-lg", !newLesson.vimeoUrl && "bg-muted/40")}
+                            placeholder={newLesson.vimeoUrl ? "Ex. 22min" : "Auto depuis la vidéo"}
                           />
                         ) : (
                           <Input
@@ -1357,38 +1417,62 @@ export function AdminCoursesTab() {
                         )}
                       </div>
                       {newLesson.type === "video" ? (
-                        <div className="space-y-1.5 sm:col-span-2">
-                          <Label htmlFor={`new-lesson-video-${section.id}`}>Vidéo uploadée</Label>
-                          <LessonVideoUpload
-                            courseSlug={selectedCourse.slug}
-                            defaultTitle={newLesson.title}
-                            onUploaded={(video) =>
-                              handleLessonVideoUploaded(video, (patch) =>
-                                updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
-                              )
-                            }
-                          />
-                          <Select
-                            value={newLesson.videoId || "__none__"}
-                            onValueChange={(value) =>
-                              applyVideoSelection(value, (patch) =>
-                                updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
-                              )
-                            }
-                          >
-                            <SelectTrigger id={`new-lesson-video-${section.id}`} className="rounded-lg">
-                              <SelectValue placeholder="Choisir une vidéo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="__none__">— Aucune —</SelectItem>
-                              {videoLibrary.map((video) => (
-                                <SelectItem key={video.id} value={video.id}>
-                                  {video.title} · {formatVideoStatusLabel(video)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <>
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <Label htmlFor={`new-lesson-video-${section.id}`}>Vidéo uploadée (max 50 Mo)</Label>
+                            {!newLesson.vimeoUrl ? (
+                              <>
+                                <LessonVideoUpload
+                                  courseSlug={selectedCourse.slug}
+                                  defaultTitle={newLesson.title}
+                                  onUploaded={(video) =>
+                                    handleLessonVideoUploaded(video, (patch) =>
+                                      updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
+                                    )
+                                  }
+                                />
+                                <Select
+                                  value={newLesson.videoId || "__none__"}
+                                  onValueChange={(value) =>
+                                    applyVideoSelection(value, (patch) =>
+                                      updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger id={`new-lesson-video-${section.id}`} className="rounded-lg">
+                                    <SelectValue placeholder="Choisir une vidéo" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="__none__">— Aucune —</SelectItem>
+                                    {videoLibrary.map((video) => (
+                                      <SelectItem key={video.id} value={video.id}>
+                                        {video.title} · {formatVideoStatusLabel(video)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </>
+                            ) : (
+                              <p className="text-[11px] text-muted-foreground">
+                                Upload désactivé — cette leçon utilisera Vimeo.
+                              </p>
+                            )}
+                          </div>
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <Label htmlFor={`new-lesson-vimeo-${section.id}`}>Lien Vimeo (&gt; 50 Mo)</Label>
+                            <Input
+                              id={`new-lesson-vimeo-${section.id}`}
+                              value={newLesson.vimeoUrl}
+                              onChange={(e) =>
+                                applyVimeoUrl(e.target.value, (patch) =>
+                                  updateNewLessonDraft(section.id, patch as Partial<NewLessonDraft>),
+                                )
+                              }
+                              className="rounded-lg"
+                              placeholder="https://vimeo.com/123456789"
+                            />
+                          </div>
+                        </>
                       ) : (
                         <div className="space-y-1.5 sm:col-span-2">
                           <Label htmlFor={`new-lesson-content-${section.id}`}>Contenu</Label>
@@ -1406,7 +1490,7 @@ export function AdminCoursesTab() {
                       <div className="space-y-1.5 sm:col-span-2">
                         {newLesson.type === "video" ? (
                           <p className="text-[11px] text-muted-foreground">
-                            Uploadez dans Admin → Vidéos, puis liez la leçon ici — la durée se calcule automatiquement.
+                            Jusqu&apos;à 50 Mo sur Supabase, ou collez un lien Vimeo pour les fichiers plus lourds.
                           </p>
                         ) : (
                           <p className="text-[11px] text-muted-foreground">
