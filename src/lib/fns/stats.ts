@@ -1,12 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { siteConfig } from "@/lib/site-config";
+import { resolveStatsStudentsBase } from "@/lib/site-display";
 import { getDb } from "@/server/env";
 import { getRegistrationCount } from "@/server/db";
 
 export const getStudentCount = createServerFn({ method: "GET" }).handler(async () => {
-  const db = await getDb();
+  const { getSiteSettings } = await import("@/server/site-content");
+  const [settings, db] = await Promise.all([getSiteSettings(), getDb()]);
   const registrations = await getRegistrationCount(db);
-  return siteConfig.stats.studentsBase + registrations;
+  return resolveStatsStudentsBase(settings) + registrations;
 });
 
 export const getCatalogCourseCount = createServerFn({ method: "GET" }).handler(async () => {

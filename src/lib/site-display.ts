@@ -6,7 +6,8 @@ export function resolveCohortStartDate(settings?: Pick<SiteSettings, "cohortStar
 }
 
 export function resolveStatsStudentsBase(settings?: Pick<SiteSettings, "statsStudentsBase">): number {
+  const floor = siteConfig.stats.studentsBase;
   const base = settings?.statsStudentsBase;
-  if (typeof base === "number" && base > 0) return base;
-  return siteConfig.stats.studentsBase;
+  const configured = typeof base === "number" && base > 0 ? base : floor;
+  return Math.max(configured, floor);
 }

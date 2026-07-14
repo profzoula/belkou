@@ -28,7 +28,7 @@ export const siteConfig = {
     messageShort: "Ebook gratuit — 50 premières places",
   },
   stats: {
-    studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 2785),
+    studentsBase: Number(import.meta.env.VITE_STATS_STUDENTS_BASE ?? 5300),
     /** Minimum shown on course pages when stored count is lower (e.g. new admin courses). */
     courseStudentsBase: Number(import.meta.env.VITE_COURSE_STUDENTS_BASE ?? 285),
     tools: "20+",
