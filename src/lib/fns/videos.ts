@@ -257,7 +257,7 @@ export const getLessonVimeoPlayback = createServerFn({ method: "POST" })
     const { listRegistrationsByEmail } = await import("@/server/db");
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
     const { getDb } = await import("@/server/env");
-    const { vimeoUrlToEmbedUrl } = await import("@/lib/vimeo");
+    const { parseVimeoUrl, buildVimeoEmbedUrl } = await import("@/lib/vimeo");
 
     const course = await getResolvedCourseBySlug(data.courseSlug);
     if (!course) throw new Error("Cours introuvable");
@@ -286,8 +286,10 @@ export const getLessonVimeoPlayback = createServerFn({ method: "POST" })
       throw new Error("Preview non disponible");
     }
 
-    const embedUrl = vimeoUrlToEmbedUrl(vimeoUrl);
-    if (!embedUrl) throw new Error("URL Vimeo invalide");
+    const parsed = parseVimeoUrl(vimeoUrl);
+    if (!parsed) throw new Error("URL Vimeo invalide");
+
+    const embedUrl = buildVimeoEmbedUrl(parsed, data.lessonId);
 
     return {
       kind: "vimeo" as const,

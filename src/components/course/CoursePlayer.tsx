@@ -1078,7 +1078,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             hasPaidAccess={hasPaidAccess}
             welcomeLessonId={welcomeLesson?.id}
             nextLessonTitle={nextLesson?.title}
-            onNextLesson={nextLesson ? () => selectLesson(nextLesson.id) : undefined}
+            onNextLesson={nextLesson ? handleActiveLessonComplete : undefined}
             onLessonComplete={handleActiveLessonComplete}
             getLockState={getLockState}
             startAtSeconds={resumeAtSeconds}

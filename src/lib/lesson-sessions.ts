@@ -1,6 +1,6 @@
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import type { LessonQuiz } from "@/lib/lesson-quiz";
-import { decodeLessonQuizData, extractQuizFromSubSessionHtml } from "@/lib/lesson-quiz";
+import { decodeLessonQuizData, extractQuizFromSubSessionHtml, getLessonQuiz } from "@/lib/lesson-quiz";
 import { parseInlineMarkdown, parseLessonContent, type LessonContentBlock } from "@/lib/parse-lesson-content";
 
 export type ArticleSubSession = {
@@ -23,6 +23,11 @@ export type ArticleSession = {
 
 const SESSION_HEADING_RE = /^session\s*(\d+)(?:\s*[—–-]\s*(.+))?$/i;
 const SUBSESSION_HEADING_RE = /^(\d+\.\d+)\s*[—–-]?\s*(.+)$/;
+
+/** Markdown article lessons: attach quiz by sub-session number (e.g. 1.9). */
+const MARKDOWN_QUIZ_BY_SUBNUMBER: Record<string, string> = {
+  "1.9": "prompt-engineering-ch1",
+};
 
 function blocksToHtml(blocks: LessonContentBlock[]): string {
   return blocks
@@ -95,11 +100,14 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
     if (!current || !currentSub) return;
     const body = currentSub.lines.join("\n").trim();
     const blocks = body ? parseLessonContent(body) : [];
+    const quizId = MARKDOWN_QUIZ_BY_SUBNUMBER[currentSub.number];
+    const quiz = quizId ? getLessonQuiz(quizId) ?? undefined : undefined;
     current.subSessions.push({
       number: currentSub.number,
       title: currentSub.title,
       blocks,
       html: blocks.length ? blocksToHtml(blocks) : undefined,
+      ...(quiz ? { quiz, isQuiz: true } : {}),
     });
     currentSub = null;
   };
@@ -133,6 +141,7 @@ function parseMarkdownSessions(raw: string): ArticleSession[] | null {
         startSession(session.number, session.title);
         continue;
       }
+      flushSub();
       if (currentSub) {
         currentSub.lines.push(line);
       } else if (current) {

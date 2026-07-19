@@ -90,8 +90,77 @@ export const PREPARE_ANVIWONMAN_SESSION1_QUIZ: LessonQuiz = {
   ],
 };
 
+export const PROMPT_ENGINEERING_SESSION1_QUIZ: LessonQuiz = {
+  id: "prompt-engineering-ch1",
+  title: "Quiz — Session 1: Prompt Engineering",
+  passScore: 5,
+  questions: [
+    {
+      id: "q1",
+      prompt: 'Ki sa "Prompt Engineering" vle di nan VibeCoding?',
+      options: [
+        { id: "a", label: "Enstale plis zouti sou òdinatè a" },
+        { id: "b", label: "Atizay pou fòmile demann klè bay AI pou li bay bon rezilta" },
+        { id: "c", label: "Kreye logo pou aplikasyon an" },
+        { id: "d", label: "Achte yon nouvo laptop" },
+      ],
+      correctOptionId: "b",
+      explanation: "Prompt Engineering se fason ou estriktire demann ou bay AI a pou kòd ak repons yo pi egzak.",
+    },
+    {
+      id: "q2",
+      prompt: 'Nan fòmil RTFC, ki lèt ki reprezante "Kontèks" (enfòmasyon sou pwojè a)?',
+      options: [
+        { id: "a", label: "R" },
+        { id: "b", label: "T" },
+        { id: "c", label: "F" },
+        { id: "d", label: "C" },
+      ],
+      correctOptionId: "d",
+      explanation: "C = Kontèks : stack, fichye, konvansyon pwojè a, ak sa ou pa vle.",
+    },
+    {
+      id: "q3",
+      prompt: "Ki move pratik ki pi souvan lakòz AI devine stack ou a?",
+      options: [
+        { id: "a", label: "Mete mesaj erè konplè lè w deboge" },
+        { id: "b", label: "Mansyone fichye ki egziste deja ak `@`" },
+        { id: "c", label: "Yon prompt twò kout san kontèks" },
+        { id: "d", label: "Separe gwo travay an plizyè ti prompt" },
+      ],
+      correctOptionId: "c",
+      explanation: "San kontèks, AI devine — e devinasyon sou kòd se sous erè.",
+    },
+    {
+      id: "q4",
+      prompt: "Lè w mande AI deboge yon erè, ki enfòmasyon ou dwe toujou bay?",
+      options: [
+        { id: "a", label: "Sèlman non pwojè a" },
+        { id: "b", label: "Mesaj erè konplè, fichye ki konsène, ak sa ou te atann" },
+        { id: "c", label: "Yon screenshot san tèks" },
+        { id: "d", label: "Lis tout bibliyotèk npm yo" },
+      ],
+      correctOptionId: "b",
+      explanation: "Debogaj efikas bezwen erè egzak, fichye, ak rezilta ou te espere.",
+    },
+    {
+      id: "q5",
+      prompt: "Ki limit ou dwe souvan mete nan yon prompt pou kreye kòd?",
+      options: [
+        { id: "a", label: "« Pa ajoute nouvo depandans » ak « pa modifye lòt fichye »" },
+        { id: "b", label: "« Refè tout aplikasyon an »" },
+        { id: "c", label: "« Enstale tout pakè ki egziste »" },
+        { id: "d", label: "« Pa teste anyen »" },
+      ],
+      correctOptionId: "a",
+      explanation: "Limit klè anpeche AI ajoute lib inutil oswa kraze kòd ki deja mache.",
+    },
+  ],
+};
+
 const QUIZZES: Record<string, LessonQuiz> = {
   "prepare-anviwonnman-ch1": PREPARE_ANVIWONMAN_SESSION1_QUIZ,
+  "prompt-engineering-ch1": PROMPT_ENGINEERING_SESSION1_QUIZ,
 };
 
 function escapeHtml(text: string): string {

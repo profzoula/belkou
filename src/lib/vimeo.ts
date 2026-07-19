@@ -30,16 +30,18 @@ export function isValidVimeoUrl(url: string): boolean {
   return parseVimeoUrl(url) !== null;
 }
 
-export function buildVimeoEmbedUrl(parsed: ParsedVimeoUrl): string {
+export function buildVimeoEmbedUrl(parsed: ParsedVimeoUrl, playerId?: string): string {
   const params = new URLSearchParams({
     api: "1",
     title: "0",
     byline: "0",
     portrait: "0",
     dnt: "1",
+    autopause: "0",
   });
   if (parsed.hash) params.set("h", parsed.hash);
-  return `https://player.vimeo.com/video/${parsed.id}?${params}`;
+  if (playerId) params.set("player_id", playerId);
+  return `https://player.vimeo.com/video/${parsed.id}?${params.toString()}`;
 }
 
 export function vimeoUrlToEmbedUrl(url: string): string | null {

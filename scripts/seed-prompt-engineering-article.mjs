@@ -1,5 +1,5 @@
 /**
- * Seed Prompt Engineering article into the existing lesson (Supabase overrides).
+ * Seed Prompt Engineering article HTML (without quiz — use seed-prompt-engineering-quiz.mjs for full sync).
  *
  * Usage:
  *   node scripts/seed-prompt-engineering-article.mjs
@@ -14,7 +14,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const COURSE_SLUG = "apps-ia-cursor-claude";
 const OVERRIDES_KEY = "course_overrides";
 const LESSON_ID = "prompt-engeneering-mr6ul87b";
-const CONTENT_FILE = join(root, "content/courses/apps-ia-cursor-claude/prompt-engineering.md");
+const CONTENT_FILE = join(root, "content/courses/apps-ia-cursor-claude/prompt-engineering.html");
 
 function loadDevVars() {
   for (const file of [".dev.vars", ".env"]) {

@@ -188,3 +188,9 @@ Lè ou fin li modil sa a :
 **Souke :** Si yon prompt pa bay bon rezilta, pa abandone — **refine** li ak plis kontèks olye de repete menm fraz la. Se konsa pwofesyonèl yo travay ak IA chak jou.
 
 Poze kesyon ou yo nan **forum** kou a si yon egzanp pa klè.
+
+---
+
+### 1.9 Quiz — Session 1: Prompt Engineering
+
+Reponn tout kesyon yo kòrèkteman (5/5) pou kontinye.
