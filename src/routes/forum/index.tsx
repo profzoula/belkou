@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { MessagesSquare } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { ForumCoursePicker } from "@/components/forum/ForumCoursePicker";
 import { useAuth } from "@/hooks/use-auth";
 import { seoHead } from "@/lib/seo";
@@ -30,8 +31,8 @@ function ForumIndexPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center text-sm text-muted-foreground">
-        Chargement...
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+        Chargement…
       </div>
     );
   }
@@ -39,21 +40,32 @@ function ForumIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-6xl">
-        <header className="mb-8">
-          <p className="section-label mb-2">Communauté</p>
-          <div className="flex items-start gap-3">
-            <MessagesSquare className="mt-1 h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-2xl md:text-3xl font-semibold">Forum étudiant</h1>
-              <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-                Posez une question, partagez une suggestion et débattez avec les autres inscrits. Chaque
-                nouveau sujet envoie une notification aux étudiants du cours.
-              </p>
-            </div>
+      <main>
+        <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
+          <div className="site-container site-page-top pb-10 pt-8 sm:pb-12">
+            <FadeIn>
+              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Communauté</p>
+              <div className="mt-3 flex items-start gap-3">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+                  <MessagesSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                    Forum étudiant
+                  </h1>
+                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
+                    Posez une question, partagez une idée et échangez avec les autres inscrits. Chaque nouveau
+                    sujet notifie les étudiants du cours.
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
           </div>
-        </header>
-        <ForumCoursePicker />
+        </section>
+
+        <div className="site-container max-w-6xl py-8 sm:py-12">
+          <ForumCoursePicker />
+        </div>
       </main>
       <Footer />
     </div>

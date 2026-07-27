@@ -12,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -55,20 +56,23 @@ export function AdminLayout({
   children,
 }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen bg-[#eef1f6]">
+    <div className="min-h-screen bg-background">
       <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="flex flex-col border-b border-border bg-card lg:min-h-screen lg:border-b-0 lg:border-r">
           <div className="border-b border-border px-5 py-5">
             <div className="flex items-center gap-3">
               <SiteLogo className="h-10 w-10 rounded-xl" alt="" />
               <div className="min-w-0">
-                <p className="font-display text-base font-bold truncate">BelKou Admin</p>
-                <p className="text-xs text-muted-foreground">Plateforme de formation</p>
+                <p className="truncate font-display text-base font-semibold">{siteConfig.name} Admin</p>
+                <p className="text-xs text-muted-foreground">Ops · formations</p>
               </div>
             </div>
           </div>
 
-          <nav className="flex gap-1 overflow-x-auto p-3 lg:flex-col lg:overflow-visible lg:px-4 lg:py-5">
+          <nav
+            className="flex gap-1 overflow-x-auto p-3 lg:flex-col lg:overflow-visible lg:px-4 lg:py-5"
+            aria-label="Navigation admin"
+          >
             {navItems.map((item) => {
               const Icon = item.icon;
               const activeState = active === item.id;
@@ -79,10 +83,10 @@ export function AdminLayout({
                   type="button"
                   onClick={() => onNavigate(item.id)}
                   className={cn(
-                    "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors lg:w-full",
+                    "flex shrink-0 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors lg:w-full",
                     activeState
-                      ? "bg-[#1a2744] text-white shadow-sm"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      ? "bg-primary text-primary-foreground shadow-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground",
                   )}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -92,12 +96,16 @@ export function AdminLayout({
             })}
           </nav>
 
-          <div className="mt-auto hidden border-t border-border p-4 lg:block space-y-2">
+          <div className="mt-auto hidden space-y-2 border-t border-border p-4 lg:block">
+            <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-2 py-1.5">
+              <span className="px-1 text-xs text-muted-foreground">Thème</span>
+              <ThemeToggle />
+            </div>
             {onRefresh && (
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full justify-start rounded-lg"
+                className="w-full justify-start rounded-xl"
                 onClick={onRefresh}
                 disabled={refreshing}
               >
@@ -105,7 +113,7 @@ export function AdminLayout({
                 Actualiser
               </Button>
             )}
-            <Button variant="ghost" size="sm" className="w-full justify-start rounded-lg" onClick={onLogout}>
+            <Button variant="ghost" size="sm" className="w-full justify-start rounded-xl" onClick={onLogout}>
               <LogOut className="h-4 w-4" />
               Déconnexion
             </Button>
@@ -115,8 +123,9 @@ export function AdminLayout({
           </div>
         </aside>
 
-        <main className="min-w-0 p-4 sm:p-6 lg:p-8">
+        <main className="min-w-0 bg-muted/20 p-4 sm:p-6 lg:p-8">
           <div className="mb-4 flex items-center justify-end gap-2 lg:hidden">
+            <ThemeToggle />
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh} disabled={refreshing}>
                 <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
@@ -126,7 +135,7 @@ export function AdminLayout({
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
-          {children}
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
     </div>

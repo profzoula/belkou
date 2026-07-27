@@ -64,11 +64,11 @@ function AboutPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <section className="site-page-top border-b border-border/60 bg-gradient-mesh">
-        <div className="site-container mx-auto max-w-4xl py-12 sm:py-16 md:py-20">
+      <section className="site-page-top relative overflow-hidden border-b border-border bg-gradient-mesh">
+        <div className="site-container relative mx-auto max-w-4xl py-12 sm:py-16 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-4 justify-center">À propos</p>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-balance sm:text-4xl md:text-5xl">
+            <h1 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl md:text-5xl">
               Former la nouvelle génération tech{" "}
               <span className="text-gradient">en français</span>
             </h1>
@@ -107,12 +107,12 @@ function AboutPage() {
               {pillars.map((pillar) => (
                 <article
                   key={pillar.title}
-                  className="surface surface-hover rounded-2xl p-6 text-center md:text-left"
+                  className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md md:text-left"
                 >
                   <div className="icon-box mx-auto md:mx-0">
                     <pillar.icon className="h-5 w-5" />
                   </div>
-                  <h3 className="mt-4 font-display text-lg font-bold">{pillar.title}</h3>
+                  <h3 className="mt-4 font-display text-lg font-semibold">{pillar.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {pillar.description}
                   </p>
@@ -169,7 +169,7 @@ function AboutPage() {
             <div className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl bg-gradient-brand p-8 text-center shadow-primary sm:p-10 md:p-12">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(1_0_0/0.15),transparent_50%)]" />
               <div className="relative">
-                <h2 className="font-display text-2xl font-bold text-primary-foreground sm:text-3xl">
+                <h2 className="font-display text-2xl font-semibold text-primary-foreground sm:text-3xl">
                   Prêt à commencer ?
                 </h2>
                 <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-primary-foreground/85 sm:text-base">

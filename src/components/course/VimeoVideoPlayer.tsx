@@ -52,7 +52,8 @@ export function VimeoVideoPlayer({
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    let ready = false;
+    let polledSeconds = 0;
+    let polledDuration = 0;
 
     const subscribe = () => {
       for (const event of ["finish", "ended", "playProgress", "play"] as const) {
@@ -60,10 +61,19 @@ export function VimeoVideoPlayer({
       }
     };
 
+    const completeIfAtEnd = (seconds: number, duration: number) => {
+      if (duration > 0 && seconds >= duration - 1) markComplete();
+    };
+
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== VIMEO_ORIGIN) return;
 
-      let data: { event?: string; method?: string; data?: { seconds?: number; duration?: number } };
+      let data: {
+        event?: string;
+        method?: string;
+        value?: unknown;
+        data?: { seconds?: number; duration?: number };
+      };
       try {
         data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
       } catch {
@@ -71,7 +81,6 @@ export function VimeoVideoPlayer({
       }
 
       if (data?.event === "ready") {
-        ready = true;
         subscribe();
         return;
       }
@@ -87,22 +96,32 @@ export function VimeoVideoPlayer({
       }
 
       if (data?.event === "playProgress") {
-        const seconds = data.data?.seconds ?? 0;
-        const duration = data.data?.duration ?? 0;
-        if (duration > 0 && seconds >= duration - 0.75) {
-          markComplete();
-        }
+        completeIfAtEnd(data.data?.seconds ?? 0, data.data?.duration ?? 0);
+        return;
+      }
+
+      // Fallback for players that stop emitting playProgress near the end.
+      if (data?.method === "getCurrentTime" && typeof data.value === "number") {
+        polledSeconds = data.value;
+        completeIfAtEnd(polledSeconds, polledDuration);
+        return;
+      }
+
+      if (data?.method === "getDuration" && typeof data.value === "number") {
+        polledDuration = data.value;
+        completeIfAtEnd(polledSeconds, polledDuration);
       }
     };
 
     window.addEventListener("message", handleMessage);
     iframe.addEventListener("load", subscribe);
+    subscribe();
 
     const pollTimer = window.setInterval(() => {
-      if (!ready || completedRef.current) return;
-      postToVimeo(iframe, { method: "getCurrentTime" });
+      if (completedRef.current) return;
       postToVimeo(iframe, { method: "getDuration" });
-    }, 4000);
+      postToVimeo(iframe, { method: "getCurrentTime" });
+    }, 3000);
 
     return () => {
       window.clearInterval(pollTimer);

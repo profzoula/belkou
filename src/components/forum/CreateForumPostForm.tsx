@@ -65,10 +65,10 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
   return (
     <form
       onSubmit={submit}
-      className="space-y-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+      className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm"
     >
       <div>
-        <h2 className="text-lg font-bold">Nouvelle publication</h2>
+        <h2 className="font-display text-lg font-semibold">Nouvelle publication</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Partagez une question ou une idée avec les autres inscrits.
         </p>
@@ -77,7 +77,7 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
       <div className="space-y-1.5">
         <Label>Type de sujet</Label>
         <Select value={kind} onValueChange={(value) => setKind(value as "question" | "suggestion")}>
-          <SelectTrigger>
+          <SelectTrigger className="rounded-xl">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -95,6 +95,7 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Ex. Comment déployer mon app sur Railway ?"
           maxLength={200}
+          className="rounded-xl"
         />
       </div>
 
@@ -107,11 +108,12 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
           placeholder="Décrivez votre question ou suggestion en détail..."
           rows={5}
           maxLength={8000}
+          className="rounded-xl"
         />
       </div>
 
-      <Button type="submit" variant="hero" disabled={loading} className="w-full sm:w-auto">
-        {loading ? "Publication..." : "Publier"}
+      <Button type="submit" variant="hero" disabled={loading} className="w-full shadow-primary sm:w-auto">
+        {loading ? "Publication…" : "Publier"}
       </Button>
     </form>
   );

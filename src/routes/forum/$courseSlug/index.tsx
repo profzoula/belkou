@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Button } from "@/components/ui/button";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { CreateForumPostForm } from "@/components/forum/CreateForumPostForm";
 import { ForumPostCard } from "@/components/forum/ForumPostCard";
 import { listCourseForumPosts } from "@/lib/fns/forum";
@@ -67,8 +68,8 @@ function ForumCoursePage() {
 
   if (loading || !user || !session?.access_token) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center text-sm text-muted-foreground">
-        Chargement...
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+        Chargement…
       </div>
     );
   }
@@ -76,7 +77,7 @@ function ForumCoursePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg mx-auto">
+      <main className="site-container site-page-top mx-auto max-w-2xl pb-12 sm:pb-16">
         <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="gap-1 px-0">
             <Link to="/forum">
@@ -86,13 +87,23 @@ function ForumCoursePage() {
           </Button>
         </div>
 
+        <FadeIn className="mb-8">
+          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Discussion</p>
+          <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+            Forum du cours
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Posez une question ou partagez une idée avec les autres étudiants inscrits.
+          </p>
+        </FadeIn>
+
         {error ? (
-          <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          <div className="mb-6 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
             {error}
           </div>
         ) : null}
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <CreateForumPostForm
             courseSlug={courseSlug}
             accessToken={session.access_token}
@@ -100,18 +111,27 @@ function ForumCoursePage() {
           />
 
           <section className="space-y-4">
-            <h2 className="text-lg font-bold">Publications</h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-display text-lg font-semibold">Publications</h2>
+              {posts ? (
+                <span className="text-xs text-muted-foreground">
+                  {posts.length} sujet{posts.length > 1 ? "s" : ""}
+                </span>
+              ) : null}
+            </div>
             {posts === undefined ? (
-              <p className="text-sm text-muted-foreground">Chargement...</p>
+              <p className="text-sm text-muted-foreground">Chargement…</p>
             ) : posts.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-muted/20 p-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center text-sm text-muted-foreground">
                 Aucune publication pour le moment. Soyez le premier à lancer la discussion !
               </div>
             ) : (
               <ul className="space-y-4">
-                {posts.map((post) => (
+                {posts.map((post, index) => (
                   <li key={post.id}>
-                    <ForumPostCard post={post} courseSlug={courseSlug} />
+                    <FadeIn delay={Math.min(index * 0.04, 0.16)}>
+                      <ForumPostCard post={post} courseSlug={courseSlug} />
+                    </FadeIn>
                   </li>
                 ))}
               </ul>

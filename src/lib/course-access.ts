@@ -1,5 +1,5 @@
 import { BASE_COURSE_SLUGS } from "@/lib/courses";
-import { isWelcomePreviewLesson, lessonHasVideo } from "@/lib/courses";
+import { getSequenceLessonIds, isWelcomePreviewLesson, lessonHasVideo } from "@/lib/courses";
 import type { CourseLesson, CourseSection } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
@@ -56,10 +56,15 @@ export function hasPaidAccessToCourse(
 
 export type LessonLockReason = "none" | "schedule" | "enrollment" | "sequential";
 
+/**
+ * `requiredLessonIds` restricts the gate to lessons a student can actually finish, so an
+ * empty placeholder in the middle of the curriculum never locks everything after it.
+ */
 export function isLessonUnlockedInSequence(
   lessonId: string,
   orderedLessonIds: string[],
   completedLessonIds: string[],
+  requiredLessonIds?: string[],
 ): boolean {
   const index = orderedLessonIds.indexOf(lessonId);
   if (index < 0) return false;
@@ -68,8 +73,11 @@ export function isLessonUnlockedInSequence(
   if (completed.has(lessonId)) return true;
   if (index === 0) return true;
 
+  const required = requiredLessonIds ? new Set(requiredLessonIds) : null;
   for (let i = 0; i < index; i += 1) {
-    if (!completed.has(orderedLessonIds[i]!)) return false;
+    const previousId = orderedLessonIds[i]!;
+    if (required && !required.has(previousId)) continue;
+    if (!completed.has(previousId)) return false;
   }
 
   return true;
@@ -77,7 +85,15 @@ export function isLessonUnlockedInSequence(
 
 export function getLessonLockState(
   opts: {
-    lesson: { id: string; title: string; preview?: boolean; type?: string; videoId?: string };
+    lesson: {
+      id: string;
+      title: string;
+      preview?: boolean;
+      type?: string;
+      videoId?: string;
+      vimeoUrl?: string;
+      content?: string;
+    };
     course: { published?: boolean; scheduledPublishAt?: string; sections?: CourseSection[] };
     hasPaidAccess: boolean;
     completedLessonIds?: string[];
@@ -107,7 +123,10 @@ export function getLessonLockState(
     }
 
     if (orderedLessonIds?.length && completedLessonIds) {
-      if (!isLessonUnlockedInSequence(lesson.id, orderedLessonIds, completedLessonIds)) {
+      const requiredLessonIds = course.sections
+        ? getSequenceLessonIds({ sections: course.sections })
+        : undefined;
+      if (!isLessonUnlockedInSequence(lesson.id, orderedLessonIds, completedLessonIds, requiredLessonIds)) {
         return { locked: true, reason: "sequential" };
       }
     }

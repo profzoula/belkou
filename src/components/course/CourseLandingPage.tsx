@@ -42,6 +42,7 @@ import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-acces
 import { getCourseProgress } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
@@ -250,14 +251,15 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
-      <header className="border-b border-border/60 bg-course-hero text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 text-foreground backdrop-blur-xl">
         <div className="site-container flex h-14 items-center justify-between gap-3">
-          <Link to="/" className="flex min-w-0 items-center gap-2 font-display font-bold text-sm">
+          <Link to="/" className="flex min-w-0 items-center gap-2 font-display text-sm font-bold">
             <SiteLogo className="h-8 w-8 shrink-0" alt="" />
             {siteConfig.name}
           </Link>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button asChild variant="outline" size="sm">
+          <div className="flex shrink-0 items-center gap-1.5">
+            <ThemeToggle />
+            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
               <Link to="/courses">Tous les cours</Link>
             </Button>
             {!authLoading && !user ? (
@@ -270,9 +272,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </div>
       </header>
 
-      <section className="bg-course-hero text-foreground pb-10 pt-6">
-        <div className="site-container">
-          <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+      <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-10 pt-6">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60" />
+        <div className="site-container relative">
+          <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground" aria-label="Fil d'Ariane">
             <Link to="/" className="hover:text-foreground hover:underline">
               {siteConfig.name}
             </Link>
@@ -281,11 +284,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               Cours
             </Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground/90 line-clamp-1">{course.title}</span>
+            <span className="line-clamp-1 text-foreground/90">{course.title}</span>
           </nav>
 
           {!authLoading && !user && (
-            <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-lg border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-foreground">
               <span>Déjà payé pour ce cours ?</span>
               <Link to="/login" className="font-semibold text-primary underline underline-offset-2">
                 Connectez-vous
@@ -295,26 +298,26 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           )}
 
           {enrolledWaiting && access?.scheduledPublishAt && (
-            <p className="mb-4 inline-flex rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+            <p className="mb-4 inline-flex rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-xs text-foreground">
               Vous êtes inscrit — accès complet au cours le{" "}
               {formatScheduledPublishLabel(access.scheduledPublishAt)}
             </p>
           )}
 
           {scheduledSoon && course.scheduledPublishAt && !hasPaidAccess && (
-            <p className="mb-4 inline-flex rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
+            <p className="mb-4 inline-flex rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-foreground">
               Inscriptions ouvertes — les vidéos seront disponibles le{" "}
               {formatScheduledPublishLabel(course.scheduledPublishAt)}
             </p>
           )}
 
           {!contentLive && !scheduledSoon && !hasPaidAccess && (
-            <p className="mb-4 inline-flex rounded-lg border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground">
+            <p className="mb-4 inline-flex rounded-xl border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground">
               Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
             </p>
           )}
 
-          <h1 className="max-w-4xl font-display text-xl font-bold leading-tight sm:text-3xl md:text-4xl">
+          <h1 className="max-w-4xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
             {course.title}
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -323,11 +326,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             {course.bestseller && (
-              <span className="rounded-sm bg-primary/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary">
+              <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand-accent-foreground">
                 Bestseller
               </span>
             )}
-            <span className="rounded-sm bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
+            <span className="rounded-md bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
               {course.skillLevel}
             </span>
           </div>
@@ -350,7 +353,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
       <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
         <aside className="mb-8 lg:sticky lg:top-6 lg:order-2 lg:mb-0 lg:self-start">
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <CourseThumbnail
               course={course}
               hasPaidAccess={accessLoading ? false : hasPaidAccess}
@@ -364,18 +367,18 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             <div className="space-y-4 p-5">
               {accessLoading ? (
                 <div className="space-y-3" aria-busy="true" aria-label="Chargement de votre accès">
-                  <div className="h-24 animate-pulse rounded-lg bg-muted" />
-                  <div className="h-11 animate-pulse rounded-full bg-muted" />
-                  <div className="h-9 animate-pulse rounded-full bg-muted/70" />
+                  <div className="h-24 animate-pulse rounded-xl bg-muted" />
+                  <div className="h-11 animate-pulse rounded-xl bg-muted" />
+                  <div className="h-9 animate-pulse rounded-xl bg-muted/70" />
                 </div>
               ) : (
                 <>
               {hasPaidAccess ? (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-800">
+                <div className="rounded-xl border border-success/30 bg-success/10 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-success">
                     {canStartCourse ? "Accès actif" : "Inscription confirmée"}
                   </p>
-                  <p className="mt-2 text-sm text-emerald-900">
+                  <p className="mt-2 text-sm text-foreground">
                     {canStartCourse
                       ? "Vous avez accès à toutes les leçons de ce cours."
                       : enrolledWaiting && access?.scheduledPublishAt
@@ -384,14 +387,14 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                <div className="rounded-xl border border-border bg-muted/30 p-4">
                   <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
                   <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                    <span className="text-3xl font-bold">${course.price}</span>
+                    <span className="font-display text-3xl font-bold">${course.price}</span>
                     {courseDiscount > 0 && (
                       <>
                         <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
-                        <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off</span>
+                        <span className="text-xs font-semibold text-success">−{courseDiscount}%</span>
                       </>
                     )}
                   </div>
@@ -500,9 +503,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <Award className="h-3.5 w-3.5" />
               {course.skillLevel}
             </span>
-            <span className="inline-flex items-center gap-1 font-bold text-amber-600">
+            <span className="inline-flex items-center gap-1 font-bold text-foreground">
               {course.rating.toFixed(1)}
-              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <Star className="h-4 w-4 fill-brand-accent text-brand-accent" />
             </span>
             <span className="text-primary underline">{formatCount(course.ratingsCount)} avis</span>
             <span className="inline-flex items-center gap-1 text-muted-foreground">

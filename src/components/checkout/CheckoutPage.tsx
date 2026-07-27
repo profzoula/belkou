@@ -140,27 +140,35 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
     `Formation BelKou ${plan.name} — Apps IA & SaaS`;
 
   return (
-    <div className="min-h-screen bg-[#f7f9fa]">
-      <header className="border-b border-border bg-white">
+    <div className="min-h-screen bg-background">
+      <header className="border-b border-border bg-card/90 backdrop-blur-xl">
         <div className="site-container flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-display font-bold text-sm">
+          <Link to="/" className="flex items-center gap-2 font-display text-sm font-bold">
             <SiteLogo className="h-8 w-8" alt="" />
             {siteConfig.name}
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5" />
+            <Lock className="h-3.5 w-3.5 text-primary" />
             Paiement sécurisé
           </span>
         </div>
       </header>
 
-      <main className="site-container py-6 sm:py-8 lg:py-10 px-0 sm:px-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-6 sm:mb-8 px-4 sm:px-0">Checkout to start learning</h1>
+      <main className="site-container px-4 py-6 sm:px-0 sm:py-8 lg:py-10">
+        <div className="mb-6 sm:mb-8">
+          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
+          <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Finalisez votre inscription
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Quelques informations, puis paiement sécurisé via Stripe.
+          </p>
+        </div>
 
-        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:items-start px-4 sm:px-0">
-          <div className="space-y-6 min-w-0">
+        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
+          <div className="min-w-0 space-y-6">
             {/* Product */}
-            <section className="rounded border border-border bg-white p-5">
+            <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
               <div className="flex gap-4">
                 <div
                   className={cn(
@@ -188,7 +196,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                     <p className="font-bold text-sm">{course.title}</p>
                     <p className="text-xl font-bold mt-1">${course.price}</p>
                     {course.originalPrice > course.price && (
-                      <span className="inline-block mt-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                      <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
                         Économisez ${course.originalPrice - course.price}
                       </span>
                     )}
@@ -205,9 +213,9 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                       <label
                         key={planId}
                         className={cn(
-                          "cursor-pointer rounded border p-4 transition-colors",
+                          "cursor-pointer rounded-xl border p-4 transition-colors",
                           active
-                            ? "border-primary ring-1 ring-primary/40 bg-primary/5"
+                            ? "border-primary bg-primary/5 ring-1 ring-primary/40"
                             : "border-border hover:border-primary/50",
                         )}
                       >
@@ -223,7 +231,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                             <p className="font-bold text-sm">{option.name}</p>
                             <p className="text-xl font-bold mt-1">${option.price}</p>
                             {save > 0 && (
-                              <span className="inline-block mt-1 rounded-sm bg-emerald-100 px-1.5 py-0.5 text-[11px] font-bold text-emerald-800">
+                              <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
                                 Économisez ${save}
                               </span>
                             )}
@@ -257,19 +265,19 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
             </section>
 
             {/* Personal info */}
-            <section className="rounded border border-border bg-white p-5 space-y-4">
-              <h2 className="font-bold text-foreground">Vos informations</h2>
+            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="font-display text-lg font-semibold text-foreground">Vos informations</h2>
               <div className="space-y-2">
                 <Label htmlFor="full_name">Nom complet</Label>
                 <Input
                   id="full_name"
                   value={form.full_name}
                   onChange={(e) => update("full_name", e.target.value)}
-                  className="rounded-md"
+                  className="h-11 rounded-xl"
                   required
                 />
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -277,7 +285,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                     type="email"
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
-                    className="rounded-md"
+                    className="h-11 rounded-xl"
                     required
                   />
                 </div>
@@ -287,7 +295,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                     id="whatsapp"
                     value={form.whatsapp}
                     onChange={(e) => update("whatsapp", e.target.value)}
-                    className="rounded-md"
+                    className="h-11 rounded-xl"
                     required
                   />
                 </div>
@@ -295,7 +303,7 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
               <div className="space-y-2">
                 <Label>Niveau</Label>
                 <Select value={form.level} onValueChange={(v) => update("level", v)}>
-                  <SelectTrigger className="rounded-md">
+                  <SelectTrigger className="h-11 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -308,19 +316,19 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
             </section>
 
             {/* Billing */}
-            <section className="rounded border border-border bg-white p-5 space-y-4">
-              <h2 className="font-bold text-foreground">Billing address</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
+            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <h2 className="font-display text-lg font-semibold text-foreground">Adresse de facturation</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Country</Label>
+                  <Label>Pays</Label>
                   <Select value={form.country} onValueChange={(v) => update("country", v)}>
-                    <SelectTrigger className="rounded-md">
-                      <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <SelectTrigger className="h-11 rounded-xl">
+                      <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="HT">Haïti</SelectItem>
-                      <SelectItem value="US">United States</SelectItem>
+                      <SelectItem value="US">États-Unis</SelectItem>
                       <SelectItem value="CA">Canada</SelectItem>
                       <SelectItem value="DO">République dominicaine</SelectItem>
                       <SelectItem value="FR">France</SelectItem>
@@ -334,16 +342,16 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
             </section>
 
             {/* Payment */}
-            <section className="rounded border border-border bg-white p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-foreground">Payment Method</h2>
+            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-lg font-semibold text-foreground">Moyen de paiement</h2>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Secure and encrypted
+                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
+                  Sécurisé & chiffré
                 </span>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded border-2 border-primary bg-primary/5 p-4">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-primary bg-primary/5 p-4">
                 <input type="radio" name="pay" checked readOnly className="accent-primary" />
                 <CreditCard className="h-5 w-5" />
                 <div>
@@ -364,9 +372,9 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
           </div>
 
           {/* Summary sidebar */}
-          <aside className="mt-8 lg:mt-0 lg:sticky lg:top-6">
-            <div className="rounded border border-border bg-white p-5 shadow-sm">
-              <h2 className="font-bold text-lg mb-4">Summary</h2>
+          <aside className="mt-8 lg:sticky lg:top-6 lg:mt-0">
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-md">
+              <h2 className="mb-4 font-display text-lg font-semibold">Récapitulatif</h2>
 
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
@@ -376,17 +384,17 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
                   <dd>${displayPrice}</dd>
                 </div>
                 {pctOff > 0 && (
-                  <div className="flex justify-between gap-4 text-emerald-700">
-                    <dt>Promo ({pctOff}% off)</dt>
-                    <dd>-${savings}</dd>
+                  <div className="flex justify-between gap-4 text-success">
+                    <dt>Promo (−{pctOff}%)</dt>
+                    <dd>−${savings}</dd>
                   </div>
                 )}
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Estimated tax</dt>
+                  <dt className="text-muted-foreground">Taxes estimées</dt>
                   <dd>$0.00</dd>
                 </div>
-                <div className="flex justify-between gap-4 pt-3 border-t border-border text-base font-bold">
-                  <dt>Total:</dt>
+                <div className="flex justify-between gap-4 border-t border-border pt-3 text-base font-bold">
+                  <dt>Total</dt>
                   <dd>${displayPrice}</dd>
                 </div>
               </dl>
@@ -434,10 +442,11 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
               <Button
                 type="submit"
                 disabled={loading || !acceptedTerms}
-                className="mt-5 w-full h-12 rounded-md bg-primary hover:bg-primary/90 text-base font-bold"
+                size="xl"
+                className="mt-5 h-12 w-full shadow-primary"
               >
-                <Lock className="h-4 w-4 mr-2" />
-                {loading ? "Redirection..." : "Complete purchase"}
+                <Lock className="mr-1 h-4 w-4" />
+                {loading ? "Redirection…" : "Payer et commencer"}
               </Button>
 
               <p className="mt-3 text-center text-[11px] text-muted-foreground">

@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseActionLabel } from "@/lib/courses";
@@ -78,8 +79,8 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   if (enrollments === undefined) {
     return (
-      <div className="rounded-lg border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-        Chargement de vos cours...
+      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+        Chargement de vos cours…
       </div>
     );
   }
@@ -87,20 +88,20 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
   if (enrollments.length === 0) {
     return (
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Mes cours</h2>
-        <div className="rounded-lg border border-border bg-card p-10 md:p-12 text-center">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-muted">
-            <BookOpen className="h-7 w-7 text-muted-foreground" />
+        <h2 className="font-display text-2xl font-semibold text-foreground">Mes cours</h2>
+        <div className="mt-6 rounded-2xl border border-border bg-card p-10 text-center shadow-sm md:p-12">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10">
+            <BookOpen className="h-7 w-7 text-primary" />
           </div>
-          <h3 className="text-lg font-bold mb-2">Aucun cours pour le moment</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
+          <h3 className="font-display text-lg font-semibold">Aucun cours pour le moment</h3>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre.
           </p>
-          <p className="text-xs text-muted-foreground max-w-md mx-auto mb-6">
-            Déjà inscrit ? Vérifiez que vous êtes connecté avec la même adresse email que celle utilisée lors du
-            paiement ou de l&apos;activation admin.
+          <p className="mx-auto mt-4 max-w-md text-xs text-muted-foreground">
+            Déjà inscrit ? Vérifiez que vous êtes connecté avec la même adresse email que celle utilisée
+            lors du paiement.
           </p>
-          <Button asChild variant="hero" className="rounded-md">
+          <Button asChild variant="hero" className="mt-6 shadow-primary">
             <Link to="/courses">
               Explorer les cours <ArrowRight className="h-4 w-4" />
             </Link>
@@ -114,11 +115,19 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   return (
     <section className="space-y-5">
-      <h2 className="text-2xl font-bold text-foreground">Mes cours</h2>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="font-display text-2xl font-semibold text-foreground">Mes cours</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Reprenez là où vous vous êtes arrêté.</p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/courses">Catalogue</Link>
+        </Button>
+      </div>
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-          <SelectTrigger className="w-full lg:w-[180px] rounded-md border-border h-11">
+          <SelectTrigger className="h-11 w-full rounded-xl border-border lg:w-[200px]">
             <SelectValue placeholder="Progression" />
           </SelectTrigger>
           <SelectContent>
@@ -130,30 +139,22 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
         </Select>
 
         <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher dans mes cours"
-            className="h-11 rounded-md pr-12"
+            className="h-11 rounded-xl pl-10"
           />
-          <button
-            type="button"
-            className="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground"
-            aria-label="Rechercher"
-          >
-            <Search className="h-4 w-4" />
-          </button>
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
-        <p className="font-semibold text-foreground">
-          {count} cours
-        </p>
+      <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-semibold text-foreground">{count} cours</p>
         <div className="flex items-center gap-2">
-          <span className="text-muted-foreground shrink-0">Trier par :</span>
+          <span className="shrink-0 text-muted-foreground">Trier par</span>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="w-full sm:w-[200px] rounded-md border-border h-9 text-sm">
+            <SelectTrigger className="h-9 w-full rounded-xl border-border text-sm sm:w-[200px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -165,13 +166,15 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       </div>
 
       {count === 0 ? (
-        <div className="rounded-lg border border-dashed border-border bg-muted/30 p-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center text-sm text-muted-foreground">
           Aucun cours ne correspond à votre recherche.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
-          {filtered?.map((enrollment) => (
-            <CourseGridCard key={enrollment.id} enrollment={enrollment} />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {filtered?.map((enrollment, index) => (
+            <FadeIn key={enrollment.id} delay={Math.min(index * 0.04, 0.2)}>
+              <CourseGridCard enrollment={enrollment} />
+            </FadeIn>
           ))}
         </div>
       )}
@@ -199,13 +202,11 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
       : { to: "/checkout" as const, search: { course: enrollment.courseSlug } };
 
   const showProgress = isPaid && enrollment.contentLive;
+  const status = enrollmentStatus(enrollment);
 
   return (
-    <article className="group flex flex-col min-w-0">
-      <Link
-        {...href}
-        className="block overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md"
-      >
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md">
+      <Link {...href} className="block overflow-hidden">
         <CourseThumbnailBanner
           thumbnail={{
             gradient: enrollment.thumbnailGradient,
@@ -220,18 +221,30 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
         />
       </Link>
 
-      <div className="pt-3 flex flex-col flex-1 min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col p-4">
+        <div className="mb-2">
+          <span
+            className={cn(
+              "rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              status === "active" && "bg-success/15 text-success",
+              status === "scheduled" && "bg-primary/10 text-primary",
+              status === "pending" && "bg-brand-accent/20 text-brand-accent-foreground",
+            )}
+          >
+            {status === "active" ? "Actif" : status === "scheduled" ? "Programmé" : "En attente"}
+          </span>
+        </div>
         <Link {...href} className="block min-w-0">
-          <h3 className="font-bold text-sm leading-snug text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-2 font-display text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
             {enrollment.courseTitle}
           </h3>
         </Link>
-        <p className="text-xs text-muted-foreground mt-1 truncate">{enrollment.instructor}</p>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{enrollment.instructor}</p>
 
-        <div className="mt-3 space-y-1.5">
+        <div className="mt-auto space-y-2 pt-4">
           {showProgress ? (
             <>
-              <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
                   className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
@@ -242,8 +255,8 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
           ) : (
             <p
               className={cn(
-                "text-xs flex items-center gap-1",
-                isPaid ? "text-sky-700" : "text-amber-700",
+                "flex items-center gap-1 text-xs",
+                isPaid ? "text-primary" : "text-brand-accent-foreground",
               )}
             >
               {!isPaid ? null : !enrollment.contentLive ? (
@@ -252,6 +265,12 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
               {progressLabel(enrollment)}
             </p>
           )}
+          <Button asChild size="sm" variant={canLearn || isPaid ? "default" : "outline"} className="w-full">
+            <Link {...href}>
+              {canLearn ? "Continuer" : isPaid ? "Ouvrir" : "Finaliser"}
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
       </div>
     </article>

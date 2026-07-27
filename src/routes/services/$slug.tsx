@@ -39,11 +39,14 @@ function ServiceDetailPage() {
   const Icon = service.icon;
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <main className="site-page-top site-container py-10 sm:py-14">
         <div className="mx-auto max-w-5xl text-center">
-          <h1 className="font-display text-2xl font-bold sm:text-3xl md:text-4xl">Prendre rendez-vous</h1>
+          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Services</p>
+          <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">
+            Prendre rendez-vous
+          </h1>
           <p className="mt-2 text-muted-foreground">
             Pour le service : <span className="font-semibold text-foreground">{service.title}</span>
           </p>
@@ -61,7 +64,7 @@ function ServiceDetailPage() {
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               {service.premium ? (
-                <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase text-primary-foreground">
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-md bg-brand-accent px-2.5 py-1 text-[10px] font-bold uppercase text-brand-accent-foreground">
                   <Star className="h-3 w-3 fill-current" />
                   Premium
                 </span>
@@ -69,7 +72,7 @@ function ServiceDetailPage() {
             </div>
 
             <div className="p-5 sm:p-6">
-              <h2 className="font-display text-2xl font-bold">{service.title}</h2>
+              <h2 className="font-display text-2xl font-semibold">{service.title}</h2>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{service.description}</p>
 
               <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">

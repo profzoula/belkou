@@ -18,7 +18,7 @@ export function SectionHeader({
   return (
     <div className={`max-w-2xl mb-10 sm:mb-14 ${alignClass} ${className}`}>
       <p className={`section-label mb-3 ${align === "center" ? "justify-center" : ""}`}>{label}</p>
-      <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-balance">
+      <h2 className="font-display text-2xl font-semibold tracking-tight text-balance sm:text-3xl md:text-4xl">
         {title}
       </h2>
       {description && (

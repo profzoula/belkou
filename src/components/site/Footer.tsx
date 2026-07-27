@@ -57,13 +57,13 @@ const twitterHandle = siteConfig.social.twitter.replace(/^@/, "");
 const twitterUrl = `https://x.com/${twitterHandle}`;
 
 const iconShell =
-  "flex size-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-100 transition-colors hover:bg-zinc-50";
+  "flex size-9 items-center justify-center rounded-xl border border-border bg-muted transition-colors hover:bg-accent hover:text-foreground";
 
 const contactIconShell =
-  "flex size-8 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-100";
+  "flex size-8 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-muted-foreground";
 
 function FooterNavLink({ item }: { item: FooterLink }) {
-  const className = "text-sm text-zinc-500 transition-colors hover:text-zinc-700";
+  const className = "text-sm text-muted-foreground transition-colors hover:text-foreground";
 
   if (item.href.startsWith("/") && !item.href.startsWith("//") && !item.href.includes("#")) {
     return (
@@ -180,8 +180,8 @@ function ContactBlock({
     <div className="flex flex-1 items-start gap-2.5">
       <div className={contactIconShell}>{icon}</div>
       <div>
-        <h4 className="mb-0.5 text-base font-medium text-zinc-800">{title}</h4>
-        <div className="text-sm leading-relaxed text-zinc-500">{children}</div>
+        <h4 className="mb-0.5 text-base font-medium text-foreground">{title}</h4>
+        <div className="text-sm leading-relaxed text-muted-foreground">{children}</div>
       </div>
     </div>
   );
@@ -193,19 +193,19 @@ export function Footer() {
   const whatsappLabel = formatWhatsAppPhone();
 
   return (
-    <footer className="bg-zinc-50 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-16 sm:px-6 md:px-8 lg:px-20">
+    <footer className="border-t border-border bg-muted/40 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-16 sm:px-6 md:px-8 lg:px-20">
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-16 pb-12 lg:flex-row">
           <div className="max-w-full flex-1 lg:max-w-[400px]">
             <Link to="/" className="mb-6 inline-flex items-center gap-3">
               <SiteLogo className="h-10 w-10" alt={siteConfig.name} />
-              <span className="font-display text-lg font-bold text-zinc-900">{siteConfig.name}</span>
+              <span className="font-display text-lg font-bold text-foreground">{siteConfig.name}</span>
             </Link>
-            <p className="mb-7 max-w-80 text-sm leading-7 text-zinc-500">
+            <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
               {siteConfig.tagline}. Formations vidéo en français pour créer des apps IA, des SaaS et
               monétiser en ligne — Haïti, diaspora & monde entier.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <a
                 href={twitterUrl}
                 target="_blank"
@@ -225,7 +225,7 @@ export function Footer() {
                 <WhatsAppIcon />
               </a>
               <a href={`mailto:${siteConfig.contactEmail}`} className={iconShell} aria-label="Email BelKou">
-                <Mail className="h-4 w-4 text-zinc-600" strokeWidth={1.75} />
+                <Mail className="h-4 w-4" strokeWidth={1.75} />
               </a>
             </div>
           </div>
@@ -233,7 +233,7 @@ export function Footer() {
           <div className="flex w-full max-w-3xl flex-1 flex-wrap justify-between gap-8 sm:flex-nowrap">
             {footerColumns.map((column) => (
               <div key={column.title}>
-                <h3 className="mb-6 text-base font-medium text-zinc-800">{column.title}</h3>
+                <h3 className="mb-6 text-base font-medium text-foreground">{column.title}</h3>
                 <ul className="flex list-none flex-col gap-3">
                   {column.items.map((item) => (
                     <li key={item.name}>
@@ -259,7 +259,7 @@ export function Footer() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-zinc-700"
+              className="transition-colors hover:text-foreground"
             >
               {whatsappLabel}
             </a>
@@ -267,15 +267,15 @@ export function Footer() {
           <ContactBlock icon={<MailIcon />} title="Email">
             <a
               href={`mailto:${siteConfig.contactEmail}`}
-              className="break-all transition-colors hover:text-zinc-700"
+              className="break-all transition-colors hover:text-foreground"
             >
               {siteConfig.contactEmail}
             </a>
           </ContactBlock>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-zinc-300 py-4 md:flex-row">
-          <p className="text-sm text-zinc-500">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border py-4 md:flex-row">
+          <p className="text-sm text-muted-foreground">
             © {year} {siteConfig.name}. Tous droits réservés.
           </p>
           <div className="flex flex-wrap justify-center gap-5 md:gap-9">

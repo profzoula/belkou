@@ -268,6 +268,20 @@ export function countLessons(course: { sections: CourseSection[] }): number {
   return getAllLessons(course).length;
 }
 
+/** A lesson a student can actually finish (video uploaded/Vimeo, or article with text). */
+export function lessonIsCompletable(lesson: CourseLesson): boolean {
+  if (lesson.type === "video") return lessonHasVideo(lesson);
+  return Boolean(lesson.content?.trim());
+}
+
+/**
+ * Lesson ids that gate the sequential unlock. Empty placeholder lessons are excluded:
+ * a student cannot finish them, so keeping them would lock the rest of the course.
+ */
+export function getSequenceLessonIds(course: { sections: CourseSection[] }): string[] {
+  return getAllLessons(course).filter(lessonIsCompletable).map((lesson) => lesson.id);
+}
+
 /** Parse "4min", "8 min", "1h 30min", etc. into minutes. */
 export function parseLessonDurationMinutes(duration: string): number {
   const normalized = duration.trim().toLowerCase();
@@ -300,15 +314,25 @@ export function getVideoLessons(course: { sections: CourseSection[] }): CourseLe
   return getAllLessons(course).filter((lesson) => lesson.type === "video");
 }
 
-export function getLessonDisplayDuration(lesson: CourseLesson): string | null {
-  if (lesson.type === "video") {
-    if (!lessonHasVideo(lesson)) return null;
-    const trimmed = lesson.duration?.trim();
-    return trimmed || null;
-  }
+/** Normalise free-form admin input ("28", "25 min") to the sidebar format ("28min"). */
+export function formatLessonDurationLabel(duration: string): string {
+  const trimmed = duration.trim();
+  if (!trimmed) return "";
 
-  const trimmed = lesson.duration?.trim();
-  return trimmed || null;
+  const minutes = parseLessonDurationMinutes(trimmed);
+  if (minutes <= 0) return trimmed;
+
+  const hours = Math.floor(minutes / 60);
+  const rest = Math.round(minutes % 60);
+  if (hours > 0 && rest > 0) return `${hours}h ${rest}min`;
+  if (hours > 0) return `${hours}h`;
+  return `${rest}min`;
+}
+
+export function getLessonDisplayDuration(lesson: CourseLesson): string | null {
+  if (lesson.type === "video" && !lessonHasVideo(lesson)) return null;
+
+  return formatLessonDurationLabel(lesson.duration ?? "") || null;
 }
 
 export function getSectionDurationMinutes(section: CourseSection): number {

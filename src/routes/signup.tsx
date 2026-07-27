@@ -124,9 +124,9 @@ function SignupPage() {
 
   return (
     <AuthSplitLayout>
-      <p className="section-label mb-3">Sign up</p>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Create your account
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Inscription</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        Créez votre compte
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         Compte gratuit pour votre espace étudiant. Prêt à acheter un cours ?{" "}
@@ -146,13 +146,13 @@ function SignupPage() {
         <div className="mt-8 space-y-6">
           <form onSubmit={submit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full name</Label>
+              <Label htmlFor="full_name">Nom complet</Label>
               <Input
                 id="full_name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Jean Pierre"
-                className="h-11 rounded-lg"
+                className="h-11 rounded-xl"
                 required
               />
             </div>
@@ -164,21 +164,21 @@ function SignupPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="h-11 rounded-lg"
+                placeholder="vous@email.com"
+                className="h-11 rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-lg"
+                className="h-11 rounded-xl"
                 minLength={8}
                 required
               />
@@ -191,26 +191,26 @@ function SignupPage() {
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                 placeholder="Ex. JEAN1A2B"
-                className="h-11 rounded-lg font-mono tracking-wide"
+                className="h-11 rounded-xl font-mono tracking-wide"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirm_password">Confirm password</Label>
+              <Label htmlFor="confirm_password">Confirmer le mot de passe</Label>
               <Input
                 id="confirm_password"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-lg"
+                className="h-11 rounded-xl"
                 minLength={8}
                 required
               />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full rounded-lg">
-              {loading ? "Creating account..." : "Sign up"}
+            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full shadow-primary">
+              {loading ? "Création…" : "Créer mon compte"}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
               Après l&apos;inscription, vérifiez votre <strong>Gmail</strong> pour confirmer votre compte.
@@ -219,23 +219,23 @@ function SignupPage() {
 
           <AuthDivider />
 
-          <GoogleAuthButton label="Continue with Google" disabled={loading} variant="dark" />
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
 
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            Déjà un compte ?{" "}
             <Link to="/login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-              Sign in
+              Se connecter
             </Link>
           </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            By signing up, you agree to the{" "}
+            En créant un compte, vous acceptez les{" "}
             <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
-              Terms of Service
+              Conditions d&apos;utilisation
             </Link>{" "}
-            and{" "}
+            et la{" "}
             <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
-              Privacy Policy
+              Politique de confidentialité
             </Link>
             .
           </p>

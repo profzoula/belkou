@@ -1,0 +1,175 @@
+import { Link } from "@tanstack/react-router";
+import { Clock3, Star, Users } from "lucide-react";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
+import { formatCount, isFreeCourse } from "@/lib/courses";
+import type { PublicCourse } from "@/lib/fns/courses";
+import { cn } from "@/lib/utils";
+
+type CourseCatalogCardProps = {
+  course: PublicCourse;
+  layout?: "grid" | "row";
+  className?: string;
+};
+
+function StarRating({ rating, count }: { rating: number; count: number }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-sm font-bold text-foreground">{rating.toFixed(1)}</span>
+      <div className="flex items-center gap-0.5" aria-hidden>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Star
+            key={index}
+            className={cn(
+              "h-3.5 w-3.5",
+              index < Math.round(rating)
+                ? "fill-brand-accent text-brand-accent"
+                : "fill-muted text-muted",
+            )}
+          />
+        ))}
+      </div>
+      <span className="text-xs text-muted-foreground">({formatCount(count)})</span>
+    </div>
+  );
+}
+
+export function CourseCatalogCard({
+  course,
+  layout = "grid",
+  className,
+}: CourseCatalogCardProps) {
+  const free = isFreeCourse(course);
+
+  if (layout === "row") {
+    return (
+      <Link
+        to="/courses/$slug"
+        params={{ slug: course.slug }}
+        className={cn(
+          "group flex overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          className,
+        )}
+      >
+        <CourseThumbnailBanner
+          thumbnail={course.thumbnail}
+          slug={course.slug}
+          aspectClass="aspect-auto w-36 sm:w-48 min-h-full"
+          className="shrink-0 rounded-none border-0"
+          showLabel={false}
+          showIcon={false}
+        >
+          <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
+        </CourseThumbnailBanner>
+        <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
+          <div className="flex flex-wrap gap-1.5">
+            {course.bestseller ? (
+              <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground">
+                Bestseller
+              </span>
+            ) : null}
+            <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+              {course.skillLevel}
+            </span>
+          </div>
+          <h2 className="mt-2 line-clamp-2 font-display text-base font-semibold leading-snug group-hover:text-primary sm:text-lg">
+            {course.title}
+          </h2>
+          <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
+          <div className="mt-2">
+            <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} />
+          </div>
+          <div className="mt-2">
+            <StarRating rating={course.rating} count={course.ratingsCount} />
+          </div>
+          <div className="mt-auto flex flex-wrap items-center gap-3 pt-3 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Clock3 className="h-3.5 w-3.5" />
+              {course.totalDuration}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Users className="h-3.5 w-3.5" />
+              {formatCount(course.studentsCount)}
+            </span>
+            <span className="ml-auto text-base font-bold text-foreground">
+              {free ? (
+                <span className="text-success">Gratuit</span>
+              ) : (
+                <>
+                  ${course.price}
+                  {course.originalPrice > course.price ? (
+                    <span className="ml-2 text-sm font-normal text-muted-foreground line-through">
+                      ${course.originalPrice}
+                    </span>
+                  ) : null}
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/courses/$slug"
+      params={{ slug: course.slug }}
+      className={cn(
+        "group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        className,
+      )}
+    >
+      <div className="relative">
+        <CourseThumbnailBanner
+          thumbnail={course.thumbnail}
+          slug={course.slug}
+          aspectClass="aspect-[16/10]"
+          className="rounded-none border-0"
+          showLabel={false}
+          showIcon={!course.thumbnail.imageUrl}
+        >
+          <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
+        </CourseThumbnailBanner>
+        <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5">
+          {course.bestseller ? (
+            <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm">
+              Bestseller
+            </span>
+          ) : null}
+          {free ? (
+            <span className="rounded-md bg-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-foreground shadow-sm">
+              Gratuit
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <span className="w-fit rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+          {course.skillLevel}
+        </span>
+        <h3 className="mt-2 line-clamp-2 min-h-[2.75rem] font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary sm:text-base">
+          {course.title}
+        </h3>
+        <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
+        <div className="mt-3">
+          <StarRating rating={course.rating} count={course.ratingsCount} />
+        </div>
+        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock3 className="h-3.5 w-3.5" />
+            {course.totalDuration}
+          </span>
+          {free ? (
+            <span className="text-lg font-bold text-success">Gratuit</span>
+          ) : (
+            <span className="text-lg font-bold text-foreground">
+              ${Number.isInteger(course.price) ? course.price : course.price.toFixed(2)}
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}

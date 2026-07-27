@@ -38,28 +38,32 @@ export function ForumPostCard({
   const card = (
     <article
       className={cn(
-        "w-full rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-shadow duration-200",
-        linkToThread && "hover:shadow-md hover:border-primary/25",
+        "w-full rounded-2xl border border-border/80 bg-card p-4 shadow-sm transition-all duration-200",
+        linkToThread && "hover:border-primary/25 hover:shadow-md",
         className,
       )}
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-border bg-gradient-to-br from-primary/15 to-indigo-500/15 text-sm font-semibold text-primary"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-primary/10 text-sm font-semibold text-primary"
             aria-hidden
           >
             {initials}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="truncate font-bold text-foreground">{post.authorName}</p>
+              <p className="truncate font-semibold text-foreground">{post.authorName}</p>
               {post.kind === "suggestion" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">
+                <span className="inline-flex items-center gap-1 rounded-md bg-brand-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-accent-foreground">
                   <Lightbulb className="h-3 w-3" />
                   Idée
                 </span>
-              ) : null}
+              ) : (
+                <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  Question
+                </span>
+              )}
             </div>
             <p className="truncate text-sm text-muted-foreground">{handle}</p>
           </div>
@@ -85,7 +89,7 @@ export function ForumPostCard({
         </time>
         <div
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-muted-foreground transition-colors",
+            "inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-muted-foreground transition-colors",
             linkToThread && "group-hover:text-primary",
           )}
           aria-label={`${post.replyCount} réponse${post.replyCount > 1 ? "s" : ""}`}
@@ -131,19 +135,19 @@ export function ForumReplyCard({
   return (
     <article
       className={cn(
-        "w-full rounded-xl border border-border/60 bg-muted/20 p-4 shadow-sm",
+        "w-full rounded-2xl border border-border/70 bg-muted/20 p-4 shadow-sm",
         className,
       )}
     >
       <div className="mb-3 flex items-start gap-3">
         <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-xs font-semibold text-primary"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-xs font-semibold text-primary"
           aria-hidden
         >
           {initials}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-bold text-sm text-foreground">{authorName}</p>
+          <p className="truncate text-sm font-semibold text-foreground">{authorName}</p>
           <p className="truncate text-xs text-muted-foreground">{handle}</p>
         </div>
       </div>

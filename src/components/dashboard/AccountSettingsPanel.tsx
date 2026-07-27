@@ -124,10 +124,10 @@ export function AccountSettingsPanel({ user }: AccountSettingsPanelProps) {
   };
 
   return (
-    <section className="surface rounded-2xl p-6 sm:p-8">
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="font-display text-xl font-bold text-foreground">Paramètres du compte</h2>
+          <h2 className="font-display text-xl font-semibold text-foreground">Paramètres du compte</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Gérez votre profil et vos informations de connexion.
           </p>

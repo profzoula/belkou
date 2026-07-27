@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { SectionHeader } from "@/components/site/SectionHeader";
+import { FadeIn } from "@/components/motion/FadeIn";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { getPublicServices } from "@/lib/fns/services";
 import { serializableToServiceItem } from "@/lib/service-storage";
@@ -29,33 +29,48 @@ function ServicesIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-page-top site-container py-10 sm:py-14 md:py-16">
-        <SectionHeader
-          label="Nos services"
-          title="Solutions complètes pour votre business"
-          description="De la création d'entreprise à la formation, nous couvrons tous vos besoins numériques."
-          className="max-w-2xl"
-        />
-
-        {services.length === 0 ? (
-          <p className="mt-10 text-muted-foreground">Aucun service disponible pour le moment.</p>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard key={service.slug} service={service} />
-            ))}
+      <main>
+        <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
+          <div className="site-container site-page-top pb-10 pt-8 sm:pb-14 sm:pt-12">
+            <FadeIn className="max-w-2xl">
+              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Services</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                Solutions complètes pour votre business
+              </h1>
+              <p className="mt-4 text-muted-foreground md:text-lg">
+                De la création d&apos;entreprise à la formation, nous couvrons vos besoins numériques.
+              </p>
+            </FadeIn>
           </div>
-        )}
+        </section>
 
-        {contactSlug ? (
-          <p className="mt-10 text-center text-sm text-muted-foreground">
-            Besoin d&apos;un service sur mesure ?{" "}
-            <Link to="/services/$slug" params={{ slug: contactSlug }} className="font-semibold text-primary hover:underline">
-              Contactez-nous
-            </Link>{" "}
-            pour un devis personnalisé.
-          </p>
-        ) : null}
+        <div className="site-container py-10 sm:py-14">
+          {services.length === 0 ? (
+            <p className="text-muted-foreground">Aucun service disponible pour le moment.</p>
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {services.map((service, index) => (
+                <FadeIn key={service.slug} delay={Math.min(index * 0.05, 0.2)}>
+                  <ServiceCard service={service} />
+                </FadeIn>
+              ))}
+            </div>
+          )}
+
+          {contactSlug ? (
+            <p className="mt-12 text-center text-sm text-muted-foreground">
+              Besoin d&apos;un service sur mesure ?{" "}
+              <Link
+                to="/services/$slug"
+                params={{ slug: contactSlug }}
+                className="font-semibold text-primary hover:underline"
+              >
+                Contactez-nous
+              </Link>{" "}
+              pour un devis personnalisé.
+            </p>
+          ) : null}
+        </div>
       </main>
       <Footer />
     </div>

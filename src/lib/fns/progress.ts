@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { computeCourseProgressPercent, getAllLessons } from "@/lib/courses";
+import { computeCourseProgressPercent, getAllLessons, getSequenceLessonIds } from "@/lib/courses";
 import { isLessonUnlockedInSequence } from "@/lib/course-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
@@ -77,11 +77,12 @@ export const completeLesson = createServerFn({ method: "POST" })
     if (!course) throw new Error("Cours introuvable.");
 
     const orderedLessonIds = getAllLessons(course).map((lesson) => lesson.id);
+    const requiredLessonIds = getSequenceLessonIds(course);
     const rows = await listLessonProgress(user.email, data.courseSlug);
     const completedLessonIds = rows.filter((row) => row.completed_at).map((row) => row.lesson_id);
 
     if (
-      !isLessonUnlockedInSequence(data.lessonId, orderedLessonIds, completedLessonIds)
+      !isLessonUnlockedInSequence(data.lessonId, orderedLessonIds, completedLessonIds, requiredLessonIds)
     ) {
       throw new Error("Terminez la leçon précédente avant de continuer.");
     }

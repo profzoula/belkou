@@ -95,11 +95,11 @@ function LoginPage() {
 
   return (
     <AuthSplitLayout>
-      <p className="section-label mb-3">Connexion</p>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Sign in to your account
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Connexion</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        Accédez à votre espace
       </h1>
-      <p className="mt-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
         Vous avez déjà payé pour un cours ? Connectez-vous avec{" "}
         <strong className="text-foreground">le même email</strong> que votre inscription pour accéder à Mes cours.
       </p>
@@ -128,55 +128,55 @@ function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="h-11 rounded-lg"
+                placeholder="vous@email.com"
+                className="h-11 rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mot de passe</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-lg"
+                className="h-11 rounded-xl"
                 required
               />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full rounded-lg">
-              {loading ? "Signing in..." : "Sign in"}
+            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full shadow-primary">
+              {loading ? "Connexion…" : "Se connecter"}
             </Button>
           </form>
 
           <AuthDivider />
 
-          <GoogleAuthButton label="Continue with Google" disabled={loading} variant="dark" />
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
 
           <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            Pas encore de compte ?{" "}
             <Link to="/signup" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
-              Sign up
+              Créer un compte
             </Link>
           </p>
 
           <p className="text-center text-sm">
             <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground hover:underline">
-              Forgot password?
+              Mot de passe oublié ?
             </Link>
           </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
-            By signing in, you agree to the{" "}
+            En vous connectant, vous acceptez les{" "}
             <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
-              Terms of Service
+              Conditions d&apos;utilisation
             </Link>{" "}
-            and{" "}
+            et la{" "}
             <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
-              Privacy Policy
+              Politique de confidentialité
             </Link>
             .
           </p>

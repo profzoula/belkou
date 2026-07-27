@@ -9,6 +9,7 @@ import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const links = [
   { href: "/courses", label: "Cours", route: true },
@@ -98,14 +99,14 @@ function NavActions({
         <Link
           to="/forum"
           onClick={onNavigate}
-          className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+          className="hidden sm:inline-flex rounded-xl px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
         >
           Forum
         </Link>
         <Link
           to="/dashboard"
           onClick={onNavigate}
-          className="hidden sm:inline-flex rounded-full px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+          className="hidden sm:inline-flex rounded-xl px-3.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
         >
           Mes cours
         </Link>
@@ -119,21 +120,12 @@ function NavActions({
     <div className={wrapClass}>
       {hero ? (
         <>
-          <Button
-            asChild
-            size={stacked ? "lg" : "sm"}
-            className="rounded-full bg-indigo-600 px-6 text-white hover:bg-indigo-700"
-          >
+          <Button asChild size={stacked ? "lg" : "sm"} className="rounded-xl px-6 shadow-primary">
             <Link to="/courses" onClick={onNavigate}>
               Commencer
             </Link>
           </Button>
-          <Button
-            asChild
-            variant="outline"
-            size={stacked ? "lg" : "sm"}
-            className="rounded-full border-slate-300 text-slate-700 hover:bg-slate-50"
-          >
+          <Button asChild variant="outline" size={stacked ? "lg" : "sm"} className="rounded-xl">
             <Link to="/login" onClick={onNavigate}>
               Connexion
             </Link>
@@ -177,16 +169,16 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
   const isHero = theme === "hero";
 
   const linkClass = isDark
-    ? "rounded-full px-3.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+    ? "rounded-xl px-3.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
     : isHero
-      ? "rounded-full px-3.5 py-2 text-sm text-slate-700 transition-colors hover:text-indigo-600"
-      : "rounded-full px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-accent";
+      ? "rounded-xl px-3.5 py-2 text-sm text-foreground/80 transition-colors hover:bg-primary/5 hover:text-primary"
+      : "rounded-xl px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground";
 
   const mobileLinkClass = isDark
-    ? "touch-target rounded-lg px-3 py-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+    ? "touch-target rounded-xl px-3 py-3 text-sm text-white/70 hover:bg-white/10 hover:text-white"
     : isHero
-      ? "touch-target rounded-lg px-3 py-3 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"
-      : "touch-target rounded-lg px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground";
+      ? "touch-target rounded-xl px-3 py-3 text-sm text-foreground hover:bg-primary/5 hover:text-primary"
+      : "touch-target rounded-xl px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground";
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -203,7 +195,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
           isDark
             ? "border-b border-white/10 bg-[#07080d]/80 backdrop-blur-md"
             : isHero
-              ? "border-b border-border/60 bg-white/70 backdrop-blur-md"
+              ? "border-b border-border/50 bg-background/75 backdrop-blur-xl"
               : "glass"
         }
       >
@@ -219,7 +211,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             <span className="truncate text-[15px]">{siteConfig.name}</span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
             {links.map((l) =>
               l.route ? (
                 <Link key={l.href} to={l.href} className={linkClass}>
@@ -233,22 +225,25 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             )}
           </nav>
 
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-1.5">
+            <ThemeToggle className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined} />
             <NavActions dark={isDark} hero={isHero} />
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-1.5 md:hidden">
+            <ThemeToggle className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined} />
             {!loading && user ? <UserAccountMenu onNavigate={close} /> : null}
             <button
               type="button"
               className={cn(
-                "grid h-10 w-10 touch-target place-items-center rounded-full border",
+                "grid h-10 w-10 touch-target place-items-center rounded-xl border",
                 isDark
                   ? "border-white/15 bg-white/5 text-white"
                   : "border-border bg-card text-foreground",
               )}
               onClick={() => setOpen(!open)}
               aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={open}
             >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>

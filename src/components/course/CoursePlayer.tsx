@@ -33,6 +33,7 @@ import {
   getSectionForLesson,
   getWelcomePreviewLesson,
   lessonHasVideo,
+  lessonIsCompletable,
   type CourseLesson,
 } from "@/lib/courses";
 import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
@@ -48,6 +49,7 @@ import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { SiteLogo } from "@/components/site/SiteLogo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback, getLessonVimeoPlayback } from "@/lib/fns/videos";
 import type { VideoPlaybackSource } from "@/lib/videos";
@@ -544,8 +546,10 @@ function CurriculumSidebar({
       )}
     >
       <div className={cn("border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
-        {variant === "sidebar" ? <h2 className="text-sm font-bold">Contenu du cours</h2> : null}
-        <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-0")}>{summary}</p>
+        {variant === "sidebar" ? (
+          <h2 className="font-display text-sm font-semibold">Contenu du cours</h2>
+        ) : null}
+        <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-1")}>{summary}</p>
       </div>
 
       <div className={cn(variant === "sidebar" && "flex-1 overflow-y-auto")}>
@@ -968,6 +972,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
     for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
       const candidate = allLessons[index]!;
+      if (!lessonIsCompletable(candidate)) continue;
+
       const { locked } = getLessonLockState({
         lesson: candidate,
         course,
@@ -999,7 +1005,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
         <div className="site-container flex h-14 items-center gap-3">
           <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 px-2">
             <Link to="/courses/$slug" params={{ slug: course.slug }}>
@@ -1007,8 +1013,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               <span className="hidden sm:inline">Cours</span>
             </Link>
           </Button>
-          <SiteLogo className="hidden h-7 w-7 rounded-md sm:inline-flex" alt="" />
-          <p className="min-w-0 flex-1 truncate text-sm font-semibold">{course.title}</p>
+          <SiteLogo className="hidden h-7 w-7 rounded-xl sm:inline-flex" alt="" />
+          <p className="min-w-0 flex-1 truncate font-display text-sm font-semibold">{course.title}</p>
+          <ThemeToggle />
           <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
             <Link to="/courses">Tous les cours</Link>
           </Button>
@@ -1027,13 +1034,13 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       </header>
 
       {scheduledSoon && startLabel && !enrolledWaiting && (
-        <div className="border-b border-sky-200 bg-sky-50 px-4 py-2.5 text-center text-sm text-sky-900">
+        <div className="border-b border-primary/20 bg-primary/10 px-4 py-2.5 text-center text-sm text-foreground">
           Inscriptions ouvertes — les vidéos seront disponibles le <strong>{startLabel}</strong>
         </div>
       )}
 
       {enrolledWaiting && access?.scheduledPublishAt && (
-        <div className="border-b border-emerald-200 bg-emerald-50 px-4 py-2.5 text-center text-sm text-emerald-900">
+        <div className="border-b border-success/25 bg-success/10 px-4 py-2.5 text-center text-sm text-foreground">
           Vous êtes inscrit — accès complet au cours le{" "}
           <strong>{formatScheduledPublishLabel(access.scheduledPublishAt)}</strong>
         </div>
@@ -1045,7 +1052,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             <p className="text-xs font-medium text-foreground">
               Progression · {progress?.progressPercent ?? 0}% terminé
             </p>
-            <div className="h-1.5 w-full max-w-md rounded-full bg-muted overflow-hidden sm:ml-4">
+            <div className="h-1.5 w-full max-w-md overflow-hidden rounded-full bg-muted sm:ml-4">
               <div
                 className="h-full rounded-full bg-primary transition-all"
                 style={{ width: `${Math.max(progress?.progressPercent ?? 0, 2)}%` }}
@@ -1056,7 +1063,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       ) : null}
 
       <div className="site-container py-4 sm:py-6">
-        <div className="flex flex-col max-lg:overflow-visible overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
+        <div className="flex max-lg:overflow-visible flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start xl:grid-cols-[380px_minmax(0,1fr)]">
         <aside className="hidden lg:block lg:col-start-1 lg:sticky lg:top-[calc(3.5rem+1rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:overflow-hidden lg:self-start">
           <CurriculumSidebar
             course={course}
@@ -1104,7 +1111,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     key={tab.value}
                     value={tab.value}
                     className={cn(
-                      "rounded-none border-b-2 border-transparent px-3 py-3 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+                      "rounded-none border-b-2 border-transparent px-3 py-3 text-muted-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
                       tab.mobileOnly && "lg:hidden",
                       tab.desktopOnly && "hidden lg:inline-flex",
                     )}

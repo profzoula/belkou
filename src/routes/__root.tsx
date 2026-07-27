@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ReferralCapture } from "@/components/affiliate/ReferralCapture";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { defaultDescription, defaultTitle, absoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
@@ -106,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Urbanist:wght@600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap",
       },
       {
         rel: "stylesheet",
@@ -125,12 +126,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="fr">
       <head>
         <HeadContent />
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           (function() {
-            document.documentElement.classList.remove('dark');
-            try { localStorage.setItem('belkou-theme', 'light'); } catch (e) {}
+            try {
+              var stored = localStorage.getItem('belkou-theme');
+              var theme = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+              var dark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+              document.documentElement.classList.toggle('dark', dark);
+              document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+            } catch (e) {}
           })();
-        `}} />
+        `,
+          }}
+        />
       </head>
       <body>
         {children}
@@ -145,11 +155,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ReferralCapture />
-        <Outlet />
-        <Toaster />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ReferralCapture />
+          <Outlet />
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
