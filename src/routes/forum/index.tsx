@@ -31,20 +31,22 @@ function ForumIndexPage() {
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+      <div className="flex min-h-dvh items-center justify-center bg-background text-sm text-muted-foreground">
         Chargement…
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <Navbar />
       <main>
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
-          <div className="site-container site-page-top pb-10 pt-8 sm:pb-12">
+          <div className="site-container site-page-top pb-8 pt-8 sm:pb-10">
             <FadeIn>
-              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Communauté</p>
+              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+                Communauté
+              </p>
               <div className="mt-3 flex items-start gap-3">
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
                   <MessagesSquare className="h-5 w-5" />
@@ -54,8 +56,8 @@ function ForumIndexPage() {
                     Forum étudiant
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
-                    Posez une question, partagez une idée et échangez avec les autres inscrits. Chaque nouveau
-                    sujet notifie les étudiants du cours.
+                    Posez une question, partagez une idée et échangez avec les autres inscrits. Chaque
+                    nouveau sujet notifie les étudiants du cours.
                   </p>
                 </div>
               </div>
@@ -63,7 +65,7 @@ function ForumIndexPage() {
           </div>
         </section>
 
-        <div className="site-container max-w-6xl py-8 sm:py-12">
+        <div className="site-container py-8 sm:py-10">
           <ForumCoursePicker />
         </div>
       </main>
