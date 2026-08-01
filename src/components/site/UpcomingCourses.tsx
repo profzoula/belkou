@@ -78,7 +78,7 @@ export function UpcomingCourses({ courses }: UpcomingCoursesProps) {
           className="mb-8 max-w-2xl"
         />
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {courses.map((course) => (
             <UpcomingCourseCard key={course.slug} course={course} />
           ))}

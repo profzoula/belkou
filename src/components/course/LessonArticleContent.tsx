@@ -127,7 +127,7 @@ function ArticleSubSessionPanel({
   const sessionIntro = isFirstSubInSession ? found.session.introHtml?.trim() : "";
 
   return (
-    <div className="lesson-article-panel relative border-b border-border bg-gradient-to-b from-emerald-50/40 via-card to-card dark:from-emerald-950/20">
+    <div className="lesson-article-panel relative border-b border-border bg-gradient-to-b from-emerald-50/40 via-card to-card pb-8 dark:from-emerald-950/20 sm:pb-4">
       {nav.prevId && onSubSessionChange ? (
         <button
           type="button"
@@ -149,7 +149,7 @@ function ArticleSubSessionPanel({
         </button>
       ) : null}
 
-      <div className="px-4 py-6 sm:px-10 sm:py-10 md:px-14">
+      <div className="px-4 py-6 pb-10 sm:px-10 sm:py-10 sm:pb-10 md:px-14">
         <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 p-[1px] shadow-sm dark:border-emerald-800">
           <div className="rounded-[15px] bg-card/95 px-5 py-4 backdrop-blur-sm sm:px-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">

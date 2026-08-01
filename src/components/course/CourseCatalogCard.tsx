@@ -131,40 +131,40 @@ export function CourseCatalogCard({
         >
           <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
         </CourseThumbnailBanner>
-        <div className="absolute left-3 top-3 z-10 flex flex-wrap gap-1.5">
+        <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
           {course.bestseller ? (
-            <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm">
+            <span className="rounded-md bg-brand-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm sm:px-2 sm:text-[10px]">
               Bestseller
             </span>
           ) : null}
           {free ? (
-            <span className="rounded-md bg-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-foreground shadow-sm">
+            <span className="rounded-md bg-success px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-success-foreground shadow-sm sm:px-2 sm:text-[10px]">
               Gratuit
             </span>
           ) : null}
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <span className="w-fit rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+      <div className="flex flex-1 flex-col p-2.5 sm:p-5">
+        <span className="w-fit rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary sm:px-2 sm:text-[10px]">
           {course.skillLevel}
         </span>
-        <h3 className="mt-2 line-clamp-2 min-h-[2.75rem] font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary sm:text-base">
+        <h3 className="mt-1.5 line-clamp-2 min-h-[2.4rem] font-display text-xs font-semibold leading-snug text-foreground group-hover:text-primary sm:mt-2 sm:min-h-[2.75rem] sm:text-base">
           {course.title}
         </h3>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
-        <div className="mt-3">
+        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">{course.instructor}</p>
+        <div className="mt-2 hidden sm:mt-3 sm:block">
           <StarRating rating={course.rating} count={course.ratingsCount} />
         </div>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock3 className="h-3.5 w-3.5" />
+        <div className="mt-auto flex items-end justify-between gap-1.5 pt-2.5 sm:gap-3 sm:pt-4">
+          <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground sm:gap-1 sm:text-xs">
+            <Clock3 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             {course.totalDuration}
           </span>
           {free ? (
-            <span className="text-lg font-bold text-success">Gratuit</span>
+            <span className="text-sm font-bold text-success sm:text-lg">Gratuit</span>
           ) : (
-            <span className="text-lg font-bold text-foreground">
+            <span className="text-sm font-bold text-foreground sm:text-lg">
               ${Number.isInteger(course.price) ? course.price : course.price.toFixed(2)}
             </span>
           )}

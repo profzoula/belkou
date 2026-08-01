@@ -125,6 +125,7 @@ export function mergeCourse(base: Course, override?: CourseOverride): Course {
       ...(meta.totalDuration !== undefined && { totalDuration: meta.totalDuration }),
       ...(meta.bestseller !== undefined && { bestseller: meta.bestseller }),
       ...(meta.whatYouLearn !== undefined && { whatYouLearn: meta.whatYouLearn }),
+      ...(meta.categories !== undefined && { categories: meta.categories }),
       ...(meta.published !== undefined && { published: meta.published }),
       ...(meta.scheduledPublishAt !== undefined && {
         scheduledPublishAt: meta.scheduledPublishAt ?? undefined,

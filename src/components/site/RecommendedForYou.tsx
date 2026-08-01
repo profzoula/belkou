@@ -105,7 +105,7 @@ export function RecommendedForYou({ courses, maxVisible = 8 }: RecommendedForYou
           ))}
         </div>
 
-        <div className="site-container hidden gap-5 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="site-container hidden gap-3 sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {recommended.map((course, index) => (
             <FadeIn key={course.slug} delay={Math.min(index * 0.05, 0.2)}>
               <RecommendedCard course={course} />

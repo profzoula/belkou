@@ -170,7 +170,7 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
           Aucun cours ne correspond à votre recherche.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered?.map((enrollment, index) => (
             <FadeIn key={enrollment.id} delay={Math.min(index * 0.04, 0.2)}>
               <CourseGridCard enrollment={enrollment} />
@@ -221,11 +221,11 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
         />
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col p-4">
-        <div className="mb-2">
+      <div className="flex min-w-0 flex-1 flex-col p-2.5 sm:p-4">
+        <div className="mb-1.5 sm:mb-2">
           <span
             className={cn(
-              "rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              "rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide sm:px-2 sm:text-[10px]",
               status === "active" && "bg-success/15 text-success",
               status === "scheduled" && "bg-primary/10 text-primary",
               status === "pending" && "bg-brand-accent/20 text-brand-accent-foreground",
@@ -235,13 +235,13 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
           </span>
         </div>
         <Link {...href} className="block min-w-0">
-          <h3 className="line-clamp-2 font-display text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+          <h3 className="line-clamp-2 font-display text-xs font-semibold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-sm">
             {enrollment.courseTitle}
           </h3>
         </Link>
-        <p className="mt-1 truncate text-xs text-muted-foreground">{enrollment.instructor}</p>
+        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">{enrollment.instructor}</p>
 
-        <div className="mt-auto space-y-2 pt-4">
+        <div className="mt-auto space-y-2 pt-3 sm:pt-4">
           {showProgress ? (
             <>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -250,12 +250,12 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
                   style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">{progressLabel(enrollment)}</p>
+              <p className="text-[10px] text-muted-foreground sm:text-xs">{progressLabel(enrollment)}</p>
             </>
           ) : (
             <p
               className={cn(
-                "flex items-center gap-1 text-xs",
+                "flex items-center gap-1 text-[10px] sm:text-xs",
                 isPaid ? "text-primary" : "text-brand-accent-foreground",
               )}
             >
@@ -265,7 +265,7 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
               {progressLabel(enrollment)}
             </p>
           )}
-          <Button asChild size="sm" variant={canLearn || isPaid ? "default" : "outline"} className="w-full">
+          <Button asChild size="sm" variant={canLearn || isPaid ? "default" : "outline"} className="h-8 w-full text-xs sm:h-9 sm:text-sm">
             <Link {...href}>
               {canLearn ? "Continuer" : isPaid ? "Ouvrir" : "Finaliser"}
               <ArrowRight className="h-3.5 w-3.5" />

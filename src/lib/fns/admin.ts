@@ -632,6 +632,7 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
         totalDuration: z.string().optional(),
         bestseller: z.boolean().optional(),
         whatYouLearn: z.array(z.string().min(1)).optional(),
+        categories: z.array(z.string().min(1)).optional(),
         thumbnailLabel: z.string().optional(),
         thumbnailGradient: z.string().optional(),
         thumbnailImageUrl: z.string().optional(),
@@ -643,7 +644,12 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
-    const { courseSlug, ...patch } = data;
+    const { normalizeCourseCategories } = await import("@/lib/course-categories");
+    const { courseSlug, categories, ...rest } = data;
+    const patch = {
+      ...rest,
+      ...(categories !== undefined ? { categories: normalizeCourseCategories(categories) } : {}),
+    };
 
     const result = await updateCourseMeta({ courseSlug, patch });
     if (!result.ok) {

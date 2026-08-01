@@ -40,6 +40,8 @@ export type Course = {
   plan?: "premium" | "vip";
   description: string;
   whatYouLearn: string[];
+  /** Catégories homepage / filtre catalogue (ids canoniques) */
+  categories?: string[];
   /** false = masqué sur le site public */
   published?: boolean;
   /** ISO date — le cours devient visible automatiquement à cette date */

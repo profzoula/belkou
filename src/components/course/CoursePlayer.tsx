@@ -1068,8 +1068,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </div>
       ) : null}
 
-      <div className="site-container py-4 sm:py-6">
-        <div className="flex max-lg:overflow-visible flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start xl:grid-cols-[380px_minmax(0,1fr)]">
+      <div className="site-container py-4 pb-20 sm:py-6 sm:pb-6">
+        <div className="flex flex-col overflow-visible rounded-2xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start lg:overflow-hidden xl:grid-cols-[380px_minmax(0,1fr)]">
         <aside className="hidden lg:col-start-1 lg:flex lg:h-[calc(100dvh-3.5rem-2rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:sticky lg:top-[calc(3.5rem+1rem)] lg:min-h-0 lg:flex-col lg:self-start lg:overflow-hidden">
           <CurriculumSidebar
             course={course}
@@ -1083,7 +1083,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </aside>
 
-        <div className="flex min-w-0 flex-col max-lg:min-h-0 max-lg:max-h-[calc(100dvh-3.5rem)] max-lg:flex-1 max-lg:overflow-hidden lg:col-start-2">
+        <div className="flex min-w-0 flex-col lg:col-start-2">
         <div className="z-30 min-w-0 shrink-0">
           <CourseVideoArea
             course={course}
@@ -1102,8 +1102,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           />
         </div>
 
-        <div className="flex min-w-0 flex-col border-b border-border px-3 sm:px-6 max-lg:min-h-0 max-lg:flex-1">
-            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col">
+        <div className="flex min-w-0 flex-col border-b border-border px-3 sm:px-6">
+            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
               <TabsList className="h-auto w-full shrink-0 justify-start gap-0 rounded-none border-0 bg-transparent p-0">
                 {[
                   { value: "overview", label: "Aperçu" },
@@ -1129,7 +1129,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
               <TabsContent
                 value="curriculum"
-                className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto max-lg:overscroll-contain pb-8 pt-0 lg:hidden"
+                className="mt-0 pb-16 pt-0 lg:hidden"
               >
                 <CurriculumSidebar
                   variant="tab"
@@ -1144,7 +1144,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 />
               </TabsContent>
 
-              <TabsContent value="overview" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 pb-8 pt-6 sm:px-0">
+              <TabsContent value="overview" className="mt-0 px-1 pb-16 pt-6 sm:px-0">
                 <h1 className="font-display text-xl font-bold leading-snug sm:text-2xl md:text-3xl">
                   {course.title}
                 </h1>
@@ -1245,7 +1245,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </div>
               </TabsContent>
 
-              <TabsContent value="resources" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 pb-8 pt-6 sm:px-0">
+              <TabsContent value="resources" className="mt-0 px-1 pb-16 pt-6 sm:px-0">
                 {hasPaidAccess ? (
                   <CourseResourcesPanel resources={course.resources ?? []} />
                 ) : (
@@ -1264,7 +1264,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               </TabsContent>
 
               {["qa", "notes", "reviews"].map((tab) => (
-                <TabsContent key={tab} value={tab} className="max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto px-1 py-12 text-center sm:px-0">
+                <TabsContent key={tab} value={tab} className="px-1 py-12 pb-16 text-center sm:px-0">
                   {hasPaidAccess && session?.access_token ? (
                     <EnrolledExtraTab
                       tab={tab}

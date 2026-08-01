@@ -64,6 +64,7 @@ export type CourseMetaPatch = {
   totalDuration?: string;
   bestseller?: boolean;
   whatYouLearn?: string[];
+  categories?: string[];
   thumbnailLabel?: string;
   thumbnailGradient?: string;
   thumbnailImageUrl?: string;
@@ -87,6 +88,7 @@ export function patchStoredCourseMeta(course: StoredCourse, patch: CourseMetaPat
     ...(patch.totalDuration !== undefined && { totalDuration: patch.totalDuration }),
     ...(patch.bestseller !== undefined && { bestseller: patch.bestseller }),
     ...(patch.whatYouLearn !== undefined && { whatYouLearn: patch.whatYouLearn }),
+    ...(patch.categories !== undefined && { categories: patch.categories }),
     ...(patch.published !== undefined && { published: patch.published }),
     ...(patch.scheduledPublishAt !== undefined && {
       scheduledPublishAt: patch.scheduledPublishAt ?? undefined,
@@ -288,6 +290,7 @@ export function buildDefaultStoredCourse(input: CreateCourseInput): StoredCourse
     plan,
     description: input.description ?? "",
     whatYouLearn: [],
+    categories: [],
     published: false,
     resources: [],
     thumbnail: {

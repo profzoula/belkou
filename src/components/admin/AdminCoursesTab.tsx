@@ -41,6 +41,7 @@ import { LessonVideoUpload } from "@/components/admin/LessonVideoUpload";
 import { AdminCourseResourcesEditor } from "@/components/admin/AdminCourseResourcesEditor";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatCoursePrice, formatCourseDurationLabel, getCourseDisplayDuration, isFreeCourse } from "@/lib/courses";
+import { COURSE_CATEGORIES, normalizeCourseCategories } from "@/lib/course-categories";
 import { siteConfig } from "@/lib/site-config";
 import {
   adminAddLesson,
@@ -93,6 +94,7 @@ type CourseMetaDraft = {
   skillLevel: string;
   totalDuration: string;
   bestseller: boolean;
+  categories: string[];
 };
 
 type NewLessonDraft = {
@@ -146,6 +148,7 @@ function courseToMetaDraft(course: AdminCourse): CourseMetaDraft {
     skillLevel: course.skillLevel,
     totalDuration: course.totalDuration,
     bestseller: Boolean(course.bestseller),
+    categories: normalizeCourseCategories(course.categories ?? []),
   };
 }
 
@@ -394,6 +397,7 @@ export function AdminCoursesTab() {
           skillLevel: metaDraft.skillLevel.trim(),
           totalDuration: getCourseDisplayDuration(selectedCourse),
           bestseller: metaDraft.bestseller,
+          categories: metaDraft.categories,
         },
       });
       let nextCourses = result.courses;
@@ -849,6 +853,42 @@ export function AdminCoursesTab() {
                 onChange={(e) => updateMetaDraft({ description: e.target.value })}
                 className="rounded-lg min-h-[88px]"
               />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Catégories</Label>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {COURSE_CATEGORIES.map((category) => {
+                  const checked = metaDraft.categories.includes(category.id);
+                  return (
+                    <label
+                      key={category.id}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-colors",
+                        checked
+                          ? "border-primary/40 bg-primary/5 text-foreground"
+                          : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-primary"
+                        checked={checked}
+                        onChange={(event) => {
+                          updateMetaDraft({
+                            categories: event.target.checked
+                              ? [...metaDraft.categories, category.id]
+                              : metaDraft.categories.filter((id) => id !== category.id),
+                          });
+                        }}
+                      />
+                      <span className="font-medium text-foreground">{category.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Ces catégories apparaissent dans « Cours populaires » sur l&apos;accueil.
+              </p>
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="meta-learn">Ce que vous apprendrez</Label>

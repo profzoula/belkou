@@ -11,17 +11,17 @@ import {
   Terminal,
 } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { COURSE_CATEGORIES, type CourseCategoryId } from "@/lib/course-categories";
 
-const popularCourses = [
-  { label: "Dropshipping", icon: Package },
-  { label: "Développement App", icon: AppWindow },
-  { label: "Marketing Digital", icon: Megaphone },
-  { label: "Shopify Shop", icon: Store },
-  { label: "Facebook Ads", icon: Target },
-  { label: "Powershell & CMD", icon: Terminal },
-  { label: "Ebook", icon: BookOpen },
-  { label: "Plus de cours", icon: LayoutGrid },
-] as const;
+const categoryIcons: Record<CourseCategoryId, typeof Package> = {
+  dropshipping: Package,
+  "developpement-app": AppWindow,
+  "marketing-digital": Megaphone,
+  "shopify-shop": Store,
+  "facebook-ads": Target,
+  "powershell-cmd": Terminal,
+  ebook: BookOpen,
+};
 
 export function PopularCourses() {
   return (
@@ -41,24 +41,38 @@ export function PopularCourses() {
         </FadeIn>
 
         <div className="mt-4 grid grid-cols-4 gap-2.5 sm:mt-8 sm:gap-4 md:gap-5">
-          {popularCourses.map((item, index) => {
-            const Icon = item.icon;
+          {COURSE_CATEGORIES.map((category, index) => {
+            const Icon = categoryIcons[category.id];
             return (
-              <FadeIn key={item.label} delay={Math.min(index * 0.03, 0.18)}>
+              <FadeIn key={category.id} delay={Math.min(index * 0.03, 0.18)}>
                 <Link
                   to="/courses"
+                  search={{ category: category.id }}
                   className="group flex flex-col items-center justify-start gap-2 rounded-2xl bg-muted/70 px-1.5 py-3 text-center transition-colors active:bg-muted hover:bg-muted sm:gap-3 sm:px-3 sm:py-7"
                 >
                   <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15 sm:size-14">
                     <Icon className="size-5 sm:size-7" strokeWidth={1.75} aria-hidden />
                   </span>
                   <span className="line-clamp-2 min-h-[2rem] text-[10px] font-semibold leading-tight text-foreground sm:min-h-0 sm:max-w-[9.5rem] sm:text-sm">
-                    {item.label}
+                    {category.label}
                   </span>
                 </Link>
               </FadeIn>
             );
           })}
+          <FadeIn delay={0.21}>
+            <Link
+              to="/courses"
+              className="group flex flex-col items-center justify-start gap-2 rounded-2xl bg-muted/70 px-1.5 py-3 text-center transition-colors active:bg-muted hover:bg-muted sm:gap-3 sm:px-3 sm:py-7"
+            >
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15 sm:size-14">
+                <LayoutGrid className="size-5 sm:size-7" strokeWidth={1.75} aria-hidden />
+              </span>
+              <span className="line-clamp-2 min-h-[2rem] text-[10px] font-semibold leading-tight text-foreground sm:min-h-0 sm:max-w-[9.5rem] sm:text-sm">
+                Plus de cours
+              </span>
+            </Link>
+          </FadeIn>
         </div>
       </div>
     </section>
