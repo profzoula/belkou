@@ -541,18 +541,24 @@ function CurriculumSidebar({
   return (
     <div
       className={cn(
-        "flex flex-col bg-card",
+        "flex min-h-0 flex-col bg-card",
         variant === "sidebar" ? "h-full border-t border-border lg:border-t-0 lg:border-r" : "",
       )}
     >
-      <div className={cn("border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
+      <div className={cn("shrink-0 border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
         {variant === "sidebar" ? (
           <h2 className="font-display text-sm font-semibold">Contenu du cours</h2>
         ) : null}
         <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-1")}>{summary}</p>
       </div>
 
-      <div className={cn(variant === "sidebar" && "flex-1 overflow-y-auto")}>
+      <div
+        className={cn(
+          variant === "sidebar"
+            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            : "min-h-0",
+        )}
+      >
         <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
           {course.sections.map((section) => {
             const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
@@ -1064,7 +1070,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
       <div className="site-container py-4 sm:py-6">
         <div className="flex max-lg:overflow-visible flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start xl:grid-cols-[380px_minmax(0,1fr)]">
-        <aside className="hidden lg:block lg:col-start-1 lg:sticky lg:top-[calc(3.5rem+1rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:overflow-hidden lg:self-start">
+        <aside className="hidden lg:col-start-1 lg:flex lg:h-[calc(100dvh-3.5rem-2rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:sticky lg:top-[calc(3.5rem+1rem)] lg:min-h-0 lg:flex-col lg:self-start lg:overflow-hidden">
           <CurriculumSidebar
             course={course}
             activeLessonId={activeLessonId}
@@ -1121,7 +1127,10 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 ))}
               </TabsList>
 
-              <TabsContent value="curriculum" className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto pb-8 pt-0 lg:hidden">
+              <TabsContent
+                value="curriculum"
+                className="mt-0 max-lg:min-h-0 max-lg:flex-1 max-lg:overflow-y-auto max-lg:overscroll-contain pb-8 pt-0 lg:hidden"
+              >
                 <CurriculumSidebar
                   variant="tab"
                   course={course}

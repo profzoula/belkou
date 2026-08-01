@@ -161,6 +161,11 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+  @media (max-width: 1023px) {
+    body.has-mobile-bottom-nav {
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
   ::selection {
     background: rgb(0 70 213 / 0.16);
   }

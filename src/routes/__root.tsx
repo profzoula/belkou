@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ReferralCapture } from "@/components/affiliate/ReferralCapture";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { MobileBottomNav } from "@/components/site/MobileBottomNav";
 import { defaultDescription, defaultTitle, absoluteUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
@@ -159,6 +160,7 @@ function RootComponent() {
         <AuthProvider>
           <ReferralCapture />
           <Outlet />
+          <MobileBottomNav />
           <Toaster />
         </AuthProvider>
       </ThemeProvider>

@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
-import { ImpactStats } from "@/components/site/ImpactStats";
-import { TrendingCourses } from "@/components/site/TrendingCourses";
+import { PopularCourses } from "@/components/site/PopularCourses";
+import { RecommendedForYou } from "@/components/site/RecommendedForYou";
+import { TrustStrip } from "@/components/site/TrustStrip";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { Testimonials } from "@/components/site/Testimonials";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
-import { getStudentCount, getCatalogCourseCount } from "@/lib/fns/stats";
+import { getStudentCount } from "@/lib/fns/stats";
 import { getPublicCourses } from "@/lib/fns/courses";
 import { isScheduledInFuture } from "@/lib/course-publish";
 import { seoHead, defaultTitle, defaultDescription, organizationJsonLd } from "@/lib/seo";
@@ -22,35 +23,34 @@ export const Route = createFileRoute("/")({
       path: "/",
     }),
   loader: async () => {
-    const [studentCount, publicCourses, courseCount] = await Promise.all([
+    const [studentCount, publicCourses] = await Promise.all([
       getStudentCount(),
       getPublicCourses(),
-      getCatalogCourseCount(),
     ]);
     return {
       studentCount,
       courses: publicCourses,
-      courseCount,
     };
   },
   component: Index,
 });
 
 function Index() {
-  const { studentCount, courses, courseCount } = Route.useLoaderData();
+  const { studentCount, courses } = Route.useLoaderData();
 
   const upcomingCourses = courses.filter((course) => isScheduledInFuture(course));
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden max-w-[100vw]">
+    <div className="min-h-screen max-w-[100vw] overflow-x-hidden bg-background">
       <JsonLd data={[organizationJsonLd()]} />
       <div className="relative bg-background">
         <Navbar theme="hero" />
         <Hero studentCount={studentCount} />
-        <ImpactStats studentCount={studentCount} courseCount={courseCount} overlap />
       </div>
-      <main className="overflow-x-hidden max-w-full">
-        <TrendingCourses courses={courses} />
+      <main className="max-w-full overflow-x-hidden">
+        <PopularCourses />
+        <RecommendedForYou courses={courses} />
+        <TrustStrip />
         <UpcomingCourses courses={upcomingCourses} />
         <HowItWorks />
         <Testimonials />
