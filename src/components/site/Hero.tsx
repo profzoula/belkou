@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
-import { Calendar, Rocket, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Play, Star } from "lucide-react";
 import { formatCount } from "@/lib/courses";
 
 type HeroProps = {
@@ -14,102 +14,85 @@ export function Hero({ studentCount }: HeroProps) {
   const studentLabel = formatCount(studentCount);
 
   return (
-    <section className="relative bg-background site-page-top">
-      <div className="site-container py-4 sm:py-8 md:py-12">
+    <section className="relative overflow-hidden bg-background site-page-top">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(0_70_213_/_0.12),transparent_55%)]"
+      />
+      <img
+        src="/hero/bg-with-grid.png"
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.55]"
+        width={1200}
+        height={800}
+      />
+
+      <div className="site-container relative grid grid-cols-[1.15fr_0.85fr] items-center gap-3 px-4 pb-4 pt-5 sm:gap-8 sm:pb-8 sm:pt-10 md:grid-cols-[1.05fr_0.95fr] md:gap-10 md:pb-10 md:pt-8 lg:gap-14">
         <motion.div
-          className="relative overflow-hidden rounded-[1.35rem] bg-[#0046d5] shadow-[0_20px_60px_-28px_rgb(0_70_213_/_0.5)] sm:rounded-[1.75rem] md:rounded-[2rem]"
+          className="flex min-w-0 flex-col items-start text-left"
           initial={reduceMotion ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
         >
+          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-sm">
+            <span className="inline-flex items-center gap-0.5 text-brand-accent" aria-label="5 étoiles">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star key={index} className="size-2.5 fill-current sm:size-3.5" />
+              ))}
+            </span>
+            <span>
+              Utilisé par <span className="font-semibold text-foreground">{studentLabel}+</span>{" "}
+              étudiants
+            </span>
+          </div>
+
+          <h1 className="mt-3 font-display text-[1.35rem] font-bold leading-[1.12] tracking-tight text-foreground text-balance sm:mt-5 sm:text-4xl md:text-5xl lg:text-[3.4rem]">
+            Des compétences qui vous font{" "}
+            <span className="text-primary">embaucher</span>
+          </h1>
+
+          <p className="mt-2 max-w-lg text-[11px] leading-relaxed text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
+            Parcours premium pour bâtir des apps IA et SaaS — de l&apos;idée au déploiement, avec
+            mentors et projets concrets.
+          </p>
+
+          <div className="mt-4 flex flex-nowrap items-center gap-2 sm:mt-7 sm:gap-3">
+            <Link
+              to="/courses"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-3 text-[10px] font-semibold whitespace-nowrap text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
+            >
+              Commencer
+              <ArrowRight className="size-3 sm:size-4" aria-hidden />
+            </Link>
+            <Link
+              to="/courses"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-card px-3 text-[10px] font-semibold whitespace-nowrap text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
+            >
+              <Play className="size-3 text-primary sm:size-4" aria-hidden />
+              Voir les cours
+            </Link>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="relative justify-self-end"
+          initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.55, delay: 0.08, ease }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-x-6 bottom-6 h-28 rounded-[100%] bg-primary/20 blur-3xl"
+          />
           <img
-            src="/images/website/pexels-ron-lach-9829316.jpg"
+            src="/hero/student.png"
             alt="Diplômée BelKou prête pour sa carrière"
-            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover object-[72%_center] sm:object-[75%_center] lg:object-[78%_center]"
-            width={1200}
-            height={800}
+            className="relative z-10 mx-auto h-auto w-full max-h-[min(52vh,380px)] object-contain object-bottom sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-105"
+            width={900}
+            height={1200}
             fetchPriority="high"
           />
-
-          {/* Blue melt from left into the photo */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-[1] hidden sm:block"
-            style={{
-              background:
-                "linear-gradient(90deg, #002a8f 0%, #0039c4 28%, #0046d5 42%, rgba(0,70,213,0.82) 54%, rgba(0,70,213,0.4) 66%, rgba(0,70,213,0.12) 78%, transparent 92%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-[1] sm:hidden"
-            style={{
-              background:
-                "linear-gradient(105deg, #002a8f 0%, #0046d5 45%, rgba(0,70,213,0.7) 58%, rgba(0,70,213,0.25) 75%, transparent 100%)",
-            }}
-          />
-
-          <div className="relative z-10 px-5 py-5 sm:px-10 sm:py-12 md:px-12 xl:px-14">
-            <div className="flex min-h-[15rem] flex-col justify-center sm:min-h-[28rem] lg:min-h-[32rem]">
-              <div className="w-[58%] max-w-[16rem] sm:w-full sm:max-w-lg lg:max-w-[32rem]">
-                <motion.h1
-                  className="font-display text-[1.3rem] font-bold leading-[1.15] tracking-tight text-white sm:text-4xl sm:font-semibold md:text-5xl lg:text-[3rem]"
-                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.05, ease }}
-                >
-                  Prêt à coder&nbsp;?
-                  <span className="mt-1 block">
-                    Des compétences qui vous font embaucher.
-                  </span>
-                </motion.h1>
-
-                <motion.ul
-                  className="mt-2.5 space-y-1 text-[10px] leading-snug text-white/90 sm:mt-6 sm:space-y-2.5 sm:text-[15px]"
-                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1, ease }}
-                >
-                  <li className="flex items-center gap-1.5 sm:gap-2.5">
-                    <Zap className="size-3 shrink-0 text-brand-accent sm:size-4" aria-hidden />
-                    <span className="sm:hidden">Parcours premium IA &amp; SaaS</span>
-                    <span className="hidden sm:inline">
-                      Parcours premium IA &amp; SaaS, prêts à l&apos;emploi
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-1.5 sm:gap-2.5">
-                    <ShieldCheck className="size-3 shrink-0 text-brand-accent sm:size-4" aria-hidden />
-                    <span className="sm:hidden">Mentors • {studentLabel}+ étudiants</span>
-                    <span className="hidden sm:inline">
-                      Mentors experts • Projets réels • {studentLabel}+ étudiants
-                    </span>
-                  </li>
-                </motion.ul>
-              </div>
-
-              <motion.div
-                className="mt-3.5 flex w-full max-w-[20rem] flex-nowrap items-center gap-2 sm:mt-8 sm:max-w-none sm:gap-3"
-                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.16, ease }}
-              >
-                <Link
-                  to="/courses"
-                  className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-full bg-white px-3 text-[11px] font-semibold whitespace-nowrap text-[#0046d5] shadow-sm transition hover:bg-white/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
-                >
-                  <Rocket className="size-3 sm:size-4" aria-hidden />
-                  Commencer
-                </Link>
-                <Link
-                  to="/courses"
-                  className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-full border border-white/80 bg-transparent px-3 text-[11px] font-semibold whitespace-nowrap text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
-                >
-                  <Calendar className="size-3 sm:size-4" aria-hidden />
-                  Voir les cours
-                </Link>
-              </motion.div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>

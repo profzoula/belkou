@@ -100,14 +100,14 @@
 
   --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --promo-bar-height: 1.75rem;
+  --promo-bar-height: 2.25rem;
   --nav-bar-height: 3.5rem;
   --site-header-height: calc(env(safe-area-inset-top, 0px) + var(--promo-bar-height) + var(--nav-bar-height));
 }
 
 @media (min-width: 640px) {
   :root {
-    --promo-bar-height: 2rem;
+    --promo-bar-height: 2.5rem;
     --nav-bar-height: 4rem;
   }
 }
@@ -622,11 +622,13 @@
   50% { background-position: 100% 50%; }
 }
 .promo-topbar {
-  background: var(--gradient-promo);
-  background-size: 200% 100%;
-  color: oklch(0.99 0 0);
-  animation: promo-bar-shift 5s ease-in-out infinite;
-  box-shadow: 0 2px 14px oklch(0.50 0.18 272 / 0.25);
+  background: #0f172a;
+  color: #fff;
+  box-shadow: none;
+}
+.dark .promo-topbar {
+  background: #020617;
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
 }
 
 @keyframes promo-shimmer {
@@ -639,27 +641,13 @@
 }
 .promo-highlight {
   font-weight: 700;
-  background: linear-gradient(
-    105deg,
-    oklch(0.99 0 0) 0%,
-    oklch(0.99 0 0) 38%,
-    oklch(0.98 0.14 95) 50%,
-    oklch(0.99 0 0) 62%,
-    oklch(0.99 0 0) 100%
-  );
-  background-size: 220% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: promo-shimmer 2.8s linear infinite;
+  color: var(--brand-accent);
 }
 .promo-spots {
   font-weight: 600;
-  animation: promo-glow 2.2s ease-in-out infinite;
 }
 .promo-cta {
-  animation: promo-glow 2.2s ease-in-out infinite;
-  animation-delay: 0.4s;
+  font-weight: 600;
 }
 
 .lesson-quiz-option:focus-visible {

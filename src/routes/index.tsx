@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
-import { PopularCourses } from "@/components/site/PopularCourses";
-import { RecommendedForYou } from "@/components/site/RecommendedForYou";
 import { TrustStrip } from "@/components/site/TrustStrip";
+import { CoursesSection } from "@/components/site/CoursesSection";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
 import { HowItWorks } from "@/components/site/HowItWorks";
 import { Testimonials } from "@/components/site/Testimonials";
@@ -48,8 +47,7 @@ function Index() {
         <Hero studentCount={studentCount} />
       </div>
       <main className="max-w-full overflow-x-hidden">
-        <PopularCourses />
-        <RecommendedForYou courses={courses} />
+        <CoursesSection courses={courses} />
         <TrustStrip />
         <UpcomingCourses courses={upcomingCourses} />
         <HowItWorks />
