@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  Award,
   BookOpen,
   CalendarClock,
   Check,
@@ -324,17 +323,6 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             {course.description}
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            {course.bestseller && (
-              <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand-accent-foreground">
-                Bestseller
-              </span>
-            )}
-            <span className="rounded-md bg-primary px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary-foreground">
-              {course.skillLevel}
-            </span>
-          </div>
-
           <p className="mt-3 text-sm text-muted-foreground">
             Créé par{" "}
             <span className="font-medium text-primary underline-offset-2 hover:underline">{course.instructor}</span>
@@ -499,10 +487,6 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
         <main className="min-w-0 lg:order-1">
           <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
-            <span className="inline-flex items-center gap-1 rounded-sm bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
-              <Award className="h-3.5 w-3.5" />
-              {course.skillLevel}
-            </span>
             <span className="inline-flex items-center gap-1 font-bold text-foreground">
               {course.rating.toFixed(1)}
               <Star className="h-4 w-4 fill-brand-accent text-brand-accent" />

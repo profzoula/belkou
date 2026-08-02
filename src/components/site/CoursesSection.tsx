@@ -3,11 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Clock3, Star, Users } from "lucide-react";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { FadeIn } from "@/components/motion/FadeIn";
-import {
-  COURSE_CATEGORIES,
-  getCourseCategoryLabel,
-  type CourseCategoryId,
-} from "@/lib/course-categories";
+import { COURSE_CATEGORIES } from "@/lib/course-categories";
 import { formatCount, isFreeCourse } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { cn } from "@/lib/utils";
@@ -19,8 +15,6 @@ type CoursesSectionProps = {
 
 function HomeCourseCard({ course }: { course: PublicCourse }) {
   const free = isFreeCourse(course);
-  const categoryId = (course.categories?.[0] ?? null) as CourseCategoryId | null;
-  const categoryLabel = categoryId ? getCourseCategoryLabel(categoryId) : course.skillLevel;
 
   return (
     <Link
@@ -38,12 +32,7 @@ function HomeCourseCard({ course }: { course: PublicCourse }) {
       />
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-xs text-muted-foreground">{course.instructor}</p>
-          <span className="shrink-0 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-            {categoryLabel}
-          </span>
-        </div>
+        <p className="truncate text-xs text-muted-foreground">{course.instructor}</p>
 
         <h3 className="mt-2 line-clamp-2 min-h-[2.5rem] font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary sm:text-base">
           {course.title}

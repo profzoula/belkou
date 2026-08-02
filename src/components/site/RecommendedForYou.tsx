@@ -23,21 +23,14 @@ function RecommendedCard({ course }: { course: PublicCourse }) {
         "active:scale-[0.98] sm:w-full sm:hover:-translate-y-0.5 sm:hover:border-primary/25 sm:hover:shadow-md",
       )}
     >
-      <div className="relative">
-        <CourseThumbnailBanner
-          thumbnail={course.thumbnail}
-          slug={course.slug}
-          aspectClass="aspect-[16/10]"
-          className="rounded-none border-0"
-          showLabel={false}
-          showIcon={!course.thumbnail.imageUrl}
-        />
-        {course.bestseller ? (
-          <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm">
-            Bestseller
-          </span>
-        ) : null}
-      </div>
+      <CourseThumbnailBanner
+        thumbnail={course.thumbnail}
+        slug={course.slug}
+        aspectClass="aspect-[16/10]"
+        className="rounded-none border-0"
+        showLabel={false}
+        showIcon={!course.thumbnail.imageUrl}
+      />
 
       <div className="flex flex-1 flex-col p-3.5 sm:p-4">
         <h3 className="line-clamp-2 min-h-[2.5rem] font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary">

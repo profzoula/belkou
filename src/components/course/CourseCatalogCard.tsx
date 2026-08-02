@@ -62,17 +62,7 @@ export function CourseCatalogCard({
           <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
         </CourseThumbnailBanner>
         <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
-          <div className="flex flex-wrap gap-1.5">
-            {course.bestseller ? (
-              <span className="rounded-md bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground">
-                Bestseller
-              </span>
-            ) : null}
-            <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
-              {course.skillLevel}
-            </span>
-          </div>
-          <h2 className="mt-2 line-clamp-2 font-display text-base font-semibold leading-snug group-hover:text-primary sm:text-lg">
+          <h2 className="line-clamp-2 font-display text-base font-semibold leading-snug group-hover:text-primary sm:text-lg">
             {course.title}
           </h2>
           <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
@@ -131,25 +121,15 @@ export function CourseCatalogCard({
         >
           <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
         </CourseThumbnailBanner>
-        <div className="absolute left-2 top-2 z-10 flex flex-wrap gap-1 sm:left-3 sm:top-3 sm:gap-1.5">
-          {course.bestseller ? (
-            <span className="rounded-md bg-brand-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm sm:px-2 sm:text-[10px]">
-              Bestseller
-            </span>
-          ) : null}
-          {free ? (
-            <span className="rounded-md bg-success px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-success-foreground shadow-sm sm:px-2 sm:text-[10px]">
-              Gratuit
-            </span>
-          ) : null}
-        </div>
+        {free ? (
+          <span className="absolute left-2 top-2 z-10 rounded-md bg-success px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-success-foreground shadow-sm sm:left-3 sm:top-3 sm:px-2 sm:text-[10px]">
+            Gratuit
+          </span>
+        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col p-2.5 sm:p-5">
-        <span className="w-fit rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary sm:px-2 sm:text-[10px]">
-          {course.skillLevel}
-        </span>
-        <h3 className="mt-1.5 line-clamp-2 min-h-[2.4rem] font-display text-xs font-semibold leading-snug text-foreground group-hover:text-primary sm:mt-2 sm:min-h-[2.75rem] sm:text-base">
+        <h3 className="line-clamp-2 min-h-[2.4rem] font-display text-xs font-semibold leading-snug text-foreground group-hover:text-primary sm:min-h-[2.75rem] sm:text-base">
           {course.title}
         </h3>
         <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">{course.instructor}</p>
