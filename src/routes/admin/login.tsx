@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Lock } from "lucide-react";
+import { ArrowRight, Lock, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,28 +48,40 @@ function AdminLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh" />
-      <div className="absolute right-4 top-4 z-10">
+    <div className="relative flex min-h-dvh items-center justify-center bg-[#F8FAFC] px-4 dark:bg-background">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(0_70_213_/_0.12),transparent_55%)]"
+      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-70" />
+
+      <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
 
-      <div className="site-container relative w-full max-w-md py-10">
+      <div className="relative w-full max-w-[420px] py-10">
         <div className="mb-8 text-center">
-          <div className="mb-4 inline-flex items-center gap-2.5">
-            <SiteLogo className="h-9 w-9" alt="" />
-            <span className="font-display text-lg font-semibold">{siteConfig.name}</span>
+          <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/80 bg-card/80 px-3 py-1.5 shadow-sm backdrop-blur">
+            <SiteLogo className="size-6 rounded-md" alt="" />
+            <span className="font-display text-sm font-semibold">{siteConfig.name}</span>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase">
+              Admin
+            </span>
           </div>
-          <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Lock className="h-5 w-5" />
+          <div className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-primary">
+            <Lock className="size-5" aria-hidden />
           </div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Administration</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Accès réservé au formateur</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-[28px]">
+            Console administration
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Accès sécurisé réservé à l&apos;équipe BelKou.
+          </p>
         </div>
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-md"
+          className="space-y-4 rounded-[20px] border border-border/80 bg-card/95 p-6 shadow-[0_16px_48px_rgb(15_23_42_/_0.08)] backdrop-blur sm:p-7"
         >
           <div className="space-y-2">
             <Label htmlFor="username">Identifiant</Label>
@@ -94,13 +106,18 @@ function AdminLoginPage() {
               required
             />
           </div>
-          <Button type="submit" variant="hero" className="w-full shadow-primary" disabled={loading}>
-            {loading ? "Connexion…" : "Se connecter"} <ArrowRight className="h-4 w-4" />
+          <Button type="submit" variant="hero" className="w-full rounded-xl shadow-primary" disabled={loading}>
+            {loading ? "Connexion…" : "Se connecter"}
+            <ArrowRight className="size-4" aria-hidden />
           </Button>
+          <p className="inline-flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
+            <ShieldCheck className="size-3.5 text-success" aria-hidden />
+            Session chiffrée · accès formateur uniquement
+          </p>
         </form>
 
         <p className="mt-6 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+          <Link to="/" className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
             ← Retour au site
           </Link>
         </p>

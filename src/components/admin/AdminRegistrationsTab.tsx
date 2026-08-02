@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import {
   adminAddCashRegistration,
   adminGrantFreeVip,
@@ -185,26 +186,28 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Inscriptions</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Gérez paiements cash, VIP gratuit et export CSV.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="hero" size="sm" onClick={() => setShowAddForm((v) => !v)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Cash
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => exportCSV(registrations as unknown as Array<Record<string, unknown>>)}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            CSV
-          </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Ops"
+        title="Inscriptions"
+        description="Paiements cash, VIP gratuit et export CSV."
+        actions={
+          <>
+            <Button variant="hero" size="sm" className="rounded-xl" onClick={() => setShowAddForm((v) => !v)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Cash
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
+              onClick={() => exportCSV(registrations as unknown as Array<Record<string, unknown>>)}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              CSV
+            </Button>
+          </>
+        }
+      />
 
       {showAddForm && (
         <div className="surface rounded-2xl p-5 sm:p-6">

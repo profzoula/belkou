@@ -74,21 +74,20 @@ export async function handleOAuthCallback(request: Request): Promise<Response> {
   try {
     const { data: userData } = await supabase.auth.getUser();
     const user = userData.user;
-    const referredBy = user?.user_metadata?.referred_by;
     const cookieRef = parseCookieHeader(request.headers.get("Cookie") ?? "").find(
       (c) => c.name === "belkou_ref",
     )?.value;
-    const referralCode =
-      (typeof referredBy === "string" && referredBy.trim()) ||
-      (cookieRef ? decodeURIComponent(cookieRef) : "");
+    const ephemeralReferralCode = cookieRef ? decodeURIComponent(cookieRef) : null;
 
-    if (user?.id && user.email && referralCode) {
-      const { earnSignupAffiliateCommission } = await import("@/server/affiliates");
+    if (user?.id && user.email) {
+      const { claimSignupReferralFromTrustedSources } = await import("@/server/affiliates");
       const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
-      await earnSignupAffiliateCommission({
+      // Cookie may bind referred_by only for brand-new accounts; late ?ref= is ignored.
+      await claimSignupReferralFromTrustedSources({
         userId: user.id,
         email: normalizeRegistrationEmail(user.email),
-        referralCode,
+        createdAt: user.created_at,
+        ephemeralReferralCode,
       });
     }
 

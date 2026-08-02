@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminGrantCourseAccess, getAdminStudents } from "@/lib/fns/admin";
 
 const ROWS_PER_PAGE = 20;
@@ -163,18 +164,17 @@ export function AdminStudentsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Étudiants</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Comptes créés sur BelKou et accès aux cours. Activez un cours manuellement pour un étudiant.
-          </p>
-        </div>
-        <Button variant="hero" size="sm" onClick={() => openGrantDialog()}>
-          <BookOpenCheck className="h-4 w-4 mr-2" />
-          Activer un cours
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="Ops"
+        title="Étudiants"
+        description="Comptes BelKou et accès cours. Activez un parcours manuellement si besoin."
+        actions={
+          <Button variant="hero" size="sm" className="rounded-xl" onClick={() => openGrantDialog()}>
+            <BookOpenCheck className="mr-2 h-4 w-4" />
+            Activer un cours
+          </Button>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4">

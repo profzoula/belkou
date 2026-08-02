@@ -14,7 +14,7 @@ import {
   formatAffiliateUsd,
 } from "@/lib/affiliate-config";
 import { getAffiliateDashboard, requestAffiliateWithdrawalFn } from "@/lib/fns/affiliate";
-import { getStoredReferralCode } from "@/lib/referral-storage";
+import { clearStoredReferralCode } from "@/lib/referral-storage";
 import { useAuth } from "@/hooks/use-auth";
 
 type AffiliatePanelProps = {
@@ -38,14 +38,15 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
 
   const loadDashboard = () => {
     setLoading(true);
-    const storedRef = getStoredReferralCode();
     return dashboardFn({
-      data: {
-        accessToken,
-        referralCode: storedRef ?? undefined,
-      },
+      data: { accessToken },
     })
-      .then(setData)
+      .then((result) => {
+        setData(result);
+        if (result.affiliate?.referralClaimed) {
+          clearStoredReferralCode();
+        }
+      })
       .catch((err) => {
         console.error("[BelKou] affiliate dashboard:", err);
         setData({ affiliate: null, error: "load_failed" as const });

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Film, Loader2, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { VideoUploadProgressBar } from "@/components/admin/VideoUploadProgressBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -194,12 +195,11 @@ export function AdminVideosTab() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-display text-2xl font-bold">Vidéos</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          1) Upload MP4/MOV ici · 2) Admin → Cours → liez chaque leçon vidéo. Conversion HLS : Sprint 2.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Catalogue"
+        title="Vidéos"
+        description="1) Upload MP4/MOV · 2) Cours → liez chaque leçon. Conversion HLS : Sprint 2."
+      />
 
       <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
         <div className="mb-4 flex items-center gap-2">

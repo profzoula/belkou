@@ -9,7 +9,11 @@ import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
-import { getStoredReferralCode, normalizeReferralCode } from "@/lib/referral-storage";
+import {
+  clearStoredReferralCode,
+  getStoredReferralCode,
+  normalizeReferralCode,
+} from "@/lib/referral-storage";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { z } from "zod";
 import { seoHead } from "@/lib/seo";
@@ -93,6 +97,11 @@ function SignupPage() {
       return;
     }
 
+    // referred_by is persisted in user_metadata at signup — clear client storage so late visits can't re-bind.
+    if (referredBy) {
+      clearStoredReferralCode();
+    }
+
     const alreadyRegistered = data.user.identities?.length === 0;
     const needsEmailConfirmation =
       alreadyRegistered || Boolean(!data.user.email_confirmed_at && !data.session);
@@ -113,7 +122,6 @@ function SignupPage() {
       await claimReferralFn({
         data: {
           accessToken: data.session.access_token,
-          referralCode: referredBy ?? undefined,
         },
       }).catch(() => undefined);
     }

@@ -6,7 +6,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { finishAuthCallback } from "@/lib/supabase/auth-actions";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
-import { getStoredReferralCode } from "@/lib/referral-storage";
+import { clearStoredReferralCode } from "@/lib/referral-storage";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/auth/callback")({
@@ -53,12 +53,12 @@ function AuthCallbackPage() {
       }
 
       if (accessToken) {
-        await claimReferralFn({
-          data: {
-            accessToken,
-            referralCode: getStoredReferralCode() ?? undefined,
-          },
-        }).catch(() => undefined);
+        const claim = await claimReferralFn({
+          data: { accessToken },
+        }).catch(() => null);
+        if (claim?.ok) {
+          clearStoredReferralCode();
+        }
       }
 
       window.location.replace(destination);

@@ -12,10 +12,11 @@ import {
   VideoOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { siteConfig } from "@/lib/site-config";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
 import type { AdminSection } from "@/components/admin/AdminLayout";
 import type { getAdminOverview } from "@/lib/fns/admin";
+import { siteConfig } from "@/lib/site-config";
 
 type OverviewData = Awaited<ReturnType<typeof getAdminOverview>>;
 
@@ -28,6 +29,12 @@ const statusLabel: Record<string, string> = {
   paid: "Payé",
   pending: "En attente",
   manual_pending: "Paiement manuel",
+};
+
+const statusClass: Record<string, string> = {
+  paid: "bg-success/10 text-success",
+  pending: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  manual_pending: "bg-primary/10 text-primary",
 };
 
 function formatActivityDate(iso: string): string {
@@ -50,13 +57,21 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-sm font-semibold tracking-[0.14em] text-primary uppercase">Ops</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Vue d&apos;ensemble de la plateforme BelKou — inscriptions, cours et revenus.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Ops"
+        title="Dashboard"
+        description="Vue d'ensemble BelKou — inscriptions, catalogue, services et revenus affiliés."
+        actions={
+          <>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => onNavigate("inscriptions")}>
+              Inscriptions
+            </Button>
+            <Button variant="hero" size="sm" className="rounded-xl shadow-primary" onClick={() => onNavigate("courses")}>
+              Gérer les cours
+            </Button>
+          </>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <AdminStatCard
@@ -72,13 +87,13 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           onManage={() => onNavigate("inscriptions")}
         />
         <AdminStatCard
-          label="Premium (inscrits)"
+          label="Premium"
           value={stats.premium}
           icon={GraduationCap}
           onManage={() => onNavigate("students")}
         />
         <AdminStatCard
-          label="VIP (inscrits)"
+          label="VIP"
           value={stats.vip}
           icon={Crown}
           onManage={() => onNavigate("inscriptions")}
@@ -107,93 +122,128 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           icon={CalendarDays}
           highlight={services.newBookings > 0}
           onManage={() => onNavigate("services")}
+          hint={services.newBookings > 0 ? "À traiter" : undefined}
         />
         <AdminStatCard
-          label="Leçons sans vidéo"
+          label="Sans vidéo"
           value={content.lessonsWithoutVideo}
           icon={VideoOff}
           highlight={content.lessonsWithoutVideo > 0}
           onManage={() => onNavigate("courses")}
+          hint={content.lessonsWithoutVideo > 0 ? "À compléter" : undefined}
         />
       </div>
 
-      <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-2">
-            <h2 className="font-display text-lg font-bold">Catalogue BelKou</h2>
-            <p className="text-sm text-muted-foreground">
-              {content.courseCount} cours · {content.totalLessons} leçons · {content.previewLessons} previews
-              gratuites
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {content.courses.map((course) => (
-                <span
-                  key={course.slug}
-                  className="inline-flex items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium"
-                >
-                  {course.title}
-                  {course.missingVideo > 0 && (
-                    <span className="ml-1.5 text-brand-accent-foreground">
-                      ({course.missingVideo} sans vidéo)
-                    </span>
-                  )}
-                </span>
-              ))}
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <section className="rounded-[20px] border border-border/80 bg-card p-6 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <h2 className="font-display text-lg font-semibold tracking-tight">Catalogue</h2>
+              <p className="text-sm text-muted-foreground">
+                {content.courseCount} cours · {content.totalLessons} leçons · {content.previewLessons}{" "}
+                previews
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => onNavigate("videos")}>
+                Vidéos
+              </Button>
+              <Button variant="soft" size="sm" className="rounded-xl" onClick={() => onNavigate("courses")}>
+                Cours
+              </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Button variant="hero" size="sm" onClick={() => onNavigate("courses")}>
-              Gérer les cours
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onNavigate("videos")}>
-              Bibliothèque vidéos
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onNavigate("inscriptions")}>
-              Inscriptions
-            </Button>
-          </div>
-        </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-3 text-sm">
-          <div className="rounded-lg bg-muted/40 px-4 py-3">
-            <p className="text-muted-foreground">Étudiants (compteur public)</p>
-            <p className="mt-1 text-xl font-bold">{publicStudents}</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {content.courses.map((course) => (
+              <span
+                key={course.slug}
+                className="inline-flex items-center rounded-full border border-border/80 bg-muted/50 px-3 py-1.5 text-xs font-medium"
+              >
+                {course.title}
+                {course.missingVideo > 0 ? (
+                  <span className="ml-1.5 text-amber-700 dark:text-amber-400">
+                    ({course.missingVideo} sans vidéo)
+                  </span>
+                ) : null}
+              </span>
+            ))}
           </div>
-          <div className="rounded-lg bg-muted/40 px-4 py-3">
-            <p className="text-muted-foreground">En attente de paiement</p>
-            <p className="mt-1 text-xl font-bold">{stats.pending + stats.manual_pending}</p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Compteur public", value: publicStudents },
+              { label: "En attente", value: stats.pending + stats.manual_pending },
+              { label: "Au catalogue", value: content.courseCount },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-border/60 bg-muted/30 px-4 py-3"
+              >
+                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="mt-1 font-display text-xl font-semibold tabular-nums">{item.value}</p>
+              </div>
+            ))}
           </div>
-          <div className="rounded-lg bg-muted/40 px-4 py-3">
-            <p className="text-muted-foreground">Cours au catalogue</p>
-            <p className="mt-1 text-xl font-bold">{content.courseCount}</p>
+        </section>
+
+        <section className="rounded-[20px] border border-border/80 bg-card p-6 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)]">
+          <h2 className="font-display text-lg font-semibold tracking-tight">Actions rapides</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Accès direct aux flux critiques.</p>
+          <div className="mt-5 grid gap-2">
+            {[
+              { label: "Inscriptions", section: "inscriptions" as const },
+              { label: "Étudiants", section: "students" as const },
+              { label: "Services / bookings", section: "services" as const },
+              { label: "Revenus affiliés", section: "commissions" as const },
+              { label: "Paramètres site", section: "settings" as const },
+            ].map((item) => (
+              <button
+                key={item.section}
+                type="button"
+                onClick={() => onNavigate(item.section)}
+                className="flex cursor-pointer items-center justify-between rounded-xl border border-transparent bg-muted/40 px-3.5 py-3 text-left text-sm font-medium transition hover:border-border hover:bg-muted"
+              >
+                {item.label}
+                <span className="text-primary">→</span>
+              </button>
+            ))}
           </div>
-        </div>
+        </section>
       </div>
 
-      <div className="rounded-xl border border-border/70 bg-card shadow-sm overflow-hidden">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="font-display text-lg font-bold">Activité récente</h2>
-          <p className="text-sm text-muted-foreground">
-            Dernières inscriptions sur la plateforme (réservé aux administrateurs).
-          </p>
+      <section className="overflow-hidden rounded-[20px] border border-border/80 bg-card shadow-[0_8px_24px_rgb(15_23_42_/_0.04)]">
+        <div className="border-b border-border/70 px-6 py-5">
+          <h2 className="font-display text-lg font-semibold tracking-tight">Activité récente</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Dernières inscriptions plateforme.</p>
         </div>
 
         {recentRegistrations.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-muted-foreground">Aucune inscription pour le moment.</div>
+          <div className="px-6 py-12 text-center text-sm text-muted-foreground">
+            Aucune inscription pour le moment.
+          </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border/70">
             {recentRegistrations.map((row) => (
-              <li key={row.id} className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <li
+                key={row.id}
+                className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
                 <div className="min-w-0">
-                  <p className="font-medium truncate">
-                    {row.full_name}{" "}
-                    <span className="text-muted-foreground font-normal">
-                      — {row.plan.toUpperCase()} · {statusLabel[row.payment_status] ?? row.payment_status}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate font-medium">{row.full_name}</p>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {row.plan}
                     </span>
-                  </p>
-                  <p className="text-sm text-muted-foreground truncate">{row.email}</p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusClass[row.payment_status] ?? "bg-muted text-muted-foreground"}`}
+                    >
+                      {statusLabel[row.payment_status] ?? row.payment_status}
+                    </span>
+                  </div>
+                  <p className="mt-1 truncate text-sm text-muted-foreground">{row.email}</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground shrink-0">
+                <div className="flex shrink-0 flex-wrap items-center gap-3 text-xs text-muted-foreground">
                   <span>{row.country}</span>
                   <span>{formatActivityDate(row.created_at)}</span>
                 </div>
@@ -202,27 +252,27 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           </ul>
         )}
 
-        <div className="border-t border-border bg-muted/20 px-6 py-3 flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 border-t border-border/70 bg-muted/20 px-6 py-3.5 text-sm">
           <button
             type="button"
             onClick={() => onNavigate("inscriptions")}
-            className="font-medium text-primary hover:underline"
+            className="cursor-pointer font-semibold text-primary hover:underline"
           >
-            Voir toutes les inscriptions →
+            Toutes les inscriptions →
           </button>
           <button
             type="button"
             onClick={() => onNavigate("commissions")}
-            className="inline-flex items-center font-medium text-primary hover:underline"
+            className="inline-flex cursor-pointer items-center font-semibold text-primary hover:underline"
           >
-            <DollarSign className="h-3.5 w-3.5 mr-1" />
+            <DollarSign className="mr-1 size-3.5" aria-hidden />
             Retraits affiliés ({affiliate.pendingWithdrawals}) →
           </button>
-          <Link to="/courses" className="font-medium text-primary hover:underline">
+          <Link to="/courses" className="font-semibold text-primary hover:underline">
             Site public →
           </Link>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
 import { AccountSettingsPanel } from "@/components/dashboard/AccountSettingsPanel";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
-import { getStoredReferralCode } from "@/lib/referral-storage";
+import { clearStoredReferralCode } from "@/lib/referral-storage";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({
@@ -50,14 +50,16 @@ function DashboardPage() {
   useEffect(() => {
     if (!session?.access_token) return;
 
-    const storedRef = getStoredReferralCode();
     void (async () => {
-      await claimReferralFn({
+      // Claim only from trusted referred_by metadata (set at signup / new OAuth).
+      const claim = await claimReferralFn({
         data: {
           accessToken: session.access_token,
-          referralCode: storedRef ?? undefined,
         },
-      }).catch(() => undefined);
+      }).catch(() => null);
+      if (claim?.ok) {
+        clearStoredReferralCode();
+      }
 
       const result = await dashboardFn({ data: { accessToken: session.access_token } });
       setEnrollments(result.enrollments);

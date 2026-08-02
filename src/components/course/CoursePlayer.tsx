@@ -1,24 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  CheckCircle2,
-  ChevronLeft,
-  Circle,
-  Clock,
-  FileText,
-  Globe,
-  Lock,
-  Star,
-} from "lucide-react";
+import { CheckCircle2, Clock, FileText, Globe, Lock, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   computeCourseProgressPercent,
   countLessons,
@@ -29,7 +14,6 @@ import {
   getLessonDisplayDuration,
   getLessonVideoId,
   getLessonVimeoUrl,
-  getSectionDurationMinutes,
   getSectionForLesson,
   getWelcomePreviewLesson,
   lessonHasVideo,
@@ -48,8 +32,6 @@ import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-acces
 import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
-import { SiteLogo } from "@/components/site/SiteLogo";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback, getLessonVimeoPlayback } from "@/lib/fns/videos";
 import type { VideoPlaybackSource } from "@/lib/videos";
@@ -58,8 +40,11 @@ import { VimeoVideoPlayer } from "@/components/course/VimeoVideoPlayer";
 import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
 import { CourseReviewsPanel } from "@/components/course/CourseReviewsPanel";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
-import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
 import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
+import { CurriculumSidebar } from "@/components/course/CurriculumSidebar";
+import { LearnHeader } from "@/components/course/LearnHeader";
+import { LessonContextHeader } from "@/components/course/LessonContextHeader";
+import { LessonNavControls } from "@/components/course/LessonNavControls";
 import {
   getFirstArticleSubSessionId,
   parseArticleSessions,
@@ -337,17 +322,7 @@ function CourseVideoArea({
         />
       );
 
-    return (
-      <>
-        {player}
-        <div className="border-b border-border bg-gradient-to-r from-violet-600/10 via-card to-emerald-600/10 px-4 py-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Leçon vidéo</p>
-          <h2 className="mt-0.5 font-display text-lg font-bold leading-snug text-foreground sm:text-xl">
-            {lesson.title}
-          </h2>
-        </div>
-      </>
-    );
+    return player;
   }
 
   if (!locked && lesson.type === "video" && (videoId || vimeoUrl) && playbackLoading) {
@@ -510,155 +485,6 @@ function EnrolledExtraTab({
       fallbackRating={course.rating}
       fallbackCount={course.ratingsCount}
     />
-  );
-}
-
-function CurriculumSidebar({
-  course,
-  activeLessonId,
-  activeArticleSubSessionId,
-  viewedArticleSubSessionIds,
-  getLockState,
-  completedLessonIds,
-  onSelectLesson,
-  onSelectArticleSubSession,
-  variant = "sidebar",
-}: {
-  course: PublicCourse;
-  activeLessonId: string;
-  activeArticleSubSessionId: string | null;
-  viewedArticleSubSessionIds: Set<string>;
-  getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
-  completedLessonIds: string[];
-  onSelectLesson: (lessonId: string) => void;
-  onSelectArticleSubSession: (lessonId: string, subSessionId: string) => void;
-  variant?: "sidebar" | "tab";
-}) {
-  const defaultSections = course.sections.map((section) => section.id);
-  const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds]);
-  const summary = `${course.sections.length} sections · ${countLessons(course)} leçons · ${getCourseDisplayDuration(course)}`;
-
-  return (
-    <div
-      className={cn(
-        "flex min-h-0 flex-col bg-card",
-        variant === "sidebar" ? "h-full border-t border-border lg:border-t-0 lg:border-r" : "",
-      )}
-    >
-      <div className={cn("shrink-0 border-b border-border px-4", variant === "tab" ? "py-2" : "py-3")}>
-        {variant === "sidebar" ? (
-          <h2 className="font-display text-sm font-semibold">Contenu du cours</h2>
-        ) : null}
-        <p className={cn("text-xs text-muted-foreground", variant === "sidebar" && "mt-1")}>{summary}</p>
-      </div>
-
-      <div
-        className={cn(
-          variant === "sidebar"
-            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain"
-            : "min-h-0",
-        )}
-      >
-        <Accordion type="multiple" defaultValue={defaultSections} className="px-1">
-          {course.sections.map((section) => {
-            const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
-            const sectionDuration = getSectionDurationMinutes(section);
-
-            return (
-              <AccordionItem key={section.id} value={section.id} className="border-border">
-                <AccordionTrigger className="px-3 py-3 hover:no-underline [&>svg]:hidden">
-                  <div className="flex w-full items-start gap-2 text-left">
-                    <span className="mt-0.5 text-muted-foreground">▾</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold leading-snug">{section.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {completed}/{section.lessons.length}
-                        {sectionDuration > 0 ? ` · ${sectionDuration}min` : ""}
-                      </p>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-0">
-                  <ul>
-                    {section.lessons.map((lesson, index) => {
-                      const active = lesson.id === activeLessonId;
-                      const { locked } = getLockState(lesson);
-                      const done = completedSet.has(lesson.id);
-                      const lessonDuration = getLessonDisplayDuration(lesson);
-                      const articleSessions =
-                        lesson.type === "article" && lesson.content
-                          ? parseArticleSessions(lesson.content)
-                          : null;
-
-                      if (articleSessions?.length) {
-                        return (
-                          <li key={lesson.id} className="px-2 py-2">
-                            <p
-                              className={cn(
-                                "mb-2 px-1 text-xs font-semibold uppercase tracking-wide",
-                                active ? "text-primary" : "text-muted-foreground",
-                              )}
-                            >
-                              {index + 1}. {lesson.title}
-                            </p>
-                            <ArticleCurriculumOutline
-                              lesson={lesson}
-                              sessions={articleSessions}
-                              activeSubSessionId={active ? activeArticleSubSessionId : null}
-                              viewedSubSessionIds={viewedArticleSubSessionIds}
-                              lessonCompleted={done}
-                              locked={locked}
-                              onSelectSubSession={onSelectArticleSubSession}
-                            />
-                          </li>
-                        );
-                      }
-
-                      return (
-                        <li key={lesson.id}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const { locked: isLocked } = getLockState(lesson);
-                              if (!isLocked) onSelectLesson(lesson.id);
-                            }}
-                            className={cn(
-                              "flex w-full items-start gap-2 border-l-2 px-3 py-2.5 text-left text-sm transition-colors",
-                              active
-                                ? "border-primary bg-primary/10 font-medium text-foreground"
-                                : "border-transparent hover:bg-muted/60",
-                              locked && !active && "opacity-70",
-                            )}
-                          >
-                            {done ? (
-                              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            ) : locked ? (
-                              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/60" />
-                            ) : lesson.type === "article" ? (
-                              <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70" />
-                            ) : (
-                              <Circle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/50" />
-                            )}
-                            <span className="min-w-0 flex-1 leading-snug">
-                              {index + 1}. {lesson.title}
-                            </span>
-                            {lessonDuration ? (
-                              <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                                {lessonDuration}
-                              </span>
-                            ) : null}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
-      </div>
-    </div>
   );
 }
 
@@ -909,18 +735,54 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
 
   const activeSection = getSectionForLesson(course, activeLesson.id);
-  const nextLesson = useMemo(() => {
-    const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
-    if (currentIndex < 0) return null;
+  const [lessonQuery, setLessonQuery] = useState("");
+  const lessonNumber =
+    allLessons.findIndex((lesson) => lesson.id === activeLessonId) + 1;
+  const activeLessonCompleted = completedLessonIds.includes(activeLesson.id);
 
-    for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
+  const previousLesson = useMemo(() => {
+    const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
+    if (currentIndex <= 0) return null;
+
+    for (let index = currentIndex - 1; index >= 0; index -= 1) {
       const candidate = allLessons[index];
+      if (!candidate) continue;
       const { locked } = getLockState(candidate);
       if (!locked) return candidate;
     }
 
     return null;
   }, [activeLessonId, allLessons, getLockState]);
+
+  const nextLesson = useMemo(() => {
+    const currentIndex = allLessons.findIndex((lesson) => lesson.id === activeLessonId);
+    if (currentIndex < 0) return null;
+
+    for (let index = currentIndex + 1; index < allLessons.length; index += 1) {
+      const candidate = allLessons[index];
+      if (!candidate) continue;
+      const { locked } = getLockState(candidate);
+      if (!locked) return candidate;
+    }
+
+    return null;
+  }, [activeLessonId, allLessons, getLockState]);
+
+  const goToPreviousLesson = useCallback(() => {
+    if (!previousLesson) return;
+    selectLesson(previousLesson.id);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [previousLesson, selectLesson]);
+
+  const goToNextLesson = useCallback(() => {
+    if (!nextLesson) return;
+    selectLesson(nextLesson.id);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [nextLesson, selectLesson]);
 
   const recordLessonComplete = useCallback(
     (lessonId: string) => {
@@ -1009,35 +871,57 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     selectLesson,
   ]);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        goToPreviousLesson();
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        goToNextLesson();
+      }
+      if ((event.key === "c" || event.key === "C") && hasPaidAccess && contentLive && !activeLessonCompleted) {
+        event.preventDefault();
+        handleActiveLessonComplete();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    activeLessonCompleted,
+    contentLive,
+    goToNextLesson,
+    goToPreviousLesson,
+    handleActiveLessonComplete,
+    hasPaidAccess,
+  ]);
+
+  const progressPercent = progress?.progressPercent ?? 0;
+  const remainingLessons = Math.max(countLessons(course) - completedLessonIds.length, 0);
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/75">
-        <div className="site-container flex h-14 items-center gap-3">
-          <Button asChild variant="ghost" size="sm" className="shrink-0 gap-1 px-2">
-            <Link to="/courses/$slug" params={{ slug: course.slug }}>
-              <ChevronLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Cours</span>
-            </Link>
-          </Button>
-          <SiteLogo className="hidden h-7 w-7 rounded-xl sm:inline-flex" alt="" />
-          <p className="min-w-0 flex-1 truncate font-display text-sm font-semibold">{course.title}</p>
-          <ThemeToggle />
-          <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
-            <Link to="/courses">Tous les cours</Link>
-          </Button>
-          {hasPaidAccess ? (
-            <Button asChild size="sm" variant="hero">
-              <Link to="/dashboard">Mes cours</Link>
-            </Button>
-          ) : (
-            <Button asChild size="sm">
-              <Link to="/checkout" search={{ course: course.slug }}>
-                S&apos;inscrire · ${course.price}
-              </Link>
-            </Button>
-          )}
-        </div>
-      </header>
+    <div className="min-h-dvh bg-[#F8FAFC] text-foreground dark:bg-background">
+      <LearnHeader
+        courseTitle={course.title}
+        courseSlug={course.slug}
+        progressPercent={progressPercent}
+        hasPaidAccess={hasPaidAccess}
+        coursePrice={course.price}
+        lessonQuery={lessonQuery}
+        onLessonQueryChange={setLessonQuery}
+      />
 
       {scheduledSoon && startLabel && !enrolledWaiting && (
         <div className="border-b border-primary/20 bg-primary/10 px-4 py-2.5 text-center text-sm text-foreground">
@@ -1052,249 +936,297 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </div>
       )}
 
-      {hasPaidAccess && contentLive ? (
-        <div className="border-b border-border bg-muted/30 px-4 py-3">
-          <div className="site-container flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-medium text-foreground">
-              Progression · {progress?.progressPercent ?? 0}% terminé
-            </p>
-            <div className="h-1.5 w-full max-w-md overflow-hidden rounded-full bg-muted sm:ml-4">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${Math.max(progress?.progressPercent ?? 0, 2)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <div className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
+        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
+          <aside className="hidden lg:sticky lg:top-[calc(4rem+1rem)] lg:flex lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:flex-col lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
+            <CurriculumSidebar
+              course={course}
+              activeLessonId={activeLessonId}
+              activeArticleSubSessionId={activeArticleSubSessionId}
+              viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+              getLockState={getLockState}
+              completedLessonIds={completedLessonIds}
+              progressPercent={progressPercent}
+              onSelectLesson={selectLesson}
+              onSelectArticleSubSession={handleSelectArticleSubSession}
+              lessonQuery={lessonQuery}
+              onLessonQueryChange={setLessonQuery}
+            />
+          </aside>
 
-      <div className="site-container py-4 pb-20 sm:py-6 sm:pb-6">
-        <div className="flex flex-col overflow-visible rounded-2xl border border-border bg-card shadow-sm lg:grid lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start lg:overflow-hidden xl:grid-cols-[380px_minmax(0,1fr)]">
-        <aside className="hidden lg:col-start-1 lg:flex lg:h-[calc(100dvh-3.5rem-2rem)] lg:max-h-[calc(100dvh-3.5rem-2rem)] lg:sticky lg:top-[calc(3.5rem+1rem)] lg:min-h-0 lg:flex-col lg:self-start lg:overflow-hidden">
-          <CurriculumSidebar
-            course={course}
-            activeLessonId={activeLessonId}
-            activeArticleSubSessionId={activeArticleSubSessionId}
-            viewedArticleSubSessionIds={viewedArticleSubSessionIds}
-            getLockState={getLockState}
-            completedLessonIds={completedLessonIds}
-            onSelectLesson={selectLesson}
-            onSelectArticleSubSession={handleSelectArticleSubSession}
-          />
-        </aside>
-
-        <div className="flex min-w-0 flex-col lg:col-start-2">
-        <div className="z-30 min-w-0 shrink-0">
-          <CourseVideoArea
-            course={course}
-            lesson={activeLesson}
-            hasPaidAccess={hasPaidAccess}
-            welcomeLessonId={welcomeLesson?.id}
-            nextLessonTitle={nextLesson?.title}
-            onNextLesson={nextLesson ? handleActiveLessonComplete : undefined}
-            onLessonComplete={handleActiveLessonComplete}
-            getLockState={getLockState}
-            startAtSeconds={resumeAtSeconds}
-            onPlaybackTimeUpdate={(currentTime) => handlePlaybackTimeUpdate(activeLesson.id, currentTime)}
-            activeArticleSubSessionId={activeArticleSubSessionId}
-            onArticleSubSessionChange={handleArticleSubSessionChange}
-            onVideoPlay={openCurriculumTab}
-          />
-        </div>
-
-        <div className="flex min-w-0 flex-col border-b border-border px-3 sm:px-6">
-            <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
-              <TabsList className="h-auto w-full shrink-0 justify-start gap-0 rounded-none border-0 bg-transparent p-0">
-                {[
-                  { value: "overview", label: "Aperçu" },
-                  { value: "curriculum", label: "Contenu du cours", mobileOnly: true },
-                  { value: "qa", label: "Q&R", desktopOnly: true },
-                  { value: "notes", label: "Notes", desktopOnly: true },
-                  { value: "resources", label: "Ressources" },
-                  { value: "reviews", label: "Avis", desktopOnly: true },
-                ].map((tab) => (
-                  <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
-                    className={cn(
-                      "rounded-none border-b-2 border-transparent px-3 py-3 text-muted-foreground data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none",
-                      tab.mobileOnly && "lg:hidden",
-                      tab.desktopOnly && "hidden lg:inline-flex",
-                    )}
-                  >
-                    {tab.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              <TabsContent
-                value="curriculum"
-                className="mt-0 pb-16 pt-0 lg:hidden"
-              >
-                <CurriculumSidebar
-                  variant="tab"
-                  course={course}
-                  activeLessonId={activeLessonId}
-                  activeArticleSubSessionId={activeArticleSubSessionId}
-                  viewedArticleSubSessionIds={viewedArticleSubSessionIds}
-                  getLockState={getLockState}
-                  completedLessonIds={completedLessonIds}
-                  onSelectLesson={selectLesson}
-                  onSelectArticleSubSession={handleSelectArticleSubSession}
+          <div className="flex min-w-0 flex-col gap-4">
+            <div className="overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_12px_40px_rgb(15_23_42_/_0.08)]">
+              <div className="space-y-4 border-b border-border px-4 py-4 sm:px-6 sm:py-5">
+                <LessonContextHeader
+                  courseTitle={course.title}
+                  moduleTitle={activeSection?.title}
+                  lessonNumber={Math.max(lessonNumber, 1)}
+                  lessonTitle={activeLesson.title}
+                  instructor={course.instructor}
+                  duration={getLessonDisplayDuration(activeLesson)}
+                  publishedLabel={course.lastUpdated}
                 />
-              </TabsContent>
+              </div>
 
-              <TabsContent value="overview" className="mt-0 px-1 pb-16 pt-6 sm:px-0">
-                <h1 className="font-display text-xl font-bold leading-snug sm:text-2xl md:text-3xl">
-                  {course.title}
-                </h1>
+              <div className="bg-black/95">
+                <CourseVideoArea
+                  course={course}
+                  lesson={activeLesson}
+                  hasPaidAccess={hasPaidAccess}
+                  welcomeLessonId={welcomeLesson?.id}
+                  nextLessonTitle={nextLesson?.title}
+                  onNextLesson={nextLesson ? handleActiveLessonComplete : undefined}
+                  onLessonComplete={handleActiveLessonComplete}
+                  getLockState={getLockState}
+                  startAtSeconds={resumeAtSeconds}
+                  onPlaybackTimeUpdate={(currentTime) =>
+                    handlePlaybackTimeUpdate(activeLesson.id, currentTime)
+                  }
+                  activeArticleSubSessionId={activeArticleSubSessionId}
+                  onArticleSubSessionChange={handleArticleSubSessionChange}
+                  onVideoPlay={openCurriculumTab}
+                />
+              </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                  <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
-                    {course.rating.toFixed(1)}
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    <span className="font-normal text-primary underline">
-                      ({formatCount(course.ratingsCount)} avis)
-                    </span>
-                  </span>
-                  <span className="text-muted-foreground">
-                    {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
-                  </span>
-                  <span className="text-muted-foreground">{getCourseDisplayDuration(course)}</span>
-                </div>
+              <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
+                {hasPaidAccess && contentLive ? (
+                  <div className="rounded-[16px] border border-border bg-muted/40 p-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground">Progression du cours</p>
+                        <p className="mt-1 font-display text-2xl font-bold tabular-nums">
+                          {progressPercent}%
+                        </p>
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground">
+                        <p>
+                          <span className="font-semibold text-foreground">
+                            {completedLessonIds.length}
+                          </span>{" "}
+                          terminées
+                        </p>
+                        <p className="mt-0.5">{remainingLessons} restantes</p>
+                      </div>
+                    </div>
+                    <div
+                      className="mt-3 h-2.5 overflow-hidden rounded-full bg-background"
+                      role="progressbar"
+                      aria-valuenow={progressPercent}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`Progression : ${progressPercent} %`}
+                    >
+                      <div
+                        className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
+                        style={{ width: `${Math.min(Math.max(progressPercent, 0), 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : null}
 
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Dernière mise à jour {course.lastUpdated} · {course.language}
-                  {course.captions ? " · Sous-titres" : ""}
-                </p>
+                <LessonNavControls
+                  canGoPrevious={Boolean(previousLesson)}
+                  canGoNext={Boolean(nextLesson)}
+                  canMarkComplete={hasPaidAccess && contentLive && lessonIsCompletable(activeLesson)}
+                  isCompleted={activeLessonCompleted}
+                  previousTitle={previousLesson?.title}
+                  nextTitle={nextLesson?.title}
+                  onPrevious={goToPreviousLesson}
+                  onNext={goToNextLesson}
+                  onMarkComplete={handleActiveLessonComplete}
+                />
 
-                <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4 sm:p-5">
-                  <div className="flex gap-3">
-                    <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                    <div>
-                      <p className="font-semibold">Planifiez votre apprentissage</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {startLabel
-                          ? `Ce cours sera disponible le ${startLabel}. Organisez votre planning pour être prêt.`
-                          : "Avancez à votre rythme — fixez un rappel pour progresser régulièrement sur ce cours."}
-                      </p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <Button size="sm" variant="outline" className="rounded-full" asChild>
-                          <Link to="/checkout" search={{ course: course.slug }}>
-                            Commencer
-                          </Link>
-                        </Button>
+                {(course.resources?.length ?? 0) > 0 && hasPaidAccess ? (
+                  <p className="text-sm text-muted-foreground">
+                    Ressources disponibles dans l&apos;onglet{" "}
+                    <button
+                      type="button"
+                      className="font-semibold text-primary underline-offset-2 hover:underline"
+                      onClick={() => setPlayerTab("resources")}
+                    >
+                      Téléchargements
+                    </button>
+                    .
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="rounded-[20px] border border-border bg-card p-3 shadow-sm sm:p-4">
+              <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
+                <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-[14px] bg-muted/70 p-1">
+                  {[
+                    { value: "overview", label: "Aperçu" },
+                    { value: "curriculum", label: "Programme", mobileOnly: true },
+                    { value: "notes", label: "Notes", desktopOnly: true },
+                    { value: "resources", label: "Téléchargements" },
+                    { value: "qa", label: "Q&R", desktopOnly: true },
+                    { value: "reviews", label: "Avis", desktopOnly: true },
+                  ].map((tab) => (
+                    <TabsTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      className={cn(
+                        "rounded-[12px] px-3 py-2 text-xs font-semibold text-muted-foreground transition data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-sm",
+                        tab.mobileOnly && "lg:hidden",
+                        tab.desktopOnly && "hidden lg:inline-flex",
+                      )}
+                    >
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+
+                <TabsContent value="curriculum" className="mt-4 pb-12 lg:hidden">
+                  <CurriculumSidebar
+                    variant="tab"
+                    course={course}
+                    activeLessonId={activeLessonId}
+                    activeArticleSubSessionId={activeArticleSubSessionId}
+                    viewedArticleSubSessionIds={viewedArticleSubSessionIds}
+                    getLockState={getLockState}
+                    completedLessonIds={completedLessonIds}
+                    progressPercent={progressPercent}
+                    onSelectLesson={selectLesson}
+                    onSelectArticleSubSession={handleSelectArticleSubSession}
+                    lessonQuery={lessonQuery}
+                    onLessonQueryChange={setLessonQuery}
+                  />
+                </TabsContent>
+
+                <TabsContent value="overview" className="mt-4 space-y-8 px-1 pb-12 sm:px-2">
+                  <div>
+                    <h2 className="font-display text-[22px] font-bold tracking-tight">{course.title}</h2>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                      <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
+                        {course.rating.toFixed(1)}
+                        <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                        <span className="font-normal text-primary underline">
+                          ({formatCount(course.ratingsCount)} avis)
+                        </span>
+                      </span>
+                      <span className="text-muted-foreground">
+                        {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
+                      </span>
+                      <span className="text-muted-foreground">{getCourseDisplayDuration(course)}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Dernière mise à jour {course.lastUpdated} · {course.language}
+                      {course.captions ? " · Sous-titres" : ""}
+                    </p>
+                  </div>
+
+                  <div className="rounded-[16px] border border-border bg-muted/30 p-4 sm:p-5">
+                    <div className="flex gap-3">
+                      <Clock className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                      <div>
+                        <p className="font-semibold">Continuez votre apprentissage</p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {activeSection
+                            ? `${activeSection.title} — ${activeLesson.title}`
+                            : "Avancez à votre rythme sur ce parcours BelKou."}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-8 grid gap-8 md:grid-cols-2">
-                  <div>
-                    <h2 className="mb-3 text-lg font-bold">Ce que vous apprendrez</h2>
-                    <ul className="grid gap-2 sm:grid-cols-1">
-                      {course.whatYouLearn.map((item) => (
-                        <li key={item} className="flex gap-2 text-sm">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <div>
+                      <h3 className="mb-3 font-display text-[22px] font-bold">Ce que vous apprendrez</h3>
+                      <ul className="grid gap-2">
+                        {course.whatYouLearn.map((item) => (
+                          <li key={item} className="flex gap-2 text-sm sm:text-base">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="mb-3 font-display text-[22px] font-bold">En chiffres</h3>
+                      <dl className="space-y-2 text-sm sm:text-base">
+                        <div className="flex justify-between gap-4 border-b border-border py-2">
+                          <dt className="text-muted-foreground">Niveau</dt>
+                          <dd className="font-medium">{course.skillLevel}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4 border-b border-border py-2">
+                          <dt className="text-muted-foreground">Étudiants</dt>
+                          <dd className="font-medium">
+                            {formatCount(getDisplayedCourseStudentsCount(course))}
+                          </dd>
+                        </div>
+                        <div className="flex justify-between gap-4 border-b border-border py-2">
+                          <dt className="text-muted-foreground">Leçons</dt>
+                          <dd className="font-medium">{countLessons(course)}</dd>
+                        </div>
+                        <div className="flex justify-between gap-4 py-2">
+                          <dt className="text-muted-foreground">Durée</dt>
+                          <dd className="font-medium">{getCourseDisplayDuration(course)}</dd>
+                        </div>
+                      </dl>
+                    </div>
                   </div>
 
                   <div>
-                    <h2 className="mb-3 text-lg font-bold">En chiffres</h2>
-                    <dl className="space-y-2 text-sm">
-                      <div className="flex justify-between gap-4 border-b border-border py-2">
-                        <dt className="text-muted-foreground">Niveau</dt>
-                        <dd className="font-medium">{course.skillLevel}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4 border-b border-border py-2">
-                        <dt className="text-muted-foreground">Étudiants</dt>
-                        <dd className="font-medium">{formatCount(getDisplayedCourseStudentsCount(course))}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4 border-b border-border py-2">
-                        <dt className="text-muted-foreground">Langues</dt>
-                        <dd className="font-medium">{course.language}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4 border-b border-border py-2">
-                        <dt className="text-muted-foreground">Sous-titres</dt>
-                        <dd className="font-medium">{course.captions ? "Oui" : "Non"}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4 border-b border-border py-2">
-                        <dt className="text-muted-foreground">Leçons</dt>
-                        <dd className="font-medium">{countLessons(course)}</dd>
-                      </div>
-                      <div className="flex justify-between gap-4 py-2">
-                        <dt className="text-muted-foreground">Vidéo</dt>
-                        <dd className="font-medium">{getCourseDisplayDuration(course)}</dd>
-                      </div>
-                    </dl>
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  <h2 className="mb-3 text-lg font-bold">Description</h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{course.description}</p>
-                  {activeSection && (
-                    <p className="mt-4 text-sm">
-                      <span className="font-medium">Leçon actuelle :</span>{" "}
-                      {activeSection.title} — {activeLesson.title}
+                    <h3 className="mb-3 font-display text-[22px] font-bold">Description</h3>
+                    <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+                      {course.description}
                     </p>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="resources" className="mt-0 px-1 pb-16 pt-6 sm:px-0">
-                {hasPaidAccess ? (
-                  <CourseResourcesPanel resources={course.resources ?? []} />
-                ) : (
-                  <div className="px-1 py-12 text-center sm:px-0">
-                    <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-                    <p className="text-sm text-muted-foreground">
-                      Les ressources (PDF, Word, ebook…) sont disponibles après inscription au cours.
-                    </p>
-                    <Button asChild className="mt-4" size="sm">
-                      <Link to="/checkout" search={{ course: course.slug }}>
-                        S&apos;inscrire maintenant
-                      </Link>
-                    </Button>
                   </div>
-                )}
-              </TabsContent>
+                </TabsContent>
 
-              {["qa", "notes", "reviews"].map((tab) => (
-                <TabsContent key={tab} value={tab} className="px-1 py-12 pb-16 text-center sm:px-0">
-                  {hasPaidAccess && session?.access_token ? (
-                    <EnrolledExtraTab
-                      tab={tab}
-                      course={course}
-                      contentLive={contentLive}
-                      startLabel={courseStartsAtLabel(course)}
-                      activeLessonId={activeLessonId}
-                      allLessons={allLessons}
-                      accessToken={session.access_token}
-                    />
-                  ) : hasPaidAccess ? (
-                    <p className="text-sm text-muted-foreground">Reconnectez-vous pour accéder à cette section.</p>
+                <TabsContent value="resources" className="mt-4 px-1 pb-12 sm:px-2">
+                  {hasPaidAccess ? (
+                    <CourseResourcesPanel resources={course.resources ?? []} />
                   ) : (
-                    <>
+                    <div className="py-12 text-center">
                       <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
                       <p className="text-sm text-muted-foreground">
-                        Disponible après inscription à ce cours.
+                        Les ressources sont disponibles après inscription au cours.
                       </p>
                       <Button asChild className="mt-4" size="sm">
                         <Link to="/checkout" search={{ course: course.slug }}>
                           S&apos;inscrire maintenant
                         </Link>
                       </Button>
-                    </>
+                    </div>
                   )}
                 </TabsContent>
-              ))}
-            </Tabs>
-        </div>
-        </div>
+
+                {["qa", "notes", "reviews"].map((tab) => (
+                  <TabsContent key={tab} value={tab} className="mt-4 px-1 py-8 pb-12 text-center sm:px-2">
+                    {hasPaidAccess && session?.access_token ? (
+                      <EnrolledExtraTab
+                        tab={tab}
+                        course={course}
+                        contentLive={contentLive}
+                        startLabel={courseStartsAtLabel(course)}
+                        activeLessonId={activeLessonId}
+                        allLessons={allLessons}
+                        accessToken={session.access_token}
+                      />
+                    ) : hasPaidAccess ? (
+                      <p className="text-sm text-muted-foreground">
+                        Reconnectez-vous pour accéder à cette section.
+                      </p>
+                    ) : (
+                      <>
+                        <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+                        <p className="text-sm text-muted-foreground">
+                          Disponible après inscription à ce cours.
+                        </p>
+                        <Button asChild className="mt-4" size="sm">
+                          <Link to="/checkout" search={{ course: course.slug }}>
+                            S&apos;inscrire maintenant
+                          </Link>
+                        </Button>
+                      </>
+                    )}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </div>
+          </div>
         </div>
       </div>
     </div>

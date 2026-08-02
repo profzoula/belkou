@@ -1,8 +1,14 @@
 import type { User } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { affiliateCodeForUser } from "@/lib/affiliate-code";
+import {
+  affiliateCodeForUser,
+  deriveAffiliateCode,
+  normalizeAffiliateCode,
+} from "@/lib/affiliate-code";
 import {
   AFFILIATE_COMMISSION_USD,
+  AFFILIATE_OAUTH_BIND_MAX_AGE_MS,
+  AFFILIATE_SIGNUP_CLAIM_MAX_AGE_MS,
   AFFILIATE_SIGNUP_COMMISSION_USD,
   AFFILIATE_SIGNUP_REFERRAL_PREFIX,
 } from "@/lib/affiliate-config";
@@ -40,18 +46,19 @@ export type AffiliateReferralRecord = {
 let affiliateTablesAvailable: boolean | null = null;
 
 function normalizeCode(code: string): string {
-  return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return normalizeAffiliateCode(code);
 }
 
-function generateAffiliateCode(email: string): string {
-  const base =
-    email
-      .split("@")[0]
-      .replace(/[^a-z0-9]/gi, "")
-      .slice(0, 4)
-      .toUpperCase() || "BK";
-  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${base}${suffix}`;
+function isWithinMs(isoDate: string | undefined, maxAgeMs: number): boolean {
+  if (!isoDate) return false;
+  const created = Date.parse(isoDate);
+  if (Number.isNaN(created)) return false;
+  return Date.now() - created <= maxAgeMs;
+}
+
+/** Signup commissions only for accounts still inside the claim window. */
+export function isSignupReferralClaimEligible(createdAt: string | undefined): boolean {
+  return isWithinMs(createdAt, AFFILIATE_SIGNUP_CLAIM_MAX_AGE_MS);
 }
 
 function rowToAffiliate(row: Record<string, unknown>): AffiliateRecord {
@@ -189,18 +196,11 @@ async function getOrCreateAffiliateFromMetadata(params: {
     return metadataToAffiliate(data.user, existingCode);
   }
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const code = generateAffiliateCode(params.email);
-    const saved = await saveAffiliateCodeToMetadata(sb, params.userId, code);
-    if (!saved) continue;
+  const code = deriveAffiliateCode(params.userId, params.email);
+  const saved = await saveAffiliateCodeToMetadata(sb, params.userId, code);
+  if (!saved) return metadataToAffiliate(data.user, code);
 
-    const duplicate = await findAffiliateInUserList(sb, code);
-    if (duplicate && duplicate.user_id !== params.userId) continue;
-
-    return metadataToAffiliate(data.user, code);
-  }
-
-  return null;
+  return metadataToAffiliate(data.user, code);
 }
 
 /** Ensures a row exists in `affiliates` and returns the DB record (uuid id for FK inserts). */
@@ -459,9 +459,36 @@ export async function getOrCreateAffiliate(params: {
     return ensured ?? existing;
   }
 
+  const code = deriveAffiliateCode(params.userId, email);
+
   if (await checkAffiliateTables(sb)) {
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const code = generateAffiliateCode(email);
+    const { data: byCode } = await sb.from("affiliates").select("*").eq("code", code).maybeSingle();
+    if (byCode) {
+      const existingByCode = rowToAffiliate(byCode);
+      if (existingByCode.user_id === params.userId) {
+        await saveAffiliateCodeToMetadata(sb, params.userId, code);
+        return existingByCode;
+      }
+      // Extremely rare collision: extend with more of the user id.
+      const fallbackCode = normalizeCode(
+        `${code}${params.userId.replace(/-/g, "").toUpperCase().slice(4, 8)}`,
+      );
+      const { data, error } = await sb
+        .from("affiliates")
+        .insert({
+          user_id: params.userId,
+          email,
+          full_name: params.fullName.trim(),
+          code: fallbackCode,
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        await saveAffiliateCodeToMetadata(sb, params.userId, fallbackCode);
+        return rowToAffiliate(data);
+      }
+    } else {
       const { data, error } = await sb
         .from("affiliates")
         .insert({
@@ -480,12 +507,8 @@ export async function getOrCreateAffiliate(params: {
 
       if (error && isMissingTableError(error.message)) {
         affiliateTablesAvailable = false;
-        break;
-      }
-
-      if (!error?.message.includes("duplicate") && !error?.message.includes("unique")) {
-        console.error("[BelKou] create affiliate:", error?.message);
-        break;
+      } else if (error) {
+        console.error("[BelKou] create affiliate:", error.message);
       }
     }
   }
@@ -623,13 +646,29 @@ async function getStatsFromRegistrations(sb: SupabaseClient, code: string) {
   };
 }
 
+/**
+ * Awards signup commission only when:
+ * - referralCode comes from trusted signup metadata (caller responsibility), and
+ * - the referred account is still inside the claim window (anti late-attribution).
+ */
 export async function earnSignupAffiliateCommission(params: {
   userId: string;
   email: string;
   referralCode: string;
+  createdAt?: string;
 }): Promise<{ ok: boolean; reason?: string }> {
   const sb = getSupabaseAdmin();
   if (!sb) return { ok: false, reason: "db_unavailable" };
+
+  let createdAt = params.createdAt;
+  if (!createdAt) {
+    const { data } = await sb.auth.admin.getUserById(params.userId);
+    createdAt = data.user?.created_at;
+  }
+
+  if (!isSignupReferralClaimEligible(createdAt)) {
+    return { ok: false, reason: "claim_window_expired" };
+  }
 
   const code = normalizeCode(params.referralCode);
   if (!code) return { ok: false, reason: "invalid_code" };
@@ -680,6 +719,65 @@ export async function earnSignupAffiliateCommission(params: {
   }
 
   return { ok: true };
+}
+
+/**
+ * Claims signup commission using only user_metadata.referred_by (never client localStorage).
+ * Optionally binds a cookie code for brand-new OAuth accounts.
+ */
+export async function claimSignupReferralFromTrustedSources(params: {
+  userId: string;
+  email: string;
+  createdAt?: string;
+  /** Cookie/local ref — only used to bind referred_by for brand-new OAuth accounts. */
+  ephemeralReferralCode?: string | null;
+}): Promise<{ ok: boolean; reason?: string; claimedCode?: string }> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return { ok: false, reason: "db_unavailable" };
+
+  const { data, error } = await sb.auth.admin.getUserById(params.userId);
+  if (error || !data.user) return { ok: false, reason: "user_not_found" };
+
+  const user = data.user;
+  const createdAt = params.createdAt ?? user.created_at;
+  const metaCode =
+    typeof user.user_metadata?.referred_by === "string"
+      ? normalizeCode(user.user_metadata.referred_by)
+      : "";
+
+  let referralCode = metaCode;
+
+  if (!referralCode) {
+    const ephemeral = params.ephemeralReferralCode
+      ? normalizeCode(params.ephemeralReferralCode)
+      : "";
+    if (ephemeral && isWithinMs(createdAt, AFFILIATE_OAUTH_BIND_MAX_AGE_MS)) {
+      const { error: updateError } = await sb.auth.admin.updateUserById(params.userId, {
+        user_metadata: {
+          ...user.user_metadata,
+          referred_by: ephemeral,
+        },
+      });
+      if (!updateError) {
+        referralCode = ephemeral;
+      }
+    }
+  }
+
+  if (!referralCode) {
+    return { ok: false, reason: "no_code" };
+  }
+
+  const result = await earnSignupAffiliateCommission({
+    userId: params.userId,
+    email: params.email,
+    referralCode,
+    createdAt,
+  });
+
+  return result.ok
+    ? { ok: true, claimedCode: referralCode }
+    : { ok: false, reason: result.reason };
 }
 
 export async function earnAffiliateCommission(registrationId: string): Promise<void> {

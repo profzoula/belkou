@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { DollarSign, RefreshCw, Wallet } from "lucide-react";
+import { RefreshCw, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { adminProcessWithdrawal, getAdminAffiliateOverview } from "@/lib/fns/admin";
 import {
@@ -79,20 +80,16 @@ export function AdminCommissionsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="font-semibold text-sm flex items-center gap-2">
-            <DollarSign className="h-4 w-4 text-primary" />
-            Commissions affiliés
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            ${AFFILIATE_SIGNUP_COMMISSION_USD} par compte créé · ${AFFILIATE_COMMISSION_USD} par inscription payée · retrait min. ${AFFILIATE_MIN_WITHDRAWAL_USD}
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={load}>
-          <RefreshCw className="h-4 w-4" /> Actualiser
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="Finance"
+        title="Revenus affiliés"
+        description={`$${AFFILIATE_SIGNUP_COMMISSION_USD} / compte · $${AFFILIATE_COMMISSION_USD} / inscription payée · retrait min. $${AFFILIATE_MIN_WITHDRAWAL_USD}`}
+        actions={
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={load}>
+            <RefreshCw className="h-4 w-4" /> Actualiser
+          </Button>
+        }
+      />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[

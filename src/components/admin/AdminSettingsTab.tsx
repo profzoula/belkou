@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { adminSaveSiteSettings, getAdminSiteSettings } from "@/lib/fns/admin";
 import type { SiteSettings } from "@/lib/site-settings";
 
@@ -58,12 +59,11 @@ export function AdminSettingsTab() {
 
   return (
     <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Paramètres du site</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Dates et promo. Sauvegardé dans Supabase (prioritaire sur le code).
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Finance"
+        title="Paramètres du site"
+        description="Promo et compteur public. Sauvegardé dans Supabase (prioritaire sur le code)."
+      />
 
       <form onSubmit={save} className="surface rounded-xl p-5 sm:p-6 space-y-5">
         <div className="space-y-2">

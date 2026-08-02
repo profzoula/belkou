@@ -16,6 +16,7 @@ import {
   adminUpdateService,
   getAdminServices,
 } from "@/lib/fns/admin";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminServiceImageEditor } from "@/components/admin/AdminServiceImageEditor";
 import { AdminServiceBookingsPanel } from "@/components/admin/AdminServiceBookingsPanel";
 import {
@@ -496,14 +497,11 @@ export function AdminServicesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Services</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gérez le catalogue et les demandes de rendez-vous clients.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Catalogue"
+        title="Services"
+        description="Catalogue services et demandes de rendez-vous clients."
+      />
 
       <div className="flex flex-wrap gap-2 border-b border-border pb-1">
         <Button

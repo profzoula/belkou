@@ -10,7 +10,7 @@ import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { requestAffiliateWithdrawal } from "@/server/affiliate-withdrawals";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import {
-  earnSignupAffiliateCommission,
+  claimSignupReferralFromTrustedSources,
   getAffiliateByCode,
   getAffiliateStats,
   getOrCreateAffiliate,
@@ -24,7 +24,6 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
     z
       .object({
         accessToken: z.string().min(1),
-        referralCode: z.string().optional(),
       })
       .parse(data),
   )
@@ -39,7 +38,6 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       (user.user_metadata?.full_name as string | undefined) ??
       (user.user_metadata?.name as string | undefined) ??
       user.email.split("@")[0];
-    const fallbackCode = affiliateCodeForUser(user);
 
     const affiliateRecord = await getOrCreateAffiliate({
       userId: user.id,
@@ -50,7 +48,8 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       return null;
     });
 
-    const code = affiliateRecord?.code ?? fallbackCode;
+    // Always prefer DB code, then metadata/deterministic fallback (same algorithm).
+    const code = affiliateRecord?.code ?? affiliateCodeForUser(user);
 
     await persistAffiliate({
       userId: user.id,
@@ -59,25 +58,19 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       code,
     }).catch((err) => console.warn("[BelKou] persist affiliate:", err));
 
-    const metaCode = user.user_metadata?.referred_by;
-    const pendingReferralCode =
-      data.referralCode?.trim() ||
-      (typeof metaCode === "string" ? metaCode.trim() : "");
-
-    if (pendingReferralCode) {
-      const claimResult = await earnSignupAffiliateCommission({
-        userId: user.id,
-        email,
-        referralCode: pendingReferralCode,
-      }).catch((err) => {
-        console.warn("[BelKou] claim signup referral:", err);
-        return { ok: false as const, reason: "error" };
-      });
-      if (!claimResult.ok && claimResult.reason === "tables_unavailable") {
-        console.error(
-          "[BelKou] Affiliate tables missing — run migrations/supabase_affiliates.sql in Supabase",
-        );
-      }
+    // Signup claim uses referred_by metadata only — never client localStorage.
+    const claimResult = await claimSignupReferralFromTrustedSources({
+      userId: user.id,
+      email,
+      createdAt: user.created_at,
+    }).catch((err) => {
+      console.warn("[BelKou] claim signup referral:", err);
+      return { ok: false as const, reason: "error" };
+    });
+    if (!claimResult.ok && claimResult.reason === "tables_unavailable") {
+      console.error(
+        "[BelKou] Affiliate tables missing — run migrations/supabase_affiliates.sql in Supabase",
+      );
     }
 
     const stats = await getAffiliateStats(
@@ -104,6 +97,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
         stats,
         statsWarning:
           stats.referrals === 0 && !hasAdmin ? ("server_config" as const) : undefined,
+        referralClaimed: claimResult.ok === true,
       },
     };
   });
@@ -113,6 +107,7 @@ export const claimSignupReferral = createServerFn({ method: "POST" })
     z
       .object({
         accessToken: z.string().min(1),
+        /** Ignored for attribution — kept optional for backward-compatible clients. */
         referralCode: z.string().optional(),
       })
       .parse(data),
@@ -123,22 +118,14 @@ export const claimSignupReferral = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "not_authenticated" };
     }
 
-    const metaCode = user.user_metadata?.referred_by;
-    const referralCode =
-      data.referralCode?.trim() ||
-      (typeof metaCode === "string" ? metaCode.trim() : "");
-
-    if (!referralCode) {
-      return { ok: false as const, reason: "no_code" };
-    }
-
-    const result = await earnSignupAffiliateCommission({
+    // Client-supplied referralCode is intentionally ignored (anti late-attribution).
+    const result = await claimSignupReferralFromTrustedSources({
       userId: user.id,
       email: normalizeRegistrationEmail(user.email),
-      referralCode,
+      createdAt: user.created_at,
     });
 
-    return result.ok ? { ok: true as const } : result;
+    return result.ok ? { ok: true as const } : { ok: false as const, reason: result.reason };
   });
 
 export const requestAffiliateWithdrawalFn = createServerFn({ method: "POST" })
@@ -157,8 +144,21 @@ export const requestAffiliateWithdrawalFn = createServerFn({ method: "POST" })
       return { ok: false as const, reason: "not_authenticated" };
     }
 
-    const code = affiliateCodeForUser(user);
-    const stats = await getAffiliateStats(user.id, code, user.id);
+    const affiliateRecord = await getOrCreateAffiliate({
+      userId: user.id,
+      email: normalizeRegistrationEmail(user.email),
+      fullName:
+        (user.user_metadata?.full_name as string | undefined) ??
+        (user.user_metadata?.name as string | undefined) ??
+        user.email.split("@")[0],
+    }).catch(() => null);
+
+    const code = affiliateRecord?.code ?? affiliateCodeForUser(user);
+    const stats = await getAffiliateStats(
+      affiliateRecord?.id ?? user.id,
+      code,
+      user.id,
+    );
 
     const result = await requestAffiliateWithdrawal({
       userId: user.id,
@@ -171,7 +171,11 @@ export const requestAffiliateWithdrawalFn = createServerFn({ method: "POST" })
 
     if (!result.ok) return result;
 
-    const refreshed = await getAffiliateStats(user.id, code, user.id);
+    const refreshed = await getAffiliateStats(
+      affiliateRecord?.id ?? user.id,
+      code,
+      user.id,
+    );
     return { ok: true as const, amount: result.amount, stats: refreshed };
   });
 
