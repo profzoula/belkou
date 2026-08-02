@@ -498,7 +498,7 @@
     @apply bg-primary/15;
   }
   .lesson-article-rich > ul {
-    @apply my-3 space-y-2 rounded-xl border border-border bg-muted/25 p-4 sm:p-5;
+    @apply my-3 space-y-2 rounded-xl border border-border bg-white p-4 sm:p-5 dark:bg-card;
   }
   .lesson-article-rich > ul > li {
     @apply relative list-none pl-5 leading-relaxed before:absolute before:left-0 before:top-2.5 before:h-2 before:w-2 before:rounded-full before:bg-emerald-500;

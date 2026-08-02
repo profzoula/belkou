@@ -41,6 +41,7 @@ import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
 import { CourseReviewsPanel } from "@/components/course/CourseReviewsPanel";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
 import { CourseResourcesPanel } from "@/components/course/CourseResourcesPanel";
+import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { CurriculumSidebar } from "@/components/course/CurriculumSidebar";
 import { LearnHeader } from "@/components/course/LearnHeader";
 import { LessonContextHeader } from "@/components/course/LessonContextHeader";
@@ -350,60 +351,40 @@ function CourseVideoArea({
     );
   }
 
-  if (!locked && lesson.type === "video" && !videoId && !vimeoUrl) {
-    return (
-      <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
-        <p className="font-semibold">{lesson.title}</p>
-        <p className="text-sm text-muted-foreground">Vidéo en cours de préparation.</p>
-      </div>
-    );
-  }
+  const placeholderStatus = enrolledWaiting && startLabel
+    ? `Inscription confirmée — vidéos le ${startLabel}`
+    : reason === "schedule" && startLabel
+      ? `Vidéos disponibles le ${startLabel}`
+      : reason === "sequential"
+        ? "Terminez la leçon précédente pour continuer"
+        : locked
+          ? "Contenu réservé aux inscrits"
+          : hasPaidAccess
+            ? "Vidéo en cours de préparation."
+            : "Preview bientôt disponible";
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-black">
-      <div
-        className={cn(
-          "absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br",
-          course.thumbnail.gradient,
-          locked && "opacity-60",
-        )}
-      >
-        <Icon className="mb-4 h-16 w-16 text-white/20" aria-hidden />
-        <p className="max-w-md px-6 text-center text-lg font-bold text-white">{lesson.title}</p>
-        {enrolledWaiting && startLabel ? (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
-            <Lock className="h-4 w-4" />
-            Inscription confirmée — vidéos le {startLabel}
-          </p>
-        ) : reason === "schedule" && startLabel ? (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
-            <Lock className="h-4 w-4" />
-            Vidéos disponibles le {startLabel}
-          </p>
-        ) : reason === "sequential" ? (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
-            <Lock className="h-4 w-4" />
-            Terminez la leçon précédente pour continuer
-          </p>
-        ) : locked ? (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-white/80">
-            <Lock className="h-4 w-4" />
-            Contenu réservé aux inscrits
-          </p>
-        ) : hasPaidAccess ? (
-          <p className="mt-2 text-sm text-white/80">
-            Vidéo en cours de préparation — disponible au lancement du cours.
-          </p>
-        ) : (
-          <p className="mt-2 text-sm text-white/80">Preview bientôt disponible</p>
-        )}
-      </div>
-
-      {locked && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40 px-4">
-          {reason === "sequential" ? null : enrolledWaiting ? (
+    <CourseThumbnailBanner
+      thumbnail={course.thumbnail}
+      slug={course.slug}
+      icon={Icon}
+      aspectClass="aspect-video"
+      showLabel={false}
+      showIcon={!course.thumbnail.imageUrl}
+      className="w-full"
+    >
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/30 px-6 text-center">
+        <p className="max-w-md text-lg font-bold text-white drop-shadow-sm">{lesson.title}</p>
+        <p className="flex items-center gap-1.5 text-sm text-white/90 drop-shadow-sm">
+          {(locked || reason === "sequential" || enrolledWaiting || reason === "schedule") && (
+            <Lock className="h-4 w-4 shrink-0" aria-hidden />
+          )}
+          {placeholderStatus}
+        </p>
+        {locked && reason !== "sequential" ? (
+          enrolledWaiting ? (
             welcomeLessonId && lesson.id !== welcomeLessonId ? (
-              <Button asChild size="lg" variant="secondary" className="rounded-full">
+              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-full">
                 <Link
                   to="/courses/$slug/learn"
                   params={{ slug: course.slug }}
@@ -413,22 +394,22 @@ function CourseVideoArea({
                 </Link>
               </Button>
             ) : (
-              <Button asChild size="lg" variant="secondary" className="rounded-full">
+              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-full">
                 <Link to="/dashboard">Retour à Mes cours</Link>
               </Button>
             )
           ) : (
-            <Button asChild size="lg" className="rounded-full">
+            <Button asChild size="lg" className="mt-2 rounded-full">
               <Link to="/checkout" search={{ course: course.slug }}>
                 {reason === "schedule"
                   ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
                   : "S'inscrire pour débloquer"}
               </Link>
             </Button>
-          )}
-        </div>
-      )}
-    </div>
+          )
+        ) : null}
+      </div>
+    </CourseThumbnailBanner>
   );
 }
 
@@ -937,7 +918,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const remainingLessons = Math.max(countLessons(course) - completedLessonIds.length, 0);
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFC] text-foreground dark:bg-background">
+    <div
+      className={cn(
+        "min-h-dvh text-foreground dark:bg-background",
+        activeLesson.type === "article" ? "bg-white" : "bg-[#F8FAFC]",
+      )}
+    >
       <LearnHeader
         courseTitle={course.title}
         courseSlug={course.slug}
@@ -993,7 +979,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 />
               </div>
 
-              <div className="bg-black/95">
+              <div className={activeLesson.type === "article" ? "bg-white" : "bg-black/95"}>
                 <CourseVideoArea
                   course={course}
                   lesson={activeLesson}

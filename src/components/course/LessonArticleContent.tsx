@@ -145,7 +145,7 @@ function ArticleSubSessionPanel({
   const sessionIntro = isFirstSubInSession ? found.session.introHtml?.trim() : "";
 
   return (
-    <div className="lesson-article-panel relative border-b border-border bg-gradient-to-b from-emerald-50/40 via-card to-card pb-8 dark:from-emerald-950/20 sm:pb-4">
+    <div className="lesson-article-panel relative border-b border-border bg-white pb-8 dark:bg-background sm:pb-4">
       {nav.prevId && onSubSessionChange ? (
         <button
           type="button"
