@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getDb } from "@/server/env";
-import { updateRegistrationPayment, getRegistrationByStripeSession } from "@/server/db";
+import {
+  updateRegistrationPayment,
+  getRegistrationById,
+  getRegistrationByStripeSession,
+} from "@/server/db";
 import { verifyWebhook } from "@/server/stripe";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
 import { getWhatsappGroupUrl } from "@/lib/site-config";
@@ -41,27 +45,40 @@ export const Route = createFileRoute("/api/stripe/webhook")({
             const email = session.customer_email ?? session.customer_details?.email;
 
             if (registrationId) {
-              const record = await getRegistrationByStripeSession(db, session.id);
-              const wasPaid = record?.payment_status === "paid";
+              const before =
+                (await getRegistrationById(db, registrationId)) ??
+                (await getRegistrationByStripeSession(db, session.id));
+              const wasPaid = before?.payment_status === "paid";
 
               await updateRegistrationPayment(db, registrationId, {
                 payment_status: "paid",
                 stripe_session_id: session.id,
               });
 
-              if (record && email && !wasPaid) {
-                try {
-                  await sendEmail({
-                    to: email,
-                    subject: "Paiement confirmé — BelKou",
-                    html: paymentConfirmedEmail(
-                      record.full_name,
-                      record.plan,
-                      getWhatsappGroupUrl(record.plan),
-                    ),
-                  });
-                } catch (emailError) {
-                  console.error("[BelKou] Payment confirmed but email failed:", emailError);
+              const record =
+                (await getRegistrationById(db, registrationId)) ??
+                (await getRegistrationByStripeSession(db, session.id)) ??
+                before;
+
+              if (record && !wasPaid) {
+                const to = email ?? record.email;
+                if (to) {
+                  try {
+                    const emailResult = await sendEmail({
+                      to,
+                      subject: "Paiement confirmé — BelKou",
+                      html: paymentConfirmedEmail(
+                        record.full_name,
+                        record.plan,
+                        getWhatsappGroupUrl(record.plan),
+                      ),
+                    });
+                    if (!emailResult.ok) {
+                      console.error("[BelKou] Payment confirmed but email not sent:", emailResult);
+                    }
+                  } catch (emailError) {
+                    console.error("[BelKou] Payment confirmed but email failed:", emailError);
+                  }
                 }
               }
 

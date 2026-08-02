@@ -10,6 +10,7 @@ import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { requestAffiliateWithdrawal } from "@/server/affiliate-withdrawals";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import {
+  areAffiliateTablesReady,
   claimSignupReferralFromTrustedSources,
   getAffiliateByCode,
   getAffiliateStats,
@@ -59,6 +60,8 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
     }).catch((err) => console.warn("[BelKou] persist affiliate:", err));
 
     // Signup claim uses referred_by metadata only — never client localStorage.
+    const tablesReady = await areAffiliateTablesReady();
+
     const claimResult = await claimSignupReferralFromTrustedSources({
       userId: user.id,
       email,
@@ -86,6 +89,12 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
       "",
     );
 
+    const statsWarning = !tablesReady
+      ? ("tables_unavailable" as const)
+      : stats.referrals === 0 && !hasAdmin
+        ? ("server_config" as const)
+        : undefined;
+
     return {
       affiliate: {
         code,
@@ -95,8 +104,7 @@ export const getAffiliateDashboard = createServerFn({ method: "POST" })
         signupCommissionUsd: AFFILIATE_SIGNUP_COMMISSION_USD,
         minWithdrawalUsd: AFFILIATE_MIN_WITHDRAWAL_USD,
         stats,
-        statsWarning:
-          stats.referrals === 0 && !hasAdmin ? ("server_config" as const) : undefined,
+        statsWarning,
         referralClaimed: claimResult.ok === true,
       },
     };

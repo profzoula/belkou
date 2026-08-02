@@ -10,7 +10,12 @@ import {
 import { ArticleSubSessionBody } from "@/components/course/ArticleSubSessionBody";
 import { LessonQuiz } from "@/components/course/LessonQuiz";
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
-import { findLessonQuizInLesson, lessonQuizPassStorageKey, readQuizPass } from "@/lib/lesson-quiz";
+import {
+  findLessonQuizInLesson,
+  lessonQuizPassStorageKey,
+  OPEN_LESSON_QUIZ_EVENT,
+  readQuizPass,
+} from "@/lib/lesson-quiz";
 import {
   findArticleSubSession,
   getArticleSubSessionNav,
@@ -28,6 +33,7 @@ type LessonArticleContentProps = {
   nextLessonTitle?: string;
   onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
+  onQuizGateChange?: (passed: boolean) => void;
 };
 
 function InlineText({ text }: { text: string }) {
@@ -56,6 +62,7 @@ type ArticleSubSessionPanelProps = {
   nextLessonTitle?: string;
   onSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onComplete?: () => void;
+  onQuizGateChange?: (passed: boolean) => void;
 };
 
 function CompleteLessonButton({
@@ -84,6 +91,7 @@ function ArticleSubSessionPanel({
   nextLessonTitle,
   onSubSessionChange,
   onComplete,
+  onQuizGateChange,
 }: ArticleSubSessionPanelProps) {
   const quizSectionRef = useRef<HTMLDivElement>(null);
   const isLastStudentSub = !nav.nextId;
@@ -95,9 +103,12 @@ function ArticleSubSessionPanel({
   );
 
   useEffect(() => {
-    setQuizPassed(requiresLessonQuiz ? readQuizPass(quizPassKey) : true);
+    const lessonQuizMet = !lessonQuiz || readQuizPass(quizPassKey);
+    const localPassed = !requiresLessonQuiz || readQuizPass(quizPassKey);
+    setQuizPassed(localPassed);
     setQuizVisible(false);
-  }, [effectiveSubSessionId, quizPassKey, requiresLessonQuiz]);
+    onQuizGateChange?.(lessonQuizMet);
+  }, [effectiveSubSessionId, lessonQuiz, onQuizGateChange, quizPassKey, requiresLessonQuiz]);
 
   const canCompleteLesson = !requiresLessonQuiz || quizPassed;
 
@@ -116,6 +127,13 @@ function ArticleSubSessionPanel({
       quizSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
+
+  useEffect(() => {
+    if (!requiresLessonQuiz || quizPassed) return;
+    const onOpenQuiz = () => openQuiz();
+    window.addEventListener(OPEN_LESSON_QUIZ_EVENT, onOpenQuiz);
+    return () => window.removeEventListener(OPEN_LESSON_QUIZ_EVENT, onOpenQuiz);
+  }, [quizPassed, requiresLessonQuiz]);
 
   const showInlineQuiz = requiresLessonQuiz && lessonQuiz && (quizVisible || quizPassed);
 
@@ -186,6 +204,7 @@ function ArticleSubSessionPanel({
                 onPass={() => {
                   setQuizPassed(true);
                   setQuizVisible(true);
+                  onQuizGateChange?.(true);
                 }}
               />
             </div>
@@ -254,6 +273,7 @@ export function LessonArticleContent({
   nextLessonTitle,
   onSubSessionChange,
   onComplete,
+  onQuizGateChange,
 }: LessonArticleContentProps) {
   const sessions = parseArticleSessions(content);
 
@@ -281,6 +301,7 @@ export function LessonArticleContent({
           nextLessonTitle={nextLessonTitle}
           onSubSessionChange={onSubSessionChange}
           onComplete={onComplete}
+          onQuizGateChange={onQuizGateChange}
         />
       );
     }

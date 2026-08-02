@@ -45,8 +45,8 @@ export function MobileBottomNav() {
       key: "support",
       label: "Support",
       icon: MessageCircle,
-      active: pathname.startsWith("/forum") || pathname.startsWith("/faq"),
-      to: "/faq" as const,
+      active: pathname.startsWith("/forum"),
+      to: "/forum" as const,
     },
     {
       key: "account",

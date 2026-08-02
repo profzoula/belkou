@@ -81,8 +81,9 @@ async function supabaseUpdateFields(
 async function supabaseInsertFields(
   sb: SupabaseClient,
   fields: RegistrationFields,
+  preferredId?: string,
 ): Promise<RegistrationRecord> {
-  const id = crypto.randomUUID();
+  const id = preferredId?.trim() || crypto.randomUUID();
   for (const includeUpdatedAt of [true, false]) {
     const payload = includeUpdatedAt
       ? { id, ...fields, updated_at: new Date().toISOString() }
@@ -98,7 +99,11 @@ async function supabaseInsertFields(
 
 export async function supabaseSaveRegistration(
   data: RegistrationInput,
-  options?: { payment_status?: RegistrationRecord["payment_status"] },
+  options?: {
+    payment_status?: RegistrationRecord["payment_status"];
+    /** Keep D1 and Supabase rows on the same primary key. */
+    id?: string;
+  },
 ): Promise<RegistrationRecord> {
   const sb = getSupabaseAdmin();
   if (!sb) {
@@ -117,7 +122,7 @@ export async function supabaseSaveRegistration(
       await supabaseUpdateFields(sb, existing.id, fields);
       return { ...existing, ...fields };
     }
-    return await supabaseInsertFields(sb, fields);
+    return await supabaseInsertFields(sb, fields, options?.id);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("[BelKou] Supabase save registration:", message);

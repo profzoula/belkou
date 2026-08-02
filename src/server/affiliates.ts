@@ -132,6 +132,13 @@ async function checkAffiliateTables(sb: SupabaseClient): Promise<boolean> {
   return false;
 }
 
+/** Public probe for ops / dashboard — true when affiliates + referrals tables are readable. */
+export async function areAffiliateTablesReady(): Promise<boolean> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return false;
+  return checkAffiliateTables(sb);
+}
+
 async function getAffiliateCodeFromMetadata(sb: SupabaseClient, userId: string): Promise<string | null> {
   const { data, error } = await sb.auth.admin.getUserById(userId);
   if (error || !data.user) return null;
@@ -562,7 +569,10 @@ export async function attributeReferral(params: {
   await setRegistrationReferralCode(params.registrationId, code);
 
   if (!(await checkAffiliateTables(sb))) {
-    return { ok: true };
+    console.error(
+      "[BelKou] Affiliate tables missing — enrollment referral_code saved but commission row not created. Run migrations/supabase_affiliates.sql",
+    );
+    return { ok: false, reason: "tables_unavailable" };
   }
 
   const { data: existing } = await sb

@@ -143,8 +143,16 @@ export const submitRegistration = createServerFn({ method: "POST" })
         referredEmail: data.email,
         referralCode: data.referral_code,
       });
-      if (!attribution.ok && attribution.reason === "self_referral") {
-        console.warn("[BelKou] Self-referral blocked:", data.email);
+      if (!attribution.ok) {
+        if (attribution.reason === "self_referral") {
+          console.warn("[BelKou] Self-referral blocked:", data.email);
+        } else if (attribution.reason === "tables_unavailable") {
+          console.error(
+            "[BelKou] Affiliate attribution skipped — tables missing. Run migrations/supabase_affiliates.sql",
+          );
+        } else {
+          console.warn("[BelKou] Affiliate attribution failed:", attribution.reason);
+        }
       }
     }
 
@@ -153,7 +161,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
     const checkoutUrl = await startCheckout(db, record, pricing);
 
     try {
-      await sendEmail({
+      const emailResult = await sendEmail({
         to: data.email,
         subject: resumed
           ? `Reprise inscription BelKou — ${pricing.label}`
@@ -167,6 +175,9 @@ export const submitRegistration = createServerFn({ method: "POST" })
           manualPaymentHtml: manualHtml,
         }),
       });
+      if (!emailResult.ok) {
+        console.error("[BelKou] Registration email not sent:", emailResult);
+      }
     } catch (error) {
       console.error("Email error:", error);
     }

@@ -1,4 +1,4 @@
-import type { ArticleSession } from "@/lib/lesson-sessions";
+import { parseArticleSessions, type ArticleSession } from "@/lib/lesson-sessions";
 
 export type LessonQuizOption = {
   id: string;
@@ -354,6 +354,40 @@ export function findLessonQuizInLesson(
 
 export function lessonQuizPassStorageKey(lessonId: string): string {
   return `${lessonId}::lesson-quiz-pass`;
+}
+
+/** True when an article lesson embeds a quiz that must be passed before completion. */
+export function lessonHasRequiredQuiz(lesson: {
+  id: string;
+  type?: string;
+  content?: string | null;
+}): boolean {
+  if (lesson.type && lesson.type !== "article") return false;
+  const content = lesson.content?.trim();
+  if (!content) return false;
+  const sessions = parseArticleSessions(content);
+  if (!sessions?.length) return false;
+  return Boolean(findLessonQuizInLesson(lesson.id, sessions));
+}
+
+/** False when the lesson requires a quiz and localStorage has no pass yet. */
+export function isLessonQuizRequirementMet(lesson: {
+  id: string;
+  type?: string;
+  content?: string | null;
+}): boolean {
+  if (!lessonHasRequiredQuiz(lesson)) return true;
+  return readQuizPass(lessonQuizPassStorageKey(lesson.id));
+}
+
+export const OPEN_LESSON_QUIZ_EVENT = "belkou:open-lesson-quiz";
+
+export function requestOpenLessonQuiz(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(OPEN_LESSON_QUIZ_EVENT));
+  window.requestAnimationFrame(() => {
+    document.querySelector(".lesson-quiz")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
 export function quizStorageKey(storageKey: string): string {

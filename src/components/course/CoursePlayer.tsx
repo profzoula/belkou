@@ -49,6 +49,11 @@ import {
   getFirstArticleSubSessionId,
   parseArticleSessions,
 } from "@/lib/lesson-sessions";
+import {
+  isLessonQuizRequirementMet,
+  lessonHasRequiredQuiz,
+  requestOpenLessonQuiz,
+} from "@/lib/lesson-quiz";
 
 type CoursePlayerProps = {
   course: PublicCourse;
@@ -69,6 +74,7 @@ function CourseVideoArea({
   activeArticleSubSessionId,
   onArticleSubSessionChange,
   onVideoPlay,
+  onQuizGateChange,
 }: {
   course: PublicCourse;
   lesson: CourseLesson;
@@ -83,6 +89,7 @@ function CourseVideoArea({
   activeArticleSubSessionId?: string | null;
   onArticleSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
   onVideoPlay?: () => void;
+  onQuizGateChange?: (passed: boolean) => void;
 }) {
   const { session } = useAuth();
   const Icon = getCourseIcon(course.slug);
@@ -201,6 +208,7 @@ function CourseVideoArea({
           nextLessonTitle={nextLessonTitle}
           onSubSessionChange={onArticleSubSessionChange}
           onComplete={onLessonComplete}
+          onQuizGateChange={onQuizGateChange}
         />
       );
     }
@@ -675,6 +683,16 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   }, [access, getLockState, initialLessonId, allLessons, welcomeLesson, course]);
 
   const activeLesson = allLessons.find((lesson) => lesson.id === activeLessonId) ?? allLessons[0];
+  const [activeQuizPassed, setActiveQuizPassed] = useState(() =>
+    isLessonQuizRequirementMet(activeLesson),
+  );
+
+  useEffect(() => {
+    setActiveQuizPassed(isLessonQuizRequirementMet(activeLesson));
+  }, [activeLesson]);
+
+  const quizBlocksComplete = lessonHasRequiredQuiz(activeLesson) && !activeQuizPassed;
+
   const [playerTab, setPlayerTab] = useState(() => {
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
       const lesson = allLessons.find((l) => l.id === activeLessonId) ?? allLessons[0];
@@ -820,6 +838,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
 
   const handleActiveLessonComplete = useCallback(() => {
+    if (lessonHasRequiredQuiz(activeLesson) && !isLessonQuizRequirementMet(activeLesson)) {
+      setActiveQuizPassed(false);
+      requestOpenLessonQuiz();
+      return;
+    }
+
     if (activeArticleSubSessionId) {
       markArticleSubSessionRead(activeArticleSubSessionId);
     }
@@ -860,7 +884,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     }
   }, [
     activeArticleSubSessionId,
-    activeLesson.id,
+    activeLesson,
     allLessons,
     completedLessonIds,
     course,
@@ -889,6 +913,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       }
       if (event.key === "ArrowRight") {
         event.preventDefault();
+        // Do not auto-complete; only navigate when the next lesson is already unlocked.
         goToNextLesson();
       }
       if ((event.key === "c" || event.key === "C") && hasPaidAccess && contentLive && !activeLessonCompleted) {
@@ -975,7 +1000,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   hasPaidAccess={hasPaidAccess}
                   welcomeLessonId={welcomeLesson?.id}
                   nextLessonTitle={nextLesson?.title}
-                  onNextLesson={nextLesson ? handleActiveLessonComplete : undefined}
+                  onNextLesson={
+                    nextLesson && !quizBlocksComplete ? handleActiveLessonComplete : undefined
+                  }
                   onLessonComplete={handleActiveLessonComplete}
                   getLockState={getLockState}
                   startAtSeconds={resumeAtSeconds}
@@ -985,6 +1012,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   activeArticleSubSessionId={activeArticleSubSessionId}
                   onArticleSubSessionChange={handleArticleSubSessionChange}
                   onVideoPlay={openCurriculumTab}
+                  onQuizGateChange={setActiveQuizPassed}
                 />
               </div>
 
@@ -1027,7 +1055,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 <LessonNavControls
                   canGoPrevious={Boolean(previousLesson)}
                   canGoNext={Boolean(nextLesson)}
-                  canMarkComplete={hasPaidAccess && contentLive && lessonIsCompletable(activeLesson)}
+                  canMarkComplete={
+                    hasPaidAccess &&
+                    contentLive &&
+                    lessonIsCompletable(activeLesson) &&
+                    !quizBlocksComplete
+                  }
                   isCompleted={activeLessonCompleted}
                   previousTitle={previousLesson?.title}
                   nextTitle={nextLesson?.title}
@@ -1054,22 +1087,21 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
             <div className="rounded-[20px] border border-border bg-card p-3 shadow-sm sm:p-4">
               <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
-                <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-[14px] bg-muted/70 p-1">
+                <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-[14px] bg-muted/70 p-1">
                   {[
                     { value: "overview", label: "Aperçu" },
                     { value: "curriculum", label: "Programme", mobileOnly: true },
-                    { value: "notes", label: "Notes", desktopOnly: true },
-                    { value: "resources", label: "Téléchargements" },
-                    { value: "qa", label: "Q&R", desktopOnly: true },
-                    { value: "reviews", label: "Avis", desktopOnly: true },
+                    { value: "notes", label: "Notes" },
+                    { value: "resources", label: "Fichiers" },
+                    { value: "qa", label: "Q&R" },
+                    { value: "reviews", label: "Avis" },
                   ].map((tab) => (
                     <TabsTrigger
                       key={tab.value}
                       value={tab.value}
                       className={cn(
-                        "rounded-[12px] px-3 py-2 text-xs font-semibold text-muted-foreground transition data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-sm",
+                        "shrink-0 rounded-[12px] px-3 py-2 text-xs font-semibold text-muted-foreground transition data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-sm",
                         tab.mobileOnly && "lg:hidden",
-                        tab.desktopOnly && "hidden lg:inline-flex",
                       )}
                     >
                       {tab.label}

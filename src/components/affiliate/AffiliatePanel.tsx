@@ -190,6 +190,13 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
       </div>
 
       <div className="p-5 sm:p-6 space-y-5">
+        {"statsWarning" in affiliate && affiliate.statsWarning === "tables_unavailable" ? (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-800 dark:text-red-200 leading-relaxed">
+            Tables affiliés absentes dans Supabase. Exécutez{" "}
+            <code className="font-mono">migrations/supabase_affiliates.sql</code> dans SQL Editor, puis{" "}
+            <code className="font-mono">node scripts/setup-affiliates.mjs</code> pour vérifier.
+          </div>
+        ) : null}
         {"statsWarning" in affiliate && affiliate.statsWarning === "server_config" ? (
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
             Les commissions existent dans Supabase mais le serveur ne peut pas les lire. Ajoutez{" "}

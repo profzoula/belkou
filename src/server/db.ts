@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS registrations (
   course_slug TEXT,
   payment_status TEXT NOT NULL DEFAULT 'pending',
   stripe_session_id TEXT,
+  referral_code TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT
 );
@@ -42,6 +43,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_email_course ON registration
 
 export async function initDb(db: D1Database) {
   await db.exec(INIT_SQL);
+  // Older D1 databases may predate referral_code — add it idempotently.
+  try {
+    await db.exec(`ALTER TABLE registrations ADD COLUMN referral_code TEXT`);
+  } catch {
+    /* column already exists */
+  }
 }
 
 export function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
@@ -153,33 +160,70 @@ export async function saveRegistration(
   }
 
   await initDb(db);
-  await db
-    .prepare(
-      `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, course_slug, payment_status, stripe_session_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(
-      record.id,
-      record.full_name,
-      record.email,
-      record.whatsapp,
-      record.country,
-      record.level,
-      record.plan,
-      record.course_slug,
-      record.payment_status,
-      record.stripe_session_id,
-      record.created_at,
-      record.updated_at,
-    )
-    .run();
 
+  // Supabase is the source of truth for Stripe/affiliates — create/reuse that id first,
+  // then mirror the exact same primary key into D1 (prevents dual-UUID drift).
   try {
-    const saved = await supabaseSaveRegistration(normalized, options);
+    const saved = await supabaseSaveRegistration(normalized, {
+      ...options,
+      id: record.id,
+    });
+    await db
+      .prepare(
+        `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, course_slug, payment_status, stripe_session_id, referral_code, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET
+           full_name = excluded.full_name,
+           email = excluded.email,
+           whatsapp = excluded.whatsapp,
+           country = excluded.country,
+           level = excluded.level,
+           plan = excluded.plan,
+           course_slug = excluded.course_slug,
+           payment_status = excluded.payment_status,
+           updated_at = excluded.updated_at`,
+      )
+      .bind(
+        saved.id,
+        saved.full_name,
+        saved.email,
+        saved.whatsapp,
+        saved.country,
+        saved.level,
+        saved.plan,
+        saved.course_slug,
+        saved.payment_status,
+        saved.stripe_session_id,
+        saved.referral_code,
+        saved.created_at,
+        saved.updated_at ?? saved.created_at,
+      )
+      .run();
     devStore.set(saved.id, saved);
     return saved;
   } catch (error) {
-    console.warn("[BelKou] Supabase sync failed (D1 saved):", error);
+    console.warn("[BelKou] Supabase save failed; writing D1-only fallback:", error);
+    await db
+      .prepare(
+        `INSERT INTO registrations (id, full_name, email, whatsapp, country, level, plan, course_slug, payment_status, stripe_session_id, referral_code, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        record.id,
+        record.full_name,
+        record.email,
+        record.whatsapp,
+        record.country,
+        record.level,
+        record.plan,
+        record.course_slug,
+        record.payment_status,
+        record.stripe_session_id,
+        record.referral_code,
+        record.created_at,
+        record.updated_at,
+      )
+      .run();
     devStore.set(record.id, record);
     return record;
   }
@@ -366,6 +410,10 @@ export async function getRegistrationCount(db: D1Database | null): Promise<numbe
 }
 
 export async function listRegistrations(db: D1Database | null): Promise<RegistrationRecord[]> {
+  // Prefer Supabase (payment/affiliate source of truth) when available.
+  const fromSb = await supabaseListRegistrations();
+  if (fromSb.length > 0) return fromSb;
+
   if (db) {
     await initDb(db);
     const { results } = await db
@@ -374,15 +422,15 @@ export async function listRegistrations(db: D1Database | null): Promise<Registra
     return (results ?? []).map(rowToRecord);
   }
 
-  const fromSb = await supabaseListRegistrations();
-  if (fromSb.length > 0) return fromSb;
-
   return [...devStore.values()].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 }
 
 export async function getRegistrationStats(db: D1Database | null): Promise<RegistrationStats> {
+  const fromSb = await supabaseGetStats();
+  if (fromSb && fromSb.total > 0) return fromSb;
+
   if (db) {
     await initDb(db);
     const row = await db
@@ -410,5 +458,5 @@ export async function getRegistrationStats(db: D1Database | null): Promise<Regis
     }
   }
 
-  return (await supabaseGetStats()) ?? { total: 0, paid: 0, pending: 0, manual_pending: 0, premium: 0, vip: 0 };
+  return fromSb ?? { total: 0, paid: 0, pending: 0, manual_pending: 0, premium: 0, vip: 0 };
 }

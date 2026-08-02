@@ -34,7 +34,7 @@ async function sendPaymentConfirmed(
   plan: "premium" | "vip",
 ) {
   try {
-    await sendEmail({
+    const result = await sendEmail({
       to: email,
       subject: "Paiement confirmé — BelKou",
       html: paymentConfirmedEmail(
@@ -43,6 +43,9 @@ async function sendPaymentConfirmed(
         getWhatsappGroupUrl(plan),
       ),
     });
+    if (!result.ok) {
+      console.error("[BelKou] Payment confirmation email not sent:", result);
+    }
   } catch (error) {
     console.error("Payment confirmation email error:", error);
   }

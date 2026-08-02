@@ -6,12 +6,26 @@ type SendEmailInput = {
   html: string;
 };
 
-export async function sendEmail({ to, subject, html }: SendEmailInput) {
+export type SendEmailResult =
+  | { ok: true; dev: boolean }
+  | { ok: false; reason: "not_configured" | "send_failed"; message?: string };
+
+export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<SendEmailResult> {
   const env = await getServerEnvResolved();
+  const isProd = process.env.NODE_ENV === "production";
 
   if (!env.RESEND_API_KEY) {
+    // Dev: log only. Production: fail closed so callers don't assume delivery.
+    console.warn("[BelKou] Email skipped — RESEND_API_KEY missing:", { to, subject, isProd });
+    if (isProd) {
+      return {
+        ok: false,
+        reason: "not_configured",
+        message: "RESEND_API_KEY manquant — email non envoyé.",
+      };
+    }
     console.info("[BelKou] Email (dev mode):", { to, subject });
-    return { ok: true as const, dev: true };
+    return { ok: true, dev: true };
   }
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -30,10 +44,11 @@ export async function sendEmail({ to, subject, html }: SendEmailInput) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Email failed: ${text}`);
+    console.error("[BelKou] Email failed:", text);
+    return { ok: false, reason: "send_failed", message: text };
   }
 
-  return { ok: true as const, dev: false };
+  return { ok: true, dev: false };
 }
 
 export function registrationPendingEmail(params: {
