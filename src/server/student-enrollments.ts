@@ -15,6 +15,7 @@ import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
 import { listDistinctCourseSlugsForEmail, listLessonProgress } from "@/server/lesson-progress";
+import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
@@ -49,6 +50,11 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
   for (const slug of progressSlugs) {
     await ensureFreeCourseEnrollment(db, { email, courseSlug: slug, fullName }).catch(() => undefined);
   }
+
+  // If Stripe already charged but webhook missed, unlock before rendering Mes cours.
+  await reconcilePendingStripePaymentsForEmail(db, email).catch((error) => {
+    console.warn("[BelKou] enrollment Stripe reconcile:", error);
+  });
 
   const registrations = await listRegistrationsByEmail(db, email);
   if (!registrations.length) return [];

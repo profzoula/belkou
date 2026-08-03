@@ -229,26 +229,89 @@ export async function saveRegistration(
   }
 }
 
+function paymentRank(status: RegistrationRecord["payment_status"]): number {
+  if (status === "paid") return 2;
+  if (status === "manual_pending") return 1;
+  return 0;
+}
+
+/** Prefer paid (then freshest) when D1 and Supabase disagree. */
+function preferRegistration(a: RegistrationRecord, b: RegistrationRecord): RegistrationRecord {
+  const rankDiff = paymentRank(a.payment_status) - paymentRank(b.payment_status);
+  if (rankDiff !== 0) return rankDiff > 0 ? a : b;
+  const aTime = Date.parse(a.updated_at ?? a.created_at);
+  const bTime = Date.parse(b.updated_at ?? b.created_at);
+  return aTime >= bTime ? a : b;
+}
+
+function mergeRegistrationRows(rows: RegistrationRecord[]): RegistrationRecord[] {
+  const byId = new Map<string, RegistrationRecord>();
+  for (const row of rows) {
+    const existing = byId.get(row.id);
+    byId.set(row.id, existing ? preferRegistration(existing, row) : row);
+  }
+
+  // One row per email+course — avoids a stale D1 pending hiding a paid Supabase row.
+  const byCourse = new Map<string, RegistrationRecord>();
+  for (const row of byId.values()) {
+    const key = `${normalizeRegistrationEmail(row.email)}::${registrationCourseKey(row.course_slug)}`;
+    const existing = byCourse.get(key);
+    byCourse.set(key, existing ? preferRegistration(existing, row) : row);
+  }
+
+  return [...byCourse.values()].sort(
+    (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
+  );
+}
+
 export async function listRegistrationsByEmail(
   db: D1Database | null,
   email: string,
 ): Promise<RegistrationRecord[]> {
   const normalized = normalizeRegistrationEmail(email);
+  const collected: RegistrationRecord[] = [];
 
   if (db) {
     const { results } = await db
       .prepare(`SELECT * FROM registrations WHERE lower(email) = ? ORDER BY created_at DESC`)
       .bind(normalized)
       .all<Record<string, unknown>>();
-    if (results?.length) return results.map(rowToRecord);
+    if (results?.length) collected.push(...results.map(rowToRecord));
   }
 
   const fromSb = await supabaseListByEmail(normalized);
-  if (fromSb.length) return fromSb;
+  if (fromSb.length) collected.push(...fromSb);
 
-  return [...devStore.values()]
-    .filter((record) => record.email.toLowerCase() === normalized)
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  if (!collected.length) {
+    return [...devStore.values()]
+      .filter((record) => record.email.toLowerCase() === normalized)
+      .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  }
+
+  const merged = mergeRegistrationRows(collected);
+
+  // Heal D1 when Supabase (or merge) says paid but a same-id D1 row is still pending.
+  if (db) {
+    for (const row of merged) {
+      if (row.payment_status !== "paid") continue;
+      const d1Pending = collected.find(
+        (r) => r.id === row.id && r.payment_status !== "paid",
+      );
+      if (!d1Pending) continue;
+      try {
+        await db
+          .prepare(
+            `UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id), updated_at = ? WHERE id = ?`,
+          )
+          .bind(row.payment_status, row.stripe_session_id, new Date().toISOString(), row.id)
+          .run();
+      } catch (error) {
+        console.warn("[BelKou] D1 payment heal failed:", error);
+      }
+    }
+  }
+
+  return merged;
 }
 
 export async function getRegistrationByEmailAndCourse(
@@ -338,16 +401,18 @@ export async function updateRegistrationPayment(
   id: string,
   update: { payment_status: RegistrationRecord["payment_status"]; stripe_session_id?: string | null },
 ) {
+  // Supabase first — student access / admin prefer it when D1 lags or diverges.
+  await supabaseUpdatePayment(id, update);
+
   if (db) {
     await db
-      .prepare(`UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id), updated_at = ? WHERE id = ?`)
+      .prepare(
+        `UPDATE registrations SET payment_status = ?, stripe_session_id = COALESCE(?, stripe_session_id), updated_at = ? WHERE id = ?`,
+      )
       .bind(update.payment_status, update.stripe_session_id ?? null, new Date().toISOString(), id)
       .run();
-    await supabaseUpdatePayment(id, update);
-    return;
   }
 
-  await supabaseUpdatePayment(id, update);
   const existing = devStore.get(id);
   if (existing) {
     devStore.set(id, {

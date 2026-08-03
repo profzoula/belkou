@@ -67,6 +67,9 @@ export const getCourseAccess = createServerFn({ method: "POST" })
       fullName,
     }).catch(() => undefined);
 
+    const { reconcilePendingStripePaymentsForEmail } = await import("@/server/stripe-access");
+    await reconcilePendingStripePaymentsForEmail(db, email).catch(() => undefined);
+
     const rows = await listRegistrationsByEmail(db, email);
     const registration = pickRegistrationForCourse(rows, data.courseSlug);
     const hasPaidAccess = hasPaidAccessToCourse(registration, data.courseSlug);

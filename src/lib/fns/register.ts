@@ -215,39 +215,52 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
   .inputValidator((data: { sessionId: string; registrationId: string }) => data)
   .handler(async ({ data }) => {
     const { getCheckoutSession } = await import("@/server/stripe");
+    const { grantAccessFromCheckoutSession, isCheckoutPaid } = await import(
+      "@/server/stripe-access"
+    );
     const db = await getDb();
     const record = await getRegistrationById(db, data.registrationId);
     const session = await getCheckoutSession(data.sessionId);
 
-    if (!session || session.payment_status !== "paid") {
+    if (!session || !isCheckoutPaid(session)) {
       return { paid: false as const, plan: record?.plan };
     }
 
     const plan = (session.metadata?.plan ?? record?.plan) as PlanId | undefined;
+    const granted = await grantAccessFromCheckoutSession(db, {
+      ...session,
+      metadata: {
+        ...(session.metadata ?? {}),
+        // Prefer the registration from the success URL when Stripe metadata is missing.
+        registrationId: session.metadata?.registrationId || data.registrationId,
+      },
+    });
 
-    if (session.metadata?.registrationId === data.registrationId && record) {
-      const wasPaid = record.payment_status === "paid";
-      await updateRegistrationPayment(db, data.registrationId, {
-        payment_status: "paid",
-        stripe_session_id: session.id,
+    if (!granted) {
+      console.error("[BelKou] Stripe session paid but access not granted", {
+        sessionId: session.id,
+        registrationId: data.registrationId,
       });
+      return { paid: false as const, plan: plan ?? record?.plan };
+    }
 
-      if (!wasPaid) {
+    if (!granted.alreadyPaid) {
+      const unlocked = await getRegistrationById(db, granted.registrationId);
+      if (unlocked) {
         try {
           await sendEmail({
-            to: record.email,
+            to: unlocked.email,
             subject: "Paiement confirmé — BelKou",
             html: paymentConfirmedEmail(
-              record.full_name,
-              record.plan,
-              getWhatsappGroupUrl(record.plan),
+              unlocked.full_name,
+              unlocked.plan,
+              getWhatsappGroupUrl(unlocked.plan),
             ),
           });
         } catch (error) {
           console.error("Payment confirmation email error:", error);
         }
-
-        await earnAffiliateCommission(data.registrationId);
+        await earnAffiliateCommission(granted.registrationId);
       }
     }
 
