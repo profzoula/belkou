@@ -6,15 +6,20 @@ import {
 } from "@/lib/course-access";
 import {
   computeCourseProgressPercent,
+  getAllLessons,
   getFirstPreviewVideoLesson,
-  getNextLessonToWatch,
+  getResumeLesson,
   getWelcomePreviewLesson,
 } from "@/lib/courses";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
-import { listDistinctCourseSlugsForEmail, listLessonProgress } from "@/server/lesson-progress";
+import {
+  listDistinctCourseSlugsForEmail,
+  listLessonProgress,
+  pickLastAccessedLessonId,
+} from "@/server/lesson-progress";
 import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourseBySlug } from "@/server/site-content";
@@ -75,7 +80,9 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
 
     const course = await getResolvedCourseBySlug(slug);
     const progressRows = await listLessonProgress(email, slug);
-    const completedLessonIds = progressRows.map((row) => row.lesson_id);
+    const completedLessonIds = progressRows
+      .filter((row) => row.completed_at)
+      .map((row) => row.lesson_id);
 
     if (!course) {
       enrollments.push({
@@ -92,6 +99,11 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
       continue;
     }
 
+    const lastLessonId = pickLastAccessedLessonId(
+      progressRows,
+      getAllLessons(course).map((lesson) => lesson.id),
+    );
+
     enrollments.push({
       id: registration.id,
       payment_status: registration.payment_status,
@@ -105,7 +117,7 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
       progressPercent: computeCourseProgressPercent(course, completedLessonIds),
       purchasedAt: registration.created_at,
       welcomeLessonId: getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
-      continueLessonId: getNextLessonToWatch(course, completedLessonIds)?.id,
+      continueLessonId: getResumeLesson(course, { completedLessonIds, lastLessonId })?.id,
     });
   }
 

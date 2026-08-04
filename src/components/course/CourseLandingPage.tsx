@@ -166,9 +166,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const accessFn = useServerFn(getCourseAccess);
   const progressFn = useServerFn(getCourseProgress);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
-  const [progress, setProgress] = useState<{ completedLessonIds: string[]; progressPercent: number } | null>(
-    null,
-  );
+  const [progress, setProgress] = useState<{
+    completedLessonIds: string[];
+    progressPercent: number;
+    lastLessonId?: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -221,7 +223,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
       })
       .catch(() => {
         if (!cancelled) {
-          setProgress({ completedLessonIds: [], progressPercent: 0 });
+          setProgress({ completedLessonIds: [], progressPercent: 0, lastLessonId: null });
         }
       });
 
@@ -239,7 +241,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const playableLearnSearch = getPlayableLearnSearch(course);
   const previewLearnSearch = getPreviewLearnSearch(course);
   const hasPublicPreview = getPreviewVideoLessons(course).length > 0;
-  const continueLearnSearch = getContinueLearnSearch(course, progress?.completedLessonIds ?? []);
+  const continueLearnSearch = getContinueLearnSearch(
+    course,
+    progress?.completedLessonIds ?? [],
+    progress?.lastLessonId,
+  );
   const courseActionLabel = getCourseActionLabel(progress?.progressPercent ?? 0);
 
   const courseDiscount = discountPercent(course.price, course.originalPrice);

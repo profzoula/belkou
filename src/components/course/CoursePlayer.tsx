@@ -16,6 +16,7 @@ import {
   getLessonVimeoUrl,
   getSectionForLesson,
   getWelcomePreviewLesson,
+  lastLessonStorageKey,
   lessonHasVideo,
   lessonIsCompletable,
   type CourseLesson,
@@ -29,7 +30,12 @@ import {
   isScheduledInFuture,
 } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
-import { completeLesson, getCourseProgress, saveLessonPlayback } from "@/lib/fns/progress";
+import {
+  completeLesson,
+  getCourseProgress,
+  saveLessonLastAccess,
+  saveLessonPlayback,
+} from "@/lib/fns/progress";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
@@ -484,14 +490,18 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
   const savePlaybackFn = useServerFn(saveLessonPlayback);
+  const saveLastAccessFn = useServerFn(saveLessonLastAccess);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
   const [progress, setProgress] = useState<{
     completedLessonIds: string[];
     playbackByLessonId: Record<string, number>;
     progressPercent: number;
+    lastLessonId: string | null;
   } | null>(null);
   const markedLessonsRef = useRef(new Set<string>());
   const lastPlaybackSaveRef = useRef(0);
+  const resumeAppliedRef = useRef(Boolean(initialLessonId));
+  const lastAccessSavedRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -547,7 +557,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       })
       .catch(() => {
         if (!cancelled) {
-          setProgress({ completedLessonIds: [], playbackByLessonId: {}, progressPercent: 0 });
+          setProgress({
+            completedLessonIds: [],
+            playbackByLessonId: {},
+            progressPercent: 0,
+            lastLessonId: null,
+          });
         }
       });
 
@@ -575,6 +590,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         current
           ? {
               ...current,
+              lastLessonId: lessonId,
               playbackByLessonId: {
                 ...current.playbackByLessonId,
                 [lessonId]: Math.floor(currentTime),
@@ -613,6 +629,18 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       if (!locked) return requested.id;
     }
 
+    if (typeof window !== "undefined" && !lessonId) {
+      try {
+        const stored = window.localStorage.getItem(lastLessonStorageKey(course.slug));
+        if (stored) {
+          const storedLesson = allLessons.find((lesson) => lesson.id === stored);
+          if (storedLesson && !getLockState(storedLesson).locked) return storedLesson.id;
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
     const firstUnlocked = allLessons.find((lesson) => !getLockState(lesson).locked);
 
     return firstUnlocked?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
@@ -636,6 +664,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const selectLesson = useCallback(
     (lessonId: string) => {
       setActiveLessonId(lessonId);
+      try {
+        window.localStorage.setItem(lastLessonStorageKey(course.slug), lessonId);
+      } catch {
+        /* ignore */
+      }
       void navigate({
         to: "/courses/$slug/learn",
         params: { slug: course.slug },
@@ -645,6 +678,67 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     },
     [course.slug, navigate],
   );
+
+  // Persist last opened lesson (articles included — not only video playback).
+  useEffect(() => {
+    if (!session?.access_token || !hasPaidAccess || !activeLessonId) return;
+    if (lastAccessSavedRef.current === activeLessonId) return;
+    lastAccessSavedRef.current = activeLessonId;
+
+    try {
+      window.localStorage.setItem(lastLessonStorageKey(course.slug), activeLessonId);
+    } catch {
+      /* ignore */
+    }
+
+    void saveLastAccessFn({
+      data: {
+        accessToken: session.access_token,
+        courseSlug: course.slug,
+        lessonId: activeLessonId,
+      },
+    }).catch(() => undefined);
+  }, [activeLessonId, course.slug, hasPaidAccess, saveLastAccessFn, session?.access_token]);
+
+  // After progress loads, resume the last lesson when the URL has no explicit lesson.
+  useEffect(() => {
+    if (!access || !progress || resumeAppliedRef.current) return;
+    if (initialLessonId) {
+      resumeAppliedRef.current = true;
+      return;
+    }
+
+    const targetId = progress.lastLessonId;
+    if (!targetId) {
+      resumeAppliedRef.current = true;
+      return;
+    }
+
+    const target = allLessons.find((lesson) => lesson.id === targetId);
+    if (!target) {
+      resumeAppliedRef.current = true;
+      return;
+    }
+
+    const { locked } = getLockState(target);
+    if (locked) {
+      resumeAppliedRef.current = true;
+      return;
+    }
+
+    resumeAppliedRef.current = true;
+    if (targetId !== activeLessonId) {
+      selectLesson(targetId);
+    }
+  }, [
+    access,
+    activeLessonId,
+    allLessons,
+    getLockState,
+    initialLessonId,
+    progress,
+    selectLesson,
+  ]);
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
@@ -801,6 +895,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             completedLessonIds: [...new Set([...(current?.completedLessonIds ?? []), lessonId])],
             playbackByLessonId: current?.playbackByLessonId ?? {},
             progressPercent: result.progressPercent,
+            lastLessonId: lessonId,
           }));
         })
         .catch(() => {
@@ -811,6 +906,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               completedLessonIds,
               playbackByLessonId: current?.playbackByLessonId ?? {},
               progressPercent: computeCourseProgressPercent(course, completedLessonIds),
+              lastLessonId: current?.lastLessonId ?? null,
             };
           });
         });
@@ -836,6 +932,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       completedLessonIds: optimisticCompleted,
       playbackByLessonId: current?.playbackByLessonId ?? {},
       progressPercent: computeCourseProgressPercent(course, optimisticCompleted),
+      lastLessonId: completedId,
     }));
 
     recordLessonComplete(completedId);

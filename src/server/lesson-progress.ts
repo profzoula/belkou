@@ -5,6 +5,7 @@ export type LessonProgressRow = {
   lesson_id: string;
   completed_at: string | null;
   current_time_seconds: number;
+  last_watched_at: string | null;
 };
 
 export async function listLessonProgress(
@@ -17,7 +18,7 @@ export async function listLessonProgress(
   const normalized = normalizeRegistrationEmail(email);
   const { data, error } = await sb
     .from("lesson_progress")
-    .select("lesson_id, completed_at, current_time_seconds")
+    .select("lesson_id, completed_at, current_time_seconds, last_watched_at")
     .ilike("email", normalized)
     .eq("course_slug", courseSlug);
 
@@ -32,7 +33,79 @@ export async function listLessonProgress(
     lesson_id: String(row.lesson_id),
     completed_at: row.completed_at ? String(row.completed_at) : null,
     current_time_seconds: Number(row.current_time_seconds) || 0,
+    last_watched_at: row.last_watched_at ? String(row.last_watched_at) : null,
   }));
+}
+
+/** Most recently opened/watched lesson for resume (ignores unknown lesson ids). */
+export function pickLastAccessedLessonId(
+  rows: LessonProgressRow[],
+  validLessonIds: Iterable<string>,
+): string | null {
+  const valid = new Set(validLessonIds);
+  let bestId: string | null = null;
+  let bestAt = 0;
+
+  for (const row of rows) {
+    if (!valid.has(row.lesson_id)) continue;
+    const at = Date.parse(row.last_watched_at ?? row.completed_at ?? "") || 0;
+    if (at > bestAt) {
+      bestAt = at;
+      bestId = row.lesson_id;
+    }
+  }
+
+  return bestId;
+}
+
+/** Record that the student opened a lesson (articles + videos). */
+export async function touchLessonLastAccess(
+  email: string,
+  courseSlug: string,
+  lessonId: string,
+): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+
+  const normalized = normalizeRegistrationEmail(email);
+  const now = new Date().toISOString();
+
+  const { data: existing, error: readError } = await sb
+    .from("lesson_progress")
+    .select("id")
+    .ilike("email", normalized)
+    .eq("course_slug", courseSlug)
+    .eq("lesson_id", lessonId)
+    .maybeSingle();
+
+  if (readError && !readError.message.includes("lesson_progress")) {
+    console.error("[BelKou] read lesson access:", readError.message);
+    return;
+  }
+
+  if (existing) {
+    const { error } = await sb
+      .from("lesson_progress")
+      .update({ last_watched_at: now })
+      .eq("id", existing.id);
+    if (error && !error.message.includes("lesson_progress")) {
+      console.error("[BelKou] update lesson access:", error.message);
+    }
+    return;
+  }
+
+  const { error } = await sb.from("lesson_progress").insert({
+    email: normalized,
+    course_slug: courseSlug,
+    lesson_id: lessonId,
+    current_time_seconds: 0,
+    last_watched_at: now,
+    completed_at: null,
+  });
+
+  if (error && !error.message.includes("lesson_progress")) {
+    console.error("[BelKou] insert lesson access:", error.message);
+  }
 }
 
 export async function saveLessonPlaybackPosition(
@@ -95,12 +168,14 @@ export async function markLessonComplete(
   if (!sb) return;
 
   const normalized = normalizeRegistrationEmail(email);
+  const now = new Date().toISOString();
   const { error } = await sb.from("lesson_progress").upsert(
     {
       email: normalized,
       course_slug: courseSlug,
       lesson_id: lessonId,
-      completed_at: new Date().toISOString(),
+      completed_at: now,
+      last_watched_at: now,
     },
     { onConflict: "email,course_slug,lesson_id" },
   );

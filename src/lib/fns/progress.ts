@@ -7,7 +7,9 @@ import { getResolvedCourseBySlug } from "@/server/site-content";
 import {
   listLessonProgress,
   markLessonComplete,
+  pickLastAccessedLessonId,
   saveLessonPlaybackPosition,
+  touchLessonLastAccess,
 } from "@/server/lesson-progress";
 
 export const getCourseProgress = createServerFn({ method: "POST" })
@@ -15,13 +17,20 @@ export const getCourseProgress = createServerFn({ method: "POST" })
     z.object({ accessToken: z.string().min(1), courseSlug: z.string().min(1) }).parse(data),
   )
   .handler(async ({ data }) => {
+    const empty = {
+      completedLessonIds: [] as string[],
+      playbackByLessonId: {} as Record<string, number>,
+      progressPercent: 0,
+      lastLessonId: null as string | null,
+    };
     const user = await getUserFromAccessToken(data.accessToken);
-    if (!user?.email) return { completedLessonIds: [] as string[], playbackByLessonId: {}, progressPercent: 0 };
+    if (!user?.email) return empty;
 
     const course = await getResolvedCourseBySlug(data.courseSlug);
-    if (!course) return { completedLessonIds: [], playbackByLessonId: {}, progressPercent: 0 };
+    if (!course) return empty;
 
     const rows = await listLessonProgress(user.email, data.courseSlug);
+    const lessonIds = getAllLessons(course).map((lesson) => lesson.id);
     const completedLessonIds = rows.filter((row) => row.completed_at).map((row) => row.lesson_id);
     const playbackByLessonId = Object.fromEntries(
       rows
@@ -32,7 +41,26 @@ export const getCourseProgress = createServerFn({ method: "POST" })
       completedLessonIds,
       playbackByLessonId,
       progressPercent: computeCourseProgressPercent(course, completedLessonIds),
+      lastLessonId: pickLastAccessedLessonId(rows, lessonIds),
     };
+  });
+
+export const saveLessonLastAccess = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        accessToken: z.string().min(1),
+        courseSlug: z.string().min(1),
+        lessonId: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const user = await getUserFromAccessToken(data.accessToken);
+    if (!user?.email) return { ok: false as const };
+
+    await touchLessonLastAccess(user.email, data.courseSlug, data.lessonId);
+    return { ok: true as const };
   });
 
 export const saveLessonPlayback = createServerFn({ method: "POST" })

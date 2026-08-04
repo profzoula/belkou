@@ -246,12 +246,36 @@ export function getNextLessonToWatch(
   return lessons.find((lesson) => !completed.has(lesson.id)) ?? lessons[0];
 }
 
+/** Prefer the last opened lesson; fall back to the first incomplete one. */
+export function getResumeLesson(
+  course: { sections: CourseSection[] },
+  options: {
+    completedLessonIds?: string[];
+    lastLessonId?: string | null;
+  } = {},
+): CourseLesson | undefined {
+  const lessons = getAllLessons(course);
+  if (!lessons.length) return undefined;
+
+  if (options.lastLessonId) {
+    const last = lessons.find((lesson) => lesson.id === options.lastLessonId);
+    if (last) return last;
+  }
+
+  return getNextLessonToWatch(course, options.completedLessonIds);
+}
+
 export function getContinueLearnSearch(
   course: { sections: CourseSection[] },
   completedLessonIds: string[] = [],
+  lastLessonId?: string | null,
 ): { lesson: string } | undefined {
-  const lesson = getNextLessonToWatch(course, completedLessonIds);
+  const lesson = getResumeLesson(course, { completedLessonIds, lastLessonId });
   return lesson ? { lesson: lesson.id } : undefined;
+}
+
+export function lastLessonStorageKey(courseSlug: string): string {
+  return `belkou:last-lesson:${courseSlug}`;
 }
 
 export function getCourseActionLabel(progressPercent: number): string {
