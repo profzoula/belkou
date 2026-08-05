@@ -85,14 +85,20 @@ export function Hero({ studentCount }: HeroProps) {
             aria-hidden
             className="absolute inset-x-6 bottom-6 h-28 rounded-[100%] bg-primary/20 blur-3xl"
           />
-          <img
-            src="/hero/student.png"
-            alt="Diplômée BelKou prête pour sa carrière"
-            className="relative z-10 mx-auto h-auto w-full max-h-[min(52vh,380px)] object-contain object-bottom sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-105"
-            width={900}
-            height={1200}
-            fetchPriority="high"
-          />
+          <div className="relative z-10 mx-auto w-full max-w-[660px]">
+            <img
+              src="/hero/student-original.png"
+              alt="Diplômée BelKou prête pour sa carrière"
+              className="mx-auto h-auto w-full max-h-[min(54vh,395px)] object-contain object-bottom drop-shadow-[0_24px_60px_rgba(2,8,23,0.20)] sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-[1.03]"
+              width={900}
+              height={1200}
+              fetchPriority="high"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent via-background/72 to-background"
+            />
+          </div>
         </motion.div>
       </div>
     </section>
