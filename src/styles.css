@@ -103,12 +103,14 @@
   --promo-bar-height: 2.25rem;
   --nav-bar-height: 3.5rem;
   --site-header-height: calc(env(safe-area-inset-top, 0px) + var(--promo-bar-height) + var(--nav-bar-height));
+  --site-content-top-gap: 0.75rem;
 }
 
 @media (min-width: 640px) {
   :root {
     --promo-bar-height: 2.5rem;
     --nav-bar-height: 4rem;
+    --site-content-top-gap: 1rem;
   }
 }
 
@@ -353,7 +355,7 @@
     touch-action: manipulation;
   }
   .site-page-top {
-    padding-top: var(--site-header-height);
+    padding-top: calc(var(--site-header-height) + var(--site-content-top-gap));
   }
   .site-section-anchor {
     scroll-margin-top: calc(var(--site-header-height) + 0.5rem);

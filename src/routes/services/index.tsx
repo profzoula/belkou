@@ -5,7 +5,7 @@ import { Footer } from "@/components/site/Footer";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { getPublicServices } from "@/lib/fns/services";
-import { serializableToServiceItem } from "@/lib/service-storage";
+import { serializableToServiceItem, type SerializableService } from "@/lib/service-storage";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/services/")({
@@ -18,15 +18,17 @@ export const Route = createFileRoute("/services/")({
     }),
   loader: async () => {
     const services = await getPublicServices();
-    return { services: services.map(serializableToServiceItem) };
+    return { services };
   },
   component: ServicesIndexPage,
 });
 
 function ServicesIndexPage() {
-  const { services } = Route.useLoaderData();
+  const { services: rawServices } = Route.useLoaderData() as { services: SerializableService[] };
+  const services = rawServices.map(serializableToServiceItem);
   const contactSlug = services.find((service) => service.action.type === "booking")?.slug ?? services[0]?.slug;
   const displayedFrom = services[0]?.priceLabel ? `à partir de ${services[0].priceLabel}` : null;
+  const contactHref = contactSlug ? `/services/${contactSlug}` : "/services";
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,7 +39,7 @@ function ServicesIndexPage() {
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgb(0_70_213_/_0.14),transparent_58%)]"
           />
-          <div className="site-container site-page-top relative grid gap-8 pb-10 pt-8 sm:pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] lg:items-center">
+          <div className="site-container site-page-top relative grid gap-8 pb-10 pt-12 sm:pb-14 sm:pt-16 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] lg:items-center">
             <FadeIn className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-primary uppercase">
                 <Sparkles className="size-3.5" aria-hidden />
@@ -51,14 +53,13 @@ function ServicesIndexPage() {
                 un accompagnement concret.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  to={contactSlug ? "/services/$slug" : "/services"}
-                  params={contactSlug ? { slug: contactSlug } : undefined}
+                <a
+                  href={contactHref}
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Prendre rendez-vous
                   <ArrowRight className="size-4" aria-hidden />
-                </Link>
+                </a>
                 <Link
                   to="/faq"
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
