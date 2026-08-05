@@ -15,7 +15,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { getRegistrationStatus, verifyStripeSession, getSuccessPageContext } from "@/lib/fns/register";
-import { siteConfig, getWhatsappGroupUrl, getWhatsappGroupLabel } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
 import { seoHead } from "@/lib/seo";
 import { useAuth } from "@/hooks/use-auth";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
@@ -119,7 +119,7 @@ function SuccessPage() {
   const courseSlug = status?.course_slug ?? loaderData.courseSlug ?? LEGACY_COURSE_SLUG;
   const welcomeLessonId = loaderData.welcomeLessonId;
   const planId = (status?.plan ?? plan)?.toLowerCase();
-  const whatsappUrl = isPaid ? getWhatsappGroupUrl(planId) : "";
+  const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
   const registrationEmail = status?.email;
   const emailMatchesUser = Boolean(

@@ -3,10 +3,11 @@ import { getDb } from "@/server/env";
 import { getRegistrationById } from "@/server/db";
 import { verifyWebhook } from "@/server/stripe";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
-import { getWhatsappGroupUrl } from "@/lib/site-config";
+import { getWhatsappGroupUrlForCourse, siteConfig } from "@/lib/site-config";
 import { earnAffiliateCommission } from "@/server/affiliates";
 import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/stripe-access";
 import { sendOpsAlert } from "@/server/ops-alerts";
+import { getResolvedCourseBySlug } from "@/server/site-content";
 
 function webhookOk() {
   return new Response(JSON.stringify({ received: true }), {
@@ -87,13 +88,27 @@ async function handleCheckoutPaid(session: {
   const to = session.customer_email ?? session.customer_details?.email ?? record.email;
   if (to) {
     try {
+      const course = record.course_slug ? await getResolvedCourseBySlug(record.course_slug) : null;
+      const fallbackAmount = course?.price ?? siteConfig.plans[record.plan].price;
       const emailResult = await sendEmail({
         to,
         subject: "Paiement confirmé — BelKou",
         html: paymentConfirmedEmail(
           record.full_name,
           record.plan,
-          getWhatsappGroupUrl(record.plan),
+          getWhatsappGroupUrlForCourse(record.course_slug, record.plan),
+          {
+            invoiceId: `INV-${record.id.slice(0, 8).toUpperCase()}`,
+            itemLabel: course?.title ?? `Plan ${record.plan.toUpperCase()} BelKou`,
+            amountUsd:
+              typeof session.amount_total === "number"
+                ? Math.max(session.amount_total, 0) / 100
+                : fallbackAmount,
+            currency: session.currency ?? "USD",
+            paidAtIso: new Date().toISOString(),
+            transactionId: session.id,
+            customerEmail: to,
+          },
         ),
       });
       if (!emailResult.ok) {

@@ -14,7 +14,7 @@ export type PlanDetail = {
 
 const premiumFeatures = [
   "Accès complet à la formation",
-  "Groupe WhatsApp Premium VibeCode",
+  "Groupe WhatsApp Formation VibeCode",
   "Code source complet",
   "Templates et ressources",
   "Support communautaire",
@@ -37,7 +37,7 @@ export const planDetails: Record<PlanId, PlanDetail> = {
     desc: "Tout le Premium + accompagnement personnel sur votre projet",
     features: [
       "Tout ce qui est inclus dans Premium",
-      "Groupe WhatsApp VIP VibeCode",
+      "Groupe WhatsApp Formation VibeCode",
       "Ebook gratuit",
       "Assistance personnelle du formateur",
       "Aide directe pendant la réalisation de votre projet",

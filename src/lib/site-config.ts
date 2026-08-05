@@ -8,14 +8,11 @@ export const siteConfig = {
   contactEmail: envString(import.meta.env.VITE_CONTACT_EMAIL, "profzoula@gmail.com"),
   contactWhatsApp: envString(import.meta.env.VITE_WHATSAPP_PHONE, "9413010414"),
   whatsappGroups: {
-    premium:
-      envString(
-        import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ?? import.meta.env.VITE_WHATSAPP_GROUP_URL,
-        "https://chat.whatsapp.com/J4iP9lv5gYlHrWiLXHuNgD",
-      ),
-    vip: envString(
-      import.meta.env.VITE_WHATSAPP_GROUP_VIP,
-      "https://chat.whatsapp.com/GqWxIE5pfafFOB3krHd0uA",
+    main: envString(
+      import.meta.env.VITE_WHATSAPP_GROUP_URL ??
+        import.meta.env.VITE_WHATSAPP_GROUP_PREMIUM ??
+        import.meta.env.VITE_WHATSAPP_GROUP_VIP,
+      "https://chat.whatsapp.com/J4iP9lv5gYlHrWiLXHuNgD",
     ),
   },
   cohortStartDate: envString(import.meta.env.VITE_COHORT_START_DATE, ""),
@@ -92,14 +89,28 @@ export const siteConfig = {
 } as const;
 
 export type PlanId = "premium" | "vip";
+export const VIBECODING_COURSE_SLUG = "apps-ia-cursor-claude";
 
 export function getWhatsappGroupUrl(plan: PlanId | string | undefined): string {
-  if (plan === "vip") return siteConfig.whatsappGroups.vip;
-  return siteConfig.whatsappGroups.premium;
+  void plan;
+  return siteConfig.whatsappGroups.main;
 }
 
 export function getWhatsappGroupLabel(plan: PlanId | string | undefined): string {
-  return plan === "vip" ? "VIP VibeCode" : "Premium VibeCode";
+  void plan;
+  return "Formation VibeCode";
+}
+
+export function isVibeCodingCourseSlug(courseSlug?: string | null): boolean {
+  return (courseSlug ?? "").trim().toLowerCase() === VIBECODING_COURSE_SLUG;
+}
+
+export function getWhatsappGroupUrlForCourse(
+  courseSlug: string | null | undefined,
+  plan: PlanId | string | undefined,
+): string {
+  if (!isVibeCodingCourseSlug(courseSlug)) return "";
+  return getWhatsappGroupUrl(plan);
 }
 
 /** Digits only, with US country code when 10 digits (e.g. 9413010414 → 19413010414). */

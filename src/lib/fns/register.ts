@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { registrationSchema } from "@/lib/schemas/registration";
-import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
 import { getDb } from "@/server/env";
 import {
   getRegistrationByEmailAndCourse,
@@ -261,13 +261,27 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
       const unlocked = await getRegistrationById(db, granted.registrationId);
       if (unlocked) {
         try {
+          const course = unlocked.course_slug ? await getResolvedCourseBySlug(unlocked.course_slug) : null;
+          const fallbackAmount = course?.price ?? siteConfig.plans[unlocked.plan].price;
           await sendEmail({
             to: unlocked.email,
             subject: "Paiement confirmé — BelKou",
             html: paymentConfirmedEmail(
               unlocked.full_name,
               unlocked.plan,
-              getWhatsappGroupUrl(unlocked.plan),
+              getWhatsappGroupUrlForCourse(unlocked.course_slug, unlocked.plan),
+              {
+                invoiceId: `INV-${unlocked.id.slice(0, 8).toUpperCase()}`,
+                itemLabel: course?.title ?? `Plan ${unlocked.plan.toUpperCase()} BelKou`,
+                amountUsd:
+                  typeof session.amount_total === "number"
+                    ? Math.max(session.amount_total, 0) / 100
+                    : fallbackAmount,
+                currency: session.currency ?? "USD",
+                paidAtIso: new Date().toISOString(),
+                transactionId: session.id,
+                customerEmail: unlocked.email,
+              },
             ),
           });
         } catch (error) {

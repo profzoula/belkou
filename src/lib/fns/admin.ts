@@ -11,8 +11,9 @@ import {
   verifyAdminSessionToken,
 } from "@/lib/admin-auth";
 import { serializeCourseForAdmin } from "@/lib/admin-courses";
-import { siteConfig, getWhatsappGroupUrl } from "@/lib/site-config";
+import { siteConfig, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
 import { getDb, getServerEnvResolved } from "@/server/env";
+import { getResolvedCourseBySlug } from "@/server/site-content";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
@@ -32,15 +33,28 @@ async function sendPaymentConfirmed(
   fullName: string,
   email: string,
   plan: "premium" | "vip",
+  courseSlug?: string | null,
+  registrationId?: string,
 ) {
   try {
+    const course = courseSlug ? await getResolvedCourseBySlug(courseSlug) : null;
+    const amountUsd = course?.price ?? siteConfig.plans[plan].price;
     const result = await sendEmail({
       to: email,
       subject: "Paiement confirmé — BelKou",
       html: paymentConfirmedEmail(
         fullName,
         plan,
-        getWhatsappGroupUrl(plan),
+        getWhatsappGroupUrlForCourse(courseSlug, plan),
+        {
+          invoiceId: `INV-${(registrationId ?? crypto.randomUUID()).slice(0, 8).toUpperCase()}`,
+          itemLabel: course?.title ?? `Plan ${plan.toUpperCase()} BelKou`,
+          amountUsd,
+          currency: "USD",
+          paidAtIso: new Date().toISOString(),
+          transactionId: registrationId ? `manual:${registrationId}` : "manual",
+          customerEmail: email,
+        },
       ),
     });
     if (!result.ok) {
@@ -242,7 +256,13 @@ export const adminAddCashRegistration = createServerFn({ method: "POST" })
     const record = await saveRegistration(db, data.registration, { payment_status: "paid" });
 
     if (data.sendEmail) {
-      await sendPaymentConfirmed(record.full_name, record.email, record.plan);
+      await sendPaymentConfirmed(
+        record.full_name,
+        record.email,
+        record.plan,
+        record.course_slug,
+        record.id,
+      );
     }
 
     return {
@@ -282,7 +302,13 @@ export const adminMarkCashPaid = createServerFn({ method: "POST" })
     await updateRegistrationPayment(db, record.id, { payment_status: "paid" });
 
     if (data.sendEmail) {
-      await sendPaymentConfirmed(record.full_name, record.email, record.plan);
+      await sendPaymentConfirmed(
+        record.full_name,
+        record.email,
+        record.plan,
+        record.course_slug,
+        record.id,
+      );
     }
 
     const { earnAffiliateCommission } = await import("@/server/affiliates");
@@ -326,7 +352,13 @@ export const adminGrantFreeVip = createServerFn({ method: "POST" })
     }
 
     if (data.sendEmail) {
-      await sendPaymentConfirmed(updated.full_name, updated.email, "vip");
+      await sendPaymentConfirmed(
+        updated.full_name,
+        updated.email,
+        "vip",
+        updated.course_slug,
+        updated.id,
+      );
     }
 
     const { earnAffiliateCommission } = await import("@/server/affiliates");

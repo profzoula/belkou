@@ -6,6 +6,16 @@ type SendEmailInput = {
   html: string;
 };
 
+export type PaymentInvoiceDetails = {
+  invoiceId: string;
+  itemLabel: string;
+  amountUsd: number;
+  currency?: string;
+  paidAtIso?: string;
+  transactionId?: string;
+  customerEmail?: string;
+};
+
 export type SendEmailResult =
   | { ok: true; dev: boolean }
   | { ok: false; reason: "not_configured" | "send_failed"; message?: string };
@@ -74,12 +84,58 @@ export function registrationPendingEmail(params: {
   `;
 }
 
-export function paymentConfirmedEmail(name: string, plan: string, whatsappUrl: string) {
-  const groupLabel = plan === "vip" ? "VIP VibeCode" : "Premium VibeCode";
+function formatCurrency(amount: number, currency = "USD"): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
+function formatInvoiceDate(iso?: string): string {
+  const raw = iso || new Date().toISOString();
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return new Date().toLocaleString("fr-FR");
+  return date.toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+}
+
+export function paymentConfirmedEmail(
+  name: string,
+  plan: string,
+  whatsappUrl: string,
+  invoice?: PaymentInvoiceDetails,
+) {
+  const groupLabel = "Formation VibeCode";
+  const invoiceBlock = invoice
+    ? `
+      <div style="margin:18px 0;border:1px solid #e4e4e7;border-radius:10px;padding:14px 16px;background:#fafafa;">
+        <h2 style="font-size:16px;margin:0 0 10px;">Facture d'achat</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.45;">
+          <tr><td style="padding:4px 0;color:#52525b;">N° facture</td><td style="padding:4px 0;text-align:right;"><strong>${invoice.invoiceId}</strong></td></tr>
+          <tr><td style="padding:4px 0;color:#52525b;">Article</td><td style="padding:4px 0;text-align:right;">${invoice.itemLabel}</td></tr>
+          <tr><td style="padding:4px 0;color:#52525b;">Montant payé</td><td style="padding:4px 0;text-align:right;"><strong>${formatCurrency(invoice.amountUsd, (invoice.currency ?? "USD").toUpperCase())}</strong></td></tr>
+          <tr><td style="padding:4px 0;color:#52525b;">Date de paiement</td><td style="padding:4px 0;text-align:right;">${formatInvoiceDate(invoice.paidAtIso)}</td></tr>
+          ${
+            invoice.transactionId
+              ? `<tr><td style="padding:4px 0;color:#52525b;">Réf. transaction</td><td style="padding:4px 0;text-align:right;">${invoice.transactionId}</td></tr>`
+              : ""
+          }
+          ${
+            invoice.customerEmail
+              ? `<tr><td style="padding:4px 0;color:#52525b;">Client</td><td style="padding:4px 0;text-align:right;">${invoice.customerEmail}</td></tr>`
+              : ""
+          }
+        </table>
+      </div>
+    `
+    : "";
+
   return `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
       <h1 style="font-size:22px;">Paiement confirmé — merci ${name} !</h1>
       <p>Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Accédez à vos cours depuis votre espace BelKou.</p>
+      ${invoiceBlock}
       ${
         whatsappUrl
           ? `<p><a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre ${groupLabel} sur WhatsApp</a></p>`
