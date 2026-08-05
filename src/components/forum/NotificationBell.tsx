@@ -99,6 +99,12 @@ export function NotificationBell({ className }: { className?: string }) {
   }, [open]);
 
   if (!session?.access_token) return null;
+  const badgeLabel =
+    unreadCount <= 0
+      ? "Aucune notification non lue"
+      : unreadCount > 9
+        ? "Plus de 9 notifications non lues"
+        : `${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`;
 
   const handleOpenNotification = async (item: NotificationItem) => {
     if (!item.readAt) {
@@ -121,7 +127,7 @@ export function NotificationBell({ className }: { className?: string }) {
           variant="ghost"
           size="icon"
           className={cn("relative h-9 w-9 rounded-full", className)}
-          aria-label="Notifications"
+          aria-label={`Notifications — ${badgeLabel}`}
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 ? (

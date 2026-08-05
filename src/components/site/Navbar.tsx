@@ -167,6 +167,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
   const close = () => setOpen(false);
   const isDark = theme === "dark";
   const isHero = theme === "hero";
+  const mobileMenuId = "mobile-primary-nav";
 
   const linkClass = isDark
     ? "rounded-xl px-3.5 py-2 text-sm text-white/70 transition-colors hover:bg-white/10 hover:text-white"
@@ -244,6 +245,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
               onClick={() => setOpen(!open)}
               aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={open}
+              aria-controls={mobileMenuId}
             >
               {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
@@ -262,12 +264,13 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
 
       {open && (
         <div
+          id={mobileMenuId}
           className={cn(
             "relative z-50 md:hidden border-t site-container py-4 shadow-md max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain",
             isDark ? "border-white/10 bg-[#07080d]" : "border-border bg-card",
           )}
         >
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1" aria-label="Navigation principale mobile">
             {links.map((l) =>
               l.route ? (
                 <Link key={l.href} to={l.href} onClick={close} className={mobileLinkClass}>
