@@ -6,6 +6,7 @@ import { paymentConfirmedEmail, sendEmail } from "@/server/email";
 import { getWhatsappGroupUrl } from "@/lib/site-config";
 import { earnAffiliateCommission } from "@/server/affiliates";
 import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/stripe-access";
+import { sendOpsAlert } from "@/server/ops-alerts";
 
 function webhookOk() {
   return new Response(JSON.stringify({ received: true }), {
@@ -127,6 +128,12 @@ export const Route = createFileRoute("/api/stripe/webhook")({
           event = await verifyWebhook(body, signature);
         } catch (error) {
           console.error("[BelKou] Stripe webhook signature failed:", error);
+          void sendOpsAlert({
+            key: "stripe-webhook-signature-failed",
+            title: "Stripe webhook signature failed",
+            message: "Invalid Stripe signature received by webhook endpoint.",
+            level: "warning",
+          });
           return new Response("Invalid signature", { status: 400 });
         }
 
@@ -136,6 +143,12 @@ export const Route = createFileRoute("/api/stripe/webhook")({
           }
         } catch (error) {
           console.error("[BelKou] Stripe webhook idempotency init failed:", error);
+          void sendOpsAlert({
+            key: "stripe-webhook-idempotency-init",
+            title: "Stripe webhook idempotency failed",
+            message: "BelKou failed to initialize webhook idempotency tracking.",
+            meta: { eventId: String(event.id) },
+          });
           return new Response("Webhook idempotency failed", { status: 500 });
         }
 
@@ -150,6 +163,12 @@ export const Route = createFileRoute("/api/stripe/webhook")({
         } catch (error) {
           // Retryable: Stripe will redeliver until access is granted.
           console.error("[BelKou] Stripe webhook handler error:", error);
+          void sendOpsAlert({
+            key: "stripe-webhook-handler-error",
+            title: "Stripe webhook handler error",
+            message: "BelKou webhook handler returned 500 and Stripe will retry.",
+            meta: { eventId: String(event.id), type: String(event.type) },
+          });
           return new Response("Webhook handler failed", { status: 500 });
         }
 

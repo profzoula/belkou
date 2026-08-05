@@ -594,7 +594,9 @@
   animation: marquee 28s linear infinite reverse;
 }
 .animate-marquee:hover,
-.animate-marquee-reverse:hover {
+.animate-marquee-reverse:hover,
+.animate-marquee:focus-within,
+.animate-marquee-reverse:focus-within {
   animation-play-state: paused;
 }
 @media (prefers-reduced-motion: reduce) {

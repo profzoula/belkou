@@ -69,8 +69,9 @@ export function MobileBottomNav() {
             <li key={tab.key}>
               <Link
                 to={tab.to}
+                aria-current={tab.active ? "page" : undefined}
                 className={cn(
-                  "flex h-full flex-col items-center justify-center gap-0.5 text-[10px] font-semibold transition-colors",
+                  "flex h-full flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors",
                   tab.active ? "text-primary" : "text-muted-foreground",
                 )}
               >

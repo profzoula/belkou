@@ -145,6 +145,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
               <button
                 type="button"
                 onClick={() => setCategory("all")}
+                aria-pressed={category === "all"}
                 className={cn(
                   "shrink-0 cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold whitespace-nowrap transition-colors sm:text-sm",
                   category === "all"
@@ -159,6 +160,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
                   key={item.id}
                   type="button"
                   onClick={() => setCategory(item.id)}
+                  aria-pressed={category === item.id}
                   className={cn(
                     "shrink-0 cursor-pointer rounded-full border px-4 py-2 text-xs font-semibold whitespace-nowrap transition-colors sm:text-sm",
                     category === item.id
@@ -209,7 +211,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
         <div className="mt-10 flex justify-center">
           <Link
             to="/courses"
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/35 bg-primary/5 px-8 text-sm font-semibold text-primary transition hover:bg-primary/10"
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-primary/35 bg-primary/5 px-8 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Autres cours
           </Link>

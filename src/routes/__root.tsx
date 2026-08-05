@@ -144,6 +144,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
         />
       </head>
       <body>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[200] focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:ring-2 focus:ring-primary"
+        >
+          Aller au contenu principal
+        </a>
         {children}
         <Scripts />
       </body>

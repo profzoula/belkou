@@ -29,6 +29,7 @@ expect(
 );
 
 const webhookSource = readText("src/routes/api/stripe/webhook.ts");
+const supabaseRegistrationsSource = readText("src/server/supabase-registrations.ts");
 expect(
   webhookSource.includes("requireRegistrationMetadata: true"),
   "Webhook strict registration metadata check not enabled",
@@ -44,9 +45,24 @@ expect(
   "Webhook idempotency table is missing",
   failures,
 );
+expect(
+  !supabaseRegistrationsSource.includes("process.env.SUPABASE_SERVICE_ROLE_KEY ??"),
+  "Unsafe SUPABASE key fallback chain detected",
+  failures,
+);
+expect(
+  !supabaseRegistrationsSource.includes("process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;"),
+  "Unsafe VITE service-role key fallback must be removed",
+  failures,
+);
 
 const serverSource = readText("scripts/railway.mjs");
 expect(serverSource.includes('pathname === "/healthz"'), "Health endpoint /healthz missing", failures);
+
+const ciWorkflow = readText(".github/workflows/ci.yml");
+expect(ciWorkflow.includes("npm run lint"), "CI does not run lint", failures);
+expect(ciWorkflow.includes("npm run test:ci"), "CI does not run runtime tests", failures);
+expect(ciWorkflow.includes("npm run audit:release"), "CI does not run release audit checks", failures);
 
 expect(existsSync(join(root, "README.md")), "Missing root README.md", failures);
 expect(

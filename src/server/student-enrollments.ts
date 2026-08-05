@@ -56,8 +56,9 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
     await ensureFreeCourseEnrollment(db, { email, courseSlug: slug, fullName }).catch(() => undefined);
   }
 
-  // If Stripe already charged but webhook missed, unlock before rendering Mes cours.
-  await reconcilePendingStripePaymentsForEmail(db, email).catch((error) => {
+  // Do not block dashboard rendering on Stripe API calls.
+  // Reconciliation still happens in webhook/success verification and can run in the background here.
+  void reconcilePendingStripePaymentsForEmail(db, email).catch((error) => {
     console.warn("[BelKou] enrollment Stripe reconcile:", error);
   });
 

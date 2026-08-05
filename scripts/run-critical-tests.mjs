@@ -9,10 +9,24 @@ function expectIncludes(source, snippet, context) {
   assert.ok(source.includes(snippet), `${context} is missing expected guard: ${snippet}`);
 }
 
-function run() {
+async function run() {
+  const adminAuth = await import("../src/lib/admin-auth.ts");
+
+  // Runtime assertions (behavior) for auth/session primitives.
+  // Other critical guards are validated structurally below.
+
+  const token = await adminAuth.createAdminToken("admin-user", "test-secret");
+  const username = await adminAuth.verifyAdminSessionToken(token, "test-secret");
+  assert.equal(username, "admin-user");
+  const cookieHeader = adminAuth.adminCookieHeader(token, true);
+  assert.match(cookieHeader, /HttpOnly/);
+  assert.match(cookieHeader, /SameSite=Lax/);
+  assert.match(cookieHeader, /Secure/);
+
+  // Static structural guards (defense-in-depth)
   const webhook = read("src/routes/api/stripe/webhook.ts");
-  const stripeAccess = read("src/server/stripe-access.ts");
-  const adminAuth = read("src/lib/admin-auth.ts");
+  const stripeAccessSource = read("src/server/stripe-access.ts");
+  const adminAuthSource = read("src/lib/admin-auth.ts");
   const checkout = read("src/lib/fns/register.ts");
 
   // Stripe webhook hardening guards
@@ -23,24 +37,24 @@ function run() {
   expectIncludes(webhook, "stripe_webhook_events", "webhook idempotency");
 
   // Access grant/payment integrity guards
-  expectIncludes(stripeAccess, "hasExpectedStripePricingForSession", "stripe access pricing");
-  expectIncludes(stripeAccess, "options.requireAmountAndCurrencyMatch", "stripe access strict option");
-  expectIncludes(stripeAccess, "updateRegistrationPayment", "stripe grant update");
+  expectIncludes(stripeAccessSource, "hasExpectedStripePricingForSession", "stripe access pricing");
+  expectIncludes(stripeAccessSource, "options.requireAmountAndCurrencyMatch", "stripe access strict option");
+  expectIncludes(stripeAccessSource, "updateRegistrationPayment", "stripe grant update");
 
   // Admin session controls
-  expectIncludes(adminAuth, "crypto.subtle.importKey", "admin auth HMAC");
-  expectIncludes(adminAuth, "SameSite=Lax", "admin cookie flags");
-  expectIncludes(adminAuth, "HttpOnly", "admin cookie flags");
+  expectIncludes(adminAuthSource, "crypto.subtle.importKey", "admin auth HMAC");
+  expectIncludes(adminAuthSource, "SameSite=Lax", "admin cookie flags");
+  expectIncludes(adminAuthSource, "HttpOnly", "admin cookie flags");
 
   // Checkout verification path still exists
   expectIncludes(checkout, "verifyStripeSession", "checkout verify flow");
   expectIncludes(checkout, "grantAccessFromCheckoutSession", "checkout grant flow");
 
-  console.log("[BelKou] Critical path guards validated.");
+  console.log("[BelKou] Critical runtime tests passed.");
 }
 
 try {
-  run();
+  await run();
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error("[BelKou] Critical test failed:", message);

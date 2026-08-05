@@ -68,6 +68,7 @@ interface CloudflareEnv {
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  OPS_ALERT_WEBHOOK_URL?: string;
 }
 
 declare module "cloudflare:workers" {

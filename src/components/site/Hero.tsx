@@ -60,14 +60,14 @@ export function Hero({ studentCount }: HeroProps) {
           <div className="mt-4 flex flex-nowrap items-center gap-2 sm:mt-7 sm:gap-3">
             <Link
               to="/courses"
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-3 text-[10px] font-semibold whitespace-nowrap text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-4 text-xs font-semibold whitespace-nowrap text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
             >
               Commencer
               <ArrowRight className="size-3 sm:size-4" aria-hidden />
             </Link>
             <Link
               to="/courses"
-              className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-card px-3 text-[10px] font-semibold whitespace-nowrap text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-card px-4 text-xs font-semibold whitespace-nowrap text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
             >
               <Play className="size-3 text-primary sm:size-4" aria-hidden />
               Voir les cours

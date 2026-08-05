@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SectionHeader } from "@/components/site/SectionHeader";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +98,15 @@ function TestimonialCard({ item }: { item: Testimonial }) {
   );
 }
 
-function TestimonialMarqueeRow({ items, reverse = false }: { items: Testimonial[]; reverse?: boolean }) {
+function TestimonialMarqueeRow({
+  items,
+  reverse = false,
+  paused = false,
+}: {
+  items: Testimonial[];
+  reverse?: boolean;
+  paused?: boolean;
+}) {
   const loop = [...items, ...items];
 
   return (
@@ -109,11 +118,14 @@ function TestimonialMarqueeRow({ items, reverse = false }: { items: Testimonial[
       <div
         className={cn(
           "flex w-max py-2",
+          paused && "animate-none",
           reverse ? "animate-marquee-reverse" : "animate-marquee",
         )}
       >
         {loop.map((item, index) => (
-          <TestimonialCard key={`${item.handle}-${index}`} item={item} />
+          <div key={`${item.handle}-${index}`} aria-hidden={index >= items.length}>
+            <TestimonialCard item={item} />
+          </div>
         ))}
       </div>
       <div
@@ -125,6 +137,8 @@ function TestimonialMarqueeRow({ items, reverse = false }: { items: Testimonial[
 }
 
 export function Testimonials() {
+  const [paused, setPaused] = useState(false);
+
   return (
     <section id="testimonials" className="site-section-anchor overflow-hidden py-16 sm:py-20 md:py-24">
       <div className="site-container mb-8 sm:mb-10">
@@ -134,11 +148,19 @@ export function Testimonials() {
           description="Des parcours réels — Pòtoprens, Cap-Haïtien, diaspora."
           className="max-w-lg"
         />
+        <button
+          type="button"
+          onClick={() => setPaused((current) => !current)}
+          aria-pressed={paused}
+          className="mt-4 inline-flex items-center rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          {paused ? "Relancer le défilement" : "Mettre en pause le défilement"}
+        </button>
       </div>
 
       <div className="mx-auto flex max-w-5xl flex-col gap-2">
-        <TestimonialMarqueeRow items={rowOne} />
-        <TestimonialMarqueeRow items={rowTwo} reverse />
+        <TestimonialMarqueeRow items={rowOne} paused={paused} />
+        <TestimonialMarqueeRow items={rowTwo} reverse paused={paused} />
       </div>
     </section>
   );

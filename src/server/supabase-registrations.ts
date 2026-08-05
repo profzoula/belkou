@@ -8,13 +8,17 @@ let client: SupabaseClient | null | undefined;
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (client !== undefined) return client;
 
+  if (process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "Unsafe configuration: VITE_SUPABASE_SERVICE_ROLE_KEY must never be set. Use SUPABASE_SERVICE_ROLE_KEY only.",
+    );
+  }
+
   const url =
     process.env.VITE_SUPABASE_URL ??
     process.env.SUPABASE_URL ??
     (typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined);
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     client = null;
     return null;

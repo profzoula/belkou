@@ -51,15 +51,16 @@ function DashboardPage() {
     if (!session?.access_token) return;
 
     void (async () => {
-      // Claim only from trusted referred_by metadata (set at signup / new OAuth).
-      const claim = await claimReferralFn({
+      // Claim referral in the background so dashboard data is not delayed.
+      void claimReferralFn({
         data: {
           accessToken: session.access_token,
         },
-      }).catch(() => null);
-      if (claim?.ok) {
-        clearStoredReferralCode();
-      }
+      })
+        .then((claim) => {
+          if (claim?.ok) clearStoredReferralCode();
+        })
+        .catch(() => null);
 
       const result = await dashboardFn({ data: { accessToken: session.access_token } });
       setEnrollments(result.enrollments);
@@ -86,7 +87,11 @@ function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground"
+      >
         Chargement…
       </div>
     );
@@ -115,7 +120,7 @@ function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
+      <main id="main-content">
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container site-page-top pb-10 pt-8 sm:pb-12">
             <FadeIn>

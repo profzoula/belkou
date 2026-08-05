@@ -45,7 +45,7 @@ export function ServicesSection({ services, maxVisible = 3 }: ServicesSectionPro
         <div className="mt-10 flex justify-center">
           <Link
             to="/services"
-            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/35 bg-primary/5 px-8 text-sm font-semibold text-primary transition hover:bg-primary/10"
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/35 bg-primary/5 px-8 text-sm font-semibold text-primary transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             Voir tous les services
             <ArrowRight className="size-4" aria-hidden />

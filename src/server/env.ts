@@ -11,6 +11,7 @@ const envSchema = z.object({
   ADMIN_USERNAME: z.string().optional(),
   ADMIN_PASSWORD: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  OPS_ALERT_WEBHOOK_URL: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof envSchema>;
@@ -27,6 +28,7 @@ function fromProcessEnv(): Record<string, string | undefined> {
     ADMIN_USERNAME: process.env.ADMIN_USERNAME?.trim(),
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD?.trim(),
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
+    OPS_ALERT_WEBHOOK_URL: process.env.OPS_ALERT_WEBHOOK_URL?.trim(),
   };
 }
 
@@ -90,6 +92,7 @@ export async function getServerEnvResolved(): Promise<ServerEnv> {
       ADMIN_USERNAME: cf.ADMIN_USERNAME,
       ADMIN_PASSWORD: cf.ADMIN_PASSWORD,
       SUPABASE_SERVICE_ROLE_KEY: cf.SUPABASE_SERVICE_ROLE_KEY,
+      OPS_ALERT_WEBHOOK_URL: cf.OPS_ALERT_WEBHOOK_URL,
     });
   }
   return getServerEnv();

@@ -13,6 +13,7 @@ Detect production failures within minutes, not from user complaints.
 2. **Checkout and webhook reliability**
    - Alert on repeated `"[BelKou] Stripe webhook handler error"` logs.
    - Alert on repeated `"[BelKou] Stripe pricing verification failed"` logs.
+   - Configure `OPS_ALERT_WEBHOOK_URL` to receive throttled webhook alerts from the app.
 
 3. **Error rate**
    - Alert when 5xx responses spike above normal baseline.

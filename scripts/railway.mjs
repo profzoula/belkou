@@ -67,7 +67,7 @@ function checkEnvConfig() {
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
   ];
-  const optional = ["RESEND_API_KEY", "ENABLE_VIDEO_WORKER"];
+  const optional = ["RESEND_API_KEY", "ENABLE_VIDEO_WORKER", "OPS_ALERT_WEBHOOK_URL"];
 
   const requiredChecks = required.map((key) => ({
     name: key,

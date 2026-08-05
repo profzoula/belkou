@@ -224,7 +224,6 @@ export function AccountSettingsPanel({ user }: AccountSettingsPanelProps) {
                     type="button"
                     onClick={() => setShowPassword((current) => !current)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    tabIndex={-1}
                     aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

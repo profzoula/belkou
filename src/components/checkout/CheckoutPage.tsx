@@ -55,7 +55,9 @@ export function CheckoutPage({
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(initialPlan ?? "premium");
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState<string | null>(null);
   const [couponOpen, setCouponOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -95,11 +97,22 @@ export function CheckoutPage({
   const savings = displayOriginal - displayPrice;
   const pctOff = discountPercent(displayPrice, displayOriginal);
 
-  const update = (key: string, value: string) => setForm((s) => ({ ...s, [key]: value }));
+  const update = (key: string, value: string) => {
+    setForm((s) => ({ ...s, [key]: value }));
+    setFieldErrors((current) => {
+      if (!current[key]) return current;
+      const next = { ...current };
+      delete next[key];
+      return next;
+    });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTermsError(null);
+    setFieldErrors({});
     if (!acceptedTerms) {
+      setTermsError("Acceptez les conditions pour continuer.");
       toast.error("Acceptez les conditions pour continuer.");
       return;
     }
@@ -113,7 +126,16 @@ export function CheckoutPage({
 
     const parsed = registrationSchema.safeParse(payload);
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
+      const nextErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (typeof key === "string" && !nextErrors[key]) {
+          nextErrors[key] = issue.message;
+        }
+      }
+      setFieldErrors(nextErrors);
+      const firstMessage = Object.values(nextErrors)[0] ?? parsed.error.issues[0]?.message;
+      if (firstMessage) toast.error(firstMessage);
       return;
     }
 
@@ -165,7 +187,7 @@ export function CheckoutPage({
         </div>
       </header>
 
-      <main className="site-container px-4 py-6 sm:px-0 sm:py-8 lg:py-10">
+      <main id="main-content" className="site-container px-4 py-6 sm:px-0 sm:py-8 lg:py-10">
         <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
           <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -285,8 +307,15 @@ export function CheckoutPage({
                   value={form.full_name}
                   onChange={(e) => update("full_name", e.target.value)}
                   className="h-11 rounded-xl"
+                  aria-invalid={Boolean(fieldErrors.full_name)}
+                  aria-describedby={fieldErrors.full_name ? "checkout-full-name-error" : undefined}
                   required
                 />
+                {fieldErrors.full_name ? (
+                  <p id="checkout-full-name-error" className="text-xs text-destructive" role="alert">
+                    {fieldErrors.full_name}
+                  </p>
+                ) : null}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -297,8 +326,15 @@ export function CheckoutPage({
                     value={form.email}
                     onChange={(e) => update("email", e.target.value)}
                     className="h-11 rounded-xl"
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={fieldErrors.email ? "checkout-email-error" : undefined}
                     required
                   />
+                  {fieldErrors.email ? (
+                    <p id="checkout-email-error" className="text-xs text-destructive" role="alert">
+                      {fieldErrors.email}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="whatsapp">WhatsApp</Label>
@@ -307,14 +343,26 @@ export function CheckoutPage({
                     value={form.whatsapp}
                     onChange={(e) => update("whatsapp", e.target.value)}
                     className="h-11 rounded-xl"
+                    aria-invalid={Boolean(fieldErrors.whatsapp)}
+                    aria-describedby={fieldErrors.whatsapp ? "checkout-whatsapp-error" : undefined}
                     required
                   />
+                  {fieldErrors.whatsapp ? (
+                    <p id="checkout-whatsapp-error" className="text-xs text-destructive" role="alert">
+                      {fieldErrors.whatsapp}
+                    </p>
+                  ) : null}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Niveau</Label>
+                <Label htmlFor="level">Niveau</Label>
                 <Select value={form.level} onValueChange={(v) => update("level", v)}>
-                  <SelectTrigger className="h-11 rounded-xl">
+                  <SelectTrigger
+                    id="level"
+                    className="h-11 rounded-xl"
+                    aria-invalid={Boolean(fieldErrors.level)}
+                    aria-describedby={fieldErrors.level ? "checkout-level-error" : undefined}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -323,6 +371,11 @@ export function CheckoutPage({
                     <SelectItem value="advanced">Avancé</SelectItem>
                   </SelectContent>
                 </Select>
+                {fieldErrors.level ? (
+                  <p id="checkout-level-error" className="text-xs text-destructive" role="alert">
+                    {fieldErrors.level}
+                  </p>
+                ) : null}
               </div>
             </section>
 
@@ -331,9 +384,14 @@ export function CheckoutPage({
               <h2 className="font-display text-lg font-semibold text-foreground">Adresse de facturation</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Pays</Label>
+                  <Label htmlFor="country">Pays</Label>
                   <Select value={form.country} onValueChange={(v) => update("country", v)}>
-                    <SelectTrigger className="h-11 rounded-xl">
+                    <SelectTrigger
+                      id="country"
+                      className="h-11 rounded-xl"
+                      aria-invalid={Boolean(fieldErrors.country)}
+                      aria-describedby={fieldErrors.country ? "checkout-country-error" : undefined}
+                    >
                       <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
                       <SelectValue />
                     </SelectTrigger>
@@ -348,6 +406,11 @@ export function CheckoutPage({
                       <SelectItem value="OTHER">Autre</SelectItem>
                     </SelectContent>
                   </Select>
+                  {fieldErrors.country ? (
+                    <p id="checkout-country-error" className="text-xs text-destructive" role="alert">
+                      {fieldErrors.country}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </section>
@@ -434,12 +497,18 @@ export function CheckoutPage({
                 )}
               </div>
 
-              <label className="mt-5 flex gap-2 text-xs text-muted-foreground cursor-pointer">
+              <label className="mt-5 flex cursor-pointer gap-2 text-xs text-muted-foreground" htmlFor="accept-terms">
                 <input
+                  id="accept-terms"
                   type="checkbox"
                   checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked) setTermsError(null);
+                  }}
                   className="mt-0.5 rounded border-border"
+                  aria-invalid={Boolean(termsError)}
+                  aria-describedby={termsError ? "checkout-terms-error" : undefined}
                 />
                 <span>
                   J&apos;accepte les{" "}
@@ -449,16 +518,25 @@ export function CheckoutPage({
                   . Pas de remboursement après paiement.
                 </span>
               </label>
+              {termsError ? (
+                <p id="checkout-terms-error" className="mt-2 text-xs text-destructive" role="alert">
+                  {termsError}
+                </p>
+              ) : null}
 
               <Button
                 type="submit"
                 disabled={loading || !acceptedTerms}
                 size="xl"
                 className="mt-5 h-12 w-full shadow-primary"
+                aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1 h-4 w-4" />
                 {loading ? "Redirection…" : "Payer et commencer"}
               </Button>
+              <p id="checkout-submit-help" className="mt-2 text-center text-[11px] text-muted-foreground">
+                Activez la case des conditions pour débloquer le paiement.
+              </p>
 
               <p className="mt-3 text-center text-[11px] text-muted-foreground">
                 Paiement sécurisé · accès personnel au cours acheté

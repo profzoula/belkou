@@ -52,7 +52,7 @@ function Index() {
         <Navbar theme="hero" />
         <Hero studentCount={studentCount} />
       </div>
-      <main className="max-w-full overflow-x-hidden">
+      <main id="main-content" className="max-w-full overflow-x-hidden">
         <CoursesSection courses={courses} />
         <TrustStrip />
         <ServicesSection services={serviceItems} />

@@ -221,6 +221,14 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
     );
     const db = await getDb();
     const record = await getRegistrationById(db, data.registrationId);
+    if (record?.stripe_session_id && record.stripe_session_id !== data.sessionId) {
+      console.error("[BelKou] Stripe session mismatch for registration", {
+        expectedSessionId: record.stripe_session_id,
+        receivedSessionId: data.sessionId,
+        registrationId: data.registrationId,
+      });
+      return { paid: false as const, plan: record?.plan };
+    }
     const session = await getCheckoutSession(data.sessionId);
 
     if (!session || !isCheckoutPaid(session)) {
@@ -235,6 +243,10 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
         // Prefer the registration from the success URL when Stripe metadata is missing.
         registrationId: session.metadata?.registrationId || data.registrationId,
       },
+    }, {
+      requireRegistrationMetadata: true,
+      allowEmailCourseFallback: false,
+      requireAmountAndCurrencyMatch: true,
     });
 
     if (!granted) {

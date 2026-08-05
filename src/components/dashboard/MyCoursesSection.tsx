@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, CalendarClock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -79,7 +80,11 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   if (enrollments === undefined) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm"
+      >
         Chargement de vos cours…
       </div>
     );
@@ -126,8 +131,11 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       </div>
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <Label className="sr-only" htmlFor="courses-status-filter">
+          Filtrer mes cours par statut
+        </Label>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-          <SelectTrigger className="h-11 w-full rounded-xl border-border lg:w-[200px]">
+          <SelectTrigger id="courses-status-filter" className="h-11 w-full rounded-xl border-border lg:w-[200px]">
             <SelectValue placeholder="Progression" />
           </SelectTrigger>
           <SelectContent>
@@ -140,7 +148,11 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Label className="sr-only" htmlFor="courses-search">
+            Rechercher dans mes cours
+          </Label>
           <Input
+            id="courses-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher dans mes cours"
@@ -152,9 +164,11 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
         <p className="font-semibold text-foreground">{count} cours</p>
         <div className="flex items-center gap-2">
-          <span className="shrink-0 text-muted-foreground">Trier par</span>
+          <Label className="shrink-0 text-muted-foreground" htmlFor="courses-sort">
+            Trier par
+          </Label>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger className="h-9 w-full rounded-xl border-border text-sm sm:w-[200px]">
+            <SelectTrigger id="courses-sort" className="h-9 w-full rounded-xl border-border text-sm sm:w-[200px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -246,6 +260,11 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
             <>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.max(enrollment.progressPercent, 0)}
+                  aria-label={`Progression ${enrollment.courseTitle}`}
                   className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
                 />
