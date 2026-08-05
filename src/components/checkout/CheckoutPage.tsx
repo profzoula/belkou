@@ -475,7 +475,7 @@ export function CheckoutPage({
                   <dt className="text-muted-foreground">
                     {courseSlug && course ? course.title : `Plan ${plan.name}`}
                   </dt>
-                  <dd className="font-medium">{formatUsd(displayPrice)}</dd>
+                  <dd className="font-medium">{formatUsd(pctOff > 0 ? displayOriginal : displayPrice)}</dd>
                 </div>
                 {pctOff > 0 && (
                   <div className="flex justify-between gap-4 text-success">
