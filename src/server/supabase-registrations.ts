@@ -14,9 +14,10 @@ export function getSupabaseAdmin(): SupabaseClient | null {
     );
   }
 
+  // Server paths must prefer server-only URL to avoid client/server project mismatches.
   const url =
-    process.env.VITE_SUPABASE_URL ??
     process.env.SUPABASE_URL ??
+    process.env.VITE_SUPABASE_URL ??
     (typeof import.meta !== "undefined" ? import.meta.env?.VITE_SUPABASE_URL : undefined);
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
@@ -26,6 +27,31 @@ export function getSupabaseAdmin(): SupabaseClient | null {
 
   client = createClient(url, key, { auth: { persistSession: false } });
   return client;
+}
+
+function formatSupabaseError(error: unknown): string {
+  if (!error) return "unknown error";
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object") {
+    const e = error as {
+      message?: unknown;
+      code?: unknown;
+      details?: unknown;
+      hint?: unknown;
+    };
+    const parts = [
+      typeof e.message === "string" ? e.message : "",
+      typeof e.code === "string" ? `code=${e.code}` : "",
+      typeof e.details === "string" && e.details ? `details=${e.details}` : "",
+      typeof e.hint === "string" && e.hint ? `hint=${e.hint}` : "",
+    ].filter(Boolean);
+    if (parts.length) return parts.join(" | ");
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
 }
 
 function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
@@ -128,7 +154,7 @@ export async function supabaseSaveRegistration(
     }
     return await supabaseInsertFields(sb, fields, options?.id);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = formatSupabaseError(error);
     console.error("[BelKou] Supabase save registration:", message);
     throw new Error("Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.");
   }
@@ -158,7 +184,7 @@ export async function supabaseUpdateRegistrationDetails(
   try {
     await supabaseUpdateFields(sb, id, fields);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = formatSupabaseError(error);
     console.error("[BelKou] Supabase update registration:", message);
     throw new Error("Impossible de mettre à jour votre inscription. Réessayez ou contactez le support.");
   }
