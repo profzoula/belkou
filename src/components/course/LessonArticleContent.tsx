@@ -145,13 +145,14 @@ function ArticleSubSessionPanel({
   const sessionIntro = isFirstSubInSession ? found.session.introHtml?.trim() : "";
 
   return (
-    <div className="lesson-article-panel relative border-b border-border bg-white pb-8 dark:bg-background sm:pb-4">
+    <div className="lesson-article-panel border-b border-border bg-muted/25 py-6 sm:py-8">
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
       {nav.prevId && onSubSessionChange ? (
         <button
           type="button"
           aria-label="Sous-session précédente"
           onClick={() => goToSubSession(nav.prevId!)}
-          className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:left-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
+          className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:left-4 sm:flex"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -161,28 +162,26 @@ function ArticleSubSessionPanel({
           type="button"
           aria-label="Sous-session suivante"
           onClick={() => goToSubSession(nav.nextId!, true)}
-          className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-emerald-200 bg-white p-2 text-emerald-700 shadow-sm transition-colors hover:bg-emerald-50 sm:right-4 sm:flex dark:border-emerald-800 dark:bg-card dark:hover:bg-emerald-950/30"
+          className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:right-4 sm:flex"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
       ) : null}
 
       <div className="px-4 py-6 pb-10 sm:px-10 sm:py-10 sm:pb-10 md:px-14">
-        <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 p-[1px] shadow-sm dark:border-emerald-800">
-          <div className="rounded-[15px] bg-card/95 px-5 py-4 backdrop-blur-sm sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+        <div className="mb-6 rounded-2xl border border-border bg-muted/25 px-5 py-4 sm:px-6">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">
               Session {found.session.number} · {found.sub.number}
             </p>
             <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
               {found.sub.title}
             </h1>
-          </div>
         </div>
 
         <div className="mt-2 min-h-[200px]">
           {sessionIntro ? (
             <div
-              className="lesson-html lesson-article-rich lesson-session-intro mb-8 overflow-hidden rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/90 via-card to-card p-5 shadow-sm dark:border-emerald-800/40 dark:from-emerald-950/30 sm:p-6"
+              className="lesson-html lesson-article-rich lesson-session-intro mb-8 overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-6"
               dangerouslySetInnerHTML={{ __html: sessionIntro }}
             />
           ) : null}
@@ -261,6 +260,7 @@ function ArticleSubSessionPanel({
           ) : null}
         </div>
       </div>
+    </div>
     </div>
   );
 }
