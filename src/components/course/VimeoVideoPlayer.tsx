@@ -163,7 +163,11 @@ export function VimeoVideoPlayer({
       />
 
       {ended ? (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/95 px-6 text-center">
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/95 px-6 text-center"
+        >
           <p className="text-sm font-semibold text-white">Leçon terminée</p>
           <p className="max-w-md text-xs text-white/75">{title}</p>
           <div className="flex flex-wrap items-center justify-center gap-2">

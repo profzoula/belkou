@@ -27,6 +27,7 @@ type CheckoutPageProps = {
   plan?: PlanId;
   courseSlug?: string;
   refCode?: string;
+  initialCourse?: PublicCourse | null;
 };
 
 const ORIGINAL_PRICES: Record<PlanId, number> = {
@@ -39,11 +40,16 @@ function discountPercent(price: number, original: number) {
   return Math.round((1 - price / original) * 100);
 }
 
-export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: CheckoutPageProps) {
+export function CheckoutPage({
+  plan: initialPlan,
+  courseSlug,
+  refCode,
+  initialCourse = null,
+}: CheckoutPageProps) {
   const navigate = useNavigate();
   const submitFn = useServerFn(submitRegistration);
   const loadCourseFn = useServerFn(getPublicCourse);
-  const [course, setCourse] = useState<PublicCourse | null>(null);
+  const [course, setCourse] = useState<PublicCourse | null>(initialCourse);
   const CourseIcon = courseSlug ? getCourseIcon(courseSlug) : null;
 
   const [selectedPlan, setSelectedPlan] = useState<PlanId>(initialPlan ?? "premium");
@@ -71,10 +77,15 @@ export function CheckoutPage({ plan: initialPlan, courseSlug, refCode }: Checkou
       return;
     }
 
+    if (initialCourse && initialCourse.slug === courseSlug) {
+      setCourse(initialCourse);
+      return;
+    }
+
     loadCourseFn({ data: { slug: courseSlug } })
       .then((loaded) => setCourse(loaded))
       .catch(() => setCourse(null));
-  }, [courseSlug, loadCourseFn]);
+  }, [courseSlug, initialCourse, loadCourseFn]);
 
   const plan = planDetails[selectedPlan];
   const coursePrice = course?.price;

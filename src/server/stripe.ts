@@ -55,12 +55,21 @@ export async function createCheckoutSession(params: {
           quantity: 1,
         };
 
+  const expectedAmountCents = isCourseCheckout
+    ? Math.round(params.amountUsd! * 100)
+    : priceId
+      ? null
+      : params.plan === "premium"
+        ? 19900
+        : 29000;
+
   const cancelUrl = params.courseSlug
     ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
     : `${env.SITE_URL}/checkout?plan=${params.plan}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
+    client_reference_id: params.registrationId,
     customer_email: params.email,
     payment_method_types: ["card"],
     line_items: [lineItem],
@@ -70,6 +79,8 @@ export async function createCheckoutSession(params: {
       registrationId: params.registrationId,
       plan: params.plan,
       fullName: params.fullName,
+      expectedCurrency: "usd",
+      ...(expectedAmountCents != null ? { expectedAmountCents: String(expectedAmountCents) } : {}),
       ...(params.courseSlug ? { courseSlug: params.courseSlug } : {}),
     },
   });

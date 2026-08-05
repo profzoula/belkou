@@ -160,27 +160,28 @@ export const submitRegistration = createServerFn({ method: "POST" })
     const manualHtml = manualPaymentHtml();
     const checkoutUrl = await startCheckout(db, record, pricing);
 
-    try {
-      const emailResult = await sendEmail({
-        to: data.email,
-        subject: resumed
-          ? `Reprise inscription BelKou — ${pricing.label}`
-          : `Inscription BelKou — ${pricing.label}`,
-        html: registrationPendingEmail({
-          name: data.full_name,
-          plan: data.plan,
-          price: pricing.price,
-          registrationId: record.id,
-          checkoutUrl,
-          manualPaymentHtml: manualHtml,
-        }),
+    void sendEmail({
+      to: data.email,
+      subject: resumed
+        ? `Reprise inscription BelKou — ${pricing.label}`
+        : `Inscription BelKou — ${pricing.label}`,
+      html: registrationPendingEmail({
+        name: data.full_name,
+        plan: data.plan,
+        price: pricing.price,
+        registrationId: record.id,
+        checkoutUrl,
+        manualPaymentHtml: manualHtml,
+      }),
+    })
+      .then((emailResult) => {
+        if (!emailResult.ok) {
+          console.error("[BelKou] Registration email not sent:", emailResult);
+        }
+      })
+      .catch((error) => {
+        console.error("Email error:", error);
       });
-      if (!emailResult.ok) {
-        console.error("[BelKou] Registration email not sent:", emailResult);
-      }
-    } catch (error) {
-      console.error("Email error:", error);
-    }
 
     return {
       registrationId: record.id,

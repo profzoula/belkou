@@ -12,9 +12,21 @@ import { getCheckoutSession } from "@/server/stripe";
 type CheckoutLike = {
   id: string;
   payment_status?: string | null;
+  mode?: string | null;
+  amount_total?: number | null;
+  currency?: string | null;
   customer_email?: string | null;
   customer_details?: { email?: string | null } | null;
   metadata?: Record<string, string> | null;
+};
+
+type ResolveOptions = {
+  requireRegistrationMetadata?: boolean;
+  allowEmailCourseFallback?: boolean;
+};
+
+type GrantOptions = ResolveOptions & {
+  requireAmountAndCurrencyMatch?: boolean;
 };
 
 export function isCheckoutPaid(session: CheckoutLike): boolean {
@@ -25,26 +37,53 @@ export function isCheckoutPaid(session: CheckoutLike): boolean {
 export async function resolveRegistrationForCheckout(
   db: D1Database | null,
   session: CheckoutLike,
+  options: ResolveOptions = {},
 ): Promise<RegistrationRecord | null> {
   const registrationId = session.metadata?.registrationId?.trim();
-  if (registrationId) {
-    const byId = await getRegistrationById(db, registrationId);
-    if (byId) return byId;
+  if (options.requireRegistrationMetadata && !registrationId) {
+    return null;
   }
 
   const bySession = await getRegistrationByStripeSession(db, session.id);
   if (bySession) return bySession;
 
+  if (registrationId) {
+    const byId = await getRegistrationById(db, registrationId);
+    if (byId) return byId;
+  }
+
   const email = normalizeRegistrationEmail(
     session.customer_email ?? session.customer_details?.email ?? "",
   );
   const courseSlug = session.metadata?.courseSlug?.trim() || null;
-  if (email) {
+  if (options.allowEmailCourseFallback !== false && email) {
     const byEmailCourse = await getRegistrationByEmailAndCourse(db, email, courseSlug);
     if (byEmailCourse) return byEmailCourse;
   }
 
   return null;
+}
+
+function sessionHasExpectedPricing(session: CheckoutLike): boolean {
+  const expectedAmountRaw = session.metadata?.expectedAmountCents?.trim();
+  const expectedCurrency = session.metadata?.expectedCurrency?.trim().toLowerCase();
+
+  if (!expectedAmountRaw && !expectedCurrency) return true;
+  if (session.mode && session.mode !== "payment") return false;
+
+  if (expectedCurrency) {
+    const actualCurrency = session.currency?.toLowerCase();
+    if (!actualCurrency || actualCurrency !== expectedCurrency) return false;
+  }
+
+  if (expectedAmountRaw) {
+    const expectedAmount = Number.parseInt(expectedAmountRaw, 10);
+    if (!Number.isFinite(expectedAmount)) return false;
+    if (typeof session.amount_total !== "number") return false;
+    if (session.amount_total !== expectedAmount) return false;
+  }
+
+  return true;
 }
 
 /**
@@ -54,15 +93,27 @@ export async function resolveRegistrationForCheckout(
 export async function grantAccessFromCheckoutSession(
   db: D1Database | null,
   session: CheckoutLike,
+  options: GrantOptions = {},
 ): Promise<{ registrationId: string; alreadyPaid: boolean } | null> {
   if (!isCheckoutPaid(session)) return null;
 
-  const record = await resolveRegistrationForCheckout(db, session);
+  if (options.requireAmountAndCurrencyMatch && !sessionHasExpectedPricing(session)) {
+    console.error("[BelKou] Stripe pricing verification failed", {
+      sessionId: session.id,
+      expectedAmountCents: session.metadata?.expectedAmountCents,
+      amountTotal: session.amount_total,
+      expectedCurrency: session.metadata?.expectedCurrency,
+      currency: session.currency,
+    });
+    return null;
+  }
+
+  const record = await resolveRegistrationForCheckout(db, session, options);
   if (!record) {
     console.error("[BelKou] Stripe paid but no registration found for session", {
       sessionId: session.id,
       registrationId: session.metadata?.registrationId,
-      email: session.customer_email ?? session.customer_details?.email,
+      email: maskEmail(session.customer_email ?? session.customer_details?.email ?? ""),
       courseSlug: session.metadata?.courseSlug,
     });
     return null;
@@ -82,6 +133,13 @@ export async function grantAccessFromCheckoutSession(
   }
 
   return { registrationId: record.id, alreadyPaid };
+}
+
+function maskEmail(value: string): string {
+  const [name, domain] = value.split("@");
+  if (!name || !domain) return "masked";
+  const safeName = name.length <= 2 ? `${name[0] ?? "*"}*` : `${name.slice(0, 2)}***`;
+  return `${safeName}@${domain}`;
 }
 
 /** Heal pending enrollments that Stripe already marked paid (webhook miss / D1 lag). */

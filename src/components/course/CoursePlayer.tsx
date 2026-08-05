@@ -995,6 +995,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         goToNextLesson();
       }
       if ((event.key === "c" || event.key === "C") && hasPaidAccess && contentLive && !activeLessonCompleted) {
+        if (!event.altKey) return;
         event.preventDefault();
         handleActiveLessonComplete();
       }
@@ -1021,6 +1022,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         activeLesson.type === "article" ? "bg-white" : "bg-[#F8FAFC]",
       )}
     >
+      <a
+        href="#learn-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:ring-2 focus:ring-primary"
+      >
+        Aller au contenu du cours
+      </a>
       <LearnHeader
         courseTitle={course.title}
         courseSlug={course.slug}
@@ -1032,19 +1039,27 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       />
 
       {scheduledSoon && startLabel && !enrolledWaiting && (
-        <div className="border-b border-primary/20 bg-primary/10 px-4 py-2.5 text-center text-sm text-foreground">
+        <div
+          role="status"
+          aria-live="polite"
+          className="border-b border-primary/20 bg-primary/10 px-4 py-2.5 text-center text-sm text-foreground"
+        >
           Inscriptions ouvertes — les vidéos seront disponibles le <strong>{startLabel}</strong>
         </div>
       )}
 
       {enrolledWaiting && access?.scheduledPublishAt && (
-        <div className="border-b border-success/25 bg-success/10 px-4 py-2.5 text-center text-sm text-foreground">
+        <div
+          role="status"
+          aria-live="polite"
+          className="border-b border-success/25 bg-success/10 px-4 py-2.5 text-center text-sm text-foreground"
+        >
           Vous êtes inscrit — accès complet au cours le{" "}
           <strong>{formatScheduledPublishLabel(access.scheduledPublishAt)}</strong>
         </div>
       )}
 
-      <div className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
+      <main id="learn-main" className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
           <aside className="hidden lg:sticky lg:top-[calc(4rem+1rem)] lg:flex lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:flex-col lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
             <CurriculumSidebar
@@ -1343,7 +1358,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

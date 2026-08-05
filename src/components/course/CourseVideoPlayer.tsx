@@ -223,13 +223,22 @@ export function CourseVideoPlayer({
       />
 
       {loading || buffering ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40">
+        <div
+          role="status"
+          aria-live="polite"
+          className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40"
+        >
           <Loader2 className="h-8 w-8 animate-spin text-white/80" />
+          <span className="sr-only">{buffering ? "Mise en mémoire tampon" : "Chargement de la vidéo"}</span>
         </div>
       ) : null}
 
       {error ? (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 px-6 text-center">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/90 px-6 text-center"
+        >
           <p className="text-sm font-semibold text-white">Lecture impossible</p>
           <p className="max-w-md text-xs text-white/75">{error}</p>
           <Button type="button" size="sm" variant="secondary" onClick={replay}>
@@ -245,7 +254,11 @@ export function CourseVideoPlayer({
       ) : null}
 
       {ended ? (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-black/95 px-6 text-center">
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-black/95 px-6 text-center"
+        >
           <p className="text-sm font-semibold text-white">Leçon terminée</p>
           <p className="max-w-md text-xs text-white/75">{title}</p>
           <div className="flex flex-wrap items-center justify-center gap-2">

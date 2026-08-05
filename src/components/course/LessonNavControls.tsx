@@ -69,6 +69,7 @@ export function LessonNavControls({
           className="rounded-xl"
           disabled={!canMarkComplete || isCompleted}
           onClick={onMarkComplete}
+          aria-keyshortcuts="Alt+C"
           aria-label={isCompleted ? "Leçon déjà terminée" : "Marquer la leçon comme terminée"}
         >
           <Check className="size-4" aria-hidden />
@@ -85,7 +86,7 @@ export function LessonNavControls({
             </kbd>{" "}
             naviguer ·{" "}
             <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
-              C
+              Alt + C
             </kbd>{" "}
             terminer
           </span>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { CheckoutPage } from "@/components/checkout/CheckoutPage";
+import { getPublicCourse } from "@/lib/fns/courses";
 import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
@@ -18,10 +19,25 @@ export const Route = createFileRoute("/checkout")({
       noindex: true,
     }),
   validateSearch: searchSchema,
+  loader: async ({ location }) => {
+    const params = new URLSearchParams(location.search);
+    const courseSlug = params.get("course") ?? undefined;
+    if (!courseSlug) return { course: null };
+    const course = await getPublicCourse({ data: { slug: courseSlug } });
+    return { course };
+  },
   component: CheckoutRoute,
 });
 
 function CheckoutRoute() {
   const { plan, course, ref } = Route.useSearch();
-  return <CheckoutPage plan={plan} courseSlug={course} refCode={ref} />;
+  const { course: initialCourse } = Route.useLoaderData();
+  return (
+    <CheckoutPage
+      plan={plan}
+      courseSlug={course}
+      refCode={ref}
+      initialCourse={initialCourse}
+    />
+  );
 }

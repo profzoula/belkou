@@ -1,5 +1,5 @@
-import { registrationCourseKey } from "@/lib/course-access";
-import { supabaseListRegistrations } from "@/server/supabase-registrations";
+import { LEGACY_COURSE_SLUG, registrationCourseKey } from "@/lib/course-access";
+import { getSupabaseAdmin, supabaseListRegistrations } from "@/server/supabase-registrations";
 
 export async function getPaidEnrollmentCountsByCourse(): Promise<Record<string, number>> {
   const rows = await supabaseListRegistrations();
@@ -15,6 +15,40 @@ export async function getPaidEnrollmentCountsByCourse(): Promise<Record<string, 
 }
 
 export async function countPaidEnrollmentsForCourse(courseSlug: string): Promise<number> {
-  const counts = await getPaidEnrollmentCountsByCourse();
-  return counts[registrationCourseKey(courseSlug)] ?? 0;
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    const counts = await getPaidEnrollmentCountsByCourse();
+    return counts[registrationCourseKey(courseSlug)] ?? 0;
+  }
+
+  const key = registrationCourseKey(courseSlug);
+  const { count: explicitCount, error: explicitError } = await sb
+    .from("registrations")
+    .select("*", { count: "exact", head: true })
+    .eq("payment_status", "paid")
+    .eq("course_slug", key);
+
+  if (explicitError) {
+    const counts = await getPaidEnrollmentCountsByCourse();
+    return counts[key] ?? 0;
+  }
+
+  // Legacy paid rows may have empty/null course_slug.
+  if (key !== LEGACY_COURSE_SLUG) {
+    return explicitCount ?? 0;
+  }
+
+  const { count: nullCount } = await sb
+    .from("registrations")
+    .select("*", { count: "exact", head: true })
+    .eq("payment_status", "paid")
+    .is("course_slug", null);
+
+  const { count: emptyCount } = await sb
+    .from("registrations")
+    .select("*", { count: "exact", head: true })
+    .eq("payment_status", "paid")
+    .eq("course_slug", "");
+
+  return (explicitCount ?? 0) + (nullCount ?? 0) + (emptyCount ?? 0);
 }
