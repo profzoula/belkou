@@ -35,6 +35,19 @@ const ORIGINAL_PRICES: Record<PlanId, number> = {
   vip: 490,
 };
 
+function toMoney(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function formatUsd(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(toMoney(value));
+}
+
 function discountPercent(price: number, original: number) {
   if (original <= price) return 0;
   return Math.round((1 - price / original) * 100);
@@ -92,9 +105,11 @@ export function CheckoutPage({
   const plan = planDetails[selectedPlan];
   const coursePrice = course?.price;
   const courseOriginalPrice = course?.originalPrice;
-  const displayPrice = courseSlug && course ? coursePrice! : plan.price;
-  const displayOriginal = courseSlug && course ? courseOriginalPrice! : ORIGINAL_PRICES[selectedPlan];
-  const savings = displayOriginal - displayPrice;
+  const displayPrice = toMoney(courseSlug && course ? coursePrice! : plan.price);
+  const displayOriginal = toMoney(
+    courseSlug && course ? courseOriginalPrice! : ORIGINAL_PRICES[selectedPlan],
+  );
+  const savings = toMoney(displayOriginal - displayPrice);
   const pctOff = discountPercent(displayPrice, displayOriginal);
 
   const update = (key: string, value: string) => {
@@ -173,7 +188,7 @@ export function CheckoutPage({
     `Formation BelKou ${plan.name} — Apps IA & SaaS`;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
       <header className="border-b border-border bg-card/90 backdrop-blur-xl">
         <div className="site-container flex h-14 items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display text-sm font-bold">
@@ -190,22 +205,22 @@ export function CheckoutPage({
       <main id="main-content" className="site-container px-4 py-6 sm:px-0 sm:py-8 lg:py-10">
         <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
-          <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Finalisez votre inscription
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Quelques informations, puis paiement sécurisé via Stripe.
           </p>
         </div>
 
-        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
+        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start lg:gap-8 xl:gap-10">
           <div className="min-w-0 space-y-6">
             {/* Product */}
-            <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <div className="flex gap-4">
+            <section className="rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
+              <div className="flex items-start gap-4">
                 <div
                   className={cn(
-                    "flex h-16 w-24 shrink-0 items-center justify-center rounded bg-gradient-to-br",
+                    "flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br",
                     course?.thumbnail.gradient ?? "from-primary/80 to-primary",
                   )}
                 >
@@ -219,18 +234,23 @@ export function CheckoutPage({
                   <p className="text-sm leading-snug text-foreground">
                     Accès complet à <strong>{productTitle}</strong>.
                   </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Paiement unique · accès immédiat après confirmation.
+                  </p>
                 </div>
-                <span className="shrink-0 text-xs font-bold text-emerald-700">Inclus</span>
+                <span className="shrink-0 rounded-full bg-success/15 px-2 py-1 text-[11px] font-bold text-success">
+                  Inclus
+                </span>
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {courseSlug && course ? (
-                  <div className="sm:col-span-2 rounded border border-primary bg-primary/5 p-4">
+                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
                     <p className="font-bold text-sm">{course.title}</p>
-                    <p className="text-xl font-bold mt-1">${course.price}</p>
+                    <p className="mt-1 text-2xl font-bold">{formatUsd(course.price)}</p>
                     {course.originalPrice > course.price && (
                       <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                        Économisez ${course.originalPrice - course.price}
+                        Économisez {formatUsd(course.originalPrice - course.price)}
                       </span>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
@@ -262,10 +282,10 @@ export function CheckoutPage({
                           />
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-sm">{option.name}</p>
-                            <p className="text-xl font-bold mt-1">${option.price}</p>
+                            <p className="mt-1 text-xl font-bold">{formatUsd(option.price)}</p>
                             {save > 0 && (
                               <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                                Économisez ${save}
+                                Économisez {formatUsd(save)}
                               </span>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
@@ -277,7 +297,7 @@ export function CheckoutPage({
                 )}
               </div>
 
-              <div className="mt-5 pt-5 border-t border-border">
+              <div className="mt-5 border-t border-border pt-5">
                 <p className="text-sm font-bold mb-3">Ce qui est inclus :</p>
                 <ul className="space-y-2">
                   {(courseSlug && course
@@ -298,7 +318,7 @@ export function CheckoutPage({
             </section>
 
             {/* Personal info */}
-            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
               <h2 className="font-display text-lg font-semibold text-foreground">Vos informations</h2>
               <div className="space-y-2">
                 <Label htmlFor="full_name">Nom complet</Label>
@@ -380,7 +400,7 @@ export function CheckoutPage({
             </section>
 
             {/* Billing */}
-            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
               <h2 className="font-display text-lg font-semibold text-foreground">Adresse de facturation</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -416,7 +436,7 @@ export function CheckoutPage({
             </section>
 
             {/* Payment */}
-            <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="font-display text-lg font-semibold text-foreground">Moyen de paiement</h2>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -425,7 +445,7 @@ export function CheckoutPage({
                 </span>
               </div>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-primary bg-primary/5 p-4">
+              <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-primary/70 bg-primary/5 p-4">
                 <input type="radio" name="pay" checked readOnly className="accent-primary" />
                 <CreditCard className="h-5 w-5" />
                 <div>
@@ -434,7 +454,7 @@ export function CheckoutPage({
                 </div>
               </label>
 
-              <p className="text-xs text-muted-foreground leading-relaxed rounded-md bg-muted/50 p-3">
+              <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
                 Après validation, vous serez redirigé vers <strong>Stripe Checkout</strong> pour saisir votre
                 carte en toute sécurité. BelKou ne stocke jamais vos données bancaires.
               </p>
@@ -447,7 +467,7 @@ export function CheckoutPage({
 
           {/* Summary sidebar */}
           <aside className="mt-8 lg:sticky lg:top-6 lg:mt-0">
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-md">
+            <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-md sm:p-6">
               <h2 className="mb-4 font-display text-lg font-semibold">Récapitulatif</h2>
 
               <dl className="space-y-2 text-sm">
@@ -455,21 +475,21 @@ export function CheckoutPage({
                   <dt className="text-muted-foreground">
                     {courseSlug && course ? course.title : `Plan ${plan.name}`}
                   </dt>
-                  <dd>${displayPrice}</dd>
+                  <dd className="font-medium">{formatUsd(displayPrice)}</dd>
                 </div>
                 {pctOff > 0 && (
                   <div className="flex justify-between gap-4 text-success">
                     <dt>Promo (−{pctOff}%)</dt>
-                    <dd>−${savings}</dd>
+                    <dd>−{formatUsd(savings)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted-foreground">Taxes estimées</dt>
-                  <dd>$0.00</dd>
+                  <dd>{formatUsd(0)}</dd>
                 </div>
                 <div className="flex justify-between gap-4 border-t border-border pt-3 text-base font-bold">
                   <dt>Total</dt>
-                  <dd>${displayPrice}</dd>
+                  <dd>{formatUsd(displayPrice)}</dd>
                 </div>
               </dl>
 
