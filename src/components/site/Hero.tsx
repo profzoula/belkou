@@ -89,14 +89,10 @@ export function Hero({ studentCount }: HeroProps) {
             <img
               src="/hero/student-original.png"
               alt="Diplômée BelKou prête pour sa carrière"
-              className="mx-auto h-auto w-full max-h-[min(54vh,395px)] object-contain object-bottom drop-shadow-[0_24px_60px_rgba(2,8,23,0.20)] sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-[1.03]"
+              className="mx-auto h-auto w-full max-h-[min(54vh,395px)] object-contain object-bottom drop-shadow-[0_24px_60px_rgba(2,8,23,0.20)] [mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-[1.03]"
               width={900}
               height={1200}
               fetchPriority="high"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent via-background/72 to-background"
             />
           </div>
         </motion.div>
