@@ -57,6 +57,55 @@ if (!existsSync(join(root, "dist", "server", "index.js"))) {
 const worker = (await import(workerUrl)).default;
 const port = Number(process.env.PORT) || 3000;
 const host = "0.0.0.0";
+const startedAt = Date.now();
+
+function checkEnvConfig() {
+  const required = [
+    "SITE_URL",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+  ];
+  const optional = ["RESEND_API_KEY", "ENABLE_VIDEO_WORKER"];
+
+  const requiredChecks = required.map((key) => ({
+    name: key,
+    ok: Boolean(process.env[key]),
+  }));
+  const optionalChecks = optional.map((key) => ({
+    name: key,
+    ok: Boolean(process.env[key]),
+  }));
+  const requiredOk = requiredChecks.every((item) => item.ok);
+
+  return {
+    requiredOk,
+    required: requiredChecks,
+    optional: optionalChecks,
+  };
+}
+
+function healthResponse() {
+  const env = checkEnvConfig();
+  const status = env.requiredOk ? "ok" : "degraded";
+  return new Response(
+    JSON.stringify({
+      status,
+      service: "belkou-web",
+      uptimeSec: Math.floor((Date.now() - startedAt) / 1000),
+      timestamp: new Date().toISOString(),
+      checks: {
+        envRequired: env.required,
+        envOptional: env.optional,
+      },
+    }),
+    {
+      status: env.requiredOk ? 200 : 503,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    },
+  );
+}
 
 function toWebRequest(req) {
   const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
@@ -211,6 +260,10 @@ function startVideoWorker() {
 createServer(async (req, res) => {
   try {
     const pathname = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`).pathname;
+    if (pathname === "/healthz") {
+      await sendWebResponse(res, healthResponse());
+      return;
+    }
     if (shouldTryStatic(pathname)) {
       const staticResponse = await tryStatic(pathname);
       if (staticResponse) {

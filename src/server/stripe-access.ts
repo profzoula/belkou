@@ -64,9 +64,9 @@ export async function resolveRegistrationForCheckout(
   return null;
 }
 
-function sessionHasExpectedPricing(session: CheckoutLike): boolean {
+export function hasExpectedStripePricingForSession(session: CheckoutLike): boolean {
   const expectedAmountRaw = session.metadata?.expectedAmountCents?.trim();
-  const expectedCurrency = session.metadata?.expectedCurrency?.trim().toLowerCase();
+  const expectedCurrency = session.metadata?.expectedCurrency?.trim()?.toLowerCase();
 
   if (!expectedAmountRaw && !expectedCurrency) return true;
   if (session.mode && session.mode !== "payment") return false;
@@ -97,7 +97,7 @@ export async function grantAccessFromCheckoutSession(
 ): Promise<{ registrationId: string; alreadyPaid: boolean } | null> {
   if (!isCheckoutPaid(session)) return null;
 
-  if (options.requireAmountAndCurrencyMatch && !sessionHasExpectedPricing(session)) {
+  if (options.requireAmountAndCurrencyMatch && !hasExpectedStripePricingForSession(session)) {
     console.error("[BelKou] Stripe pricing verification failed", {
       sessionId: session.id,
       expectedAmountCents: session.metadata?.expectedAmountCents,
