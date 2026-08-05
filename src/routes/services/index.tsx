@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, BadgeCheck, BriefcaseBusiness, CalendarCheck, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -25,21 +26,81 @@ export const Route = createFileRoute("/services/")({
 function ServicesIndexPage() {
   const { services } = Route.useLoaderData();
   const contactSlug = services.find((service) => service.action.type === "booking")?.slug ?? services[0]?.slug;
+  const displayedFrom = services[0]?.priceLabel ? `à partir de ${services[0].priceLabel}` : null;
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main>
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
-          <div className="site-container site-page-top pb-10 pt-8 sm:pb-14 sm:pt-12">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgb(0_70_213_/_0.14),transparent_58%)]"
+          />
+          <div className="site-container site-page-top relative grid gap-8 pb-10 pt-8 sm:pb-14 sm:pt-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)] lg:items-center">
             <FadeIn className="max-w-2xl">
-              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Services</p>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold tracking-[0.12em] text-primary uppercase">
+                <Sparkles className="size-3.5" aria-hidden />
+                Services BelKou
+              </span>
               <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
                 Solutions complètes pour votre business
               </h1>
               <p className="mt-4 text-muted-foreground md:text-lg">
-                De la création d&apos;entreprise à la formation, nous couvrons vos besoins numériques.
+                De la création d&apos;entreprise à la formation, nous couvrons vos besoins numériques avec
+                un accompagnement concret.
               </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to={contactSlug ? "/services/$slug" : "/services"}
+                  params={contactSlug ? { slug: contactSlug } : undefined}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Prendre rendez-vous
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
+                <Link
+                  to="/faq"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  Voir les questions
+                </Link>
+              </div>
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <BadgeCheck className="size-4 text-primary" aria-hidden />
+                  Devis personnalisé rapide
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <CalendarCheck className="size-4 text-primary" aria-hidden />
+                  Support avant et après livraison
+                </span>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.06}>
+              <div className="rounded-2xl border border-border/70 bg-card/95 p-5 shadow-sm backdrop-blur">
+                <p className="text-sm font-semibold text-foreground">Pourquoi choisir nos services ?</p>
+                <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <BriefcaseBusiness className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                    <span>{services.length} services actifs pour différents besoins business.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <BadgeCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                    <span>Process clair: brief, validation, exécution, suivi.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CalendarCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                    <span>Accompagnement humain par l&apos;équipe BelKou.</span>
+                  </li>
+                </ul>
+                {displayedFrom ? (
+                  <p className="mt-4 rounded-lg bg-primary/[0.06] px-3 py-2 text-sm font-medium text-primary">
+                    Tarifs {displayedFrom}
+                  </p>
+                ) : null}
+              </div>
             </FadeIn>
           </div>
         </section>
