@@ -22,6 +22,7 @@ import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
 import {
   clearRegistrationHandoff,
   emailsMatch,
+  getRegistrationHandoff,
   saveRegistrationHandoff,
 } from "@/lib/registration-handoff";
 
@@ -109,7 +110,12 @@ function SuccessPage() {
       }
 
       try {
-        const r = await statusFn({ data: { registrationId } });
+        const r = await statusFn({
+          data: {
+            registrationId,
+            sessionId: session_id,
+          },
+        });
         setStatus(r);
       } catch (error) {
         console.error(error);
@@ -126,7 +132,11 @@ function SuccessPage() {
   const planId = (status?.plan ?? plan)?.toLowerCase();
   const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
-  const registrationEmail = status?.email;
+  const handoff =
+    typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
+  const registrationEmail =
+    status?.email ??
+    (handoff && handoff.registrationId === registrationId ? handoff.email : undefined);
   const emailMatchesUser = emailsMatch(user?.email, registrationEmail);
 
   useEffect(() => {

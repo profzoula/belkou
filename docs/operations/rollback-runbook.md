@@ -20,6 +20,8 @@ This runbook defines the minimum safe process to release and rollback BelKou.
    - `STRIPE_WEBHOOK_SECRET`
 3. Apply pending Supabase SQL migrations (if any), including:
    - `migrations/supabase_stripe_webhook_events.sql` (Stripe webhook idempotency)
+   - `migrations/supabase_course_resources_private.sql` (private course-resources bucket)
+   - Or re-run `supabase/course_resources_storage.sql` for new installs
 4. Deploy to production (GitHub Actions `Deploy` workflow on `main`, or manual Railway deploy).
 4. Post-deploy checks:
    - `GET /healthz` returns `200` and `status: "ok"`

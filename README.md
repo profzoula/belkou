@@ -52,7 +52,10 @@ Optional repository variable:
 
 If `RAILWAY_TOKEN` is unset, the deploy job skips gracefully (CI still runs).
 
-Before the first deploy with webhook idempotency, run `migrations/supabase_stripe_webhook_events.sql` in the Supabase SQL Editor.
+Before the first deploy with webhook idempotency, run these in the Supabase SQL Editor:
+
+- `migrations/supabase_stripe_webhook_events.sql`
+- `migrations/supabase_course_resources_private.sql` (or `supabase/course_resources_storage.sql` for new installs)
 
 ## Critical Production Flows
 

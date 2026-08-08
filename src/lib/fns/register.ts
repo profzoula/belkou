@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/registration";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { siteConfig, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
@@ -193,22 +194,36 @@ export const submitRegistration = createServerFn({ method: "POST" })
   });
 
 export const getRegistrationStatus = createServerFn({ method: "GET" })
-  .inputValidator((data: { registrationId: string }) => {
-    if (!data.registrationId) throw new Error("registrationId required");
-    return data;
-  })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registrationId: z.string().min(1),
+        sessionId: z.string().optional(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
     const db = await getDb();
     const { getRegistrationById } = await import("@/server/db");
     const record = await getRegistrationById(db, data.registrationId);
     if (!record) return null;
-    return {
+
+    const base = {
       id: record.id,
       plan: record.plan,
       payment_status: record.payment_status,
+      course_slug: record.course_slug,
+    };
+
+    const sessionId = data.sessionId?.trim();
+    if (!sessionId || !record.stripe_session_id || record.stripe_session_id !== sessionId) {
+      return base;
+    }
+
+    return {
+      ...base,
       full_name: record.full_name,
       email: record.email,
-      course_slug: record.course_slug,
     };
   });
 
