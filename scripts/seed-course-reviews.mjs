@@ -100,7 +100,8 @@ const REVIEW_AUTHORS = [
 ];
 
 const RATING_POOL = [
-  5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 3, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 3, 5, 5, 4, 5,
+  5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5, 5, 5, 4, 5, 5, 3, 5, 4, 5, 5, 5, 5, 4, 5, 5, 5, 4, 5, 5,
+  3, 5, 5, 4, 5,
 ];
 
 const REVIEW_TEXTS = {
@@ -232,16 +233,19 @@ function buildReviewsForCourse(course) {
 }
 
 async function readJson(key, fallback) {
-  const { data, error } = await sb.from("site_content").select("value").eq("key", key).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
   if (error || !data?.value) return fallback;
   return data.value;
 }
 
 async function writeJson(key, value) {
-  const { error } = await sb.from("site_content").upsert(
-    { key, value, updated_at: new Date().toISOString() },
-    { onConflict: "key" },
-  );
+  const { error } = await sb
+    .from("site_content")
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) throw new Error(`${key}: ${error.message}`);
 }
 
@@ -275,7 +279,9 @@ async function main() {
     const reviews = buildReviewsForCourse(course);
     store[course.slug] = reviews;
     summaryBySlug[course.slug] = summarizeReviews(reviews);
-    console.log(`  ${course.slug}: ${reviews.length} avis, moyenne ${summaryBySlug[course.slug].rating}/5`);
+    console.log(
+      `  ${course.slug}: ${reviews.length} avis, moyenne ${summaryBySlug[course.slug].rating}/5`,
+    );
   }
 
   const overrides = await readJson(OVERRIDES_KEY, {});

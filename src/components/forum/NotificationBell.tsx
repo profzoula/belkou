@@ -108,12 +108,14 @@ export function NotificationBell({ className }: { className?: string }) {
 
   const handleOpenNotification = async (item: NotificationItem) => {
     if (!item.readAt) {
-      await markReadFn({ data: { accessToken: session.access_token!, notificationId: item.id } }).catch(
-        () => undefined,
-      );
+      await markReadFn({
+        data: { accessToken: session.access_token!, notificationId: item.id },
+      }).catch(() => undefined);
       setUnreadCount((count) => Math.max(0, count - 1));
       setItems((list) =>
-        list.map((entry) => (entry.id === item.id ? { ...entry, readAt: new Date().toISOString() } : entry)),
+        list.map((entry) =>
+          entry.id === item.id ? { ...entry, readAt: new Date().toISOString() } : entry,
+        ),
       );
     }
     setOpen(false);
@@ -167,13 +169,20 @@ export function NotificationBell({ className }: { className?: string }) {
                   <Link
                     {...href}
                     onClick={() => void handleOpenNotification(item)}
-                    className={cn("flex flex-col items-start gap-1", !item.readAt && "bg-primary/5")}
+                    className={cn(
+                      "flex flex-col items-start gap-1",
+                      !item.readAt && "bg-primary/5",
+                    )}
                   >
                     <span className="text-sm font-medium leading-snug">{item.title}</span>
                     {item.body ? (
-                      <span className="text-xs text-muted-foreground line-clamp-2">{item.body}</span>
+                      <span className="text-xs text-muted-foreground line-clamp-2">
+                        {item.body}
+                      </span>
                     ) : null}
-                    <span className="text-[10px] text-muted-foreground">{formatWhen(item.createdAt)}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatWhen(item.createdAt)}
+                    </span>
                   </Link>
                 </DropdownMenuItem>
               );

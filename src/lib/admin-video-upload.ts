@@ -7,12 +7,20 @@ import {
   VIDEO_UPLOAD_MAX_BYTES,
 } from "@/lib/video-upload-limits";
 
-export { VIDEO_UPLOAD_ACCEPT, VIDEO_UPLOAD_MAX_BYTES, formatVideoUploadMaxLabel, getVideoUploadLimitHint };
+export {
+  VIDEO_UPLOAD_ACCEPT,
+  VIDEO_UPLOAD_MAX_BYTES,
+  formatVideoUploadMaxLabel,
+  getVideoUploadLimitHint,
+};
 
 const BUCKET = "course-videos";
 
 export function defaultVideoTitleFromFileName(fileName: string): string {
-  return fileName.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/[-_]+/g, " ")
+    .trim();
 }
 
 export function normalizeVideoContentType(file: File): string {
@@ -146,11 +154,13 @@ async function uploadWithSupabaseClient(
   const contentType = normalizeVideoContentType(file);
   onProgress?.(5);
 
-  const { error } = await supabase.storage.from(BUCKET).uploadToSignedUrl(storagePath, token, file, {
-    contentType,
-    upsert: true,
-    cacheControl: "3600",
-  });
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .uploadToSignedUrl(storagePath, token, file, {
+      contentType,
+      upsert: true,
+      cacheControl: "3600",
+    });
 
   if (error) {
     throw new Error(error.message);
@@ -189,7 +199,11 @@ export async function uploadVideoToSignedStorage(
   const typedFile = fileWithNormalizedType(file);
 
   try {
-    await uploadViaServerApi(typedFile, { videoId: params.videoId, storagePath: params.storagePath }, onProgress);
+    await uploadViaServerApi(
+      typedFile,
+      { videoId: params.videoId, storagePath: params.storagePath },
+      onProgress,
+    );
     return;
   } catch (serverError) {
     try {

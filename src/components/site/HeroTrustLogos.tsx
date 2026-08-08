@@ -3,7 +3,14 @@ const logoClass = "h-7 w-auto max-w-[7rem] sm:max-w-none opacity-70 grayscale";
 export function HeroTrustLogos() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-5 sm:justify-between">
-      <svg className={logoClass} width="128" height="42" viewBox="0 0 128 42" fill="none" aria-hidden>
+      <svg
+        className={logoClass}
+        width="128"
+        height="42"
+        viewBox="0 0 128 42"
+        fill="none"
+        aria-hidden
+      >
         <path
           d="M0 0H27.7325V14H13.8663L0 0ZM0 14H13.8663L27.7325 28H0V14ZM0 28H13.8663V42L0 28Z"
           fill="#90A1B9"
@@ -14,7 +21,14 @@ export function HeroTrustLogos() {
         />
       </svg>
 
-      <svg className={logoClass} width="143" height="32" viewBox="0 0 143 32" fill="none" aria-hidden>
+      <svg
+        className={logoClass}
+        width="143"
+        height="32"
+        viewBox="0 0 143 32"
+        fill="none"
+        aria-hidden
+      >
         <path
           d="M77.6225 10.3042H80.8137V19.1813C80.8137 23.6873 78.3304 26.2717 74.0042 26.2717C69.723 26.2717 67.2621 23.7322 67.2621 19.3049V10.3154H70.4534V19.2038C70.4534 21.8332 71.7456 23.2378 74.0492 23.2378C76.3527 23.2378 77.6225 21.8669 77.6225 19.3161V10.3042ZM59.6436 16.6418H52.4295V10.3042H49.2383V26.0357H52.4295V19.642H59.6323V26.0357H62.8236V10.3042H59.6323V16.6418H59.6436ZM139.56 10.3042V26.0133H142.706V10.3042H139.56ZM127.031 19.2599H132.84V16.3946H127.031V13.1696H135.458V10.3154H123.884V26.0245H135.762V23.1591H127.031V19.2599ZM114.513 21.114L110.94 10.293H108.333L104.759 21.114L101.287 10.3042H97.8937L103.377 26.0245H106.018L109.591 15.6979L113.165 26.0245H115.828L121.3 10.3042H117.985L114.513 21.114ZM92.2191 10.3941L99.0848 26.0245H95.7362L94.3204 22.7546H87.1176L87.0164 22.9793L85.6905 26.0245H82.4318L89.3649 10.3042H92.1517L92.2191 10.3941ZM92.9832 19.5409L90.7134 14.2708L88.4548 19.5409L88.2974 19.9004H93.1293L92.9832 19.5409Z"
           fill="#90A1B9"
@@ -25,7 +39,14 @@ export function HeroTrustLogos() {
         />
       </svg>
 
-      <svg className={`${logoClass} max-w-[6.5rem]`} width="129" height="36" viewBox="0 0 129 36" fill="none" aria-hidden>
+      <svg
+        className={`${logoClass} max-w-[6.5rem]`}
+        width="129"
+        height="36"
+        viewBox="0 0 129 36"
+        fill="none"
+        aria-hidden
+      >
         <path
           d="M6.63923 0.126226C3.99892 1.21347 1.09635 4.28507 0.179627 8.14059C-0.981336 13.0257 3.84997 15.0914 4.24624 14.4141C4.71264 13.6182 3.38052 13.3491 3.10632 10.8145C2.75193 7.54081 4.29898 3.88285 6.24599 2.27785C6.6079 1.97966 6.59069 2.39469 6.59069 3.16238C6.59069 4.53519 6.51358 16.859 6.51358 19.431C6.51358 22.9112 6.36746 24.0102 6.10503 25.0962C5.83914 26.1967 5.41166 26.9403 5.73558 27.2267C6.09748 27.5471 7.64265 26.785 8.53718 25.5568C9.60985 24.0837 9.98533 22.3147 10.0527 20.3936C10.1342 18.0777 10.1307 14.4029 10.1342 12.3068C10.1374 10.3843 10.1671 4.75506 10.0999 1.37095C10.0834 0.540892 7.74341 -0.329958 6.6391 0.125216"
           fill="#90A1B9"
@@ -36,7 +57,14 @@ export function HeroTrustLogos() {
         />
       </svg>
 
-      <svg className={logoClass} width="131" height="28" viewBox="0 0 131 28" fill="none" aria-hidden>
+      <svg
+        className={logoClass}
+        width="131"
+        height="28"
+        viewBox="0 0 131 28"
+        fill="none"
+        aria-hidden
+      >
         <path d="M13.2707 0H0V13.3H13.2707V0Z" fill="#90A1B9" />
         <path d="M27.9383 0H14.6676V13.3H27.9383V0Z" fill="#90A1B9" />
         <path d="M13.2707 14.7H0V28H13.2707V14.7Z" fill="#90A1B9" />
@@ -47,7 +75,14 @@ export function HeroTrustLogos() {
         />
       </svg>
 
-      <svg className={logoClass} width="131" height="32" viewBox="0 0 131 32" fill="none" aria-hidden>
+      <svg
+        className={logoClass}
+        width="131"
+        height="32"
+        viewBox="0 0 131 32"
+        fill="none"
+        aria-hidden
+      >
         <path
           d="M116.105 10.5118C116.836 10.5118 117.439 10.1314 117.52 9.63989L118.242 1.47037C118.242 0.662892 117.296 0 116.107 0C114.919 0 113.974 0.662889 113.974 1.47051L114.696 9.63989C114.775 10.1312 115.377 10.5118 116.107 10.5118H116.105Z"
           fill="#90A1B9"

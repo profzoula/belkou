@@ -119,16 +119,19 @@ function migrateSiteSettings(settings) {
 }
 
 async function readSiteContent(key, fallback) {
-  const { data, error } = await sb.from("site_content").select("value").eq("key", key).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
   if (error) throw new Error(`${key}: ${error.message}`);
   return data?.value ?? fallback;
 }
 
 async function writeSiteContent(key, value) {
-  const { error } = await sb.from("site_content").upsert(
-    { key, value, updated_at: new Date().toISOString() },
-    { onConflict: "key" },
-  );
+  const { error } = await sb
+    .from("site_content")
+    .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
   if (error) throw new Error(`${key}: ${error.message}`);
 }
 
@@ -143,7 +146,9 @@ async function main() {
 
   console.log(`course_overrides: ${migratedOverrides.changed} lesson patch(es) cleaned`);
   console.log(`admin_courses: ${migratedAdminCourses.changed} lesson(s) cleaned`);
-  console.log(`site_settings: ${migratedSettings.changed ? "vimeoPreviewDefault removed" : "no change"}`);
+  console.log(
+    `site_settings: ${migratedSettings.changed ? "vimeoPreviewDefault removed" : "no change"}`,
+  );
 
   if (dryRun) {
     console.log("\nDry run — nothing written.");

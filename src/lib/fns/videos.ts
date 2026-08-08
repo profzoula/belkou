@@ -1,10 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getCookie, getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
-import {
-  ADMIN_COOKIE_NAME,
-  getAdminFromRequestSources,
-} from "@/lib/admin-auth";
+import { ADMIN_COOKIE_NAME, getAdminFromRequestSources } from "@/lib/admin-auth";
 import type { VideoRecord } from "@/lib/videos";
 import { formatVideoUploadMaxLabel, VIDEO_UPLOAD_MAX_BYTES } from "@/lib/video-upload-limits";
 
@@ -63,7 +60,8 @@ export const adminUploadVideo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { createVideoRecord, listVideoRecords, updateVideoRecord } = await import("@/server/videos");
+    const { createVideoRecord, listVideoRecords, updateVideoRecord } =
+      await import("@/server/videos");
     const { createSourceVideoUploadUrl } = await import("@/server/video-storage");
 
     const contentType = data.contentType.trim().toLowerCase();
@@ -192,7 +190,8 @@ export const getLessonVideoPlayback = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { getResolvedCourseBySlug } = await import("@/server/site-content");
     const { getLessonById, getLessonVideoId } = await import("@/lib/courses");
-    const { hasPaidAccessToCourse, pickRegistrationForCourse } = await import("@/lib/course-access");
+    const { hasPaidAccessToCourse, pickRegistrationForCourse } =
+      await import("@/lib/course-access");
     const { getUserFromAccessToken } = await import("@/server/supabase-auth");
     const { listRegistrationsByEmail } = await import("@/server/db");
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
@@ -252,7 +251,8 @@ export const getLessonVimeoPlayback = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { getResolvedCourseBySlug } = await import("@/server/site-content");
     const { getLessonById, getLessonVimeoUrl } = await import("@/lib/courses");
-    const { hasPaidAccessToCourse, pickRegistrationForCourse } = await import("@/lib/course-access");
+    const { hasPaidAccessToCourse, pickRegistrationForCourse } =
+      await import("@/lib/course-access");
     const { getUserFromAccessToken } = await import("@/server/supabase-auth");
     const { listRegistrationsByEmail } = await import("@/server/db");
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");

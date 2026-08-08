@@ -6,7 +6,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -252,7 +258,8 @@ export function AdminServicesTab() {
             <div>
               <h2 className="font-display text-xl font-bold">Modifier le service</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Slug : <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{selected.slug}</code>
+                Slug :{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{selected.slug}</code>
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -262,7 +269,9 @@ export function AdminServicesTab() {
               <Switch
                 id="published"
                 checked={draft.published}
-                onCheckedChange={(published) => setDraft((current) => (current ? { ...current, published } : current))}
+                onCheckedChange={(published) =>
+                  setDraft((current) => (current ? { ...current, published } : current))
+                }
               />
             </div>
           </div>
@@ -274,7 +283,11 @@ export function AdminServicesTab() {
                 <Input
                   id="title"
                   value={draft.title}
-                  onChange={(event) => setDraft((current) => (current ? { ...current, title: event.target.value } : current))}
+                  onChange={(event) =>
+                    setDraft((current) =>
+                      current ? { ...current, title: event.target.value } : current,
+                    )
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -284,7 +297,9 @@ export function AdminServicesTab() {
                   rows={4}
                   value={draft.description}
                   onChange={(event) =>
-                    setDraft((current) => (current ? { ...current, description: event.target.value } : current))
+                    setDraft((current) =>
+                      current ? { ...current, description: event.target.value } : current,
+                    )
                   }
                 />
               </div>
@@ -295,7 +310,9 @@ export function AdminServicesTab() {
                     id="priceLabel"
                     value={draft.priceLabel}
                     onChange={(event) =>
-                      setDraft((current) => (current ? { ...current, priceLabel: event.target.value } : current))
+                      setDraft((current) =>
+                        current ? { ...current, priceLabel: event.target.value } : current,
+                      )
                     }
                   />
                 </div>
@@ -305,7 +322,9 @@ export function AdminServicesTab() {
                     id="provider"
                     value={draft.provider}
                     onChange={(event) =>
-                      setDraft((current) => (current ? { ...current, provider: event.target.value } : current))
+                      setDraft((current) =>
+                        current ? { ...current, provider: event.target.value } : current,
+                      )
                     }
                   />
                 </div>
@@ -321,7 +340,9 @@ export function AdminServicesTab() {
                     step={0.1}
                     value={draft.rating}
                     onChange={(event) =>
-                      setDraft((current) => (current ? { ...current, rating: event.target.value } : current))
+                      setDraft((current) =>
+                        current ? { ...current, rating: event.target.value } : current,
+                      )
                     }
                   />
                 </div>
@@ -333,7 +354,9 @@ export function AdminServicesTab() {
                     min={0}
                     value={draft.ratingsCount}
                     onChange={(event) =>
-                      setDraft((current) => (current ? { ...current, ratingsCount: event.target.value } : current))
+                      setDraft((current) =>
+                        current ? { ...current, ratingsCount: event.target.value } : current,
+                      )
                     }
                   />
                 </div>
@@ -347,7 +370,9 @@ export function AdminServicesTab() {
                   value={draft.iconKey}
                   onValueChange={(value) =>
                     setDraft((current) =>
-                      current ? { ...current, iconKey: value as StoredService["iconKey"] } : current,
+                      current
+                        ? { ...current, iconKey: value as StoredService["iconKey"] }
+                        : current,
                     )
                   }
                 >
@@ -367,7 +392,9 @@ export function AdminServicesTab() {
                 <Label>Dégradé (classes Tailwind)</Label>
                 <Select
                   value={draft.gradient}
-                  onValueChange={(value) => setDraft((current) => (current ? { ...current, gradient: value } : current))}
+                  onValueChange={(value) =>
+                    setDraft((current) => (current ? { ...current, gradient: value } : current))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -394,7 +421,9 @@ export function AdminServicesTab() {
                 <Switch
                   id="premium"
                   checked={draft.premium}
-                  onCheckedChange={(premium) => setDraft((current) => (current ? { ...current, premium } : current))}
+                  onCheckedChange={(premium) =>
+                    setDraft((current) => (current ? { ...current, premium } : current))
+                  }
                 />
                 <Label htmlFor="premium">Badge Premium</Label>
               </div>
@@ -405,7 +434,9 @@ export function AdminServicesTab() {
                   type="number"
                   value={draft.sortOrder}
                   onChange={(event) =>
-                    setDraft((current) => (current ? { ...current, sortOrder: event.target.value } : current))
+                    setDraft((current) =>
+                      current ? { ...current, sortOrder: event.target.value } : current,
+                    )
                   }
                 />
               </div>
@@ -415,7 +446,9 @@ export function AdminServicesTab() {
                   value={draft.actionType}
                   onValueChange={(value) =>
                     setDraft((current) =>
-                      current ? { ...current, actionType: value as StoredService["actionType"] } : current,
+                      current
+                        ? { ...current, actionType: value as StoredService["actionType"] }
+                        : current,
                     )
                   }
                 >
@@ -437,7 +470,9 @@ export function AdminServicesTab() {
                       placeholder="/courses"
                       value={draft.linkHref}
                       onChange={(event) =>
-                        setDraft((current) => (current ? { ...current, linkHref: event.target.value } : current))
+                        setDraft((current) =>
+                          current ? { ...current, linkHref: event.target.value } : current,
+                        )
                       }
                     />
                   </div>
@@ -447,7 +482,9 @@ export function AdminServicesTab() {
                       id="linkLabel"
                       value={draft.linkLabel}
                       onChange={(event) =>
-                        setDraft((current) => (current ? { ...current, linkLabel: event.target.value } : current))
+                        setDraft((current) =>
+                          current ? { ...current, linkLabel: event.target.value } : current,
+                        )
                       }
                     />
                   </div>
@@ -463,7 +500,9 @@ export function AdminServicesTab() {
               rows={6}
               value={draft.deliverablesText}
               onChange={(event) =>
-                setDraft((current) => (current ? { ...current, deliverablesText: event.target.value } : current))
+                setDraft((current) =>
+                  current ? { ...current, deliverablesText: event.target.value } : current,
+                )
               }
             />
           </div>
@@ -471,7 +510,11 @@ export function AdminServicesTab() {
           <div className="mt-6 overflow-hidden rounded-xl border border-border">
             <div className={cn("relative aspect-[16/10] bg-gradient-to-br", draft.gradient)}>
               {draft.imageUrl ? (
-                <img src={draft.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <img
+                  src={draft.imageUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               ) : IconPreview ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <IconPreview className="h-16 w-16 text-white/25" />
@@ -531,98 +574,116 @@ export function AdminServicesTab() {
         <AdminServiceBookingsPanel onCountsChange={setNewBookingsCount} />
       ) : (
         <>
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-        <h2 className="text-sm font-semibold">Nouveau service</h2>
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-          <Input
-            placeholder="Titre du service"
-            value={newTitle}
-            onChange={(event) => setNewTitle(event.target.value)}
-            className="sm:flex-1"
-          />
-          <Input
-            placeholder="Slug (optionnel)"
-            value={newSlug}
-            onChange={(event) => setNewSlug(event.target.value)}
-            className="sm:w-48"
-          />
-          <Button onClick={handleCreate} disabled={creating}>
-            <Plus className="h-4 w-4" />
-            {creating ? "Création…" : "Ajouter"}
-          </Button>
-        </div>
-      </div>
+          <div className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+            <h2 className="text-sm font-semibold">Nouveau service</h2>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+              <Input
+                placeholder="Titre du service"
+                value={newTitle}
+                onChange={(event) => setNewTitle(event.target.value)}
+                className="sm:flex-1"
+              />
+              <Input
+                placeholder="Slug (optionnel)"
+                value={newSlug}
+                onChange={(event) => setNewSlug(event.target.value)}
+                className="sm:w-48"
+              />
+              <Button onClick={handleCreate} disabled={creating}>
+                <Plus className="h-4 w-4" />
+                {creating ? "Création…" : "Ajouter"}
+              </Button>
+            </div>
+          </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher un service…"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          className="pl-9"
-        />
-      </div>
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un service…"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="pl-9"
+            />
+          </div>
 
-      {loading ? (
-        <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
-          Chargement…
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
-          Aucun service trouvé.
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((service) => {
-            const Icon = SERVICE_ICON_OPTIONS.find((item) => item.key === service.iconKey)?.icon;
-            return (
-              <article
-                key={service.slug}
-                className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-              >
-                <div className={cn("relative aspect-[16/10] bg-gradient-to-br", service.gradient)}>
-                  {service.imageUrl ? (
-                    <img src={service.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-                  ) : Icon ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Icon className="h-12 w-12 text-white/25" />
-                    </div>
-                  ) : null}
-                  <span
-                    className={cn(
-                      "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
-                      service.published ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground",
-                    )}
+          {loading ? (
+            <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+              Chargement…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm">
+              Aucun service trouvé.
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((service) => {
+                const Icon = SERVICE_ICON_OPTIONS.find(
+                  (item) => item.key === service.iconKey,
+                )?.icon;
+                return (
+                  <article
+                    key={service.slug}
+                    className="flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm"
                   >
-                    {service.published ? "Publié" : "Masqué"}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-4">
-                  <h3 className="font-display font-bold">{service.title}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{service.description}</p>
-                  <p className="mt-2 text-sm font-semibold">{service.priceLabel}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {service.actionType === "link" ? "Lien" : "Rendez-vous"} · ordre {service.sortOrder}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(service.slug)}>
-                      Modifier
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      disabled={togglingSlug === service.slug}
-                      onClick={() => handleTogglePublished(service.slug, !service.published)}
+                    <div
+                      className={cn("relative aspect-[16/10] bg-gradient-to-br", service.gradient)}
                     >
-                      {service.published ? "Masquer" : "Publier"}
-                    </Button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                      {service.imageUrl ? (
+                        <img
+                          src={service.imageUrl}
+                          alt=""
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : Icon ? (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Icon className="h-12 w-12 text-white/25" />
+                        </div>
+                      ) : null}
+                      <span
+                        className={cn(
+                          "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
+                          service.published
+                            ? "bg-success text-success-foreground"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {service.published ? "Publié" : "Masqué"}
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
+                      <h3 className="font-display font-bold">{service.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                        {service.description}
+                      </p>
+                      <p className="mt-2 text-sm font-semibold">{service.priceLabel}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {service.actionType === "link" ? "Lien" : "Rendez-vous"} · ordre{" "}
+                        {service.sortOrder}
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => openEdit(service.slug)}
+                        >
+                          Modifier
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={togglingSlug === service.slug}
+                          onClick={() => handleTogglePublished(service.slug, !service.published)}
+                        >
+                          {service.published ? "Masquer" : "Publier"}
+                        </Button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
     </div>

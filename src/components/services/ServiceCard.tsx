@@ -14,9 +14,19 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md">
-      <div className={cn("relative aspect-[16/10] overflow-hidden bg-gradient-to-br", service.gradient)}>
+      <div
+        className={cn(
+          "relative aspect-[16/10] overflow-hidden bg-gradient-to-br",
+          service.gradient,
+        )}
+      >
         {service.imageUrl ? (
-          <img src={service.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <img
+            src={service.imageUrl}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Icon className="h-16 w-16 text-white/25" aria-hidden />
@@ -33,7 +43,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <h3 className="font-display text-lg font-semibold leading-snug">{service.title}</h3>
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{service.description}</p>
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+          {service.description}
+        </p>
         <p className="mt-3 text-xs text-muted-foreground">{service.provider}</p>
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">

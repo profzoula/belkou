@@ -119,7 +119,10 @@ function DashboardPage() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main id="main-content" className="site-container site-page-top max-w-lg pb-12 text-center sm:pb-16">
+        <main
+          id="main-content"
+          className="site-container site-page-top max-w-lg pb-12 text-center sm:pb-16"
+        >
           <p className="text-muted-foreground">Authentification Supabase non configurée.</p>
         </main>
         <Footer />
@@ -142,7 +145,9 @@ function DashboardPage() {
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container site-page-top pb-10 pt-8 sm:pb-12">
             <FadeIn>
-              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Espace étudiant</p>
+              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+                Espace étudiant
+              </p>
               <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 Bonjour, {name}
               </h1>
@@ -182,7 +187,9 @@ function DashboardPage() {
                   className="rounded-2xl border border-border/80 bg-card/80 px-4 py-4 shadow-sm backdrop-blur"
                 >
                   <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
-                  <p className="mt-1 font-display text-2xl font-semibold text-foreground">{item.value}</p>
+                  <p className="mt-1 font-display text-2xl font-semibold text-foreground">
+                    {item.value}
+                  </p>
                 </div>
               ))}
             </FadeIn>

@@ -64,7 +64,9 @@ export const submitCourseReview = createServerFn({ method: "POST" })
     if (!course) throw new Error("Cours introuvable");
 
     const progressRows = await listLessonProgress(user.email, data.courseSlug);
-    const completedLessonIds = progressRows.filter((row) => row.completed_at).map((row) => row.lesson_id);
+    const completedLessonIds = progressRows
+      .filter((row) => row.completed_at)
+      .map((row) => row.lesson_id);
     const progressPercent = computeCourseProgressPercent(course, completedLessonIds);
     if (progressPercent < 5) {
       throw new Error("Terminez au moins une partie du cours avant de laisser un avis.");

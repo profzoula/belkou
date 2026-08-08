@@ -53,7 +53,9 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
 
   const progressSlugs = await listDistinctCourseSlugsForEmail(email);
   for (const slug of progressSlugs) {
-    await ensureFreeCourseEnrollment(db, { email, courseSlug: slug, fullName }).catch(() => undefined);
+    await ensureFreeCourseEnrollment(db, { email, courseSlug: slug, fullName }).catch(
+      () => undefined,
+    );
   }
 
   // Do not block dashboard rendering on Stripe API calls.
@@ -96,7 +98,8 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
         id: registration.id,
         payment_status: registration.payment_status,
         courseSlug: slug,
-        courseTitle: slug === LEGACY_COURSE_SLUG ? "Apps IA avec Cursor & Claude Code" : "Cours BelKou",
+        courseTitle:
+          slug === LEGACY_COURSE_SLUG ? "Apps IA avec Cursor & Claude Code" : "Cours BelKou",
         instructor: "BelKou",
         thumbnailGradient: "from-primary/80 to-primary",
         contentLive: false,
@@ -123,7 +126,8 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
       contentLive: isCourseContentLive(course),
       progressPercent: computeCourseProgressPercent(course, completedLessonIds),
       purchasedAt: registration.created_at,
-      welcomeLessonId: getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
+      welcomeLessonId:
+        getFirstPreviewVideoLesson(course)?.id ?? getWelcomePreviewLesson(course)?.id,
       continueLessonId: getResumeLesson(course, { completedLessonIds, lastLessonId })?.id,
     });
   }

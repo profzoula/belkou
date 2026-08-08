@@ -135,7 +135,10 @@ export async function uploadSourceVideo(params: {
 
   if (error) {
     if (error.message.includes("Bucket not found")) {
-      return { ok: false, reason: "Bucket course-videos manquant — exécutez supabase/videos_storage.sql" };
+      return {
+        ok: false,
+        reason: "Bucket course-videos manquant — exécutez supabase/videos_storage.sql",
+      };
     }
     return { ok: false, reason: error.message };
   }
@@ -183,7 +186,10 @@ export async function createSourceVideoUploadUrl(params: {
 
   if (error || !data?.signedUrl || !data.token) {
     if (error?.message.includes("Bucket not found")) {
-      return { ok: false, reason: "Bucket course-videos manquant — exécutez supabase/videos_storage.sql" };
+      return {
+        ok: false,
+        reason: "Bucket course-videos manquant — exécutez supabase/videos_storage.sql",
+      };
     }
     return { ok: false, reason: error?.message ?? "URL d'upload introuvable" };
   }

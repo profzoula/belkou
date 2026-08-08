@@ -14,7 +14,11 @@ import {
   MessageCircle,
   UserPlus,
 } from "lucide-react";
-import { getRegistrationStatus, verifyStripeSession, getSuccessPageContext } from "@/lib/fns/register";
+import {
+  getRegistrationStatus,
+  verifyStripeSession,
+  getSuccessPageContext,
+} from "@/lib/fns/register";
 import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
 import { seoHead } from "@/lib/seo";
 import { useAuth } from "@/hooks/use-auth";
@@ -70,7 +74,8 @@ function ManualPaymentInfo() {
   if (!items.length) {
     return (
       <p className="text-sm text-muted-foreground">
-        Contactez-nous sur WhatsApp ou par email ({siteConfig.contactEmail}) pour les détails de paiement.
+        Contactez-nous sur WhatsApp ou par email ({siteConfig.contactEmail}) pour les détails de
+        paiement.
       </p>
     );
   }
@@ -132,8 +137,7 @@ function SuccessPage() {
   const planId = (status?.plan ?? plan)?.toLowerCase();
   const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
-  const handoff =
-    typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
+  const handoff = typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
   const registrationEmail =
     status?.email ??
     (handoff && handoff.registrationId === registrationId ? handoff.email : undefined);
@@ -168,7 +172,10 @@ function SuccessPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16 max-w-lg text-center">
+      <main
+        id="main-content"
+        className="site-container site-page-top pb-12 sm:pb-16 max-w-lg text-center"
+      >
         <div className="inline-grid place-items-center h-14 w-14 rounded-full bg-primary/10 text-primary mb-5">
           <CheckCircle2 className="h-7 w-7" />
         </div>
@@ -195,7 +202,8 @@ function SuccessPage() {
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
               <div className="font-semibold text-sm mb-2 text-amber-900">Étape importante</div>
               <p className="text-sm text-amber-900/90 mb-3">
-                Créez un compte ou connectez-vous avec <strong>{registrationEmail}</strong> pour accéder à vos cours.
+                Créez un compte ou connectez-vous avec <strong>{registrationEmail}</strong> pour
+                accéder à vos cours.
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Button asChild variant="hero" size="sm" className="flex-1">
@@ -216,8 +224,9 @@ function SuccessPage() {
 
           {isPaid && user && !emailMatchesUser && registrationEmail && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-              Vous êtes connecté en tant que <strong>{user.email}</strong>, mais l&apos;inscription utilise{" "}
-              <strong>{registrationEmail}</strong>. Connectez-vous avec le bon email pour voir vos cours.
+              Vous êtes connecté en tant que <strong>{user.email}</strong>, mais l&apos;inscription
+              utilise <strong>{registrationEmail}</strong>. Connectez-vous avec le bon email pour
+              voir vos cours.
             </div>
           )}
 

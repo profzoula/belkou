@@ -68,7 +68,13 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
           <Label htmlFor="name">Nom complet</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="name" name="name" required placeholder="Jean Pierre" className="pl-10 bg-muted/40" />
+            <Input
+              id="name"
+              name="name"
+              required
+              placeholder="Jean Pierre"
+              className="pl-10 bg-muted/40"
+            />
           </div>
         </div>
 
@@ -91,7 +97,14 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
           <Label htmlFor="phone">Numéro de téléphone</Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="phone" name="phone" type="tel" required placeholder="+1 (555) 123-4567" className="pl-10 bg-muted/40" />
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              placeholder="+1 (555) 123-4567"
+              className="pl-10 bg-muted/40"
+            />
           </div>
         </div>
 
@@ -100,14 +113,26 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
             <Label htmlFor="preferredDate">Date préférée</Label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input id="preferredDate" name="preferredDate" type="date" required className="pl-10 bg-muted/40" />
+              <Input
+                id="preferredDate"
+                name="preferredDate"
+                type="date"
+                required
+                className="pl-10 bg-muted/40"
+              />
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="preferredTime">Heure préférée</Label>
             <div className="relative">
               <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input id="preferredTime" name="preferredTime" type="time" required className="pl-10 bg-muted/40" />
+              <Input
+                id="preferredTime"
+                name="preferredTime"
+                type="time"
+                required
+                className="pl-10 bg-muted/40"
+              />
             </div>
           </div>
         </div>
@@ -126,7 +151,13 @@ export function ServiceBookingForm({ service }: ServiceBookingFormProps) {
           </div>
         </div>
 
-        <Button type="submit" variant="hero" size="lg" className="w-full rounded-lg" disabled={submitting}>
+        <Button
+          type="submit"
+          variant="hero"
+          size="lg"
+          className="w-full rounded-lg"
+          disabled={submitting}
+        >
           {submitting ? "Envoi..." : "Confirmer le rendez-vous"}
         </Button>
 

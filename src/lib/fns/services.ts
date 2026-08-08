@@ -7,11 +7,13 @@ import { siteConfig } from "@/lib/site-config";
 import { sendEmail, serviceBookingEmail } from "@/server/email";
 import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 
-export const getPublicServices = createServerFn({ method: "GET" }).handler(async (): Promise<SerializableService[]> => {
-  const { getPublishedServices } = await import("@/server/site-content");
-  const services = await getPublishedServices();
-  return services.map(storedServiceToSerializable);
-});
+export const getPublicServices = createServerFn({ method: "GET" }).handler(
+  async (): Promise<SerializableService[]> => {
+    const { getPublishedServices } = await import("@/server/site-content");
+    const services = await getPublishedServices();
+    return services.map(storedServiceToSerializable);
+  },
+);
 
 export const getPublicServiceBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => z.object({ slug: z.string().min(1) }).parse(data))

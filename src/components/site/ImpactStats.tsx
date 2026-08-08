@@ -55,9 +55,7 @@ export function ImpactStats({ studentCount, courseCount, overlap = false }: Impa
         <div
           className={cn(
             "rounded-3xl border border-border/60 bg-card px-4 py-7 sm:px-6 md:px-10 md:py-9",
-            overlap
-              ? "shadow-[0_22px_60px_-18px_rgba(15,23,42,0.18)]"
-              : "shadow-sm",
+            overlap ? "shadow-[0_22px_60px_-18px_rgba(15,23,42,0.18)]" : "shadow-sm",
           )}
         >
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5 lg:gap-0">
@@ -71,7 +69,9 @@ export function ImpactStats({ studentCount, courseCount, overlap = false }: Impa
                 <p className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
                   {metric.value}
                 </p>
-                <p className="mt-2 max-w-[12rem] text-sm leading-snug text-muted-foreground">{metric.label}</p>
+                <p className="mt-2 max-w-[12rem] text-sm leading-snug text-muted-foreground">
+                  {metric.label}
+                </p>
               </div>
             ))}
           </div>

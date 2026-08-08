@@ -74,11 +74,7 @@ export const getCourseAccess = createServerFn({ method: "POST" })
     const registration = pickRegistrationForCourse(rows, data.courseSlug);
     const hasPaidAccess = hasPaidAccessToCourse(registration, data.courseSlug);
 
-    if (
-      registration &&
-      hasPaidAccess &&
-      !registration.course_slug?.trim()
-    ) {
+    if (registration && hasPaidAccess && !registration.course_slug?.trim()) {
       void updateRegistrationCourseAccess(db, registration.id, {
         course_slug: registrationCourseKey(data.courseSlug),
         payment_status: "paid",

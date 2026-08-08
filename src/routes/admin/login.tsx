@@ -53,7 +53,10 @@ function AdminLoginPage() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(0_70_213_/_0.12),transparent_55%)]"
       />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-70" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-70"
+      />
 
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
@@ -106,7 +109,12 @@ function AdminLoginPage() {
               required
             />
           </div>
-          <Button type="submit" variant="hero" className="w-full rounded-xl shadow-primary" disabled={loading}>
+          <Button
+            type="submit"
+            variant="hero"
+            className="w-full rounded-xl shadow-primary"
+            disabled={loading}
+          >
             {loading ? "Connexion…" : "Se connecter"}
             <ArrowRight className="size-4" aria-hidden />
           </Button>
@@ -117,7 +125,10 @@ function AdminLoginPage() {
         </form>
 
         <p className="mt-6 text-center">
-          <Link to="/" className="text-sm font-medium text-muted-foreground transition hover:text-foreground">
+          <Link
+            to="/"
+            className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          >
             ← Retour au site
           </Link>
         </p>

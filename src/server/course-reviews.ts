@@ -18,12 +18,18 @@ async function readReviewsStore(): Promise<CourseReviewsStore> {
   const sb = getSupabaseAdmin();
   if (!sb) return {};
 
-  const { data, error } = await sb.from("site_content").select("value").eq("key", COURSE_REVIEWS_KEY).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", COURSE_REVIEWS_KEY)
+    .maybeSingle();
   if (error || !data?.value) return {};
   return (data.value as CourseReviewsStore) ?? {};
 }
 
-async function writeReviewsStore(store: CourseReviewsStore): Promise<{ ok: boolean; reason?: string }> {
+async function writeReviewsStore(
+  store: CourseReviewsStore,
+): Promise<{ ok: boolean; reason?: string }> {
   const sb = getSupabaseAdmin();
   if (!sb) {
     return { ok: false, reason: "Supabase non configuré" };

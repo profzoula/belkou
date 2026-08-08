@@ -2,19 +2,15 @@ import type { ReactNode } from "react";
 import { Check, ClipboardList, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function CourseTocPartHeader({
-  partNumber,
-  title,
-}: {
-  partNumber: number;
-  title: string;
-}) {
+export function CourseTocPartHeader({ partNumber, title }: { partNumber: number; title: string }) {
   return (
     <div className="course-toc-part-header border-y border-border/70 bg-slate-100/90 px-4 py-3 dark:bg-muted/35">
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-muted-foreground">
         Partie {partNumber}
       </p>
-      <p className="mt-0.5 text-sm font-bold leading-snug text-slate-900 dark:text-foreground">{title}</p>
+      <p className="mt-0.5 text-sm font-bold leading-snug text-slate-900 dark:text-foreground">
+        {title}
+      </p>
     </div>
   );
 }
@@ -129,10 +125,7 @@ export function CourseTocItemShell({
   return (
     <li className="course-toc-item relative pl-3">
       {!isLast ? (
-        <span
-          aria-hidden
-          className="absolute left-[26px] top-8 bottom-0 w-px bg-border/90"
-        />
+        <span aria-hidden className="absolute left-[26px] top-8 bottom-0 w-px bg-border/90" />
       ) : null}
       {children}
     </li>

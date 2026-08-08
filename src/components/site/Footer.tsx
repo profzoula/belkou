@@ -75,7 +75,11 @@ function FooterNavLink({ item }: { item: FooterLink }) {
 
   if (item.href.startsWith("mailto:") || item.external) {
     return (
-      <a href={item.href} className={className} {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+      <a
+        href={item.href}
+        className={className}
+        {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {item.name}
       </a>
     );
@@ -199,7 +203,9 @@ export function Footer() {
           <div className="max-w-full flex-1 lg:max-w-[400px]">
             <Link to="/" className="mb-6 inline-flex items-center gap-3">
               <SiteLogo className="h-10 w-10" alt={siteConfig.name} />
-              <span className="font-display text-lg font-bold text-foreground">{siteConfig.name}</span>
+              <span className="font-display text-lg font-bold text-foreground">
+                {siteConfig.name}
+              </span>
             </Link>
             <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
               {siteConfig.tagline}. Formations vidéo en français pour créer des apps IA, des SaaS et
@@ -224,7 +230,11 @@ export function Footer() {
               >
                 <WhatsAppIcon />
               </a>
-              <a href={`mailto:${siteConfig.contactEmail}`} className={iconShell} aria-label="Email BelKou">
+              <a
+                href={`mailto:${siteConfig.contactEmail}`}
+                className={iconShell}
+                aria-label="Email BelKou"
+              >
                 <Mail className="h-4 w-4" strokeWidth={1.75} />
               </a>
             </div>

@@ -1,5 +1,9 @@
 import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
-import { getCourseStudentDisplayBase, getCourseDisplayLanguage, DEFAULT_COURSE_LANGUAGE } from "@/lib/courses";
+import {
+  getCourseStudentDisplayBase,
+  getCourseDisplayLanguage,
+  DEFAULT_COURSE_LANGUAGE,
+} from "@/lib/courses";
 import { getCourseIcon } from "@/lib/course-icons";
 import { siteConfig } from "@/lib/site-config";
 
@@ -40,7 +44,12 @@ export function storedCourseToCourse(stored: StoredCourse): Course {
 export function patchLessonInStoredCourse(
   course: StoredCourse,
   lessonId: string,
-  patch: Partial<Pick<CourseLesson, "videoId" | "vimeoUrl" | "preview" | "title" | "duration" | "content" | "type">>,
+  patch: Partial<
+    Pick<
+      CourseLesson,
+      "videoId" | "vimeoUrl" | "preview" | "title" | "duration" | "content" | "type"
+    >
+  >,
 ): StoredCourse {
   return {
     ...course,
@@ -175,7 +184,10 @@ export function buildNewSection(title: string): CourseSection {
   };
 }
 
-export function addSectionToStoredCourse(course: StoredCourse, section: CourseSection): StoredCourse {
+export function addSectionToStoredCourse(
+  course: StoredCourse,
+  section: CourseSection,
+): StoredCourse {
   return {
     ...course,
     sections: [...course.sections, section],
@@ -207,9 +219,7 @@ export function reorderLessonsInStoredCourse(
   return {
     ...course,
     sections: course.sections.map((item) =>
-      item.id === sectionId
-        ? { ...item, lessons: lessonIds.map((id) => byId.get(id)!) }
-        : item,
+      item.id === sectionId ? { ...item, lessons: lessonIds.map((id) => byId.get(id)!) } : item,
     ),
   };
 }

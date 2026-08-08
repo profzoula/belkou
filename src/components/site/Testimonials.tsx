@@ -140,7 +140,10 @@ export function Testimonials() {
   const [paused, setPaused] = useState(false);
 
   return (
-    <section id="testimonials" className="site-section-anchor overflow-hidden py-16 sm:py-20 md:py-24">
+    <section
+      id="testimonials"
+      className="site-section-anchor overflow-hidden py-16 sm:py-20 md:py-24"
+    >
       <div className="site-container mb-8 sm:mb-10">
         <SectionHeader
           label="Témoignages"

@@ -198,7 +198,9 @@ export function RichTextEditor({
   };
 
   const insertCollapsible = () => {
-    const title = window.prompt("Titre de la section repliable (ex. « Kisa yon Development Environment ye? »)");
+    const title = window.prompt(
+      "Titre de la section repliable (ex. « Kisa yon Development Environment ye? »)",
+    );
     if (!title?.trim()) return;
     insertHtml(
       `<details><summary>${escapeHtml(title.trim())}</summary><p>Écrivez le contenu de la section ici…</p></details>`,
@@ -225,7 +227,8 @@ export function RichTextEditor({
   const insertTemplate = () => {
     const editor = editorRef.current;
     const hasContent = Boolean(editor?.textContent?.trim());
-    if (hasContent && !window.confirm("Remplacer le contenu actuel par le modèle Session ?")) return;
+    if (hasContent && !window.confirm("Remplacer le contenu actuel par le modèle Session ?"))
+      return;
     if (editor) {
       editor.innerHTML = LESSON_SESSION_STARTER_HTML;
       emitChange();
@@ -267,13 +270,18 @@ export function RichTextEditor({
           const number = Number.parseInt(num, 10);
           const title = Number.isFinite(number)
             ? readArticleSessionTitle(heading, number)
-            : heading.textContent?.trim() ?? "";
+            : (heading.textContent?.trim() ?? "");
           return `${num} — ${title}`;
         })
         .join("\n");
-      const picked = window.prompt(`Numéro de session à renommer:\n${summary}`, headings[0]?.getAttribute("data-lesson-session") ?? "1");
+      const picked = window.prompt(
+        `Numéro de session à renommer:\n${summary}`,
+        headings[0]?.getAttribute("data-lesson-session") ?? "1",
+      );
       if (!picked?.trim()) return;
-      target = headings.find((heading) => heading.getAttribute("data-lesson-session") === picked.trim()) ?? null;
+      target =
+        headings.find((heading) => heading.getAttribute("data-lesson-session") === picked.trim()) ??
+        null;
       if (!target) {
         window.alert("Session introuvable.");
         return;
@@ -297,7 +305,9 @@ export function RichTextEditor({
       ? Number.parseInt(sessionMatches[sessionMatches.length - 1][1], 10)
       : 1;
     const existingSubs = [
-      ...html.matchAll(new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi")),
+      ...html.matchAll(
+        new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi"),
+      ),
     ];
     const nextSub = existingSubs.length + 1;
     const label = `${sessionNum}.${nextSub}`;
@@ -311,8 +321,10 @@ export function RichTextEditor({
   const findQuizDataBlock = (heading: Element): HTMLElement | null => {
     let node = heading.nextElementSibling;
     while (node) {
-      if (node.matches("h2[data-lesson-session], h3[data-lesson-subsession], h3[data-lesson-quiz]")) break;
-      if (node.matches(".lesson-quiz-data-block, [data-lesson-quiz-data]")) return node as HTMLElement;
+      if (node.matches("h2[data-lesson-session], h3[data-lesson-subsession], h3[data-lesson-quiz]"))
+        break;
+      if (node.matches(".lesson-quiz-data-block, [data-lesson-quiz-data]"))
+        return node as HTMLElement;
       node = node.nextElementSibling;
     }
     return null;
@@ -363,7 +375,9 @@ export function RichTextEditor({
       ? Number.parseInt(sessionMatches[sessionMatches.length - 1][1], 10)
       : 1;
     const existingSubs = [
-      ...html.matchAll(new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi")),
+      ...html.matchAll(
+        new RegExp(`<h3[^>]*data-lesson-subsession[^>]*>\\s*${sessionNum}\\.(\\d+)`, "gi"),
+      ),
     ];
     const nextSub = existingSubs.length + 1;
     const label = `${sessionNum}.${nextSub}`;
@@ -382,9 +396,7 @@ export function RichTextEditor({
 
     let target = headings[headings.length - 1]!;
     if (headings.length > 1) {
-      const summary = headings
-        .map((heading) => heading.textContent?.trim() || "Quiz")
-        .join("\n");
+      const summary = headings.map((heading) => heading.textContent?.trim() || "Quiz").join("\n");
       const picked = window.prompt(`Quel quiz modifier ?\n${summary}`, headings.length.toString());
       if (!picked?.trim()) return;
       const index = Number.parseInt(picked.trim(), 10) - 1;
@@ -444,9 +456,21 @@ export function RichTextEditor({
             icon={<LayoutTemplate className="h-3.5 w-3.5" />}
             onClick={insertTemplate}
           />
-          <ToolbarPill label="Session" icon={<Heading2 className="h-3.5 w-3.5" />} onClick={insertSession} />
-          <ToolbarPill label="Nom" icon={<Pencil className="h-3.5 w-3.5" />} onClick={editSessionTitle} />
-          <ToolbarPill label="1.1" icon={<Heading3 className="h-3.5 w-3.5" />} onClick={insertSubSession} />
+          <ToolbarPill
+            label="Session"
+            icon={<Heading2 className="h-3.5 w-3.5" />}
+            onClick={insertSession}
+          />
+          <ToolbarPill
+            label="Nom"
+            icon={<Pencil className="h-3.5 w-3.5" />}
+            onClick={editSessionTitle}
+          />
+          <ToolbarPill
+            label="1.1"
+            icon={<Heading3 className="h-3.5 w-3.5" />}
+            onClick={insertSubSession}
+          />
           <ToolbarPill
             label="Quiz"
             icon={<ClipboardCheck className="h-3.5 w-3.5" />}
@@ -462,7 +486,11 @@ export function RichTextEditor({
             icon={<PanelBottomOpen className="h-3.5 w-3.5" />}
             onClick={insertCollapsible}
           />
-          <ToolbarPill label="Tableau" icon={<Table className="h-3.5 w-3.5" />} onClick={insertTable} />
+          <ToolbarPill
+            label="Tableau"
+            icon={<Table className="h-3.5 w-3.5" />}
+            onClick={insertTable}
+          />
           <ToolbarDivider />
           <ToolbarButton label="Gras" onClick={() => exec("bold")}>
             <Bold className="h-4 w-4" />
@@ -506,10 +534,12 @@ export function RichTextEditor({
         </div>
         <p className="text-[11px] leading-relaxed text-muted-foreground px-0.5">
           <strong className="text-foreground">Modèle</strong> = Session 1 + sous-sessions 1.1, 1.2 ·{" "}
-          <strong className="text-foreground">Session</strong> / <strong className="text-foreground">Nom</strong> pour
-          titrer ou renommer · <strong className="text-foreground">1.1</strong> pour ajouter des blocs ·{" "}
-          <strong className="text-foreground">Quiz</strong> + <strong className="text-foreground">Questions</strong>{" "}
-          pour créer ou modifier un QCM (N/N requis).
+          <strong className="text-foreground">Session</strong> /{" "}
+          <strong className="text-foreground">Nom</strong> pour titrer ou renommer ·{" "}
+          <strong className="text-foreground">1.1</strong> pour ajouter des blocs ·{" "}
+          <strong className="text-foreground">Quiz</strong> +{" "}
+          <strong className="text-foreground">Questions</strong> pour créer ou modifier un QCM (N/N
+          requis).
         </p>
       </div>
       <div

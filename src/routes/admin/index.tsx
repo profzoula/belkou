@@ -12,7 +12,11 @@ import { AdminSettingsTab } from "@/components/admin/AdminSettingsTab";
 import { AdminStudentsTab } from "@/components/admin/AdminStudentsTab";
 import { AdminVideosTab } from "@/components/admin/AdminVideosTab";
 import { adminLogout, getAdminOverview, refreshAdminSession } from "@/lib/fns/admin";
-import { clearAdminSessionToken, getAdminSessionToken, setAdminSessionToken } from "@/lib/admin-session";
+import {
+  clearAdminSessionToken,
+  getAdminSessionToken,
+  setAdminSessionToken,
+} from "@/lib/admin-session";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -32,7 +36,9 @@ function AdminDashboardPage() {
   const refreshSessionFn = useServerFn(refreshAdminSession);
   const [section, setSection] = useState<AdminSection>("overview");
   const [refreshKey, setRefreshKey] = useState(0);
-  const [overview, setOverview] = useState<Awaited<ReturnType<typeof getAdminOverview>> | null>(null);
+  const [overview, setOverview] = useState<Awaited<ReturnType<typeof getAdminOverview>> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

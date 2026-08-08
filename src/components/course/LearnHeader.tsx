@@ -55,7 +55,9 @@ export function LearnHeader({
         >
           <SiteLogo className="size-8 rounded-xl" alt="" />
           <div className="min-w-0">
-            <p className="truncate font-display text-sm font-semibold tracking-tight">{courseTitle}</p>
+            <p className="truncate font-display text-sm font-semibold tracking-tight">
+              {courseTitle}
+            </p>
             {hasPaidAccess ? (
               <p className="text-[11px] text-muted-foreground tabular-nums">
                 Progression {progressPercent}%

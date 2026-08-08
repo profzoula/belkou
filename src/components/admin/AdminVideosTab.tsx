@@ -15,7 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAdminCourses } from "@/lib/fns/admin";
-import { adminDeleteVideo, adminFinalizeVideoUpload, adminListVideos, adminUploadVideo } from "@/lib/fns/videos";
+import {
+  adminDeleteVideo,
+  adminFinalizeVideoUpload,
+  adminListVideos,
+  adminUploadVideo,
+} from "@/lib/fns/videos";
 import type { AdminCourse } from "@/lib/admin-courses";
 import {
   formatVideoDuration,
@@ -69,16 +74,15 @@ export function AdminVideosTab() {
 
   const selectedCourse = courses.find((course) => course.slug === courseSlug);
   const lessons = selectedCourse
-    ? selectedCourse.sections.flatMap((section) => section.lessons.filter((lesson) => lesson.type === "video"))
+    ? selectedCourse.sections.flatMap((section) =>
+        section.lessons.filter((lesson) => lesson.type === "video"),
+      )
     : [];
 
   const load = async () => {
     setLoading(true);
     try {
-      const [videoResult, courseResult] = await Promise.all([
-        listVideosFn(),
-        listCoursesFn(),
-      ]);
+      const [videoResult, courseResult] = await Promise.all([listVideosFn(), listCoursesFn()]);
       setVideos(videoResult.videos);
       setCourses(courseResult.courses);
     } catch (error) {
@@ -158,7 +162,10 @@ export function AdminVideosTab() {
       setUploadPhase("Terminé");
 
       toast.success("Vidéo uploadée — reliez-la dans Admin → Cours si besoin");
-      setVideos((current) => [result.video, ...current.filter((item) => item.id !== result.video.id)]);
+      setVideos((current) => [
+        result.video,
+        ...current.filter((item) => item.id !== result.video.id),
+      ]);
       setSelectedFile(null);
       setTitle("");
       setLessonId("");
@@ -296,7 +303,11 @@ export function AdminVideosTab() {
 
         <div className="mt-5 flex justify-end">
           <Button type="button" variant="hero" disabled={uploading} onClick={() => void upload()}>
-            {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+            {uploading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="mr-2 h-4 w-4" />
+            )}
             Upload
           </Button>
         </div>
@@ -318,12 +329,17 @@ export function AdminVideosTab() {
         ) : (
           <ul className="divide-y divide-border">
             {videos.map((video) => (
-              <li key={video.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <li
+                key={video.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
                 <div className="min-w-0">
                   <p className="font-medium">{video.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {video.filename} · {formatVideoSize(video.originalSize)}
-                    {video.durationSeconds ? ` · ${formatVideoDuration(video.durationSeconds)}` : ""}
+                    {video.durationSeconds
+                      ? ` · ${formatVideoDuration(video.durationSeconds)}`
+                      : ""}
                   </p>
                   {video.courseSlug ? (
                     <p className="text-xs text-muted-foreground">
@@ -331,7 +347,8 @@ export function AdminVideosTab() {
                       {video.lessonId ? ` · ${video.lessonId}` : ""}
                     </p>
                   ) : null}
-                  {(!video.storagePath?.trim() || video.status === "failed") && video.errorMessage ? (
+                  {(!video.storagePath?.trim() || video.status === "failed") &&
+                  video.errorMessage ? (
                     <p className="text-xs text-destructive">{video.errorMessage}</p>
                   ) : !video.storagePath?.trim() ? (
                     <p className="text-xs text-destructive">

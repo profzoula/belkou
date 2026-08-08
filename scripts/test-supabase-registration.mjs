@@ -62,7 +62,12 @@ const payload = {
 
 console.log("\n--- Insert test ---");
 const { error: insertErr } = await sb.from("registrations").insert(payload);
-console.log("insert error:", insertErr?.message ?? "none", insertErr?.details ?? "", insertErr?.hint ?? "");
+console.log(
+  "insert error:",
+  insertErr?.message ?? "none",
+  insertErr?.details ?? "",
+  insertErr?.hint ?? "",
+);
 
 if (!insertErr) {
   await sb.from("registrations").delete().eq("id", testId);

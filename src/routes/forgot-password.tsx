@@ -61,16 +61,20 @@ function ForgotPasswordPage() {
 
       {!isSupabaseConfigured ? (
         <p className="rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-brand-accent-foreground">
-          Authentification non configurée. Définissez les variables Supabase pour activer cette fonctionnalité.
+          Authentification non configurée. Définissez les variables Supabase pour activer cette
+          fonctionnalité.
         </p>
       ) : null}
 
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Mot de passe</p>
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+        Mot de passe
+      </p>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         Mot de passe oublié
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de passe.
+        Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de
+        passe.
       </p>
 
       {sent ? (
@@ -102,7 +106,12 @@ function ForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <Button type="submit" className="w-full" variant="hero" disabled={loading || !isSupabaseConfigured}>
+          <Button
+            type="submit"
+            className="w-full"
+            variant="hero"
+            disabled={loading || !isSupabaseConfigured}
+          >
             {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
           </Button>
         </form>

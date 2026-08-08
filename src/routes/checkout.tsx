@@ -33,11 +33,6 @@ function CheckoutRoute() {
   const { plan, course, ref } = Route.useSearch();
   const { course: initialCourse } = Route.useLoaderData();
   return (
-    <CheckoutPage
-      plan={plan}
-      courseSlug={course}
-      refCode={ref}
-      initialCourse={initialCourse}
-    />
+    <CheckoutPage plan={plan} courseSlug={course} refCode={ref} initialCourse={initialCourse} />
   );
 }

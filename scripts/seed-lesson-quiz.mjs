@@ -35,7 +35,10 @@ function loadDevVars() {
 }
 
 function encodeLessonQuizForStorage(quiz) {
-  return Buffer.from(JSON.stringify({ ...quiz, passScore: quiz.questions.length }), "utf8").toString("base64");
+  return Buffer.from(
+    JSON.stringify({ ...quiz, passScore: quiz.questions.length }),
+    "utf8",
+  ).toString("base64");
 }
 
 function buildLessonQuizDataBlockHtml(quiz) {
@@ -50,7 +53,8 @@ function buildQuizSubSessionHtml(quiz) {
 
 function mergeQuizIntoContent(content, quiz) {
   const blockHtml = buildLessonQuizDataBlockHtml(quiz);
-  const quizBlockRe = /<div\b[^>]*class="[^"]*lesson-quiz-data-block[^"]*"[^>]*>[\s\S]*?<\/div>(?:\s*<p\b[^>]*class="[^"]*lesson-quiz-data-label[^"]*"[^>]*>[\s\S]*?<\/p>)?/i;
+  const quizBlockRe =
+    /<div\b[^>]*class="[^"]*lesson-quiz-data-block[^"]*"[^>]*>[\s\S]*?<\/div>(?:\s*<p\b[^>]*class="[^"]*lesson-quiz-data-label[^"]*"[^>]*>[\s\S]*?<\/p>)?/i;
 
   if (quizBlockRe.test(content)) {
     return {
@@ -61,7 +65,10 @@ function mergeQuizIntoContent(content, quiz) {
 
   if (/<h3\b[^>]*\bdata-lesson-quiz\b/i.test(content)) {
     const headingRe = /<h3\b[^>]*\bdata-lesson-quiz\b[^>]*>[\s\S]*?<\/h3>/i;
-    const afterHeading = content.replace(headingRe, `<h3 data-lesson-subsession data-lesson-quiz>${QUIZ_HEADING}</h3>`);
+    const afterHeading = content.replace(
+      headingRe,
+      `<h3 data-lesson-subsession data-lesson-quiz>${QUIZ_HEADING}</h3>`,
+    );
     return {
       content: afterHeading.includes("lesson-quiz-data-block")
         ? afterHeading.replace(quizBlockRe, blockHtml)
@@ -127,7 +134,9 @@ function patchAddedLesson(courseOverride, lessonId, patch) {
 
 function getLessonContent(courseOverride, target) {
   if (target.kind === "addedLessons") {
-    const item = (courseOverride.addedLessons ?? []).find((entry) => entry.lesson.id === target.lessonId);
+    const item = (courseOverride.addedLessons ?? []).find(
+      (entry) => entry.lesson.id === target.lessonId,
+    );
     return item?.lesson?.content ?? "";
   }
   return courseOverride.lessons?.[target.lessonId]?.content ?? "";
@@ -148,7 +157,11 @@ function setLessonContent(courseOverride, target, content) {
 }
 
 async function main() {
-  const { data, error } = await sb.from("site_content").select("value").eq("key", OVERRIDES_KEY).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", OVERRIDES_KEY)
+    .maybeSingle();
   if (error) {
     console.error("Failed to read site_content:", error.message);
     process.exit(1);

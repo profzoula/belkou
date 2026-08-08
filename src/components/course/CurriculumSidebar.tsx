@@ -153,8 +153,8 @@ export function CurriculumSidebar({
                 </p>
               </div>
               <p className="pb-1 text-right text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{completedCount}</span> / {totalLessons}{" "}
-                leçons
+                <span className="font-semibold text-foreground">{completedCount}</span> /{" "}
+                {totalLessons} leçons
               </p>
             </div>
             <div
@@ -174,8 +174,8 @@ export function CurriculumSidebar({
             </div>
             {remainingMinutes > 0 && completedCount < totalLessons ? (
               <p className="mt-2.5 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                <Clock3 className="size-3.5" aria-hidden />
-                ~{formatCourseDurationLabel(remainingMinutes)} restantes
+                <Clock3 className="size-3.5" aria-hidden />~
+                {formatCourseDurationLabel(remainingMinutes)} restantes
               </p>
             ) : null}
           </div>
@@ -220,9 +220,7 @@ export function CurriculumSidebar({
 
       <div
         className={cn(
-          variant === "sidebar"
-            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain"
-            : "min-h-0",
+          variant === "sidebar" ? "min-h-0 flex-1 overflow-y-auto overscroll-contain" : "min-h-0",
         )}
       >
         {course.sections.map((section, sectionIndex) => {

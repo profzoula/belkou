@@ -68,7 +68,11 @@ const content = stripQuiz(readFileSync(ARTICLE_FILE, "utf8"));
 const sb = createClient(url, key);
 
 async function main() {
-  const { data, error } = await sb.from("site_content").select("value").eq("key", OVERRIDES_KEY).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", OVERRIDES_KEY)
+    .maybeSingle();
   if (error) {
     console.error("Failed to read site_content:", error.message);
     process.exit(1);
@@ -84,7 +88,9 @@ async function main() {
       String(entry.lesson?.title ?? "").toLowerCase() === LESSON_TITLE.toLowerCase(),
   );
 
-  const promptEngineering = addedLessons.find((entry) => entry.lesson?.id === PROMPT_ENGINEERING_ID);
+  const promptEngineering = addedLessons.find(
+    (entry) => entry.lesson?.id === PROMPT_ENGINEERING_ID,
+  );
   const sectionId = existing?.sectionId ?? promptEngineering?.sectionId ?? "build";
 
   if (!existing) {

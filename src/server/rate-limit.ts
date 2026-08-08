@@ -31,11 +31,7 @@ function cleanup(windowMs: number) {
  * @param windowMs - Window duration in milliseconds
  * @returns true if the request is allowed, false if rate-limited
  */
-export function checkRateLimit(
-  key: string,
-  limit: number,
-  windowMs: number,
-): boolean {
+export function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   cleanup(windowMs);
 
   const now = Date.now();
@@ -62,7 +58,7 @@ export function checkRateLimit(
  */
 export const RATE_LIMITS = {
   register: { limit: 10, windowMs: 10 * 60 * 1000 }, // 10 per 10 minutes
-  login: { limit: 5, windowMs: 60 * 1000 },          // 5 per minute
-  adminLogin: { limit: 5, windowMs: 60 * 1000 },     // 5 per minute
+  login: { limit: 5, windowMs: 60 * 1000 }, // 5 per minute
+  adminLogin: { limit: 5, windowMs: 60 * 1000 }, // 5 per minute
   forgotPassword: { limit: 3, windowMs: 5 * 60 * 1000 }, // 3 per 5 minutes
 } as const;

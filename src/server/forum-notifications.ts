@@ -148,10 +148,7 @@ export async function notifyForumReply(params: {
   postTitle: string;
   participantUserIds: string[];
 }): Promise<void> {
-  const recipientSet = new Set<string>([
-    params.postAuthorUserId,
-    ...params.participantUserIds,
-  ]);
+  const recipientSet = new Set<string>([params.postAuthorUserId, ...params.participantUserIds]);
   recipientSet.delete(params.authorUserId);
 
   if (!recipientSet.size) return;

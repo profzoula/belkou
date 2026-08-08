@@ -63,7 +63,8 @@ export async function uploadCourseThumbnail(params: {
     if (error.message.includes("Bucket not found") || error.message.includes("does not exist")) {
       return {
         ok: false,
-        reason: "Bucket course-thumbnails manquant — exécutez supabase/course_thumbnails_storage.sql",
+        reason:
+          "Bucket course-thumbnails manquant — exécutez supabase/course_thumbnails_storage.sql",
       };
     }
     console.error("[BelKou] thumbnail upload:", error.message);

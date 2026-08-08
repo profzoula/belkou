@@ -26,7 +26,10 @@ export function LessonContextHeader({
 }: LessonContextHeaderProps) {
   return (
     <div className={cn("space-y-3", className)}>
-      <nav aria-label="Fil d'Ariane" className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+      <nav
+        aria-label="Fil d'Ariane"
+        className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
+      >
         <span className="truncate">{courseTitle}</span>
         {moduleTitle ? (
           <>

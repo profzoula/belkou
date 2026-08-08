@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  Check,
-  CreditCard,
-  Globe,
-  Lock,
-  ShieldCheck,
-} from "lucide-react";
+import { Check, CreditCard, Globe, Lock, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
@@ -199,9 +199,7 @@ export function CheckoutPage({
     }
   };
 
-  const productTitle =
-    course?.title ??
-    `Formation BelKou ${plan.name} — Apps IA & SaaS`;
+  const productTitle = course?.title ?? `Formation BelKou ${plan.name} — Apps IA & SaaS`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
@@ -229,7 +227,10 @@ export function CheckoutPage({
           </p>
         </div>
 
-        <form onSubmit={submit} className="lg:grid lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start lg:gap-8 xl:gap-10">
+        <form
+          onSubmit={submit}
+          className="lg:grid lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start lg:gap-8 xl:gap-10"
+        >
           <div className="min-w-0 space-y-6">
             {/* Product */}
             <section className="rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
@@ -269,7 +270,9 @@ export function CheckoutPage({
                         Économisez {formatUsd(course.originalPrice - course.price)}
                       </span>
                     )}
-                    <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paiement unique · accès au cours
+                    </p>
                   </div>
                 ) : (
                   (["premium", "vip"] as const).map((planId) => {
@@ -304,7 +307,9 @@ export function CheckoutPage({
                                 Économisez {formatUsd(save)}
                               </span>
                             )}
-                            <p className="text-xs text-muted-foreground mt-1">Paiement unique · accès au cours</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Paiement unique · accès au cours
+                            </p>
                           </div>
                         </div>
                       </label>
@@ -335,9 +340,13 @@ export function CheckoutPage({
 
             {/* Personal info */}
             <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-              <h2 className="font-display text-lg font-semibold text-foreground">Vos informations</h2>
+              <h2 className="font-display text-lg font-semibold text-foreground">
+                Vos informations
+              </h2>
               <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                <strong className="font-semibold text-foreground">Cet email = votre accès aux cours.</strong>{" "}
+                <strong className="font-semibold text-foreground">
+                  Cet email = votre accès aux cours.
+                </strong>{" "}
                 Utilisez la même adresse pour créer votre compte BelKou après le paiement.
               </div>
               <div className="space-y-2">
@@ -352,7 +361,11 @@ export function CheckoutPage({
                   required
                 />
                 {fieldErrors.full_name ? (
-                  <p id="checkout-full-name-error" className="text-xs text-destructive" role="alert">
+                  <p
+                    id="checkout-full-name-error"
+                    className="text-xs text-destructive"
+                    role="alert"
+                  >
                     {fieldErrors.full_name}
                   </p>
                 ) : null}
@@ -391,7 +404,11 @@ export function CheckoutPage({
                     required
                   />
                   {fieldErrors.whatsapp ? (
-                    <p id="checkout-whatsapp-error" className="text-xs text-destructive" role="alert">
+                    <p
+                      id="checkout-whatsapp-error"
+                      className="text-xs text-destructive"
+                      role="alert"
+                    >
                       {fieldErrors.whatsapp}
                     </p>
                   ) : null}
@@ -424,7 +441,9 @@ export function CheckoutPage({
 
             {/* Billing */}
             <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-              <h2 className="font-display text-lg font-semibold text-foreground">Adresse de facturation</h2>
+              <h2 className="font-display text-lg font-semibold text-foreground">
+                Adresse de facturation
+              </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="country">Pays</Label>
@@ -450,7 +469,11 @@ export function CheckoutPage({
                     </SelectContent>
                   </Select>
                   {fieldErrors.country ? (
-                    <p id="checkout-country-error" className="text-xs text-destructive" role="alert">
+                    <p
+                      id="checkout-country-error"
+                      className="text-xs text-destructive"
+                      role="alert"
+                    >
                       {fieldErrors.country}
                     </p>
                   ) : null}
@@ -461,7 +484,9 @@ export function CheckoutPage({
             {/* Payment */}
             <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-lg font-semibold text-foreground">Moyen de paiement</h2>
+                <h2 className="font-display text-lg font-semibold text-foreground">
+                  Moyen de paiement
+                </h2>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                   <ShieldCheck className="h-3.5 w-3.5 text-success" />
                   Sécurisé & chiffré
@@ -473,17 +498,19 @@ export function CheckoutPage({
                 <CreditCard className="h-5 w-5" />
                 <div>
                   <p className="font-semibold text-sm">Carte bancaire</p>
-                  <p className="text-xs text-muted-foreground">Visa · Mastercard · Amex — via Stripe</p>
+                  <p className="text-xs text-muted-foreground">
+                    Visa · Mastercard · Amex — via Stripe
+                  </p>
                 </div>
               </label>
 
               <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
-                Après validation, vous serez redirigé vers <strong>Stripe Checkout</strong> pour saisir votre
-                carte en toute sécurité. BelKou ne stocke jamais vos données bancaires.
+                Après validation, vous serez redirigé vers <strong>Stripe Checkout</strong> pour
+                saisir votre carte en toute sécurité. BelKou ne stocke jamais vos données bancaires.
               </p>
               <p className="text-xs text-muted-foreground">
-                Autres options : MonCash, Zelle, PayPal, virement — instructions par email si Stripe est
-                indisponible.
+                Autres options : MonCash, Zelle, PayPal, virement — instructions par email si Stripe
+                est indisponible.
               </p>
             </section>
           </div>
@@ -498,7 +525,9 @@ export function CheckoutPage({
                   <dt className="text-muted-foreground">
                     {courseSlug && course ? course.title : `Plan ${plan.name}`}
                   </dt>
-                  <dd className="font-medium">{formatUsd(pctOff > 0 ? displayOriginal : displayPrice)}</dd>
+                  <dd className="font-medium">
+                    {formatUsd(pctOff > 0 ? displayOriginal : displayPrice)}
+                  </dd>
                 </div>
                 {pctOff > 0 && (
                   <div className="flex justify-between gap-4 text-success">
@@ -540,7 +569,10 @@ export function CheckoutPage({
                 )}
               </div>
 
-              <label className="mt-5 flex cursor-pointer gap-2 text-xs text-muted-foreground" htmlFor="accept-terms">
+              <label
+                className="mt-5 flex cursor-pointer gap-2 text-xs text-muted-foreground"
+                htmlFor="accept-terms"
+              >
                 <input
                   id="accept-terms"
                   type="checkbox"
@@ -577,7 +609,10 @@ export function CheckoutPage({
                 <Lock className="mr-1 h-4 w-4" />
                 {loading ? "Redirection…" : "Payer et commencer"}
               </Button>
-              <p id="checkout-submit-help" className="mt-2 text-center text-[11px] text-muted-foreground">
+              <p
+                id="checkout-submit-help"
+                className="mt-2 text-center text-[11px] text-muted-foreground"
+              >
                 Activez la case des conditions pour débloquer le paiement.
               </p>
 

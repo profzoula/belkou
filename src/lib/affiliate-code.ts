@@ -1,7 +1,10 @@
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 
 export function normalizeAffiliateCode(code: string): string {
-  return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return code
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
 }
 
 /** Single canonical affiliate code: email prefix + user id fragment (stable per user). */

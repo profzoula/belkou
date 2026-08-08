@@ -248,7 +248,8 @@ async function claimNextVideo() {
   const video = data?.[0];
   if (!video) return null;
 
-  if (!videoIdArg && (video.status !== "ready" || video.hls_path || !video.storage_path?.trim())) return null;
+  if (!videoIdArg && (video.status !== "ready" || video.hls_path || !video.storage_path?.trim()))
+    return null;
 
   if (dryRun) return video;
 

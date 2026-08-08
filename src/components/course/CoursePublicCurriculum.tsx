@@ -24,7 +24,9 @@ export function CoursePublicCurriculum({ course, hasPaidAccess }: CoursePublicCu
         const entries = section.lessons.flatMap((lesson) => {
           const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
           const sessions =
-            lesson.type === "article" && lesson.content ? parseArticleSessions(lesson.content) : null;
+            lesson.type === "article" && lesson.content
+              ? parseArticleSessions(lesson.content)
+              : null;
 
           if (sessions?.length) {
             return flattenArticleSubSessions(lesson.id, sessions).map(({ id, sub }) => ({

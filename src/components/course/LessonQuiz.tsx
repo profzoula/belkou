@@ -116,9 +116,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
             <p className="mt-4 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               Felisitasyon!
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Ou reyisi quiz la ak yon nòt pafè
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Ou reyisi quiz la ak yon nòt pafè</p>
             <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-success/40 bg-white/80 px-4 py-2 text-sm font-semibold text-success shadow-sm dark:border-success/40 dark:bg-success/10 dark:text-success">
               <Sparkles className="h-4 w-4" />
               {quiz.passScore}/{quiz.passScore} bon repons
@@ -149,7 +147,9 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                 <XCircle className="h-6 w-6" />
               </div>
               <div>
-                <p className="font-display text-lg font-bold text-foreground">Pa ankò — eseye ankò</p>
+                <p className="font-display text-lg font-bold text-foreground">
+                  Pa ankò — eseye ankò
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Ou gen{" "}
                   <strong className="text-foreground">
@@ -187,14 +187,18 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                       <p className="text-sm font-semibold text-foreground">{question.prompt}</p>
                       <p className="mt-2 text-xs text-muted-foreground">
                         Repons ou:{" "}
-                        <span className={cn("font-medium", isCorrect ? "text-success" : "text-red-700")}>
+                        <span
+                          className={cn("font-medium", isCorrect ? "text-success" : "text-red-700")}
+                        >
                           {question.options.find((option) => option.id === selected)?.label ?? "—"}
                         </span>
                       </p>
                       {!isCorrect && question.explanation ? (
                         <div className="mt-3 flex gap-2 rounded-lg border border-amber-200/80 bg-amber-50/70 px-3 py-2.5 dark:border-amber-900/50 dark:bg-amber-950/20">
                           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                          <p className="text-xs leading-relaxed text-muted-foreground">{question.explanation}</p>
+                          <p className="text-xs leading-relaxed text-muted-foreground">
+                            {question.explanation}
+                          </p>
                         </div>
                       ) : null}
                     </div>
@@ -310,11 +314,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
           </div>
         </div>
 
-        <div
-          className="space-y-2.5"
-          role="radiogroup"
-          aria-label={`Kesyon ${currentIndex + 1}`}
-        >
+        <div className="space-y-2.5" role="radiogroup" aria-label={`Kesyon ${currentIndex + 1}`}>
           {currentQuestion.options.map((option, optionIndex) => {
             const isSelected = selected === option.id;
             const letter = optionLetter(optionIndex);
@@ -343,7 +343,9 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                 >
                   {letter}
                 </span>
-                <span className="pt-1.5 text-sm leading-relaxed text-foreground">{option.label}</span>
+                <span className="pt-1.5 text-sm leading-relaxed text-foreground">
+                  {option.label}
+                </span>
               </button>
             );
           })}
@@ -359,8 +361,11 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
         <div className="mt-5 flex items-center gap-2 rounded-xl border border-amber-200/70 bg-amber-50/60 px-4 py-3 dark:border-amber-900/50 dark:bg-amber-950/20">
           <CircleHelp className="h-4 w-4 shrink-0 text-amber-600" />
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Ou bezwen <strong className="text-foreground">{quiz.passScore}/{quiz.passScore}</strong> bon repons pou
-            debloke pwochen etap kou a.
+            Ou bezwen{" "}
+            <strong className="text-foreground">
+              {quiz.passScore}/{quiz.passScore}
+            </strong>{" "}
+            bon repons pou debloke pwochen etap kou a.
           </p>
         </div>
       </div>

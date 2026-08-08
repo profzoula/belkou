@@ -87,7 +87,9 @@ function ResetPasswordPage() {
         </p>
       ) : null}
 
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Mot de passe</p>
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+        Mot de passe
+      </p>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         Nouveau mot de passe
       </h1>

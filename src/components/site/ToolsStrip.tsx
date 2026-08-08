@@ -73,7 +73,12 @@ export function ToolsStrip({
         <div className="relative overflow-hidden marquee-mask">
           <div className="flex w-max gap-2.5 sm:gap-3 animate-marquee py-1">
             {loop.map((tool, i) => (
-              <ToolCard key={`${tool.name}-${i}`} name={tool.name} logo={tool.logo} logosOnly={logosOnly} />
+              <ToolCard
+                key={`${tool.name}-${i}`}
+                name={tool.name}
+                logo={tool.logo}
+                logosOnly={logosOnly}
+              />
             ))}
           </div>
         </div>

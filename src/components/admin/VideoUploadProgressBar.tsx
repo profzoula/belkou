@@ -14,9 +14,7 @@ export function VideoUploadProgressBar({ phase, percent, fileName }: VideoUpload
         <span className="shrink-0 tabular-nums text-muted-foreground">{percent}%</span>
       </div>
       <Progress value={percent} className="h-2.5" />
-      {fileName ? (
-        <p className="truncate text-[11px] text-muted-foreground">{fileName}</p>
-      ) : null}
+      {fileName ? <p className="truncate text-[11px] text-muted-foreground">{fileName}</p> : null}
     </div>
   );
 }

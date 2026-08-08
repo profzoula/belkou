@@ -42,20 +42,15 @@ async function sendPaymentConfirmed(
     const result = await sendEmail({
       to: email,
       subject: "Paiement confirmé — BelKou",
-      html: paymentConfirmedEmail(
-        fullName,
-        plan,
-        getWhatsappGroupUrlForCourse(courseSlug, plan),
-        {
-          invoiceId: `INV-${(registrationId ?? crypto.randomUUID()).slice(0, 8).toUpperCase()}`,
-          itemLabel: course?.title ?? `Plan ${plan.toUpperCase()} BelKou`,
-          amountUsd,
-          currency: "USD",
-          paidAtIso: new Date().toISOString(),
-          transactionId: registrationId ? `manual:${registrationId}` : "manual",
-          customerEmail: email,
-        },
-      ),
+      html: paymentConfirmedEmail(fullName, plan, getWhatsappGroupUrlForCourse(courseSlug, plan), {
+        invoiceId: `INV-${(registrationId ?? crypto.randomUUID()).slice(0, 8).toUpperCase()}`,
+        itemLabel: course?.title ?? `Plan ${plan.toUpperCase()} BelKou`,
+        amountUsd,
+        currency: "USD",
+        paidAtIso: new Date().toISOString(),
+        transactionId: registrationId ? `manual:${registrationId}` : "manual",
+        customerEmail: email,
+      }),
     });
     if (!result.ok) {
       console.error("[BelKou] Payment confirmation email not sent:", result);
@@ -102,7 +97,11 @@ export const adminLogin = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const allowed = checkRateLimit(`admin-login:${data.username}`, RATE_LIMITS.adminLogin.limit, RATE_LIMITS.adminLogin.windowMs);
+    const allowed = checkRateLimit(
+      `admin-login:${data.username}`,
+      RATE_LIMITS.adminLogin.limit,
+      RATE_LIMITS.adminLogin.windowMs,
+    );
     if (!allowed) {
       throw new Error("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
     }
@@ -505,7 +504,9 @@ export const getAdminCourses = createServerFn({ method: "GET" }).handler(async (
   };
 });
 
-function adminCoursesResponse(courses: Awaited<ReturnType<typeof import("@/server/site-content").getResolvedCourses>>) {
+function adminCoursesResponse(
+  courses: Awaited<ReturnType<typeof import("@/server/site-content").getResolvedCourses>>,
+) {
   return courses.map(serializeCourseForAdmin);
 }
 
@@ -531,7 +532,11 @@ export const adminCreateCourse = createServerFn({ method: "POST" })
       throw new Error(result.reason ?? "Création impossible");
     }
 
-    return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()), createdSlug: data.slug };
+    return {
+      ok: true as const,
+      courses: adminCoursesResponse(await getResolvedCourses()),
+      createdSlug: data.slug,
+    };
   });
 
 export const adminDeleteCourse = createServerFn({ method: "POST" })
@@ -566,9 +571,8 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { updateLessonOverride, getResolvedCourseBySlug, getResolvedCourses } = await import(
-      "@/server/site-content"
-    );
+    const { updateLessonOverride, getResolvedCourseBySlug, getResolvedCourses } =
+      await import("@/server/site-content");
     const { getVideoRecord } = await import("@/server/videos");
     const { formatCourseDurationLabel } = await import("@/lib/courses");
     const { getLessonById, lessonHasVideo } = await import("@/lib/courses");
@@ -576,7 +580,9 @@ export const adminUpdateLesson = createServerFn({ method: "POST" })
 
     const courseBefore = await getResolvedCourseBySlug(data.courseSlug);
     const lessonBefore = courseBefore ? getLessonById(courseBefore, data.lessonId) : undefined;
-    const hadVideo = Boolean(lessonBefore && lessonBefore.type === "video" && lessonHasVideo(lessonBefore));
+    const hadVideo = Boolean(
+      lessonBefore && lessonBefore.type === "video" && lessonHasVideo(lessonBefore),
+    );
 
     let duration = data.duration;
     let videoId: string | undefined;
@@ -995,9 +1001,7 @@ export const adminUploadCourseThumbnail = createServerFn({ method: "POST" })
   });
 
 export const adminRemoveCourseThumbnail = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) =>
-    z.object({ courseSlug: z.string().min(1) }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ courseSlug: z.string().min(1) }).parse(data))
   .handler(async ({ data }) => {
     await requireAdmin();
     const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
@@ -1096,7 +1100,9 @@ export const adminUpdateService = createServerFn({ method: "POST" })
         rating: z.number().min(0).max(5).optional(),
         ratingsCount: z.number().int().min(0).optional(),
         provider: z.string().optional(),
-        iconKey: z.enum(["building", "code", "globe", "calculator", "megaphone", "graduation"]).optional(),
+        iconKey: z
+          .enum(["building", "code", "globe", "calculator", "megaphone", "graduation"])
+          .optional(),
         gradient: z.string().optional(),
         imageUrl: z.string().optional(),
         premium: z.boolean().optional(),
@@ -1220,7 +1226,8 @@ export const adminUpdateServiceBookingStatus = createServerFn({ method: "POST" }
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { updateServiceBookingStatus, getServiceBookings } = await import("@/server/site-content");
+    const { updateServiceBookingStatus, getServiceBookings } =
+      await import("@/server/site-content");
     const result = await updateServiceBookingStatus(data.id, data.status);
     if (!result.ok) {
       throw new Error(result.reason ?? "Mise à jour impossible");
@@ -1248,9 +1255,8 @@ export const adminUploadCourseResource = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireAdmin();
     const { uploadCourseResource } = await import("@/server/course-resource-storage");
-    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
-      "@/server/site-content"
-    );
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } =
+      await import("@/server/site-content");
 
     const uploaded = await uploadCourseResource({
       courseSlug: data.courseSlug,
@@ -1295,16 +1301,17 @@ export const adminDeleteCourseResource = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
-      "@/server/site-content"
-    );
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } =
+      await import("@/server/site-content");
 
     const course = await getResolvedCourseBySlug(data.courseSlug);
     if (!course) {
       throw new Error("Cours introuvable");
     }
 
-    const resources = (course.resources ?? []).filter((resource) => resource.id !== data.resourceId);
+    const resources = (course.resources ?? []).filter(
+      (resource) => resource.id !== data.resourceId,
+    );
     const result = await updateCourseMeta({
       courseSlug: data.courseSlug,
       patch: { resources },
@@ -1328,9 +1335,8 @@ export const adminUpdateCourseResource = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } = await import(
-      "@/server/site-content"
-    );
+    const { getResolvedCourseBySlug, updateCourseMeta, getResolvedCourses } =
+      await import("@/server/site-content");
 
     const course = await getResolvedCourseBySlug(data.courseSlug);
     if (!course) {

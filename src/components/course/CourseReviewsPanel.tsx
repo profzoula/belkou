@@ -25,13 +25,7 @@ type PublicReview = {
   createdAt: string;
 };
 
-function StarPicker({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (rating: number) => void;
-}) {
+function StarPicker({ value, onChange }: { value: number; onChange: (rating: number) => void }) {
   return (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((rating) => (
@@ -178,7 +172,9 @@ export function CourseReviewsPanel({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">Soyez le premier à laisser un avis sur ce cours.</p>
+        <p className="text-sm text-muted-foreground">
+          Soyez le premier à laisser un avis sur ce cours.
+        </p>
       )}
     </div>
   );

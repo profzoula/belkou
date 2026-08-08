@@ -13,11 +13,18 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16 max-w-2xl">
-        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-6 sm:mb-8 inline-block touch-target">
+        <Link
+          to="/"
+          className="text-sm text-muted-foreground hover:text-foreground mb-6 sm:mb-8 inline-block touch-target"
+        >
           ← Retour
         </Link>
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 sm:mb-8 text-balance">{title}</h1>
-        <div className="prose-legal space-y-4 text-sm text-muted-foreground leading-relaxed">{children}</div>
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 sm:mb-8 text-balance">
+          {title}
+        </h1>
+        <div className="prose-legal space-y-4 text-sm text-muted-foreground leading-relaxed">
+          {children}
+        </div>
       </main>
       <Footer />
     </div>

@@ -23,7 +23,9 @@ export function AdminPageHeader({
       )}
     >
       <div className="min-w-0 space-y-1.5">
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-primary uppercase">{eyebrow}</p>
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-primary uppercase">
+          {eyebrow}
+        </p>
         <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
           {title}
         </h1>

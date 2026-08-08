@@ -1,8 +1,4 @@
-import {
-  createServerClient,
-  parseCookieHeader,
-  serializeCookieHeader,
-} from "@supabase/ssr";
+import { createServerClient, parseCookieHeader, serializeCookieHeader } from "@supabase/ssr";
 
 function getSupabasePublicEnv() {
   const url = process.env.VITE_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -25,7 +21,10 @@ export async function handleOAuthCallback(request: Request): Promise<Response> {
   }
 
   if (!code) {
-    return Response.redirect(`${origin}/login?error=${encodeURIComponent("Connexion impossible.")}`, 302);
+    return Response.redirect(
+      `${origin}/login?error=${encodeURIComponent("Connexion impossible.")}`,
+      302,
+    );
   }
 
   const { url, anonKey } = getSupabasePublicEnv();

@@ -74,7 +74,14 @@ function rowToRecord(row: Record<string, unknown>): RegistrationRecord {
 
 type RegistrationFields = Pick<
   RegistrationRecord,
-  "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "payment_status" | "course_slug"
+  | "full_name"
+  | "email"
+  | "whatsapp"
+  | "country"
+  | "level"
+  | "plan"
+  | "payment_status"
+  | "course_slug"
 >;
 
 function baseFields(
@@ -156,13 +163,18 @@ export async function supabaseSaveRegistration(
   } catch (error) {
     const message = formatSupabaseError(error);
     console.error("[BelKou] Supabase save registration:", message);
-    throw new Error("Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.");
+    throw new Error(
+      "Impossible d'enregistrer votre inscription. Réessayez ou contactez le support.",
+    );
   }
 }
 
 export async function supabaseUpdateRegistrationDetails(
   id: string,
-  data: Pick<RegistrationRecord, "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "course_slug">,
+  data: Pick<
+    RegistrationRecord,
+    "full_name" | "email" | "whatsapp" | "country" | "level" | "plan" | "course_slug"
+  >,
 ): Promise<void> {
   const sb = getSupabaseAdmin();
   if (!sb) return;
@@ -186,7 +198,9 @@ export async function supabaseUpdateRegistrationDetails(
   } catch (error) {
     const message = formatSupabaseError(error);
     console.error("[BelKou] Supabase update registration:", message);
-    throw new Error("Impossible de mettre à jour votre inscription. Réessayez ou contactez le support.");
+    throw new Error(
+      "Impossible de mettre à jour votre inscription. Réessayez ou contactez le support.",
+    );
   }
 }
 
@@ -236,7 +250,11 @@ export async function supabaseUpdateGrant(
 
   const { error } = await sb
     .from("registrations")
-    .update({ plan: update.plan, payment_status: update.payment_status, updated_at: new Date().toISOString() })
+    .update({
+      plan: update.plan,
+      payment_status: update.payment_status,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", id);
 
   if (error) console.error("[BelKou] Supabase update grant:", error.message);
@@ -266,12 +284,18 @@ export async function supabaseUpdateCourseAccess(
 
 export async function supabaseUpdatePayment(
   id: string,
-  update: { payment_status: RegistrationRecord["payment_status"]; stripe_session_id?: string | null },
+  update: {
+    payment_status: RegistrationRecord["payment_status"];
+    stripe_session_id?: string | null;
+  },
 ): Promise<void> {
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
-  const payload: Record<string, string | null> = { payment_status: update.payment_status, updated_at: new Date().toISOString() };
+  const payload: Record<string, string | null> = {
+    payment_status: update.payment_status,
+    updated_at: new Date().toISOString(),
+  };
   if (update.stripe_session_id !== undefined) {
     payload.stripe_session_id = update.stripe_session_id;
   }
@@ -284,7 +308,10 @@ export async function supabaseSetStripeSessionId(id: string, sessionId: string):
   const sb = getSupabaseAdmin();
   if (!sb) return;
 
-  const { error } = await sb.from("registrations").update({ stripe_session_id: sessionId }).eq("id", id);
+  const { error } = await sb
+    .from("registrations")
+    .update({ stripe_session_id: sessionId })
+    .eq("id", id);
   if (error) console.error("[BelKou] Supabase set session:", error.message);
 }
 
@@ -297,7 +324,9 @@ export async function supabaseGetById(id: string): Promise<RegistrationRecord | 
   return rowToRecord(data);
 }
 
-export async function supabaseGetByStripeSession(sessionId: string): Promise<RegistrationRecord | null> {
+export async function supabaseGetByStripeSession(
+  sessionId: string,
+): Promise<RegistrationRecord | null> {
   const sb = getSupabaseAdmin();
   if (!sb) return null;
 
@@ -314,7 +343,9 @@ export async function supabaseGetCount(): Promise<number> {
   const sb = getSupabaseAdmin();
   if (!sb) return 0;
 
-  const { count, error } = await sb.from("registrations").select("*", { count: "exact", head: true });
+  const { count, error } = await sb
+    .from("registrations")
+    .select("*", { count: "exact", head: true });
   if (error) return 0;
   return count ?? 0;
 }

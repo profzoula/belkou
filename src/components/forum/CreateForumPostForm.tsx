@@ -21,7 +21,11 @@ type CreateForumPostFormProps = {
   onCreated?: () => void;
 };
 
-export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: CreateForumPostFormProps) {
+export function CreateForumPostForm({
+  courseSlug,
+  accessToken,
+  onCreated,
+}: CreateForumPostFormProps) {
   const navigate = useNavigate();
   const createFn = useServerFn(createCourseForumPost);
   const [kind, setKind] = useState<"question" | "suggestion">("question");
@@ -112,7 +116,12 @@ export function CreateForumPostForm({ courseSlug, accessToken, onCreated }: Crea
         />
       </div>
 
-      <Button type="submit" variant="hero" disabled={loading} className="w-full shadow-primary sm:w-auto">
+      <Button
+        type="submit"
+        variant="hero"
+        disabled={loading}
+        className="w-full shadow-primary sm:w-auto"
+      >
         {loading ? "Publication…" : "Publier"}
       </Button>
     </form>

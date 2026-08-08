@@ -41,7 +41,9 @@ function RecommendedCard({ course }: { course: PublicCourse }) {
           <span className="inline-flex items-center gap-1 font-semibold text-foreground">
             <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
             {course.rating.toFixed(1)}
-            <span className="font-normal text-muted-foreground">({formatCount(course.ratingsCount)})</span>
+            <span className="font-normal text-muted-foreground">
+              ({formatCount(course.ratingsCount)})
+            </span>
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock3 className="size-3.5" aria-hidden />

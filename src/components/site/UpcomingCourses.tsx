@@ -32,7 +32,9 @@ function UpcomingCourseCard({ course }: { course: PublicCourse }) {
       </CourseThumbnailBanner>
 
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-2 text-sm font-bold leading-snug group-hover:text-primary">{course.title}</h3>
+        <h3 className="line-clamp-2 text-sm font-bold leading-snug group-hover:text-primary">
+          {course.title}
+        </h3>
         <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
 
         <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
@@ -52,7 +54,9 @@ function UpcomingCourseCard({ course }: { course: PublicCourse }) {
         <div className="mt-auto flex items-center justify-between gap-2 pt-3">
           <div className="flex items-baseline gap-2">
             <span className="text-base font-bold">${course.price}</span>
-            <span className="text-sm text-muted-foreground line-through">${course.originalPrice}</span>
+            <span className="text-sm text-muted-foreground line-through">
+              ${course.originalPrice}
+            </span>
           </div>
           <span className="inline-flex items-center gap-0.5 text-xs font-bold text-amber-600">
             {course.rating.toFixed(1)}

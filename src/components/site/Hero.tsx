@@ -37,7 +37,10 @@ export function Hero({ studentCount }: HeroProps) {
           transition={{ duration: 0.5, ease }}
         >
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground sm:gap-2 sm:text-sm">
-            <span className="inline-flex items-center gap-0.5 text-brand-accent" aria-label="5 étoiles">
+            <span
+              className="inline-flex items-center gap-0.5 text-brand-accent"
+              aria-label="5 étoiles"
+            >
               {Array.from({ length: 5 }).map((_, index) => (
                 <Star key={index} className="size-2.5 fill-current sm:size-3.5" />
               ))}
@@ -49,8 +52,7 @@ export function Hero({ studentCount }: HeroProps) {
           </div>
 
           <h1 className="mt-3 font-display text-[1.35rem] font-bold leading-[1.12] tracking-tight text-foreground text-balance sm:mt-5 sm:text-4xl md:text-5xl lg:text-[3.4rem]">
-            Des compétences qui vous font{" "}
-            <span className="text-primary">embaucher</span>
+            Des compétences qui vous font <span className="text-primary">embaucher</span>
           </h1>
 
           <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
@@ -59,7 +61,12 @@ export function Hero({ studentCount }: HeroProps) {
           </p>
 
           <div className="mt-4 flex flex-nowrap items-center gap-2 sm:mt-7 sm:gap-3">
-            <Button asChild variant="hero" size="lg" className="rounded-full px-4 text-xs sm:h-12 sm:px-7 sm:text-sm">
+            <Button
+              asChild
+              variant="hero"
+              size="lg"
+              className="rounded-full px-4 text-xs sm:h-12 sm:px-7 sm:text-sm"
+            >
               <Link to="/courses">
                 Commencer
                 <ArrowRight className="size-3 sm:size-4" aria-hidden />

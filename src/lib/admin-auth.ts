@@ -62,7 +62,10 @@ export async function createAdminToken(username: string, secret: string): Promis
   return `${encoded}.${signature}`;
 }
 
-export async function verifyAdminToken(token: string, secret: string): Promise<AdminPayload | null> {
+export async function verifyAdminToken(
+  token: string,
+  secret: string,
+): Promise<AdminPayload | null> {
   const [encoded, signature] = token.split(".");
   if (!encoded || !signature) return null;
 

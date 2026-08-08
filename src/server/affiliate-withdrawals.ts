@@ -63,7 +63,8 @@ export async function listWithdrawalsForUser(userId: string): Promise<Withdrawal
 
 export async function listAllWithdrawals(): Promise<WithdrawalRecord[]> {
   const sb = getSupabaseAdmin();
-  if (!sb) return [...devWithdrawals.values()].sort((a, b) => b.created_at.localeCompare(a.created_at));
+  if (!sb)
+    return [...devWithdrawals.values()].sort((a, b) => b.created_at.localeCompare(a.created_at));
 
   const { data, error } = await sb
     .from("affiliate_withdrawals")

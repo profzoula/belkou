@@ -97,7 +97,9 @@ function AppTemplateCard({ template }: { template: (typeof appTemplates)[number]
     <article className="surface surface-hover group overflow-hidden rounded-2xl min-w-0">
       <div className="border-b border-border/60 bg-muted/30 px-4 py-3 flex items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">{template.category}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+            {template.category}
+          </p>
           <h3 className="font-display text-base font-bold mt-0.5">{template.name}</h3>
         </div>
         <div className="icon-box h-8 w-8 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
@@ -121,7 +123,9 @@ function WebTemplateCard({ template }: { template: (typeof webTemplates)[number]
     <article className="surface surface-hover group overflow-hidden rounded-2xl min-w-0">
       <div className="border-b border-border/60 bg-muted/30 px-4 py-3 flex items-center justify-between gap-2">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">{template.category}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+            {template.category}
+          </p>
           <h3 className="font-display text-base font-bold mt-0.5">{template.name}</h3>
         </div>
         <div className="icon-box h-8 w-8 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
@@ -142,7 +146,10 @@ function WebTemplateCard({ template }: { template: (typeof webTemplates)[number]
 
 export function TemplateShowcase() {
   return (
-    <section id="templates" className="site-section-anchor section-divider py-16 sm:py-20 md:py-28 bg-gradient-mesh">
+    <section
+      id="templates"
+      className="site-section-anchor section-divider py-16 sm:py-20 md:py-28 bg-gradient-mesh"
+    >
       <div className="site-container">
         <AppTypeLabels />
 
@@ -171,8 +178,8 @@ export function TemplateShowcase() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-10 sm:mt-12 max-w-lg mx-auto leading-relaxed">
-          Fitness, habitudes, galeries, journaux, SaaS… vous apprendrez à générer et déployer ces types de produits avec
-          Cursor, Replit et l&apos;IA.
+          Fitness, habitudes, galeries, journaux, SaaS… vous apprendrez à générer et déployer ces
+          types de produits avec Cursor, Replit et l&apos;IA.
         </p>
       </div>
     </section>

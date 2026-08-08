@@ -144,9 +144,8 @@ export const getForumNotifications = createServerFn({ method: "POST" })
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.id) return { notifications: [], unreadCount: 0 };
 
-    const { listNotificationsForUser, countUnreadNotifications } = await import(
-      "@/server/forum-notifications"
-    );
+    const { listNotificationsForUser, countUnreadNotifications } =
+      await import("@/server/forum-notifications");
 
     const [notifications, unreadCount] = await Promise.all([
       listNotificationsForUser(user.id),

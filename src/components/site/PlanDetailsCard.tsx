@@ -38,13 +38,19 @@ export function PlanDetailsCard({ planId, className = "" }: PlanDetailsCardProps
         Plan sélectionné
       </p>
       <h2 className="text-xl font-semibold">{plan.name}</h2>
-      <p className={`text-sm mt-2 leading-relaxed ${highlighted ? "text-background/70" : "text-muted-foreground"}`}>
+      <p
+        className={`text-sm mt-2 leading-relaxed ${highlighted ? "text-background/70" : "text-muted-foreground"}`}
+      >
         {plan.desc}
       </p>
 
-      <div className={`mt-5 pt-5 border-t ${highlighted ? "border-background/15" : "border-border"}`}>
+      <div
+        className={`mt-5 pt-5 border-t ${highlighted ? "border-background/15" : "border-border"}`}
+      >
         <span className="text-3xl font-semibold tracking-tight">${plan.price}</span>
-        <span className={`ml-1.5 text-sm ${highlighted ? "text-background/60" : "text-muted-foreground"}`}>
+        <span
+          className={`ml-1.5 text-sm ${highlighted ? "text-background/60" : "text-muted-foreground"}`}
+        >
           USD
         </span>
       </div>
@@ -55,7 +61,9 @@ export function PlanDetailsCard({ planId, className = "" }: PlanDetailsCardProps
             <Check
               className={`h-4 w-4 shrink-0 mt-0.5 ${highlighted ? "text-primary-foreground" : "text-primary"}`}
             />
-            <span className={highlighted ? "text-background/90" : "text-foreground/85"}>{feature}</span>
+            <span className={highlighted ? "text-background/90" : "text-foreground/85"}>
+              {feature}
+            </span>
           </li>
         ))}
       </ul>

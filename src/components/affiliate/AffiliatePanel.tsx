@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { affiliateCodeForUser } from "@/lib/affiliate-code";
 import {
   AFFILIATE_COMMISSION_USD,
@@ -153,7 +159,13 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
             : "Impossible de générer votre code pour le moment. Déconnectez-vous puis reconnectez-vous."}
         </p>
         {loadFailed ? (
-          <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => void loadDashboard()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-4"
+            onClick={() => void loadDashboard()}
+          >
             Réessayer
           </Button>
         ) : null}
@@ -169,12 +181,18 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
           Programme affilié
         </p>
         <h2 className="font-display text-base sm:text-lg md:text-xl font-bold text-balance">
-          ${affiliate.signupCommissionUsd ?? AFFILIATE_SIGNUP_COMMISSION_USD} par compte · ${affiliate.commissionUsd} par inscription payée
+          ${affiliate.signupCommissionUsd ?? AFFILIATE_SIGNUP_COMMISSION_USD} par compte · $
+          {affiliate.commissionUsd} par inscription payée
         </h2>
         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-          <strong className="text-foreground">Compte gratuit ou payé</strong> — tout le monde peut parrainer.
-          Partagez votre lien : <strong className="text-foreground">${affiliate.signupCommissionUsd ?? AFFILIATE_SIGNUP_COMMISSION_USD}</strong> quand
-          quelqu&apos;un crée un compte, <strong className="text-foreground">${affiliate.commissionUsd}</strong> s&apos;il paie la formation.
+          <strong className="text-foreground">Compte gratuit ou payé</strong> — tout le monde peut
+          parrainer. Partagez votre lien :{" "}
+          <strong className="text-foreground">
+            ${affiliate.signupCommissionUsd ?? AFFILIATE_SIGNUP_COMMISSION_USD}
+          </strong>{" "}
+          quand quelqu&apos;un crée un compte,{" "}
+          <strong className="text-foreground">${affiliate.commissionUsd}</strong> s&apos;il paie la
+          formation.
         </p>
         <Button
           type="button"
@@ -193,15 +211,16 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
         {"statsWarning" in affiliate && affiliate.statsWarning === "tables_unavailable" ? (
           <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-800 dark:text-red-200 leading-relaxed">
             Tables affiliés absentes dans Supabase. Exécutez{" "}
-            <code className="font-mono">migrations/supabase_affiliates.sql</code> dans SQL Editor, puis{" "}
-            <code className="font-mono">node scripts/setup-affiliates.mjs</code> pour vérifier.
+            <code className="font-mono">migrations/supabase_affiliates.sql</code> dans SQL Editor,
+            puis <code className="font-mono">node scripts/setup-affiliates.mjs</code> pour vérifier.
           </div>
         ) : null}
         {"statsWarning" in affiliate && affiliate.statsWarning === "server_config" ? (
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
             Les commissions existent dans Supabase mais le serveur ne peut pas les lire. Ajoutez{" "}
             <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> sur Railway, puis exécutez{" "}
-            <code className="font-mono">migrations/supabase_affiliates_rls_read.sql</code> dans Supabase.
+            <code className="font-mono">migrations/supabase_affiliates_rls_read.sql</code> dans
+            Supabase.
           </div>
         ) : null}
 
@@ -211,11 +230,15 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
             <div className="text-xs text-muted-foreground mt-1">Parrainages</div>
           </div>
           <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 text-center">
-            <div className="text-2xl font-bold text-primary">${formatAffiliateUsd(affiliate.stats.earnedUsd ?? affiliate.stats.balanceUsd)}</div>
+            <div className="text-2xl font-bold text-primary">
+              ${formatAffiliateUsd(affiliate.stats.earnedUsd ?? affiliate.stats.balanceUsd)}
+            </div>
             <div className="text-xs text-muted-foreground mt-1">Commissions gagnées</div>
           </div>
           <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-center">
-            <div className="text-2xl font-bold text-foreground">${formatAffiliateUsd(affiliate.stats.balanceUsd)}</div>
+            <div className="text-2xl font-bold text-foreground">
+              ${formatAffiliateUsd(affiliate.stats.balanceUsd)}
+            </div>
             <div className="text-xs text-muted-foreground mt-1">Solde à payer</div>
           </div>
         </div>
@@ -229,7 +252,13 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
               <code className="flex-1 min-w-0 rounded-xl border border-border bg-muted/30 px-4 py-3 font-mono text-base sm:text-lg font-bold tracking-wider break-all">
                 {affiliate.code}
               </code>
-              <Button type="button" variant="outline" size="icon" className="shrink-0 self-end sm:self-auto touch-target" onClick={() => copy(affiliate.code, "Code")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0 self-end sm:self-auto touch-target"
+                onClick={() => copy(affiliate.code, "Code")}
+              >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
@@ -244,7 +273,13 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                 <Link2 className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />
                 {affiliate.link}
               </div>
-              <Button type="button" variant="outline" size="icon" className="shrink-0 self-end sm:self-auto touch-target" onClick={() => copy(affiliate.link, "Lien")}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="shrink-0 self-end sm:self-auto touch-target"
+                onClick={() => copy(affiliate.link, "Lien")}
+              >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
@@ -293,7 +328,8 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                 Retrait des commissions
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Minimum ${affiliate.minWithdrawalUsd ?? AFFILIATE_MIN_WITHDRAWAL_USD} pour demander un retrait.
+                Minimum ${affiliate.minWithdrawalUsd ?? AFFILIATE_MIN_WITHDRAWAL_USD} pour demander
+                un retrait.
                 {affiliate.stats.hasPendingWithdrawal
                   ? " Une demande est déjà en cours de traitement."
                   : affiliate.stats.balanceUsd > 0
@@ -318,7 +354,9 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
             <form onSubmit={submitWithdrawal} className="space-y-3 pt-2 border-t border-border">
               <p className="text-sm">
                 Montant demandé :{" "}
-                <strong className="text-foreground">${formatAffiliateUsd(affiliate.stats.balanceUsd)}</strong>
+                <strong className="text-foreground">
+                  ${formatAffiliateUsd(affiliate.stats.balanceUsd)}
+                </strong>
               </p>
               <div className="space-y-2">
                 <Label>Méthode de paiement</Label>
@@ -354,7 +392,12 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                 <Button type="submit" variant="hero" size="sm" disabled={withdrawing}>
                   {withdrawing ? "Envoi..." : "Confirmer la demande"}
                 </Button>
-                <Button type="button" variant="ghost" size="sm" onClick={() => setShowWithdrawForm(false)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowWithdrawForm(false)}
+                >
                   Annuler
                 </Button>
               </div>
@@ -363,8 +406,8 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Les commissions sont validées après paiement de la formation. Les retraits sont traités sous 3 à 7 jours
-          ouvrés via MonCash, Zelle ou virement.
+          Les commissions sont validées après paiement de la formation. Les retraits sont traités
+          sous 3 à 7 jours ouvrés via MonCash, Zelle ou virement.
         </p>
       </div>
     </div>

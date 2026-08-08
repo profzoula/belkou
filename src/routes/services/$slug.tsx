@@ -56,7 +56,11 @@ function ServiceDetailPage() {
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
             <div className={cn("relative aspect-[16/10] bg-gradient-to-br", service.gradient)}>
               {service.imageUrl ? (
-                <img src={service.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <img
+                  src={service.imageUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Icon className="h-20 w-20 text-white/20" aria-hidden />
@@ -73,7 +77,9 @@ function ServiceDetailPage() {
 
             <div className="p-5 sm:p-6">
               <h2 className="font-display text-2xl font-semibold">{service.title}</h2>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{service.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                {service.description}
+              </p>
 
               <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
                 <span className="text-sm text-muted-foreground">Prix</span>
@@ -95,7 +101,8 @@ function ServiceDetailPage() {
               </div>
 
               <p className="mt-4 text-xs text-muted-foreground">
-                {service.provider} · {service.rating.toFixed(1)}/5 ({formatCount(service.ratingsCount)} avis)
+                {service.provider} · {service.rating.toFixed(1)}/5 (
+                {formatCount(service.ratingsCount)} avis)
               </p>
             </div>
           </div>

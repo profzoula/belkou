@@ -23,7 +23,9 @@ function fromProcessEnv(): Record<string, string | undefined> {
     RESEND_API_KEY: process.env.RESEND_API_KEY?.trim(),
     EMAIL_FROM: process.env.EMAIL_FROM?.trim(),
     SITE_URL: (process.env.SITE_URL ?? process.env.VITE_SITE_URL)?.trim(),
-    STRIPE_PRICE_PREMIUM: (process.env.STRIPE_PRICE_PREMIUM ?? process.env.VITE_STRIPE_PRICE_PREMIUM)?.trim(),
+    STRIPE_PRICE_PREMIUM: (
+      process.env.STRIPE_PRICE_PREMIUM ?? process.env.VITE_STRIPE_PRICE_PREMIUM
+    )?.trim(),
     STRIPE_PRICE_VIP: (process.env.STRIPE_PRICE_VIP ?? process.env.VITE_STRIPE_PRICE_VIP)?.trim(),
     ADMIN_USERNAME: process.env.ADMIN_USERNAME?.trim(),
     ADMIN_PASSWORD: process.env.ADMIN_PASSWORD?.trim(),

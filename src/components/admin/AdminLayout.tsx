@@ -28,17 +28,21 @@ export type AdminSection =
   | "commissions"
   | "settings";
 
-const navItems: { id: AdminSection; label: string; icon: typeof Users; group: "ops" | "catalog" | "finance" }[] =
-  [
-    { id: "overview", label: "Dashboard", icon: LayoutDashboard, group: "ops" },
-    { id: "inscriptions", label: "Inscriptions", icon: Users, group: "ops" },
-    { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
-    { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
-    { id: "videos", label: "Vidéos", icon: Film, group: "catalog" },
-    { id: "services", label: "Services", icon: Briefcase, group: "catalog" },
-    { id: "commissions", label: "Revenus", icon: DollarSign, group: "finance" },
-    { id: "settings", label: "Paramètres", icon: Settings, group: "finance" },
-  ];
+const navItems: {
+  id: AdminSection;
+  label: string;
+  icon: typeof Users;
+  group: "ops" | "catalog" | "finance";
+}[] = [
+  { id: "overview", label: "Dashboard", icon: LayoutDashboard, group: "ops" },
+  { id: "inscriptions", label: "Inscriptions", icon: Users, group: "ops" },
+  { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
+  { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
+  { id: "videos", label: "Vidéos", icon: Film, group: "catalog" },
+  { id: "services", label: "Services", icon: Briefcase, group: "catalog" },
+  { id: "commissions", label: "Revenus", icon: DollarSign, group: "finance" },
+  { id: "settings", label: "Paramètres", icon: Settings, group: "finance" },
+];
 
 const groups: { id: "ops" | "catalog" | "finance"; label: string }[] = [
   { id: "ops", label: "Opérations" },
@@ -228,14 +232,22 @@ export function AdminLayout({
                 >
                   <LogOut className="size-4" aria-hidden />
                 </Button>
-                <Button asChild variant="soft" size="sm" className="hidden rounded-xl sm:inline-flex">
+                <Button
+                  asChild
+                  variant="soft"
+                  size="sm"
+                  className="hidden rounded-xl sm:inline-flex"
+                >
                   <Link to="/">Voir le site</Link>
                 </Button>
               </div>
             </div>
           </header>
 
-          <main id="main-content" className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <main
+            id="main-content"
+            className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+          >
             {children}
           </main>
         </div>

@@ -1,10 +1,6 @@
 import type { ReactNode } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  formatWhatsAppPhone,
-  getWhatsAppChatUrl,
-  siteConfig,
-} from "@/lib/site-config";
+import { formatWhatsAppPhone, getWhatsAppChatUrl, siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 type FounderCardProps = {
@@ -98,11 +94,7 @@ function FounderSocialLinks({ showLabel = false }: { showLabel?: boolean }) {
           <TikTokIcon />
         </SocialLink>
       ) : null}
-      <SocialLink
-        href={getWhatsAppChatUrl()}
-        label="WhatsApp"
-        showLabel={showLabel}
-      >
+      <SocialLink href={getWhatsAppChatUrl()} label="WhatsApp" showLabel={showLabel}>
         <WhatsAppIcon />
       </SocialLink>
       {founder.githubUrl ? (
@@ -123,7 +115,10 @@ function FounderSocialLinks({ showLabel = false }: { showLabel?: boolean }) {
 
 export function FounderCard({ variant = "default" }: FounderCardProps) {
   const founder = siteConfig.founder;
-  const roleTags = founder.role.split("·").map((tag) => tag.trim()).filter(Boolean);
+  const roleTags = founder.role
+    .split("·")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
   const initials = founder.name
     .split(/\s+/)
     .map((part) => part[0])
@@ -167,7 +162,9 @@ export function FounderCard({ variant = "default" }: FounderCardProps) {
               ))}
             </div>
 
-            <p className="mt-5 text-sm leading-relaxed text-muted-foreground sm:text-base">{founder.bio}</p>
+            <p className="mt-5 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {founder.bio}
+            </p>
 
             <div className="mt-7 flex flex-wrap gap-2.5">
               <FounderSocialLinks showLabel />

@@ -1,7 +1,11 @@
 import { isLessonHtml, sanitizeLessonHtml } from "@/lib/lesson-html";
 import type { LessonQuiz } from "@/lib/lesson-quiz";
 import { decodeLessonQuizData, extractQuizFromSubSessionHtml } from "@/lib/lesson-quiz";
-import { parseInlineMarkdown, parseLessonContent, type LessonContentBlock } from "@/lib/parse-lesson-content";
+import {
+  parseInlineMarkdown,
+  parseLessonContent,
+  type LessonContentBlock,
+} from "@/lib/parse-lesson-content";
 
 export type ArticleSubSession = {
   number: string;
@@ -47,7 +51,11 @@ function parseSessionTitle(raw: string): { number: number; title: string } | nul
   return { number, title };
 }
 
-function parseSubSessionTitle(raw: string, sessionNumber: number, index: number): { number: string; title: string } {
+function parseSubSessionTitle(
+  raw: string,
+  sessionNumber: number,
+  index: number,
+): { number: string; title: string } {
   const trimmed = raw.trim();
   const explicit = trimmed.match(SUBSESSION_HEADING_RE);
   if (explicit) {
@@ -185,7 +193,10 @@ function isStructuralSubSessionH3(element: Element): boolean {
   return SUBSESSION_HEADING_RE.test(text);
 }
 
-function collectBlocksUntilHeading(nodes: ChildNode[], start: number): { html: string; next: number } {
+function collectBlocksUntilHeading(
+  nodes: ChildNode[],
+  start: number,
+): { html: string; next: number } {
   const parts: string[] = [];
   let index = start + 1;
   while (index < nodes.length) {
@@ -209,8 +220,14 @@ function collectBlocksUntilHeading(nodes: ChildNode[], start: number): { html: s
 function readSessionTitleFromRegex(attrs: string, inner: string, sessionNumber: number): string {
   const fromAttr = attrs.match(/data-lesson-session-title="([^"]*)"/)?.[1]?.trim();
   if (fromAttr) return fromAttr;
-  const text = inner.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  return text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() || `Session ${sessionNumber}`;
+  const text = inner
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return (
+    text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() ||
+    `Session ${sessionNumber}`
+  );
 }
 
 function parseHtmlSessionsFromRegex(raw: string): ArticleSession[] | null {
@@ -254,11 +271,17 @@ function parseHtmlSessionsFromRegex(raw: string): ArticleSession[] | null {
 
       subIndex += 1;
       const subAttrs = h3Match[1] ?? "";
-      const subTitleRaw = (h3Match[2] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      const subTitleRaw = (h3Match[2] ?? "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
       const sub = parseSubSessionTitle(subTitleRaw, sessionNumber, subIndex);
       const isQuiz = /\bdata-lesson-quiz(?:=["']|>|\s)/i.test(subAttrs);
-      const legacyQuizId = subAttrs.match(/\bdata-lesson-quiz="([^"]+)"/i)?.[1]?.trim() || undefined;
-      const quizFromHeading = decodeLessonQuizData(subAttrs.match(/\bdata-lesson-quiz-data="([^"]+)"/i)?.[1] ?? "");
+      const legacyQuizId =
+        subAttrs.match(/\bdata-lesson-quiz="([^"]+)"/i)?.[1]?.trim() || undefined;
+      const quizFromHeading = decodeLessonQuizData(
+        subAttrs.match(/\bdata-lesson-quiz-data="([^"]+)"/i)?.[1] ?? "",
+      );
       const bodyHtml = subChunk.slice(h3Match[0].length);
       const { quiz: quizFromBody, introHtml } = extractQuizFromSubSessionHtml(bodyHtml);
       const quiz = quizFromHeading ?? quizFromBody ?? undefined;
@@ -338,7 +361,9 @@ function parseHtmlSessions(raw: string): ArticleSession[] | null {
       const sub = parseSubSessionTitle(text, session.number, subIndex);
       const isQuiz = element.hasAttribute("data-lesson-quiz");
       const legacyQuizId = element.getAttribute("data-lesson-quiz")?.trim() || undefined;
-      const quizFromHeading = decodeLessonQuizData(element.getAttribute("data-lesson-quiz-data") ?? "");
+      const quizFromHeading = decodeLessonQuizData(
+        element.getAttribute("data-lesson-quiz-data") ?? "",
+      );
       const body = collectBlocksUntilHeading(nodes, index);
       const { quiz: quizFromBody, introHtml } = extractQuizFromSubSessionHtml(body.html || "");
       const quiz = quizFromHeading ?? quizFromBody ?? undefined;
@@ -371,7 +396,9 @@ export function parseArticleSessions(content: string): ArticleSession[] | null {
 }
 
 export function formatArticleSessionHeading(number: number, title: string): string {
-  const normalized = title.replace(new RegExp(`^Session\\s*${number}\\s*[—–-]?\\s*`, "i"), "").trim();
+  const normalized = title
+    .replace(new RegExp(`^Session\\s*${number}\\s*[—–-]?\\s*`, "i"), "")
+    .trim();
   if (!normalized || normalized === `Session ${number}`) {
     return `Session ${number}`;
   }
@@ -382,7 +409,10 @@ export function readArticleSessionTitle(element: Element, sessionNumber: number)
   const fromAttr = element.getAttribute("data-lesson-session-title")?.trim();
   if (fromAttr) return fromAttr;
   const text = element.textContent?.trim() ?? "";
-  return text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() || `Session ${sessionNumber}`;
+  return (
+    text.replace(new RegExp(`^Session\\s*${sessionNumber}\\s*[—–-]?\\s*`, "i"), "").trim() ||
+    `Session ${sessionNumber}`
+  );
 }
 
 export function syncArticleSessionHeadingMetadata(root: ParentNode): void {

@@ -21,7 +21,11 @@ expect(Boolean(scripts["test:ci"]), "Missing npm script: test:ci", failures);
 expect(Boolean(scripts.typecheck), "Missing npm script: typecheck", failures);
 expect(Boolean(scripts.build), "Missing npm script: build", failures);
 
-expect(existsSync(join(root, "tests", "admin-auth.test.ts")), "Missing critical test: admin auth", failures);
+expect(
+  existsSync(join(root, "tests", "admin-auth.test.ts")),
+  "Missing critical test: admin auth",
+  failures,
+);
 expect(
   existsSync(join(root, "tests", "stripe-access.test.ts")),
   "Missing critical test: stripe access",
@@ -63,13 +67,25 @@ expect(
 );
 
 const serverSource = readText("scripts/railway.mjs");
-expect(serverSource.includes('pathname === "/healthz"'), "Health endpoint /healthz missing", failures);
-expect(serverSource.includes("VITE_SUPABASE_URL"), "Health check must accept VITE_SUPABASE_URL fallback", failures);
+expect(
+  serverSource.includes('pathname === "/healthz"'),
+  "Health endpoint /healthz missing",
+  failures,
+);
+expect(
+  serverSource.includes("VITE_SUPABASE_URL"),
+  "Health check must accept VITE_SUPABASE_URL fallback",
+  failures,
+);
 
 const ciWorkflow = readText(".github/workflows/ci.yml");
 expect(ciWorkflow.includes("npm run lint"), "CI does not run lint", failures);
 expect(ciWorkflow.includes("npm run test:ci"), "CI does not run runtime tests", failures);
-expect(ciWorkflow.includes("npm run audit:release"), "CI does not run release audit checks", failures);
+expect(
+  ciWorkflow.includes("npm run audit:release"),
+  "CI does not run release audit checks",
+  failures,
+);
 
 expect(existsSync(join(root, ".github/workflows/deploy.yml")), "Missing deploy workflow", failures);
 

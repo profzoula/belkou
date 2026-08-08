@@ -51,7 +51,10 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 function defaultTitleFromFileName(fileName: string): string {
-  return fileName.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/[-_]+/g, " ")
+    .trim();
 }
 
 function mimeFromFileName(fileName: string): string {
@@ -186,7 +189,8 @@ export function AdminCourseResourcesEditor({
       <div>
         <h2 className="font-semibold">Ressources téléchargeables</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          PDF, Word, ebook, Excel… visibles par les inscrits dans l&apos;onglet Ressources du lecteur.
+          PDF, Word, ebook, Excel… visibles par les inscrits dans l&apos;onglet Ressources du
+          lecteur.
         </p>
       </div>
 
@@ -271,19 +275,31 @@ export function AdminCourseResourcesEditor({
           }}
         />
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => inputRef.current?.click()}
+          >
             <Upload className="h-4 w-4 mr-2" />
             Choisir un fichier
           </Button>
           {pendingFile ? (
             <span className="self-center text-sm text-muted-foreground">{pendingFile.name}</span>
           ) : null}
-          <Button type="button" size="sm" disabled={uploading || !pendingFile} onClick={() => uploadResource()}>
+          <Button
+            type="button"
+            size="sm"
+            disabled={uploading || !pendingFile}
+            onClick={() => uploadResource()}
+          >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {uploading ? "Envoi…" : "Publier la ressource"}
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">PDF, Word, EPUB, Excel, TXT, CSV, ZIP — max 25 Mo.</p>
+        <p className="text-xs text-muted-foreground">
+          PDF, Word, EPUB, Excel, TXT, CSV, ZIP — max 25 Mo.
+        </p>
       </div>
     </div>
   );

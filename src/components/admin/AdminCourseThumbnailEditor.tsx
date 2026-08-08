@@ -104,7 +104,8 @@ export function AdminCourseThumbnailEditor({
       <div>
         <h2 className="font-semibold">Miniature du cours</h2>
         <p className="text-xs text-muted-foreground mt-1">
-          Uploadez une image — elle sera enregistrée sur Supabase et visible sur l&apos;accueil et la page du cours.
+          Uploadez une image — elle sera enregistrée sur Supabase et visible sur l&apos;accueil et
+          la page du cours.
         </p>
       </div>
 

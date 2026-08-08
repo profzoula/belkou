@@ -229,7 +229,9 @@ export function CourseVideoPlayer({
           className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40"
         >
           <Loader2 className="h-8 w-8 animate-spin text-white/80" />
-          <span className="sr-only">{buffering ? "Mise en mémoire tampon" : "Chargement de la vidéo"}</span>
+          <span className="sr-only">
+            {buffering ? "Mise en mémoire tampon" : "Chargement de la vidéo"}
+          </span>
         </div>
       ) : null}
 

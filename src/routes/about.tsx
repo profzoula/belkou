@@ -69,13 +69,12 @@ function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-4 justify-center">À propos</p>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Former la nouvelle génération tech{" "}
-              <span className="text-gradient">en français</span>
+              Former la nouvelle génération tech <span className="text-gradient">en français</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {siteConfig.name} est une plateforme de formations en ligne spécialisée en développement,
-              applications IA et SaaS. Nous accompagnons les apprenants d'Haïti, de la diaspora et
-              d'ailleurs pour créer, lancer et monétiser des projets numériques.
+              {siteConfig.name} est une plateforme de formations en ligne spécialisée en
+              développement, applications IA et SaaS. Nous accompagnons les apprenants d'Haïti, de
+              la diaspora et d'ailleurs pour créer, lancer et monétiser des projets numériques.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <span className="badge">

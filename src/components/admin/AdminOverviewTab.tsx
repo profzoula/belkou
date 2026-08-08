@@ -52,10 +52,20 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
         description="Vue d'ensemble BelKou — inscriptions, catalogue, services et revenus affiliés."
         actions={
           <>
-            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => onNavigate("inscriptions")}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl"
+              onClick={() => onNavigate("inscriptions")}
+            >
               Inscriptions
             </Button>
-            <Button variant="hero" size="sm" className="rounded-xl shadow-primary" onClick={() => onNavigate("courses")}>
+            <Button
+              variant="hero"
+              size="sm"
+              className="rounded-xl shadow-primary"
+              onClick={() => onNavigate("courses")}
+            >
               Gérer les cours
             </Button>
           </>
@@ -129,15 +139,25 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
             <div className="space-y-1">
               <h2 className="font-display text-lg font-semibold tracking-tight">Catalogue</h2>
               <p className="text-sm text-muted-foreground">
-                {content.courseCount} cours · {content.totalLessons} leçons · {content.previewLessons}{" "}
-                previews
+                {content.courseCount} cours · {content.totalLessons} leçons ·{" "}
+                {content.previewLessons} previews
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => onNavigate("videos")}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => onNavigate("videos")}
+              >
                 Vidéos
               </Button>
-              <Button variant="soft" size="sm" className="rounded-xl" onClick={() => onNavigate("courses")}>
+              <Button
+                variant="soft"
+                size="sm"
+                className="rounded-xl"
+                onClick={() => onNavigate("courses")}
+              >
                 Cours
               </Button>
             </div>

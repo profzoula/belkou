@@ -13,7 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { StudentPaymentStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { Badge } from "@/components/ui/badge";
@@ -84,7 +90,11 @@ export function AdminStudentsTab() {
       }
       if (accessFilter === "active" && student.paymentStatus !== "paid") return false;
       if (accessFilter === "none" && student.paymentStatus === "paid") return false;
-      if (accessFilter === "pending" && student.paymentStatus !== "pending" && student.paymentStatus !== "manual_pending") {
+      if (
+        accessFilter === "pending" &&
+        student.paymentStatus !== "pending" &&
+        student.paymentStatus !== "manual_pending"
+      ) {
         return false;
       }
       return true;
@@ -115,11 +125,7 @@ export function AdminStudentsTab() {
     }
 
     const courseTitle = courseTitleBySlug.get(grantCourseSlug) ?? grantCourseSlug;
-    if (
-      !confirm(
-        `Activer l'accès au cours « ${courseTitle} » pour ${grantEmail.trim()} ?`,
-      )
-    ) {
+    if (!confirm(`Activer l'accès au cours « ${courseTitle} » pour ${grantEmail.trim()} ?`)) {
       return;
     }
 
@@ -230,7 +236,10 @@ export function AdminStudentsTab() {
                 </tr>
               ) : (
                 paginatedStudents.map((student) => (
-                  <tr key={student.registrationId ?? `${student.userId}-${student.email}`} className="border-b border-border/60">
+                  <tr
+                    key={student.registrationId ?? `${student.userId}-${student.email}`}
+                    className="border-b border-border/60"
+                  >
                     <td className="px-5 py-3 text-muted-foreground">
                       {new Date(student.createdAt).toLocaleDateString("fr-FR")}
                     </td>
@@ -247,7 +256,10 @@ export function AdminStudentsTab() {
                     </td>
                     <td className="px-5 py-3">
                       {student.paymentStatus ? (
-                        <StudentPaymentStatusBadge status={student.paymentStatus} className="text-[11px]" />
+                        <StudentPaymentStatusBadge
+                          status={student.paymentStatus}
+                          className="text-[11px]"
+                        />
                       ) : (
                         <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                           Compte seul
@@ -257,7 +269,9 @@ export function AdminStudentsTab() {
                     <td className="px-5 py-3">
                       {student.paymentStatus === "paid" && student.courseSlug ? (
                         <div className="flex flex-col items-start gap-1.5">
-                          <Badge variant="success" className="text-xs">Accès confirmé</Badge>
+                          <Badge variant="success" className="text-xs">
+                            Accès confirmé
+                          </Badge>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -290,17 +304,25 @@ export function AdminStudentsTab() {
 
         <div className="md:hidden divide-y divide-border">
           {paginatedStudents.length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-muted-foreground">Aucun étudiant trouvé.</p>
+            <p className="px-5 py-10 text-center text-sm text-muted-foreground">
+              Aucun étudiant trouvé.
+            </p>
           ) : (
             paginatedStudents.map((student) => (
-              <div key={student.registrationId ?? `${student.userId}-${student.email}`} className="p-4 space-y-3">
+              <div
+                key={student.registrationId ?? `${student.userId}-${student.email}`}
+                className="p-4 space-y-3"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold truncate">{student.fullName}</p>
                     <p className="text-sm text-muted-foreground truncate">{student.email}</p>
                   </div>
                   {student.paymentStatus ? (
-                    <StudentPaymentStatusBadge status={student.paymentStatus} className="shrink-0 text-[11px]" />
+                    <StudentPaymentStatusBadge
+                      status={student.paymentStatus}
+                      className="shrink-0 text-[11px]"
+                    />
                   ) : (
                     <span className="shrink-0 inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                       Compte seul

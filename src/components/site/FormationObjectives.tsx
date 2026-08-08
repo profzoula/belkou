@@ -5,7 +5,10 @@ export function FormationObjectivesPanel() {
   const { formation } = siteConfig;
 
   return (
-    <div id="objectifs" className="site-section-anchor relative min-w-0 w-full max-w-full overflow-hidden">
+    <div
+      id="objectifs"
+      className="site-section-anchor relative min-w-0 w-full max-w-full overflow-hidden"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute -top-8 right-0 h-40 w-40 rounded-full bg-primary/15 blur-3xl"
@@ -30,7 +33,8 @@ export function FormationObjectivesPanel() {
             Objectif de la formation
           </h2>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-md">
-            À la fin du programme, vous serez capable de lancer et déployer vos propres projets avec l&apos;IA.
+            À la fin du programme, vous serez capable de lancer et déployer vos propres projets avec
+            l&apos;IA.
           </p>
         </div>
 
@@ -40,7 +44,9 @@ export function FormationObjectivesPanel() {
               <div className="icon-box shadow-primary">
                 <Target className="h-4 w-4" />
               </div>
-              <h3 className="min-w-0 flex-1 text-sm font-semibold tracking-tight">Après la formation, vous saurez</h3>
+              <h3 className="min-w-0 flex-1 text-sm font-semibold tracking-tight">
+                Après la formation, vous saurez
+              </h3>
             </div>
             <ul className="space-y-1.5">
               {formation.objectives.map((item) => (
@@ -80,7 +86,9 @@ export function FormationObjectivesPanel() {
                   Option recommandée
                 </p>
                 <p className="text-foreground leading-relaxed">
-                  <span className="font-display text-lg font-bold text-primary">{formation.durationRecommended.split(" ")[0]}</span>
+                  <span className="font-display text-lg font-bold text-primary">
+                    {formation.durationRecommended.split(" ")[0]}
+                  </span>
                   <span className="font-semibold"> semaines</span>
                   <span className="text-muted-foreground"> — {formation.schedule}</span>
                 </p>

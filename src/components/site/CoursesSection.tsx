@@ -193,10 +193,8 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
           <div
             className={cn(
               "mt-8 grid gap-3 sm:mt-10 sm:gap-5",
-              filtered.length === 1 &&
-                "mx-auto max-w-sm grid-cols-1 sm:max-w-md lg:max-w-lg",
-              filtered.length === 2 &&
-                "mx-auto max-w-3xl grid-cols-2 lg:max-w-4xl",
+              filtered.length === 1 && "mx-auto max-w-sm grid-cols-1 sm:max-w-md lg:max-w-lg",
+              filtered.length === 2 && "mx-auto max-w-3xl grid-cols-2 lg:max-w-4xl",
               filtered.length >= 3 && "grid-cols-2 lg:grid-cols-3",
             )}
           >

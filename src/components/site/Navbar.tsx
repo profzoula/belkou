@@ -139,7 +139,11 @@ function NavActions({
             variant={dark ? "inverse" : "ghost"}
             size={stacked ? "lg" : "sm"}
             className={
-              dark && !stacked ? "bg-white text-black hover:bg-white/90" : dark ? undefined : "text-muted-foreground"
+              dark && !stacked
+                ? "bg-white text-black hover:bg-white/90"
+                : dark
+                  ? undefined
+                  : "text-muted-foreground"
             }
           >
             <Link to="/login" onClick={onNavigate}>
@@ -150,7 +154,11 @@ function NavActions({
             asChild
             variant={dark ? "outline" : "hero"}
             size={stacked ? "lg" : "sm"}
-            className={dark ? "border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white" : undefined}
+            className={
+              dark
+                ? "border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+                : undefined
+            }
           >
             <Link to="/signup" onClick={onNavigate}>
               S&apos;inscrire
@@ -221,12 +229,16 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
           </nav>
 
           <div className="hidden md:flex items-center gap-1.5">
-            <ThemeToggle className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined} />
+            <ThemeToggle
+              className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
+            />
             <NavActions dark={isDark} hero={isHero} />
           </div>
 
           <div className="flex items-center gap-1.5 md:hidden">
-            <ThemeToggle className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined} />
+            <ThemeToggle
+              className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
+            />
             {!loading && user ? <UserAccountMenu onNavigate={close} /> : null}
             <button
               type="button"
@@ -270,7 +282,9 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
                   </a>
                 ),
               )}
-              <div className={cn("mt-3 pt-3 border-t", isDark ? "border-white/10" : "border-border")}>
+              <div
+                className={cn("mt-3 pt-3 border-t", isDark ? "border-white/10" : "border-border")}
+              >
                 <NavActions onNavigate={close} stacked dark={isDark} hero={isHero} />
               </div>
             </nav>

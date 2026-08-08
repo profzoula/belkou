@@ -83,7 +83,12 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   if (enrollments === undefined) {
     return (
-      <Panel padding="lg" className="text-center text-sm text-muted-foreground" role="status" aria-live="polite">
+      <Panel
+        padding="lg"
+        className="text-center text-sm text-muted-foreground"
+        role="status"
+        aria-live="polite"
+      >
         Chargement de vos cours…
       </Panel>
     );
@@ -118,7 +123,9 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="font-display text-2xl font-semibold text-foreground">Mes cours</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Reprenez là où vous vous êtes arrêté.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Reprenez là où vous vous êtes arrêté.
+          </p>
         </div>
         <Button asChild variant="outline" size="sm">
           <Link to="/courses">Catalogue</Link>
@@ -130,7 +137,10 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
           Filtrer mes cours par statut
         </Label>
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-          <SelectTrigger id="courses-status-filter" className="h-11 w-full rounded-xl border-border lg:w-[200px]">
+          <SelectTrigger
+            id="courses-status-filter"
+            className="h-11 w-full rounded-xl border-border lg:w-[200px]"
+          >
             <SelectValue placeholder="Progression" />
           </SelectTrigger>
           <SelectContent>
@@ -163,7 +173,10 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
             Trier par
           </Label>
           <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
-            <SelectTrigger id="courses-sort" className="h-9 w-full rounded-xl border-border text-sm sm:w-[200px]">
+            <SelectTrigger
+              id="courses-sort"
+              className="h-9 w-full rounded-xl border-border text-sm sm:w-[200px]"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -176,7 +189,10 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
       {count === 0 ? (
         <Panel variant="dashed">
-          <EmptyState title="Aucun résultat" description="Aucun cours ne correspond à votre recherche." />
+          <EmptyState
+            title="Aucun résultat"
+            description="Aucun cours ne correspond à votre recherche."
+          />
         </Panel>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
@@ -194,8 +210,12 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
   const isPaid = enrollment.payment_status === "paid";
   const canLearn = isPaid && enrollment.contentLive;
-  const welcomeSearch = enrollment.welcomeLessonId ? { lesson: enrollment.welcomeLessonId } : undefined;
-  const continueSearch = enrollment.continueLessonId ? { lesson: enrollment.continueLessonId } : undefined;
+  const welcomeSearch = enrollment.welcomeLessonId
+    ? { lesson: enrollment.welcomeLessonId }
+    : undefined;
+  const continueSearch = enrollment.continueLessonId
+    ? { lesson: enrollment.continueLessonId }
+    : undefined;
   const href = canLearn
     ? {
         to: "/courses/$slug/learn" as const,
@@ -246,7 +266,9 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
             {enrollment.courseTitle}
           </h3>
         </Link>
-        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">{enrollment.instructor}</p>
+        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">
+          {enrollment.instructor}
+        </p>
 
         <div className="mt-auto space-y-2 pt-3 sm:pt-4">
           {showProgress ? (
@@ -262,7 +284,9 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
                   style={{ width: `${Math.max(enrollment.progressPercent, 2)}%` }}
                 />
               </div>
-              <p className="text-[10px] text-muted-foreground sm:text-xs">{progressLabel(enrollment)}</p>
+              <p className="text-[10px] text-muted-foreground sm:text-xs">
+                {progressLabel(enrollment)}
+              </p>
             </>
           ) : (
             <p
@@ -277,7 +301,12 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
               {progressLabel(enrollment)}
             </p>
           )}
-          <Button asChild size="sm" variant={canLearn || isPaid ? "default" : "outline"} className="h-8 w-full text-xs sm:h-9 sm:text-sm">
+          <Button
+            asChild
+            size="sm"
+            variant={canLearn || isPaid ? "default" : "outline"}
+            className="h-8 w-full text-xs sm:h-9 sm:text-sm"
+          >
             <Link {...href}>
               {canLearn ? "Continuer" : isPaid ? "Ouvrir" : "Finaliser"}
               <ArrowRight className="h-3.5 w-3.5" />

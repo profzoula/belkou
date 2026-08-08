@@ -1,11 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Linkedin, Mail, Phone } from "lucide-react";
-import {
-  formatWhatsAppPhone,
-  getWhatsAppChatUrl,
-  siteConfig,
-} from "@/lib/site-config";
+import { formatWhatsAppPhone, getWhatsAppChatUrl, siteConfig } from "@/lib/site-config";
 
 const socialLinks = [
   { label: "Facebook", href: siteConfig.founder.facebookUrl, icon: Facebook },

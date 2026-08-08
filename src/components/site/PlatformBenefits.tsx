@@ -13,7 +13,8 @@ const benefits = [
   {
     icon: BookOpen,
     title: "Un cours = un achat",
-    description: "Pas d'abonnement global. Choisissez une formation, payez une fois, accédez à toutes ses leçons.",
+    description:
+      "Pas d'abonnement global. Choisissez une formation, payez une fois, accédez à toutes ses leçons.",
   },
   {
     icon: Play,
@@ -23,7 +24,8 @@ const benefits = [
   {
     icon: Zap,
     title: "Leçons en vidéo HD",
-    description: "Modules structurés, durée indiquée et lecteur intégré pour avancer à votre rythme.",
+    description:
+      "Modules structurés, durée indiquée et lecteur intégré pour avancer à votre rythme.",
   },
   {
     icon: Globe,
@@ -65,13 +67,18 @@ export function PlatformBenefits() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {benefits.map((b) => (
-              <div key={b.title} className="surface surface-hover rounded-xl p-4 flex gap-3 min-w-0">
+              <div
+                key={b.title}
+                className="surface surface-hover rounded-xl p-4 flex gap-3 min-w-0"
+              >
                 <div className="icon-box shrink-0 h-9 w-9">
                   <b.icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold">{b.title}</h3>
-                  <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">{b.description}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
+                    {b.description}
+                  </p>
                 </div>
               </div>
             ))}

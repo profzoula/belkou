@@ -83,7 +83,11 @@ function patchAddedLesson(courseOverride, lessonId, patch) {
 }
 
 async function main() {
-  const { data, error } = await sb.from("site_content").select("value").eq("key", OVERRIDES_KEY).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", OVERRIDES_KEY)
+    .maybeSingle();
   if (error) {
     console.error("Failed to read site_content:", error.message);
     process.exit(1);
@@ -126,7 +130,9 @@ async function main() {
     console.error(
       `Lesson not found. Looked for section matching ${SECTION_HINT} and lesson matching ${LESSON_HINT}.`,
     );
-    console.error("Add the lesson in admin first, or adjust SECTION_HINT / LESSON_HINT in this script.");
+    console.error(
+      "Add the lesson in admin first, or adjust SECTION_HINT / LESSON_HINT in this script.",
+    );
     process.exit(1);
   }
 

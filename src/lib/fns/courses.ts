@@ -9,7 +9,10 @@ import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
-import { countPaidEnrollmentsForCourse, getPaidEnrollmentCountsByCourse } from "@/server/enrollment-stats";
+import {
+  countPaidEnrollmentsForCourse,
+  getPaidEnrollmentCountsByCourse,
+} from "@/server/enrollment-stats";
 
 export type PublicCourse = Omit<Course, "thumbnail" | "resources"> & {
   thumbnail: {

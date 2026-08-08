@@ -47,9 +47,15 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
         }
         if (block.type === "list") {
           return (
-            <ul key={index} className="lesson-rich-list space-y-2 rounded-xl border border-border bg-white p-4 dark:bg-card">
+            <ul
+              key={index}
+              className="lesson-rich-list space-y-2 rounded-xl border border-border bg-white p-4 dark:bg-card"
+            >
               {block.items.map((item) => (
-                <li key={item} className="relative list-none pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-success">
+                <li
+                  key={item}
+                  className="relative list-none pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-success"
+                >
                   <InlineText text={item} />
                 </li>
               ))}

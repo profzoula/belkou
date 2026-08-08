@@ -29,8 +29,7 @@ function AuthCallbackPage() {
 
     const run = async () => {
       const search = new URLSearchParams(window.location.search);
-      const oauthError =
-        search.get("error_description") ?? search.get("error");
+      const oauthError = search.get("error_description") ?? search.get("error");
       const next = search.get("next") ?? "/dashboard";
       const destination = next.startsWith("/") ? next : `/${next}`;
 

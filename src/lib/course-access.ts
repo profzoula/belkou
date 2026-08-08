@@ -48,7 +48,10 @@ export function hasPaidAccessToCourse(
   if (!registration || registration.payment_status !== "paid") return false;
   if (registrationCoversCourse(registration, courseSlug)) return true;
   // Legacy cohort: paid Premium/VIP before course_slug existed
-  if (registrationCourseKey(courseSlug) === LEGACY_COURSE_SLUG && !registration.course_slug?.trim()) {
+  if (
+    registrationCourseKey(courseSlug) === LEGACY_COURSE_SLUG &&
+    !registration.course_slug?.trim()
+  ) {
     return true;
   }
   return false;
@@ -126,7 +129,14 @@ export function getLessonLockState(
       const requiredLessonIds = course.sections
         ? getSequenceLessonIds({ sections: course.sections })
         : undefined;
-      if (!isLessonUnlockedInSequence(lesson.id, orderedLessonIds, completedLessonIds, requiredLessonIds)) {
+      if (
+        !isLessonUnlockedInSequence(
+          lesson.id,
+          orderedLessonIds,
+          completedLessonIds,
+          requiredLessonIds,
+        )
+      ) {
         return { locked: true, reason: "sequential" };
       }
     }

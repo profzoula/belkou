@@ -110,14 +110,21 @@ export const completeLesson = createServerFn({ method: "POST" })
     const completedLessonIds = rows.filter((row) => row.completed_at).map((row) => row.lesson_id);
 
     if (
-      !isLessonUnlockedInSequence(data.lessonId, orderedLessonIds, completedLessonIds, requiredLessonIds)
+      !isLessonUnlockedInSequence(
+        data.lessonId,
+        orderedLessonIds,
+        completedLessonIds,
+        requiredLessonIds,
+      )
     ) {
       throw new Error("Terminez la leçon précédente avant de continuer.");
     }
 
     await markLessonComplete(user.email, data.courseSlug, data.lessonId);
     const updatedRows = await listLessonProgress(user.email, data.courseSlug);
-    const updatedCompleted = updatedRows.filter((row) => row.completed_at).map((row) => row.lesson_id);
+    const updatedCompleted = updatedRows
+      .filter((row) => row.completed_at)
+      .map((row) => row.lesson_id);
     return {
       progressPercent: computeCourseProgressPercent(course, updatedCompleted),
     };

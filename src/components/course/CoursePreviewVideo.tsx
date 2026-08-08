@@ -183,7 +183,8 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
     const refreshInMs = playback.urlExpiresAt - Date.now() - 5 * 60 * 1000;
     const timer = window.setTimeout(
       () => {
-        void refreshPlaybackRef.current?.()
+        void refreshPlaybackRef
+          .current?.()
           .then((next) => {
             if (next) setPlayback(next);
           })
@@ -202,10 +203,15 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
   return (
     <section
       ref={sectionRef}
-      className={cn("mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm", className)}
+      className={cn(
+        "mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
+        className,
+      )}
     >
       <div className="border-b border-border/80 px-4 py-3 sm:px-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">Aperçu vidéo</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
+          Aperçu vidéo
+        </p>
         <h2 className="mt-1 text-base font-semibold text-foreground sm:text-lg">{lesson.title}</h2>
       </div>
 
@@ -232,7 +238,9 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
               <Play className="h-5 w-5 fill-current" aria-hidden />
               Lancer l&apos;aperçu
             </Button>
-            <p className="max-w-sm text-xs text-white/90">La vidéo se charge uniquement quand vous la demandez.</p>
+            <p className="max-w-sm text-xs text-white/90">
+              La vidéo se charge uniquement quand vous la demandez.
+            </p>
           </div>
         </div>
       ) : playbackLoading ? (
@@ -242,7 +250,11 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
       ) : playback ? (
         <Suspense fallback={<VideoPlayerFallback />}>
           {playback.kind === "vimeo" ? (
-            <LazyVimeoVideoPlayer embedUrl={playback.url} title={lesson.title} lessonKey={lesson.id} />
+            <LazyVimeoVideoPlayer
+              embedUrl={playback.url}
+              title={lesson.title}
+              lessonKey={lesson.id}
+            />
           ) : (
             <LazyCourseVideoPlayer playback={playback} title={lesson.title} lessonKey={lesson.id} />
           )}

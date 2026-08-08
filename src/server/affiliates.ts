@@ -139,7 +139,10 @@ export async function areAffiliateTablesReady(): Promise<boolean> {
   return checkAffiliateTables(sb);
 }
 
-async function getAffiliateCodeFromMetadata(sb: SupabaseClient, userId: string): Promise<string | null> {
+async function getAffiliateCodeFromMetadata(
+  sb: SupabaseClient,
+  userId: string,
+): Promise<string | null> {
   const { data, error } = await sb.auth.admin.getUserById(userId);
   if (error || !data.user) return null;
 
@@ -147,7 +150,11 @@ async function getAffiliateCodeFromMetadata(sb: SupabaseClient, userId: string):
   return typeof code === "string" && code ? normalizeCode(code) : null;
 }
 
-async function saveAffiliateCodeToMetadata(sb: SupabaseClient, userId: string, code: string): Promise<boolean> {
+async function saveAffiliateCodeToMetadata(
+  sb: SupabaseClient,
+  userId: string,
+  code: string,
+): Promise<boolean> {
   const { data, error: getError } = await sb.auth.admin.getUserById(userId);
   if (getError || !data.user) return false;
 
@@ -161,7 +168,10 @@ async function saveAffiliateCodeToMetadata(sb: SupabaseClient, userId: string, c
   return !error;
 }
 
-async function findAffiliateInUserList(sb: SupabaseClient, code: string): Promise<AffiliateRecord | null> {
+async function findAffiliateInUserList(
+  sb: SupabaseClient,
+  code: string,
+): Promise<AffiliateRecord | null> {
   const normalized = normalizeCode(code);
   if (!normalized) return null;
 
@@ -211,7 +221,9 @@ async function getOrCreateAffiliateFromMetadata(params: {
 }
 
 /** Ensures a row exists in `affiliates` and returns the DB record (uuid id for FK inserts). */
-export async function ensureAffiliateDbRecord(affiliate: AffiliateRecord): Promise<AffiliateRecord | null> {
+export async function ensureAffiliateDbRecord(
+  affiliate: AffiliateRecord,
+): Promise<AffiliateRecord | null> {
   const sb = getSupabaseAdmin();
   if (!sb) return null;
   if (!(await checkAffiliateTables(sb))) return affiliate;
@@ -237,10 +249,7 @@ export async function ensureAffiliateDbRecord(affiliate: AffiliateRecord): Promi
 
   if (!insertError && inserted) return rowToAffiliate(inserted);
 
-  if (
-    insertError?.message.includes("duplicate") ||
-    insertError?.message.includes("unique")
-  ) {
+  if (insertError?.message.includes("duplicate") || insertError?.message.includes("unique")) {
     const { data: retry } = await sb
       .from("affiliates")
       .select("*")
@@ -286,7 +295,11 @@ export async function getAffiliateByCode(code: string): Promise<AffiliateRecord 
   if (!normalized) return null;
 
   if (await checkAffiliateTables(sb)) {
-    const { data, error } = await sb.from("affiliates").select("*").eq("code", normalized).maybeSingle();
+    const { data, error } = await sb
+      .from("affiliates")
+      .select("*")
+      .eq("code", normalized)
+      .maybeSingle();
     if (!error && data) return rowToAffiliate(data);
   }
 
@@ -345,7 +358,11 @@ export async function getAffiliateByUserId(userId: string): Promise<AffiliateRec
   if (!sb) return null;
 
   if (await checkAffiliateTables(sb)) {
-    const { data, error } = await sb.from("affiliates").select("*").eq("user_id", userId).maybeSingle();
+    const { data, error } = await sb
+      .from("affiliates")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!error && data) return rowToAffiliate(data);
   }
 
@@ -785,9 +802,7 @@ export async function claimSignupReferralFromTrustedSources(params: {
     createdAt,
   });
 
-  return result.ok
-    ? { ok: true, claimedCode: referralCode }
-    : { ok: false, reason: result.reason };
+  return result.ok ? { ok: true, claimedCode: referralCode } : { ok: false, reason: result.reason };
 }
 
 export async function earnAffiliateCommission(registrationId: string): Promise<void> {
@@ -858,7 +873,10 @@ export type AffiliateStats = {
 };
 
 async function applyWithdrawalBalance(
-  stats: Omit<AffiliateStats, "withdrawalPaidUsd" | "withdrawalPendingUsd" | "hasPendingWithdrawal">,
+  stats: Omit<
+    AffiliateStats,
+    "withdrawalPaidUsd" | "withdrawalPendingUsd" | "hasPendingWithdrawal"
+  >,
   userId: string | undefined,
   affiliateCode: string | undefined,
 ): Promise<AffiliateStats> {

@@ -1,10 +1,30 @@
 import { SectionHeader } from "@/components/site/SectionHeader";
 
 const modules = [
-  { n: "01", t: "Fondations de l'IA", d: "Comprenez comment fonctionnent les outils IA et ce qui est possible aujourd'hui.", week: "Semaine 1" },
-  { n: "02", t: "Construisez votre première application", d: "De l'idée à l'application fonctionnelle en quelques heures.", week: "Semaine 2" },
-  { n: "03", t: "SaaS et Backend", d: "Base de données, authentification, paiement — toutes les parties techniques.", week: "Semaine 3" },
-  { n: "04", t: "Lancer et vendre", d: "Déploiement, marketing, vos premiers clients.", week: "Semaine 4" },
+  {
+    n: "01",
+    t: "Fondations de l'IA",
+    d: "Comprenez comment fonctionnent les outils IA et ce qui est possible aujourd'hui.",
+    week: "Semaine 1",
+  },
+  {
+    n: "02",
+    t: "Construisez votre première application",
+    d: "De l'idée à l'application fonctionnelle en quelques heures.",
+    week: "Semaine 2",
+  },
+  {
+    n: "03",
+    t: "SaaS et Backend",
+    d: "Base de données, authentification, paiement — toutes les parties techniques.",
+    week: "Semaine 3",
+  },
+  {
+    n: "04",
+    t: "Lancer et vendre",
+    d: "Déploiement, marketing, vos premiers clients.",
+    week: "Semaine 4",
+  },
 ];
 
 export function Learn() {

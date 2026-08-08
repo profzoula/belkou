@@ -33,7 +33,9 @@ async function beginWebhookEventD1(
 
 async function finishWebhookEventD1(db: D1Database, eventId: string): Promise<void> {
   await db
-    .prepare(`UPDATE stripe_webhook_events SET status = 'success', updated_at = ? WHERE event_id = ?`)
+    .prepare(
+      `UPDATE stripe_webhook_events SET status = 'success', updated_at = ? WHERE event_id = ?`,
+    )
     .bind(new Date().toISOString(), eventId)
     .run();
 }

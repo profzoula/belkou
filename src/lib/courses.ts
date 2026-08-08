@@ -133,27 +133,69 @@ export const courses: Course[] = [
         id: "intro",
         title: "Introduction",
         lessons: [
-          { id: "intro-welcome", title: "Bienvenue dans le cours", duration: "4min", type: "video", preview: true },
-          { id: "intro-tools", title: "Outils : Cursor, Claude & Replit", duration: "12min", type: "video", preview: true },
-          { id: "intro-setup", title: "Configuration de l'environnement", duration: "8min", type: "video" },
-          { id: "intro-first", title: "Votre premier prompt efficace", duration: "11min", type: "video" },
+          {
+            id: "intro-welcome",
+            title: "Bienvenue dans le cours",
+            duration: "4min",
+            type: "video",
+            preview: true,
+          },
+          {
+            id: "intro-tools",
+            title: "Outils : Cursor, Claude & Replit",
+            duration: "12min",
+            type: "video",
+            preview: true,
+          },
+          {
+            id: "intro-setup",
+            title: "Configuration de l'environnement",
+            duration: "8min",
+            type: "video",
+          },
+          {
+            id: "intro-first",
+            title: "Votre premier prompt efficace",
+            duration: "11min",
+            type: "video",
+          },
         ],
       },
       {
         id: "build",
         title: "Construire votre application",
         lessons: [
-          { id: "build-ui", title: "Interface utilisateur avec l'IA", duration: "22min", type: "video" },
-          { id: "build-logic", title: "Logique métier et formulaires", duration: "18min", type: "video" },
+          {
+            id: "build-ui",
+            title: "Interface utilisateur avec l'IA",
+            duration: "22min",
+            type: "video",
+          },
+          {
+            id: "build-logic",
+            title: "Logique métier et formulaires",
+            duration: "18min",
+            type: "video",
+          },
           { id: "build-api", title: "Connecter une API", duration: "25min", type: "video" },
-          { id: "build-resources", title: "Ressources du module", duration: "5min", type: "resource" },
+          {
+            id: "build-resources",
+            title: "Ressources du module",
+            duration: "5min",
+            type: "resource",
+          },
         ],
       },
       {
         id: "deploy",
         title: "Déploiement & lancement",
         lessons: [
-          { id: "deploy-host", title: "Héberger sur Railway / Cloudflare", duration: "16min", type: "video" },
+          {
+            id: "deploy-host",
+            title: "Héberger sur Railway / Cloudflare",
+            duration: "16min",
+            type: "video",
+          },
           { id: "deploy-domain", title: "Domaine et HTTPS", duration: "10min", type: "video" },
           {
             id: "deploy-launch",
@@ -196,7 +238,9 @@ export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title"
   return lesson.title.toLowerCase().includes("bienvenue");
 }
 
-export function getWelcomePreviewLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
+export function getWelcomePreviewLesson(course: {
+  sections: CourseSection[];
+}): CourseLesson | undefined {
   const previews = getPreviewVideoLessons(course);
   const welcomeCandidate =
     previews.find((lesson) => lesson.id === "intro-welcome") ??
@@ -213,24 +257,24 @@ export function getWelcomePreviewLesson(course: { sections: CourseSection[] }): 
   );
 }
 
-export function getWelcomeLearnSearch(
-  course: { sections: CourseSection[] },
-): { lesson: string } | undefined {
+export function getWelcomeLearnSearch(course: {
+  sections: CourseSection[];
+}): { lesson: string } | undefined {
   const welcome = getWelcomePreviewLesson(course);
   return welcome ? { lesson: welcome.id } : undefined;
 }
 
-export function getPreviewLearnSearch(
-  course: { sections: CourseSection[] },
-): { lesson: string } | undefined {
+export function getPreviewLearnSearch(course: {
+  sections: CourseSection[];
+}): { lesson: string } | undefined {
   const preview = getFirstPreviewVideoLesson(course);
   return preview ? { lesson: preview.id } : undefined;
 }
 
 /** Prefer a preview with video; fall back to welcome lesson metadata. */
-export function getPlayableLearnSearch(
-  course: { sections: CourseSection[] },
-): { lesson: string } | undefined {
+export function getPlayableLearnSearch(course: {
+  sections: CourseSection[];
+}): { lesson: string } | undefined {
   return getPreviewLearnSearch(course) ?? getWelcomeLearnSearch(course);
 }
 
@@ -282,12 +326,20 @@ export function getCourseActionLabel(progressPercent: number): string {
   return progressPercent > 0 ? "Continuer le cours" : "Commencer le cours";
 }
 
-export function getLessonById(course: { sections: CourseSection[] }, lessonId: string): CourseLesson | undefined {
+export function getLessonById(
+  course: { sections: CourseSection[] },
+  lessonId: string,
+): CourseLesson | undefined {
   return getAllLessons(course).find((lesson) => lesson.id === lessonId);
 }
 
-export function getSectionForLesson(course: { sections: CourseSection[] }, lessonId: string): CourseSection | undefined {
-  return course.sections.find((section) => section.lessons.some((lesson) => lesson.id === lessonId));
+export function getSectionForLesson(
+  course: { sections: CourseSection[] },
+  lessonId: string,
+): CourseSection | undefined {
+  return course.sections.find((section) =>
+    section.lessons.some((lesson) => lesson.id === lessonId),
+  );
 }
 
 export function countLessons(course: { sections: CourseSection[] }): number {
@@ -305,7 +357,9 @@ export function lessonIsCompletable(lesson: CourseLesson): boolean {
  * a student cannot finish them, so keeping them would lock the rest of the course.
  */
 export function getSequenceLessonIds(course: { sections: CourseSection[] }): string[] {
-  return getAllLessons(course).filter(lessonIsCompletable).map((lesson) => lesson.id);
+  return getAllLessons(course)
+    .filter(lessonIsCompletable)
+    .map((lesson) => lesson.id);
 }
 
 /** Parse "4min", "8 min", "1h 30min", etc. into minutes. */
@@ -438,6 +492,8 @@ export function getPreviewVideoLessons(course: { sections: CourseSection[] }): C
   return getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson));
 }
 
-export function getFirstPreviewVideoLesson(course: { sections: CourseSection[] }): CourseLesson | undefined {
+export function getFirstPreviewVideoLesson(course: {
+  sections: CourseSection[];
+}): CourseLesson | undefined {
   return getPreviewVideoLessons(course)[0];
 }

@@ -52,10 +52,7 @@ import { CurriculumSidebar } from "@/components/course/CurriculumSidebar";
 import { LearnHeader } from "@/components/course/LearnHeader";
 import { LessonContextHeader } from "@/components/course/LessonContextHeader";
 import { LessonNavControls } from "@/components/course/LessonNavControls";
-import {
-  getFirstArticleSubSessionId,
-  parseArticleSessions,
-} from "@/lib/lesson-sessions";
+import { getFirstArticleSubSessionId, parseArticleSessions } from "@/lib/lesson-sessions";
 import {
   isLessonQuizRequirementMet,
   lessonHasRequiredQuiz,
@@ -94,7 +91,10 @@ function CourseVideoArea({
   startAtSeconds?: number;
   onPlaybackTimeUpdate?: (currentTime: number) => void;
   activeArticleSubSessionId?: string | null;
-  onArticleSubSessionChange?: (subSessionId: string, options?: { markCurrentAsRead?: boolean }) => void;
+  onArticleSubSessionChange?: (
+    subSessionId: string,
+    options?: { markCurrentAsRead?: boolean },
+  ) => void;
   onVideoPlay?: () => void;
   onQuizGateChange?: (passed: boolean) => void;
 }) {
@@ -189,13 +189,17 @@ function CourseVideoArea({
 
     const refreshInMs = playback.urlExpiresAt - Date.now() - 5 * 60 * 1000;
     const scheduleRefresh = (delay: number) =>
-      window.setTimeout(() => {
-        void refreshPlaybackRef.current?.()
-          .then((next) => {
-            if (next) setPlayback(next);
-          })
-          .catch(() => undefined);
-      }, Math.max(delay, 0));
+      window.setTimeout(
+        () => {
+          void refreshPlaybackRef
+            .current?.()
+            .then((next) => {
+              if (next) setPlayback(next);
+            })
+            .catch(() => undefined);
+        },
+        Math.max(delay, 0),
+      );
 
     const timer = scheduleRefresh(refreshInMs);
     return () => window.clearTimeout(timer);
@@ -325,7 +329,8 @@ function CourseVideoArea({
           onLessonComplete={onLessonComplete}
           onPlay={onVideoPlay}
           onPlaybackError={() => {
-            void refreshPlaybackRef.current?.()
+            void refreshPlaybackRef
+              .current?.()
               .then((next) => {
                 if (next) {
                   setPlayback(next);
@@ -357,17 +362,18 @@ function CourseVideoArea({
     );
   }
 
-  const placeholderStatus = enrolledWaiting && startLabel
-    ? `Inscription confirmée — vidéos le ${startLabel}`
-    : reason === "schedule" && startLabel
-      ? `Vidéos disponibles le ${startLabel}`
-      : reason === "sequential"
-        ? "Terminez la leçon précédente pour continuer"
-        : locked
-          ? "Contenu réservé aux inscrits"
-          : hasPaidAccess
-            ? "Vidéo en cours de préparation."
-            : "Preview bientôt disponible";
+  const placeholderStatus =
+    enrolledWaiting && startLabel
+      ? `Inscription confirmée — vidéos le ${startLabel}`
+      : reason === "schedule" && startLabel
+        ? `Vidéos disponibles le ${startLabel}`
+        : reason === "sequential"
+          ? "Terminez la leçon précédente pour continuer"
+          : locked
+            ? "Contenu réservé aux inscrits"
+            : hasPaidAccess
+              ? "Vidéo en cours de préparation."
+              : "Preview bientôt disponible";
 
   return (
     <CourseThumbnailBanner
@@ -441,7 +447,8 @@ function EnrolledExtraTab({
       <div className="mx-auto max-w-lg space-y-3 text-left text-sm text-muted-foreground">
         <h3 className="font-semibold text-foreground">Questions & réponses</h3>
         <p>
-          Posez vos questions sur le forum du cours — les réponses et discussions restent accessibles à toute la communauté.
+          Posez vos questions sur le forum du cours — les réponses et discussions restent
+          accessibles à toute la communauté.
         </p>
         <Button asChild variant="soft" size="sm">
           <Link to="/forum/$courseSlug" params={{ courseSlug: course.slug }}>
@@ -681,7 +688,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const [activeLessonId, setActiveLessonId] = useState(() => resolveLessonId(initialLessonId));
   const [activeArticleSubSessionId, setActiveArticleSubSessionId] = useState<string | null>(null);
-  const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(new Set());
+  const [viewedArticleSubSessionIds, setViewedArticleSubSessionIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [resumeAtSeconds, setResumeAtSeconds] = useState(0);
 
   useEffect(() => {
@@ -763,15 +772,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     if (targetId !== activeLessonId) {
       selectLesson(targetId);
     }
-  }, [
-    access,
-    activeLessonId,
-    allLessons,
-    getLockState,
-    initialLessonId,
-    progress,
-    selectLesson,
-  ]);
+  }, [access, activeLessonId, allLessons, getLockState, initialLessonId, progress, selectLesson]);
   const scheduledSoon = isScheduledInFuture(course);
   const startLabel = courseStartsAtLabel(course);
   const enrolledWaiting = hasPaidAccess && !contentLive;
@@ -862,8 +863,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const activeSection = getSectionForLesson(activeCourse, activeLesson.id);
   const [lessonQuery, setLessonQuery] = useState("");
-  const lessonNumber =
-    allLessons.findIndex((lesson) => lesson.id === activeLessonId) + 1;
+  const lessonNumber = allLessons.findIndex((lesson) => lesson.id === activeLessonId) + 1;
   const activeLessonCompleted = completedLessonIds.includes(activeLesson.id);
 
   const previousLesson = useMemo(() => {
@@ -934,7 +934,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         .catch(() => {
           markedLessonsRef.current.delete(lessonId);
           setProgress((current) => {
-            const completedLessonIds = (current?.completedLessonIds ?? []).filter((id) => id !== lessonId);
+            const completedLessonIds = (current?.completedLessonIds ?? []).filter(
+              (id) => id !== lessonId,
+            );
             return {
               completedLessonIds,
               playbackByLessonId: current?.playbackByLessonId ?? {},
@@ -1011,9 +1013,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
       const target = event.target as HTMLElement | null;
       if (
         target &&
-        (target.tagName === "INPUT" ||
-          target.tagName === "TEXTAREA" ||
-          target.isContentEditable)
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
       ) {
         return;
       }
@@ -1027,7 +1027,12 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         // Do not auto-complete; only navigate when the next lesson is already unlocked.
         goToNextLesson();
       }
-      if ((event.key === "c" || event.key === "C") && hasPaidAccess && contentLive && !activeLessonCompleted) {
+      if (
+        (event.key === "c" || event.key === "C") &&
+        hasPaidAccess &&
+        contentLive &&
+        !activeLessonCompleted
+      ) {
         if (!event.altKey) return;
         event.preventDefault();
         handleActiveLessonComplete();
@@ -1085,7 +1090,10 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </div>
       )}
 
-      <main id="main-content" className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
+      <main
+        id="main-content"
+        className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8"
+      >
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
           <aside className="hidden lg:sticky lg:top-[calc(4rem+1rem)] lg:flex lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:flex-col lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
             <CurriculumSidebar
@@ -1217,7 +1225,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
                 <TabsContent value="overview" className="mt-4 space-y-8 px-1 pb-12 sm:px-2">
                   <div>
-                    <h2 className="font-display text-[22px] font-bold tracking-tight">{course.title}</h2>
+                    <h2 className="font-display text-[22px] font-bold tracking-tight">
+                      {course.title}
+                    </h2>
                     <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                       <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400">
                         {course.rating.toFixed(1)}
@@ -1229,7 +1239,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       <span className="text-muted-foreground">
                         {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
                       </span>
-                      <span className="text-muted-foreground">{getCourseDisplayDuration(course)}</span>
+                      <span className="text-muted-foreground">
+                        {getCourseDisplayDuration(course)}
+                      </span>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
                       Dernière mise à jour {course.lastUpdated} · {course.language}
@@ -1253,7 +1265,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
                   <div className="grid gap-8 md:grid-cols-2">
                     <div>
-                      <h3 className="mb-3 font-display text-[22px] font-bold">Ce que vous apprendrez</h3>
+                      <h3 className="mb-3 font-display text-[22px] font-bold">
+                        Ce que vous apprendrez
+                      </h3>
                       <ul className="grid gap-2">
                         {course.whatYouLearn.map((item) => (
                           <li key={item} className="flex gap-2 text-sm sm:text-base">
@@ -1336,11 +1350,15 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </TabsContent>
 
                 {["qa", "notes", "reviews"].map((tab) => (
-                  <TabsContent key={tab} value={tab} className="mt-4 px-1 py-8 pb-12 text-center sm:px-2">
+                  <TabsContent
+                    key={tab}
+                    value={tab}
+                    className="mt-4 px-1 py-8 pb-12 text-center sm:px-2"
+                  >
                     {hasPaidAccess && session?.access_token ? (
-                    <EnrolledExtraTab
-                      tab={tab}
-                      course={activeCourse}
+                      <EnrolledExtraTab
+                        tab={tab}
+                        course={activeCourse}
                         contentLive={contentLive}
                         startLabel={courseStartsAtLabel(course)}
                         activeLessonId={activeLessonId}
@@ -1350,7 +1368,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                     ) : hasPaidAccess ? (
                       <div className="mx-auto max-w-sm space-y-4">
                         <p className="text-sm text-muted-foreground">
-                          Connectez-vous pour accéder à cette section et synchroniser votre progression.
+                          Connectez-vous pour accéder à cette section et synchroniser votre
+                          progression.
                         </p>
                         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
                           <Button asChild size="sm">

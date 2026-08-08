@@ -1,5 +1,10 @@
 import type { Course, CourseLesson, CourseSection } from "@/lib/courses";
-import { courses as baseCourses, getAllLessons, isBaseCourseSlug, isWelcomePreviewLesson } from "@/lib/courses";
+import {
+  courses as baseCourses,
+  getAllLessons,
+  isBaseCourseSlug,
+  isWelcomePreviewLesson,
+} from "@/lib/courses";
 import {
   addLessonToStoredCourse,
   addSectionToStoredCourse,
@@ -68,7 +73,11 @@ async function readJson<T>(key: string, fallback: T): Promise<T> {
   const sb = getSupabaseAdmin();
   if (!sb) return fallback;
 
-  const { data, error } = await sb.from("site_content").select("value").eq("key", key).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", key)
+    .maybeSingle();
 
   if (error) {
     if (!isMissingTable(error.message)) {
@@ -97,7 +106,10 @@ async function writeJson<T>(key: string, value: T): Promise<{ ok: boolean; reaso
 
   if (error) {
     if (isMissingTable(error.message)) {
-      return { ok: false, reason: "Table site_content manquante — exécutez supabase/site_content.sql" };
+      return {
+        ok: false,
+        reason: "Table site_content manquante — exécutez supabase/site_content.sql",
+      };
     }
     console.error(`[BelKou] site_content write (${key}):`, error.message);
     return { ok: false, reason: error.message };
@@ -450,7 +462,10 @@ export async function addLessonToCourse(params: { courseSlug: string; input: Add
     }
 
     const courseOverride = overrides[params.courseSlug] ?? {};
-    const addedLessons = [...(courseOverride.addedLessons ?? []), { sectionId: params.input.sectionId, lesson }];
+    const addedLessons = [
+      ...(courseOverride.addedLessons ?? []),
+      { sectionId: params.input.sectionId, lesson },
+    ];
     overrides[params.courseSlug] = { ...courseOverride, addedLessons };
     const result = await saveCourseOverrides(overrides);
     if (!result.ok) return result;
@@ -513,7 +528,9 @@ export async function deleteLessonFromCourse(params: { courseSlug: string; lesso
   if (isBaseCourseSlug(params.courseSlug)) {
     const overrides = await getCourseOverrides();
     const courseOverride = overrides[params.courseSlug] ?? {};
-    const addedLessons = (courseOverride.addedLessons ?? []).filter((item) => item.lesson.id !== lessonId);
+    const addedLessons = (courseOverride.addedLessons ?? []).filter(
+      (item) => item.lesson.id !== lessonId,
+    );
     const wasAdded = addedLessons.length !== (courseOverride.addedLessons ?? []).length;
     const deletedLessons = new Set(courseOverride.deletedLessons ?? []);
 

@@ -26,7 +26,8 @@ export const Route = createFileRoute("/services/")({
 function ServicesIndexPage() {
   const { services: rawServices } = Route.useLoaderData() as { services: SerializableService[] };
   const services = rawServices.map(serializableToServiceItem);
-  const contactSlug = services.find((service) => service.action.type === "booking")?.slug ?? services[0]?.slug;
+  const contactSlug =
+    services.find((service) => service.action.type === "booking")?.slug ?? services[0]?.slug;
   const displayedFrom = services[0]?.priceLabel ? `à partir de ${services[0].priceLabel}` : null;
   const contactHref = contactSlug ? `/services/${contactSlug}` : "/services";
 
@@ -49,8 +50,8 @@ function ServicesIndexPage() {
                 Solutions complètes pour votre business
               </h1>
               <p className="mt-4 text-muted-foreground md:text-lg">
-                De la création d&apos;entreprise à la formation, nous couvrons vos besoins numériques avec
-                un accompagnement concret.
+                De la création d&apos;entreprise à la formation, nous couvrons vos besoins
+                numériques avec un accompagnement concret.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
@@ -81,10 +82,15 @@ function ServicesIndexPage() {
 
             <FadeIn delay={0.06}>
               <div className="rounded-2xl border border-border/70 bg-card/95 p-5 shadow-sm backdrop-blur">
-                <p className="text-sm font-semibold text-foreground">Pourquoi choisir nos services ?</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Pourquoi choisir nos services ?
+                </p>
                 <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <BriefcaseBusiness className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                    <BriefcaseBusiness
+                      className="mt-0.5 size-4 shrink-0 text-primary"
+                      aria-hidden
+                    />
                     <span>{services.length} services actifs pour différents besoins business.</span>
                   </li>
                   <li className="flex items-start gap-2">

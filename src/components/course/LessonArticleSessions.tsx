@@ -10,7 +10,9 @@ type LessonArticleSessionsProps = {
 
 export function LessonArticleSessions({ sessions }: LessonArticleSessionsProps) {
   const [openId, setOpenId] = useState<string | null>(
-    sessions[0]?.subSessions[0] ? `${sessions[0].number}-${sessions[0].subSessions[0].number}` : null,
+    sessions[0]?.subSessions[0]
+      ? `${sessions[0].number}-${sessions[0].subSessions[0].number}`
+      : null,
   );
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 

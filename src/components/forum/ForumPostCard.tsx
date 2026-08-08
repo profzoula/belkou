@@ -1,11 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Lightbulb, MessageCircle } from "lucide-react";
 import { SiteLogo } from "@/components/site/SiteLogo";
-import {
-  formatForumTimestamp,
-  forumAuthorHandle,
-  forumAuthorInitials,
-} from "@/lib/forum-display";
+import { formatForumTimestamp, forumAuthorHandle, forumAuthorInitials } from "@/lib/forum-display";
 import { cn } from "@/lib/utils";
 
 type ForumPostCardData = {

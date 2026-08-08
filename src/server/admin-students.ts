@@ -137,7 +137,9 @@ export async function grantCourseAccessToStudent(params: {
     while (page <= 10) {
       const { data } = await sb.auth.admin.listUsers({ page, perPage: 200 });
       if (!data?.users.length) break;
-      const match = data.users.find((u) => u.email && normalizeRegistrationEmail(u.email) === email);
+      const match = data.users.find(
+        (u) => u.email && normalizeRegistrationEmail(u.email) === email,
+      );
       if (match) {
         fullName = displayNameFromUser(match);
         break;

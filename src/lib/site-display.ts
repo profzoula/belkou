@@ -5,7 +5,9 @@ export function resolveCohortStartDate(settings?: Pick<SiteSettings, "cohortStar
   return settings?.cohortStartDate?.trim() || siteConfig.cohortStartDate;
 }
 
-export function resolveStatsStudentsBase(settings?: Pick<SiteSettings, "statsStudentsBase">): number {
+export function resolveStatsStudentsBase(
+  settings?: Pick<SiteSettings, "statsStudentsBase">,
+): number {
   const floor = siteConfig.stats.studentsBase;
   const base = settings?.statsStudentsBase;
   const configured = typeof base === "number" && base > 0 ? base : floor;

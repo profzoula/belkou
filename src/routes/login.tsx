@@ -81,7 +81,11 @@ function LoginPage() {
         toast.error("Confirmez votre email dans Gmail avant de vous connecter.");
         return;
       }
-      toast.error(error.message === "Invalid login credentials" ? "Email ou mot de passe incorrect." : error.message);
+      toast.error(
+        error.message === "Invalid login credentials"
+          ? "Email ou mot de passe incorrect."
+          : error.message,
+      );
       return;
     }
 
@@ -95,13 +99,16 @@ function LoginPage() {
 
   return (
     <AuthSplitLayout>
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Connexion</p>
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+        Connexion
+      </p>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         Accédez à votre espace
       </h1>
       <p className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
         Vous avez déjà payé pour un cours ? Connectez-vous avec{" "}
-        <strong className="text-foreground">le même email</strong> que votre inscription pour accéder à Mes cours.
+        <strong className="text-foreground">le même email</strong> que votre inscription pour
+        accéder à Mes cours.
       </p>
 
       {!isSupabaseConfigured ? (
@@ -147,7 +154,13 @@ function LoginPage() {
               />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full shadow-primary">
+            <Button
+              type="submit"
+              variant="hero"
+              size="lg"
+              disabled={loading}
+              className="h-11 w-full shadow-primary"
+            >
               {loading ? "Connexion…" : "Se connecter"}
             </Button>
           </form>
@@ -158,24 +171,36 @@ function LoginPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             Pas encore de compte ?{" "}
-            <Link to="/signup" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+            <Link
+              to="/signup"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+            >
               Créer un compte
             </Link>
           </p>
 
           <p className="text-center text-sm">
-            <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground hover:underline">
+            <Link
+              to="/forgot-password"
+              className="text-muted-foreground hover:text-foreground hover:underline"
+            >
               Mot de passe oublié ?
             </Link>
           </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             En vous connectant, vous acceptez les{" "}
-            <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+            <Link
+              to="/legal/terms"
+              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+            >
               Conditions d&apos;utilisation
             </Link>{" "}
             et la{" "}
-            <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+            <Link
+              to="/legal/privacy"
+              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+            >
               Politique de confidentialité
             </Link>
             .

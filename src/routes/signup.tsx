@@ -136,7 +136,9 @@ function SignupPage() {
   if (pendingConfirmationEmail) {
     return (
       <AuthSplitLayout>
-        <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Inscription</p>
+        <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+          Inscription
+        </p>
         <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Presque terminé
         </h1>
@@ -163,13 +165,18 @@ function SignupPage() {
 
   return (
     <AuthSplitLayout>
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Inscription</p>
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+        Inscription
+      </p>
       <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
         Créez votre compte
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
         Compte gratuit pour votre espace étudiant. Prêt à acheter un cours ?{" "}
-        <Link to="/courses" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+        <Link
+          to="/courses"
+          className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+        >
           Parcourir les cours
         </Link>
         .
@@ -208,7 +215,8 @@ function SignupPage() {
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Utilisez la même adresse que lors de votre inscription au cours, si vous avez déjà payé.
+                Utilisez la même adresse que lors de votre inscription au cours, si vous avez déjà
+                payé.
               </p>
             </div>
 
@@ -251,11 +259,18 @@ function SignupPage() {
               />
             </div>
 
-            <Button type="submit" variant="hero" size="lg" disabled={loading} className="h-11 w-full shadow-primary">
+            <Button
+              type="submit"
+              variant="hero"
+              size="lg"
+              disabled={loading}
+              className="h-11 w-full shadow-primary"
+            >
               {loading ? "Création…" : "Créer mon compte"}
             </Button>
             <p className="text-center text-xs text-muted-foreground">
-              Après l&apos;inscription, vérifiez votre <strong>Gmail</strong> pour confirmer votre compte.
+              Après l&apos;inscription, vérifiez votre <strong>Gmail</strong> pour confirmer votre
+              compte.
             </p>
           </form>
 
@@ -265,18 +280,27 @@ function SignupPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             Déjà un compte ?{" "}
-            <Link to="/login" className="font-medium text-primary underline underline-offset-2 hover:text-primary/80">
+            <Link
+              to="/login"
+              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+            >
               Se connecter
             </Link>
           </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             En créant un compte, vous acceptez les{" "}
-            <Link to="/legal/terms" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+            <Link
+              to="/legal/terms"
+              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+            >
               Conditions d&apos;utilisation
             </Link>{" "}
             et la{" "}
-            <Link to="/legal/privacy" className="text-primary/80 underline underline-offset-2 hover:text-primary">
+            <Link
+              to="/legal/privacy"
+              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+            >
               Politique de confidentialité
             </Link>
             .

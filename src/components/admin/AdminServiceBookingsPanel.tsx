@@ -4,7 +4,13 @@ import { Calendar, Mail, Phone, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { adminUpdateServiceBookingStatus, getAdminServiceBookings } from "@/lib/fns/admin";
 import {
   serviceBookingStatusClasses,
@@ -98,7 +104,10 @@ export function AdminServiceBookingsPanel({ onCountsChange }: AdminServiceBookin
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}>
+        <Select
+          value={statusFilter}
+          onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Statut" />
           </SelectTrigger>
@@ -144,12 +153,16 @@ export function AdminServiceBookingsPanel({ onCountsChange }: AdminServiceBookin
                     </span>
                   </div>
                   <p className="mt-1 text-sm font-medium text-primary">{booking.serviceTitle}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Reçue le {formatDate(booking.createdAt)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Reçue le {formatDate(booking.createdAt)}
+                  </p>
                 </div>
                 <Select
                   value={booking.status}
                   disabled={updatingId === booking.id}
-                  onValueChange={(value) => handleStatusChange(booking.id, value as ServiceBookingStatus)}
+                  onValueChange={(value) =>
+                    handleStatusChange(booking.id, value as ServiceBookingStatus)
+                  }
                 >
                   <SelectTrigger className="w-[160px]">
                     <SelectValue />
@@ -184,7 +197,9 @@ export function AdminServiceBookingsPanel({ onCountsChange }: AdminServiceBookin
               </div>
 
               {booking.message ? (
-                <p className="mt-3 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">{booking.message}</p>
+                <p className="mt-3 rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
+                  {booking.message}
+                </p>
               ) : null}
             </article>
           ))}

@@ -1,12 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  Building2,
-  Calculator,
-  Code2,
-  Globe,
-  GraduationCap,
-  Megaphone,
-} from "lucide-react";
+import { Building2, Calculator, Code2, Globe, GraduationCap, Megaphone } from "lucide-react";
 
 export type ServiceIconKey =
   | "building"
@@ -183,7 +176,8 @@ export function getDefaultServices(): StoredService[] {
     {
       slug: "creation-site-web",
       title: "Création Site Web",
-      description: "Sites web modernes, responsives et optimisés pour convertir les visiteurs en clients.",
+      description:
+        "Sites web modernes, responsives et optimisés pour convertir les visiteurs en clients.",
       priceLabel: "$650 – $6,500",
       rating: 4.9,
       ratingsCount: 389,
@@ -205,7 +199,8 @@ export function getDefaultServices(): StoredService[] {
     {
       slug: "declaration-impots",
       title: "Déclaration d'Impôts",
-      description: "Service professionnel de déclaration fiscale pour entrepreneurs et entreprises.",
+      description:
+        "Service professionnel de déclaration fiscale pour entrepreneurs et entreprises.",
       priceLabel: "$200",
       rating: 5,
       ratingsCount: 178,
@@ -227,7 +222,8 @@ export function getDefaultServices(): StoredService[] {
     {
       slug: "marketing-digital",
       title: "Marketing Digital",
-      description: "Stratégie marketing complète : SEO, publicité, réseaux sociaux et bien plus encore.",
+      description:
+        "Stratégie marketing complète : SEO, publicité, réseaux sociaux et bien plus encore.",
       priceLabel: "$250",
       rating: 4.8,
       ratingsCount: 523,
@@ -249,7 +245,8 @@ export function getDefaultServices(): StoredService[] {
     {
       slug: "formation",
       title: "Formation",
-      description: "Formations pratiques pour maîtriser les outils et stratégies du business numérique.",
+      description:
+        "Formations pratiques pour maîtriser les outils et stratégies du business numérique.",
       priceLabel: "Voir le catalogue",
       rating: 4.9,
       ratingsCount: 1234,
@@ -316,7 +313,10 @@ export type CreateServiceInput = {
   priceLabel?: string;
 };
 
-export function buildNewService(input: CreateServiceInput, existing: StoredService[]): StoredService {
+export function buildNewService(
+  input: CreateServiceInput,
+  existing: StoredService[],
+): StoredService {
   const baseSlug = input.slug?.trim() || slugifyServiceTitle(input.title);
   let slug = baseSlug;
   let suffix = 1;

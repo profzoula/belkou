@@ -91,5 +91,7 @@ export function resourceKindLabel(kind: CourseResourceKind): string {
 }
 
 export function sortCourseResources(resources: CourseResource[]): CourseResource[] {
-  return [...resources].sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title, "fr"));
+  return [...resources].sort(
+    (a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title, "fr"),
+  );
 }

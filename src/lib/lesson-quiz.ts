@@ -37,7 +37,8 @@ export const PREPARE_ANVIWONMAN_SESSION1_QUIZ: LessonQuiz = {
         { id: "d", label: "Pou telechaje mizik" },
       ],
       correctOptionId: "b",
-      explanation: "Yon Development Environment se tout zouti devlopè a bezwen pou kreye aplikasyon.",
+      explanation:
+        "Yon Development Environment se tout zouti devlopè a bezwen pou kreye aplikasyon.",
     },
     {
       id: "q2",
@@ -65,7 +66,8 @@ export const PREPARE_ANVIWONMAN_SESSION1_QUIZ: LessonQuiz = {
     },
     {
       id: "q4",
-      prompt: "Ki zouti Chrome ki analize pèfòmans, SEO, Accessibility ak Best Practices yon sit entènèt?",
+      prompt:
+        "Ki zouti Chrome ki analize pèfòmans, SEO, Accessibility ak Best Practices yon sit entènèt?",
       options: [
         { id: "a", label: "DevTools" },
         { id: "b", label: "Postman" },
@@ -105,7 +107,8 @@ export const PROMPT_ENGINEERING_SESSION1_QUIZ: LessonQuiz = {
         { id: "d", label: "Achte yon nouvo laptop" },
       ],
       correctOptionId: "b",
-      explanation: "Prompt Engineering se fason ou estriktire demann ou bay AI a pou kòd ak repons yo pi egzak.",
+      explanation:
+        "Prompt Engineering se fason ou estriktire demann ou bay AI a pou kòd ak repons yo pi egzak.",
     },
     {
       id: "q2",
@@ -292,14 +295,18 @@ export function extractQuizFromSubSessionHtml(html: string): {
     return { quiz, introHtml: doc.body.innerHTML.trim() };
   }
 
-  const divMatch = trimmed.match(/<div\b[^>]*class="[^"]*lesson-quiz-data-block[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+  const divMatch = trimmed.match(
+    /<div\b[^>]*class="[^"]*lesson-quiz-data-block[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+  );
   if (divMatch) {
     const quiz = decodeQuizHolderContent(divMatch[1]);
     const introHtml = stripQuizLabelHtml(trimmed.replace(divMatch[0], ""));
     return { quiz, introHtml };
   }
 
-  const attrMatch = trimmed.match(/<div\b[^>]*\bdata-lesson-quiz-data="([^"]+)"[^>]*>[\s\S]*?<\/div>/i);
+  const attrMatch = trimmed.match(
+    /<div\b[^>]*\bdata-lesson-quiz-data="([^"]+)"[^>]*>[\s\S]*?<\/div>/i,
+  );
   if (!attrMatch) return { quiz: null, introHtml: trimmed };
   const quiz = decodeQuizHolderContent(attrMatch[1]);
   const introHtml = stripQuizLabelHtml(trimmed.replace(attrMatch[0], ""));

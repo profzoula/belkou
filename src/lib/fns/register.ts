@@ -115,12 +115,20 @@ export const submitRegistration = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const db = await getDb();
 
-    const allowed = checkRateLimit(`register:${data.email}`, RATE_LIMITS.register.limit, RATE_LIMITS.register.windowMs);
+    const allowed = checkRateLimit(
+      `register:${data.email}`,
+      RATE_LIMITS.register.limit,
+      RATE_LIMITS.register.windowMs,
+    );
     if (!allowed) {
       throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
     }
 
-    const existing = await getRegistrationByEmailAndCourse(db, data.email, data.course_slug ?? null);
+    const existing = await getRegistrationByEmailAndCourse(
+      db,
+      data.email,
+      data.course_slug ?? null,
+    );
     let record: RegistrationRecord;
     let resumed = false;
 
@@ -231,9 +239,8 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
   .inputValidator((data: { sessionId: string; registrationId: string }) => data)
   .handler(async ({ data }) => {
     const { getCheckoutSession } = await import("@/server/stripe");
-    const { grantAccessFromCheckoutSession, isCheckoutPaid } = await import(
-      "@/server/stripe-access"
-    );
+    const { grantAccessFromCheckoutSession, isCheckoutPaid } =
+      await import("@/server/stripe-access");
     const db = await getDb();
     const record = await getRegistrationById(db, data.registrationId);
     if (record?.stripe_session_id && record.stripe_session_id !== data.sessionId) {
@@ -251,18 +258,22 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
     }
 
     const plan = (session.metadata?.plan ?? record?.plan) as PlanId | undefined;
-    const granted = await grantAccessFromCheckoutSession(db, {
-      ...session,
-      metadata: {
-        ...(session.metadata ?? {}),
-        // Prefer the registration from the success URL when Stripe metadata is missing.
-        registrationId: session.metadata?.registrationId || data.registrationId,
+    const granted = await grantAccessFromCheckoutSession(
+      db,
+      {
+        ...session,
+        metadata: {
+          ...(session.metadata ?? {}),
+          // Prefer the registration from the success URL when Stripe metadata is missing.
+          registrationId: session.metadata?.registrationId || data.registrationId,
+        },
       },
-    }, {
-      requireRegistrationMetadata: true,
-      allowEmailCourseFallback: false,
-      requireAmountAndCurrencyMatch: true,
-    });
+      {
+        requireRegistrationMetadata: true,
+        allowEmailCourseFallback: false,
+        requireAmountAndCurrencyMatch: true,
+      },
+    );
 
     if (!granted) {
       console.error("[BelKou] Stripe session paid but access not granted", {
@@ -276,7 +287,9 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
       const unlocked = await getRegistrationById(db, granted.registrationId);
       if (unlocked) {
         try {
-          const course = unlocked.course_slug ? await getResolvedCourseBySlug(unlocked.course_slug) : null;
+          const course = unlocked.course_slug
+            ? await getResolvedCourseBySlug(unlocked.course_slug)
+            : null;
           const fallbackAmount = course?.price ?? siteConfig.plans[unlocked.plan].price;
           await sendEmail({
             to: unlocked.email,

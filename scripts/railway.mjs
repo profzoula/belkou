@@ -132,9 +132,7 @@ async function sendWebResponse(res, response) {
   res.statusCode = response.status;
 
   const setCookies =
-    typeof response.headers.getSetCookie === "function"
-      ? response.headers.getSetCookie()
-      : [];
+    typeof response.headers.getSetCookie === "function" ? response.headers.getSetCookie() : [];
 
   response.headers.forEach((value, key) => {
     const lower = key.toLowerCase();

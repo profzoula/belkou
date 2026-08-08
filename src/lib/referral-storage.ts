@@ -1,7 +1,10 @@
 import { REFERRAL_STORAGE_KEY } from "@/lib/affiliate-config";
 
 export function normalizeReferralCode(code: string): string {
-  return code.trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return code
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
 }
 
 export function saveReferralCode(code: string) {

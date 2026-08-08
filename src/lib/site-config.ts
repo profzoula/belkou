@@ -20,8 +20,7 @@ export const siteConfig = {
   promo: {
     enabled: false,
     spotsLimit: 50,
-    message:
-      "Ebook gratuit offert aux 50 premières inscriptions — places limitées !",
+    message: "Ebook gratuit offert aux 50 premières inscriptions — places limitées !",
     messageShort: "Ebook gratuit — 50 premières places",
   },
   stats: {
@@ -50,16 +49,14 @@ export const siteConfig = {
     ],
   },
   plans: {
-    premium: { name: "Premium", price: 199, priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "" },
+    premium: {
+      name: "Premium",
+      price: 199,
+      priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "",
+    },
     vip: { name: "VIP", price: 290, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },
   },
-  paymentMethods: [
-    "Stripe (carte bancaire)",
-    "PayPal",
-    "MonCash",
-    "Zelle",
-    "Virement bancaire",
-  ],
+  paymentMethods: ["Stripe (carte bancaire)", "PayPal", "MonCash", "Zelle", "Virement bancaire"],
   manualPayment: {
     moncash: envString(import.meta.env.VITE_MONCASH_NUMBER, ""),
     zelle: envString(import.meta.env.VITE_ZELLE_EMAIL, ""),
@@ -82,9 +79,18 @@ export const siteConfig = {
     avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/mackenson-lundi.png"),
     githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),
     linkedinUrl: envString(import.meta.env.VITE_FOUNDER_LINKEDIN_URL, ""),
-    facebookUrl: envString(import.meta.env.VITE_FOUNDER_FACEBOOK_URL, "https://www.facebook.com/profzoula"),
-    instagramUrl: envString(import.meta.env.VITE_FOUNDER_INSTAGRAM_URL, "https://www.instagram.com/profzoula/"),
-    tiktokUrl: envString(import.meta.env.VITE_FOUNDER_TIKTOK_URL, "https://www.tiktok.com/@profzoula"),
+    facebookUrl: envString(
+      import.meta.env.VITE_FOUNDER_FACEBOOK_URL,
+      "https://www.facebook.com/profzoula",
+    ),
+    instagramUrl: envString(
+      import.meta.env.VITE_FOUNDER_INSTAGRAM_URL,
+      "https://www.instagram.com/profzoula/",
+    ),
+    tiktokUrl: envString(
+      import.meta.env.VITE_FOUNDER_TIKTOK_URL,
+      "https://www.tiktok.com/@profzoula",
+    ),
   },
 } as const;
 

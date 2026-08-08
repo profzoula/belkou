@@ -117,8 +117,9 @@ export function AdminSettingsTab() {
       </form>
 
       <p className="text-xs text-muted-foreground">
-        Pour que <code className="rounded bg-muted px-1">VITE_*</code> change aussi au build, mettez à jour Railway
-        et redeployez. Les valeurs Supabase s&apos;appliquent côté serveur et admin immédiatement.
+        Pour que <code className="rounded bg-muted px-1">VITE_*</code> change aussi au build, mettez
+        à jour Railway et redeployez. Les valeurs Supabase s&apos;appliquent côté serveur et admin
+        immédiatement.
       </p>
     </div>
   );

@@ -132,7 +132,10 @@ export function LessonQuizBuilderDialog({
           <DialogTitle>Questions du quiz</DialogTitle>
           <DialogDescription>
             Choix multiple (A, B, C, D). L&apos;élève doit avoir{" "}
-            <strong>{quiz.questions.length}/{quiz.questions.length}</strong> pour passer.
+            <strong>
+              {quiz.questions.length}/{quiz.questions.length}
+            </strong>{" "}
+            pour passer.
           </DialogDescription>
         </DialogHeader>
 
@@ -169,15 +172,28 @@ export function LessonQuizBuilderDialog({
                 className="space-y-2"
               >
                 {question.options.map((option, optionIndex) => (
-                  <div key={option.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2">
-                    <RadioGroupItem value={option.id} id={`${question.id}-${option.id}`} className="mt-2.5" />
+                  <div
+                    key={option.id}
+                    className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2"
+                  >
+                    <RadioGroupItem
+                      value={option.id}
+                      id={`${question.id}-${option.id}`}
+                      className="mt-2.5"
+                    />
                     <div className="min-w-0 flex-1 space-y-1">
-                      <Label htmlFor={`${question.id}-${option.id}`} className="text-xs font-semibold text-muted-foreground">
-                        Réponse {OPTION_LABELS[optionIndex]} {question.correctOptionId === option.id ? "· bonne réponse" : ""}
+                      <Label
+                        htmlFor={`${question.id}-${option.id}`}
+                        className="text-xs font-semibold text-muted-foreground"
+                      >
+                        Réponse {OPTION_LABELS[optionIndex]}{" "}
+                        {question.correctOptionId === option.id ? "· bonne réponse" : ""}
                       </Label>
                       <Input
                         value={option.label}
-                        onChange={(event) => updateOption(question.id, option.id, event.target.value)}
+                        onChange={(event) =>
+                          updateOption(question.id, option.id, event.target.value)
+                        }
                         placeholder={`Réponse ${OPTION_LABELS[optionIndex]}…`}
                         className="text-sm"
                       />
@@ -187,10 +203,14 @@ export function LessonQuizBuilderDialog({
               </RadioGroup>
 
               <div className="mt-4 space-y-1.5">
-                <Label className="text-xs text-muted-foreground">Explication (optionnel, après mauvaise réponse)</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Explication (optionnel, après mauvaise réponse)
+                </Label>
                 <Input
                   value={question.explanation ?? ""}
-                  onChange={(event) => updateQuestion(question.id, { explanation: event.target.value })}
+                  onChange={(event) =>
+                    updateQuestion(question.id, { explanation: event.target.value })
+                  }
                   placeholder="Pourquoi cette réponse est correcte…"
                   className="text-sm"
                 />

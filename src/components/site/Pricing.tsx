@@ -6,7 +6,10 @@ import { pricingPlans } from "@/lib/plans";
 
 export function Pricing() {
   return (
-    <section id="pricing" className="site-section-anchor section-divider section-alt py-16 sm:py-20 md:py-28">
+    <section
+      id="pricing"
+      className="site-section-anchor section-divider section-alt py-16 sm:py-20 md:py-28"
+    >
       <div className="site-container">
         <SectionHeader
           label="Tarifs"
@@ -41,14 +44,21 @@ export function Pricing() {
                   </div>
                 )}
                 <h3 className="text-base sm:text-lg font-semibold">{p.name}</h3>
-                <p className="text-xs sm:text-sm mt-1 mb-5 text-muted-foreground leading-snug">{p.desc}</p>
+                <p className="text-xs sm:text-sm mt-1 mb-5 text-muted-foreground leading-snug">
+                  {p.desc}
+                </p>
                 <div className="mb-5 pb-5 border-b border-border">
-                  <span className="font-display text-3xl sm:text-4xl font-bold tracking-tight">${p.price}</span>
+                  <span className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
+                    ${p.price}
+                  </span>
                   <span className="ml-1 text-sm text-muted-foreground">USD</span>
                 </div>
                 <ul className="space-y-2.5 mb-6 flex-1">
                   {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-xs sm:text-sm leading-snug">
+                    <li
+                      key={f}
+                      className="flex items-start gap-2.5 text-xs sm:text-sm leading-snug"
+                    >
                       <Check className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
                       <span className="text-foreground/85">{f}</span>
                     </li>

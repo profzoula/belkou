@@ -47,7 +47,10 @@ async function listSourceFiles(videoId) {
   return files.map((item) => `${prefix}/${item.name}`);
 }
 
-const { data: videos, error } = await sb.from("videos").select("*").order("created_at", { ascending: true });
+const { data: videos, error } = await sb
+  .from("videos")
+  .select("*")
+  .order("created_at", { ascending: true });
 if (error) {
   console.error(error.message);
   process.exit(1);
@@ -97,4 +100,6 @@ for (const video of videos ?? []) {
   }
 }
 
-console.log(`\nDone — repaired ${repaired} video(s). Worker will convert missing HLS on next poll.`);
+console.log(
+  `\nDone — repaired ${repaired} video(s). Worker will convert missing HLS on next poll.`,
+);

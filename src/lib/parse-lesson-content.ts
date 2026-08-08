@@ -14,7 +14,10 @@ function flushParagraph(lines: string[], blocks: LessonContentBlock[]) {
   lines.length = 0;
 }
 
-function flushAccordion(accordion: { title: string; lines: string[] } | null, blocks: LessonContentBlock[]) {
+function flushAccordion(
+  accordion: { title: string; lines: string[] } | null,
+  blocks: LessonContentBlock[],
+) {
   if (!accordion) return;
   const body = accordion.lines.join("\n").trim();
   if (accordion.title || body) {

@@ -56,8 +56,8 @@ function ForumIndexPage() {
                     Forum étudiant
                   </h1>
                   <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
-                    Posez une question, partagez une idée et échangez avec les autres inscrits. Chaque
-                    nouveau sujet notifie les étudiants du cours.
+                    Posez une question, partagez une idée et échangez avec les autres inscrits.
+                    Chaque nouveau sujet notifie les étudiants du cours.
                   </p>
                 </div>
               </div>

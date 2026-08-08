@@ -16,7 +16,10 @@ export function ServicesSection({ services, maxVisible = 3 }: ServicesSectionPro
   if (!visible.length) return null;
 
   return (
-    <section id="services" className="site-section-anchor border-y border-border/60 bg-primary/[0.03] py-10 sm:py-16 md:py-20">
+    <section
+      id="services"
+      className="site-section-anchor border-y border-border/60 bg-primary/[0.03] py-10 sm:py-16 md:py-20"
+    >
       <div className="site-container">
         <FadeIn className="mx-auto max-w-2xl text-center">
           <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">

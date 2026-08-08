@@ -67,7 +67,8 @@ function CoursesIndexPage() {
       if (priceFilter === "paid" && isFreeCourse(course)) return false;
       if (levelFilter !== "all" && course.skillLevel !== levelFilter) return false;
       if (!normalized) return true;
-      const haystack = `${course.title} ${course.description} ${course.instructor} ${course.skillLevel}`.toLowerCase();
+      const haystack =
+        `${course.title} ${course.description} ${course.instructor} ${course.skillLevel}`.toLowerCase();
       return haystack.includes(normalized);
     });
   }, [categoryFilter, courses, levelFilter, priceFilter, query]);
@@ -90,14 +91,17 @@ function CoursesIndexPage() {
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container py-12 sm:py-16">
             <FadeIn>
-              <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">Catalogue</p>
+              <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+                Catalogue
+              </p>
               <h1 className="mt-3 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
                 {categoryFilter
                   ? getCourseCategoryLabel(categoryFilter)
                   : "Trouvez le parcours qui vous fait avancer"}
               </h1>
               <p className="mt-4 max-w-2xl text-muted-foreground md:text-lg">
-                Formations pratiques pour créer, déployer et monétiser vos applications avec l&apos;IA.
+                Formations pratiques pour créer, déployer et monétiser vos applications avec
+                l&apos;IA.
               </p>
             </FadeIn>
 

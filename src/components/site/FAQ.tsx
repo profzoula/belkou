@@ -1,4 +1,9 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -39,14 +44,18 @@ type FaqAccordionProps = {
 
 export function FaqAccordion({ className }: FaqAccordionProps) {
   return (
-    <div className={cn("rounded-2xl border border-border bg-card px-4 shadow-sm sm:px-6", className)}>
+    <div
+      className={cn("rounded-2xl border border-border bg-card px-4 shadow-sm sm:px-6", className)}
+    >
       <Accordion type="single" collapsible className="w-full">
         {faqs.map((f, i) => (
           <AccordionItem key={f.q} value={`item-${i}`} className="border-border last:border-0">
             <AccordionTrigger className="touch-target items-start py-5 text-left text-sm font-semibold hover:text-primary hover:no-underline sm:text-base [&>svg]:mt-1">
               {f.q}
             </AccordionTrigger>
-            <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
+            <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground">
+              {f.a}
+            </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>

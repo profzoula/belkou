@@ -2,7 +2,11 @@ import { pickRegistrationForCourse } from "@/lib/course-access";
 import { isFreeCourse } from "@/lib/courses";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
-import { listRegistrationsByEmail, saveRegistration, updateRegistrationCourseAccess } from "@/server/db";
+import {
+  listRegistrationsByEmail,
+  saveRegistration,
+  updateRegistrationCourseAccess,
+} from "@/server/db";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
 function displayNameFromEmail(email: string, fullName?: string): string {

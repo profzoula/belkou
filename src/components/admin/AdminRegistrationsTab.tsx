@@ -5,7 +5,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PaymentStatusBadge } from "@/components/admin/AdminStatusBadge";
 import {
@@ -46,7 +52,9 @@ function exportCSV(registrations: Array<Record<string, unknown>>) {
     r.course_slug ?? "",
     r.payment_status,
   ]);
-  const csv = [headers, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = [headers, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -187,7 +195,12 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
         description="Paiements cash, VIP gratuit et export CSV."
         actions={
           <>
-            <Button variant="hero" size="sm" className="rounded-xl" onClick={() => setShowAddForm((v) => !v)}>
+            <Button
+              variant="hero"
+              size="sm"
+              className="rounded-xl"
+              onClick={() => setShowAddForm((v) => !v)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Cash
             </Button>
@@ -264,7 +277,9 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                     type="button"
                     onClick={() => updateForm("plan", p)}
                     className={`rounded-xl border p-2 text-sm font-semibold ${
-                      form.plan === p ? "border-primary bg-primary/5 ring-2 ring-primary/20" : "border-border"
+                      form.plan === p
+                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                        : "border-border"
                     }`}
                   >
                     {p.toUpperCase()}

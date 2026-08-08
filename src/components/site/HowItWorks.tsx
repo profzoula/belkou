@@ -8,7 +8,8 @@ const steps = [
     icon: Search,
     step: "01",
     title: "Explorez le catalogue",
-    description: "Parcourez les cours, comparez les programmes et regardez la preview gratuite de chaque formation.",
+    description:
+      "Parcourez les cours, comparez les programmes et regardez la preview gratuite de chaque formation.",
   },
   {
     icon: CreditCard,
@@ -21,13 +22,17 @@ const steps = [
     icon: PlayCircle,
     step: "03",
     title: "Apprenez à votre rythme",
-    description: "Vidéos structurées, progression sauvegardée dans Mes cours et communauté pour poser vos questions.",
+    description:
+      "Vidéos structurées, progression sauvegardée dans Mes cours et communauté pour poser vos questions.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="site-section-anchor section-divider py-16 sm:py-20 md:py-24">
+    <section
+      id="how-it-works"
+      className="site-section-anchor section-divider py-16 sm:py-20 md:py-24"
+    >
       <div className="site-container">
         <SectionHeader
           label="Comment ça marche"
@@ -41,9 +46,13 @@ export function HowItWorks() {
               <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
                 <item.icon className="h-5 w-5" />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-primary">{item.step}</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-primary">
+                {item.step}
+              </span>
               <h3 className="mt-2 font-semibold text-base">{item.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
             </div>
           ))}
         </div>

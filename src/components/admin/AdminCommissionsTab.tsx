@@ -38,7 +38,11 @@ export function AdminCommissionsTab() {
     load();
   }, []);
 
-  const processWithdrawal = async (withdrawalId: string, action: "paid" | "rejected", label: string) => {
+  const processWithdrawal = async (
+    withdrawalId: string,
+    action: "paid" | "rejected",
+    label: string,
+  ) => {
     if (!confirm(`${label} cette demande de retrait ?`)) return;
 
     setActionId(withdrawalId);
@@ -130,7 +134,9 @@ export function AdminCommissionsTab() {
                     <td className="px-5 py-3 text-muted-foreground">
                       ${formatAffiliateUsd(a.withdrawalPaidUsd)}
                       {a.withdrawalPendingUsd > 0 ? (
-                        <span className="ml-1 text-amber-600 text-xs">(+${formatAffiliateUsd(a.withdrawalPendingUsd)} att.)</span>
+                        <span className="ml-1 text-amber-600 text-xs">
+                          (+${formatAffiliateUsd(a.withdrawalPendingUsd)} att.)
+                        </span>
                       ) : null}
                     </td>
                   </tr>
@@ -145,7 +151,9 @@ export function AdminCommissionsTab() {
         <div className="px-5 py-4 border-b border-border flex items-center gap-2">
           <Wallet className="h-4 w-4 text-primary" />
           <h3 className="font-semibold text-sm">Demandes de retrait</h3>
-          <span className="text-xs text-muted-foreground ml-auto">{data.withdrawals.length} total</span>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {data.withdrawals.length} total
+          </span>
         </div>
         <div className="table-scroll">
           <table className="w-full text-sm min-w-[600px]">
@@ -174,12 +182,17 @@ export function AdminCommissionsTab() {
                     </td>
                     <td className="px-5 py-3">
                       <div className="font-medium">{w.affiliate_email}</div>
-                      <div className="text-xs text-muted-foreground font-mono">{w.affiliate_code}</div>
+                      <div className="text-xs text-muted-foreground font-mono">
+                        {w.affiliate_code}
+                      </div>
                     </td>
                     <td className="px-5 py-3 font-semibold">${formatAffiliateUsd(w.amount_usd)}</td>
                     <td className="px-5 py-3">
                       <div className="text-xs uppercase font-medium">{w.payment_method}</div>
-                      <div className="text-xs text-muted-foreground max-w-[200px] truncate" title={w.payment_details}>
+                      <div
+                        className="text-xs text-muted-foreground max-w-[200px] truncate"
+                        title={w.payment_details}
+                      >
                         {w.payment_details}
                       </div>
                     </td>

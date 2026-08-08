@@ -39,10 +39,7 @@ test("cookie helpers set and clear secure flags", () => {
 test("admin token can be resolved from bearer authorization", async () => {
   const secret = "test-secret";
   const token = await createAdminToken("owner", secret);
-  const username = await getAdminFromRequestSources(
-    { authorization: `Bearer ${token}` },
-    secret,
-  );
+  const username = await getAdminFromRequestSources({ authorization: `Bearer ${token}` }, secret);
   assert.equal(username, "owner");
 });
 

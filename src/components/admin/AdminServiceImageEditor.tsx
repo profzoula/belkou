@@ -153,7 +153,11 @@ export function AdminServiceImageEditor({
               disabled={uploading || removing}
               onClick={() => void handleRemove()}
             >
-              {removing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {removing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
               Retirer
             </Button>
           ) : null}

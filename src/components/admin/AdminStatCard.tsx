@@ -25,9 +25,7 @@ export function AdminStatCard({
     <div
       className={cn(
         "group relative overflow-hidden rounded-[20px] border bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgb(15_23_42_/_0.08)]",
-        highlight
-          ? "border-brand-accent/60 ring-1 ring-brand-accent/30"
-          : "border-border/80",
+        highlight ? "border-brand-accent/60 ring-1 ring-brand-accent/30" : "border-border/80",
       )}
     >
       <div
@@ -36,7 +34,9 @@ export function AdminStatCard({
       />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{label}</p>
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            {label}
+          </p>
           <p className="mt-2 font-display text-[28px] font-semibold tracking-tight tabular-nums leading-none">
             {value}
           </p>
@@ -45,7 +45,9 @@ export function AdminStatCard({
         <div
           className={cn(
             "grid size-10 shrink-0 place-items-center rounded-2xl",
-            highlight ? "bg-brand-accent/15 text-brand-accent-foreground" : "bg-primary/10 text-primary",
+            highlight
+              ? "bg-brand-accent/15 text-brand-accent-foreground"
+              : "bg-primary/10 text-primary",
           )}
         >
           <Icon className="size-4" aria-hidden />

@@ -147,120 +147,137 @@ function ArticleSubSessionPanel({
   return (
     <div className="lesson-article-panel border-b border-border bg-muted/25 py-6 sm:py-8">
       <div className="relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
-      {nav.prevId && onSubSessionChange ? (
-        <button
-          type="button"
-          aria-label="Sous-session précédente"
-          onClick={() => goToSubSession(nav.prevId!)}
-          className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:left-4 sm:flex"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-      ) : null}
-      {nav.nextId && onSubSessionChange ? (
-        <button
-          type="button"
-          aria-label="Sous-session suivante"
-          onClick={() => goToSubSession(nav.nextId!, true)}
-          className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:right-4 sm:flex"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      ) : null}
+        {nav.prevId && onSubSessionChange ? (
+          <button
+            type="button"
+            aria-label="Sous-session précédente"
+            onClick={() => goToSubSession(nav.prevId!)}
+            className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:left-4 sm:flex"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        ) : null}
+        {nav.nextId && onSubSessionChange ? (
+          <button
+            type="button"
+            aria-label="Sous-session suivante"
+            onClick={() => goToSubSession(nav.nextId!, true)}
+            className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full border border-border bg-card p-2 text-foreground shadow-sm transition-colors hover:bg-muted sm:right-4 sm:flex"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        ) : null}
 
-      <div className="px-4 py-6 pb-10 sm:px-10 sm:py-10 sm:pb-10 md:px-14">
-        <div className="mb-6 rounded-2xl border border-border bg-muted/25 px-5 py-4 sm:px-6">
+        <div className="px-4 py-6 pb-10 sm:px-10 sm:py-10 sm:pb-10 md:px-14">
+          <div className="mb-6 rounded-2xl border border-border bg-muted/25 px-5 py-4 sm:px-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">
               Session {found.session.number} · {found.sub.number}
             </p>
             <h1 className="mt-1 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl md:text-3xl">
               {found.sub.title}
             </h1>
-        </div>
+          </div>
 
-        <div className="mt-2 min-h-[200px]">
-          {sessionIntro ? (
-            <div
-              className="lesson-html lesson-article-rich lesson-session-intro mb-8 overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-6"
-              dangerouslySetInnerHTML={{ __html: sessionIntro }}
-            />
-          ) : null}
-          <ArticleSubSessionBody sub={found.sub} />
-
-          {showInlineQuiz ? (
-            <div ref={quizSectionRef} className="scroll-mt-24 pt-4">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-border" />
-                <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
-                  Evalyasyon
-                </span>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-border to-border" />
-              </div>
-              <LessonQuiz
-                quiz={lessonQuiz.quiz}
-                storageKey={quizPassKey}
-                nextLessonTitle={nextLessonTitle}
-                onPass={() => {
-                  setQuizPassed(true);
-                  setQuizVisible(true);
-                  onQuizGateChange?.(true);
-                }}
+          <div className="mt-2 min-h-[200px]">
+            {sessionIntro ? (
+              <div
+                className="lesson-html lesson-article-rich lesson-session-intro mb-8 overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-6"
+                dangerouslySetInnerHTML={{ __html: sessionIntro }}
               />
-            </div>
-          ) : null}
-
-          {requiresLessonQuiz && !lessonQuiz ? (
-            <p className="text-sm text-destructive">
-              Quiz pa disponib — admin: klike « Questions », ajoute kesyon yo, epi Enregistrer.
-            </p>
-          ) : null}
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
-          <div className="flex gap-2 sm:hidden">
-            {nav.prevId && onSubSessionChange ? (
-              <Button type="button" variant="outline" size="sm" onClick={() => goToSubSession(nav.prevId!)}>
-                <ChevronLeft className="mr-1 h-4 w-4" />
-                Précédent
-              </Button>
             ) : null}
-            {nav.nextId && onSubSessionChange ? (
-              <Button type="button" variant="outline" size="sm" onClick={() => goToSubSession(nav.nextId!, true)}>
-                Suivant
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+            <ArticleSubSessionBody sub={found.sub} />
+
+            {showInlineQuiz ? (
+              <div ref={quizSectionRef} className="scroll-mt-24 pt-4">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-border" />
+                  <span className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+                    Evalyasyon
+                  </span>
+                  <div className="h-px flex-1 bg-gradient-to-l from-transparent via-border to-border" />
+                </div>
+                <LessonQuiz
+                  quiz={lessonQuiz.quiz}
+                  storageKey={quizPassKey}
+                  nextLessonTitle={nextLessonTitle}
+                  onPass={() => {
+                    setQuizPassed(true);
+                    setQuizVisible(true);
+                    onQuizGateChange?.(true);
+                  }}
+                />
+              </div>
+            ) : null}
+
+            {requiresLessonQuiz && !lessonQuiz ? (
+              <p className="text-sm text-destructive">
+                Quiz pa disponib — admin: klike « Questions », ajoute kesyon yo, epi Enregistrer.
+              </p>
             ) : null}
           </div>
 
-          {requiresLessonQuiz && !canCompleteLesson ? (
-            <p className="text-xs text-muted-foreground">
-              Fè {lessonQuiz!.quiz.passScore}/{lessonQuiz!.quiz.passScore} sou quiz la pou kontinye kou a.
-            </p>
-          ) : null}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
+            <div className="flex gap-2 sm:hidden">
+              {nav.prevId && onSubSessionChange ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToSubSession(nav.prevId!)}
+                >
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Précédent
+                </Button>
+              ) : null}
+              {nav.nextId && onSubSessionChange ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => goToSubSession(nav.nextId!, true)}
+                >
+                  Suivant
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              ) : null}
+            </div>
 
-          {onComplete && isLastStudentSub && requiresLessonQuiz && !canCompleteLesson ? (
-            <Button type="button" variant="hero" size="sm" onClick={openQuiz} className="ml-auto gap-2">
-              <ClipboardCheck className="h-4 w-4" />
-              Quiz
-            </Button>
-          ) : onComplete && isLastStudentSub && canCompleteLesson ? (
-            <div className="ml-auto">{renderCompleteButton()}</div>
-          ) : nav.nextId && onSubSessionChange ? (
-            <Button
-              type="button"
-              variant="hero"
-              size="sm"
-              className="ml-auto hidden sm:inline-flex"
-              onClick={() => goToSubSession(nav.nextId!, true)}
-            >
-              Suivant · {nav.nextTitle}
-            </Button>
-          ) : onComplete && isLastStudentSub ? (
-            <div className="ml-auto">{renderCompleteButton()}</div>
-          ) : null}
+            {requiresLessonQuiz && !canCompleteLesson ? (
+              <p className="text-xs text-muted-foreground">
+                Fè {lessonQuiz!.quiz.passScore}/{lessonQuiz!.quiz.passScore} sou quiz la pou
+                kontinye kou a.
+              </p>
+            ) : null}
+
+            {onComplete && isLastStudentSub && requiresLessonQuiz && !canCompleteLesson ? (
+              <Button
+                type="button"
+                variant="hero"
+                size="sm"
+                onClick={openQuiz}
+                className="ml-auto gap-2"
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                Quiz
+              </Button>
+            ) : onComplete && isLastStudentSub && canCompleteLesson ? (
+              <div className="ml-auto">{renderCompleteButton()}</div>
+            ) : nav.nextId && onSubSessionChange ? (
+              <Button
+                type="button"
+                variant="hero"
+                size="sm"
+                className="ml-auto hidden sm:inline-flex"
+                onClick={() => goToSubSession(nav.nextId!, true)}
+              >
+                Suivant · {nav.nextTitle}
+              </Button>
+            ) : onComplete && isLastStudentSub ? (
+              <div className="ml-auto">{renderCompleteButton()}</div>
+            ) : null}
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }
@@ -283,28 +300,28 @@ export function LessonArticleContent({
 
     if (effectiveSubSessionId) {
       const parsed = parseArticleSubSessionId(effectiveSubSessionId);
-    const found =
-      parsed && parsed.lessonId === lessonId
-        ? findArticleSubSession(sessions, parsed.sessionNumber, parsed.subNumber)
-        : null;
-    const nav = getArticleSubSessionNav(lessonId, sessions, effectiveSubSessionId);
-    const lessonQuiz = findLessonQuizInLesson(lessonId, sessions);
+      const found =
+        parsed && parsed.lessonId === lessonId
+          ? findArticleSubSession(sessions, parsed.sessionNumber, parsed.subNumber)
+          : null;
+      const nav = getArticleSubSessionNav(lessonId, sessions, effectiveSubSessionId);
+      const lessonQuiz = findLessonQuizInLesson(lessonId, sessions);
 
-    if (found) {
-      return (
-        <ArticleSubSessionPanel
-          lessonId={lessonId}
-          effectiveSubSessionId={effectiveSubSessionId}
-          found={found}
-          nav={nav}
-          lessonQuiz={lessonQuiz}
-          nextLessonTitle={nextLessonTitle}
-          onSubSessionChange={onSubSessionChange}
-          onComplete={onComplete}
-          onQuizGateChange={onQuizGateChange}
-        />
-      );
-    }
+      if (found) {
+        return (
+          <ArticleSubSessionPanel
+            lessonId={lessonId}
+            effectiveSubSessionId={effectiveSubSessionId}
+            found={found}
+            nav={nav}
+            lessonQuiz={lessonQuiz}
+            nextLessonTitle={nextLessonTitle}
+            onSubSessionChange={onSubSessionChange}
+            onComplete={onComplete}
+            onQuizGateChange={onQuizGateChange}
+          />
+        );
+      }
     }
   }
 
@@ -313,7 +330,9 @@ export function LessonArticleContent({
 
     return (
       <div className="prose-lesson border-b border-border bg-card px-4 py-8 sm:px-8 sm:py-10 md:px-10">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {title}
+        </h1>
         <div
           className="lesson-html mt-6 space-y-4 text-sm leading-relaxed text-muted-foreground sm:text-base"
           dangerouslySetInnerHTML={{ __html: safeHtml }}
@@ -333,7 +352,9 @@ export function LessonArticleContent({
 
   return (
     <div className="prose-lesson border-b border-border bg-card px-4 py-8 sm:px-8 sm:py-10 md:px-10">
-      <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        {title}
+      </h1>
 
       <div className="mt-6 space-y-4">
         {introBlocks.map((block, index) => {
@@ -346,7 +367,10 @@ export function LessonArticleContent({
           }
           if (block.type === "list") {
             return (
-              <ul key={index} className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+              <ul
+                key={index}
+                className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground"
+              >
                 {block.items.map((item) => (
                   <li key={item}>
                     <InlineText text={item} />
@@ -366,11 +390,17 @@ export function LessonArticleContent({
       {accordionBlocks.length > 0 ? (
         <div className="mt-8">
           {introBlocks.length === 0 ? (
-            <p className="mb-4 text-sm text-muted-foreground">Sélectionnez un titre pour en savoir plus.</p>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Sélectionnez un titre pour en savoir plus.
+            </p>
           ) : null}
           <Accordion type="multiple" className="rounded-lg border border-border">
             {accordionBlocks.map((block, index) => (
-              <AccordionItem key={`${block.title}-${index}`} value={`item-${index}`} className="px-1">
+              <AccordionItem
+                key={`${block.title}-${index}`}
+                value={`item-${index}`}
+                className="px-1"
+              >
                 <AccordionTrigger className="px-4 text-left text-sm font-semibold hover:no-underline">
                   {block.title}
                 </AccordionTrigger>

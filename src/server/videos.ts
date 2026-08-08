@@ -76,7 +76,10 @@ export async function createVideoRecord(params: {
 
   if (error) {
     if (isMissingTable(error.message)) {
-      return { ok: false, reason: "Table videos manquante — exécutez migrations/supabase_videos.sql" };
+      return {
+        ok: false,
+        reason: "Table videos manquante — exécutez migrations/supabase_videos.sql",
+      };
     }
     return { ok: false, reason: error.message };
   }
@@ -144,7 +147,9 @@ export async function updateVideoRecord(
   return true;
 }
 
-export async function deleteVideoRecord(id: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+export async function deleteVideoRecord(
+  id: string,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
   const sb = getSupabaseAdmin();
   if (!sb) {
     return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };

@@ -162,11 +162,7 @@ export const requestAffiliateWithdrawalFn = createServerFn({ method: "POST" })
     }).catch(() => null);
 
     const code = affiliateRecord?.code ?? affiliateCodeForUser(user);
-    const stats = await getAffiliateStats(
-      affiliateRecord?.id ?? user.id,
-      code,
-      user.id,
-    );
+    const stats = await getAffiliateStats(affiliateRecord?.id ?? user.id, code, user.id);
 
     const result = await requestAffiliateWithdrawal({
       userId: user.id,
@@ -179,11 +175,7 @@ export const requestAffiliateWithdrawalFn = createServerFn({ method: "POST" })
 
     if (!result.ok) return result;
 
-    const refreshed = await getAffiliateStats(
-      affiliateRecord?.id ?? user.id,
-      code,
-      user.id,
-    );
+    const refreshed = await getAffiliateStats(affiliateRecord?.id ?? user.id, code, user.id);
     return { ok: true as const, amount: result.amount, stats: refreshed };
   });
 

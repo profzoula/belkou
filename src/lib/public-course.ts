@@ -46,7 +46,10 @@ export function stripResourcesForClient(
   }));
 }
 
-export function toEnrolledCourse(course: Course, format: (c: Course) => PublicCourse): PublicCourse {
+export function toEnrolledCourse(
+  course: Course,
+  format: (c: Course) => PublicCourse,
+): PublicCourse {
   const shaped = format(course);
   return {
     ...shaped,

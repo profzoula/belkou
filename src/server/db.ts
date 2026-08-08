@@ -259,9 +259,7 @@ function mergeRegistrationRows(rows: RegistrationRecord[]): RegistrationRecord[]
     byCourse.set(key, existing ? preferRegistration(existing, row) : row);
   }
 
-  return [...byCourse.values()].sort(
-    (a, b) => Date.parse(b.created_at) - Date.parse(a.created_at),
-  );
+  return [...byCourse.values()].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
 }
 
 export async function listRegistrationsByEmail(
@@ -294,9 +292,7 @@ export async function listRegistrationsByEmail(
   if (db) {
     for (const row of merged) {
       if (row.payment_status !== "paid") continue;
-      const d1Pending = collected.find(
-        (r) => r.id === row.id && r.payment_status !== "paid",
-      );
+      const d1Pending = collected.find((r) => r.id === row.id && r.payment_status !== "paid");
       if (!d1Pending) continue;
       try {
         await db
@@ -399,7 +395,10 @@ export async function updateRegistrationCourseAccess(
 export async function updateRegistrationPayment(
   db: D1Database | null,
   id: string,
-  update: { payment_status: RegistrationRecord["payment_status"]; stripe_session_id?: string | null },
+  update: {
+    payment_status: RegistrationRecord["payment_status"];
+    stripe_session_id?: string | null;
+  },
 ) {
   // Supabase first — student access / admin prefer it when D1 lags or diverges.
   await supabaseUpdatePayment(id, update);
@@ -423,7 +422,10 @@ export async function updateRegistrationPayment(
   }
 }
 
-export async function getRegistrationById(db: D1Database | null, id: string): Promise<RegistrationRecord | null> {
+export async function getRegistrationById(
+  db: D1Database | null,
+  id: string,
+): Promise<RegistrationRecord | null> {
   if (db) {
     const row = await db.prepare(`SELECT * FROM registrations WHERE id = ?`).bind(id).first();
     return row ? rowToRecord(row as Record<string, unknown>) : await supabaseGetById(id);
@@ -442,7 +444,9 @@ export async function getRegistrationByStripeSession(
       .prepare(`SELECT * FROM registrations WHERE stripe_session_id = ?`)
       .bind(sessionId)
       .first();
-    return row ? rowToRecord(row as Record<string, unknown>) : await supabaseGetByStripeSession(sessionId);
+    return row
+      ? rowToRecord(row as Record<string, unknown>)
+      : await supabaseGetByStripeSession(sessionId);
   }
   const fromSb = await supabaseGetByStripeSession(sessionId);
   if (fromSb) return fromSb;
@@ -454,7 +458,10 @@ export async function getRegistrationByStripeSession(
 
 export async function setStripeSessionId(db: D1Database | null, id: string, sessionId: string) {
   if (db) {
-    await db.prepare(`UPDATE registrations SET stripe_session_id = ? WHERE id = ?`).bind(sessionId, id).run();
+    await db
+      .prepare(`UPDATE registrations SET stripe_session_id = ? WHERE id = ?`)
+      .bind(sessionId, id)
+      .run();
     await supabaseSetStripeSessionId(id, sessionId);
     return;
   }
@@ -466,7 +473,9 @@ export async function setStripeSessionId(db: D1Database | null, id: string, sess
 export async function getRegistrationCount(db: D1Database | null): Promise<number> {
   if (db) {
     await initDb(db);
-    const row = await db.prepare(`SELECT COUNT(*) as total FROM registrations`).first<{ total: number }>();
+    const row = await db
+      .prepare(`SELECT COUNT(*) as total FROM registrations`)
+      .first<{ total: number }>();
     return row?.total ?? (await supabaseGetCount());
   }
   const sbCount = await supabaseGetCount();

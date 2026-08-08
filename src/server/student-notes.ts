@@ -12,7 +12,11 @@ async function readNotesStore(): Promise<LessonNotesStore> {
   const sb = getSupabaseAdmin();
   if (!sb) return {};
 
-  const { data, error } = await sb.from("site_content").select("value").eq("key", LESSON_NOTES_KEY).maybeSingle();
+  const { data, error } = await sb
+    .from("site_content")
+    .select("value")
+    .eq("key", LESSON_NOTES_KEY)
+    .maybeSingle();
   if (error || !data?.value) return {};
   return (data.value as LessonNotesStore) ?? {};
 }

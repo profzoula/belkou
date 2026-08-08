@@ -13,8 +13,8 @@ export function CTA() {
               Prêt à apprendre quelque chose de nouveau ?
             </h2>
             <p className="text-sm sm:text-base text-primary-foreground/85 mb-8 leading-relaxed">
-              Explorez le catalogue, regardez une preview gratuite et inscrivez-vous au cours qui correspond à votre
-              objectif.
+              Explorez le catalogue, regardez une preview gratuite et inscrivez-vous au cours qui
+              correspond à votre objectif.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button

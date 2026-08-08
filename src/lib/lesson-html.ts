@@ -32,13 +32,30 @@ const LESSON_HTML_CONFIG = {
     "hr",
     "div",
   ],
-  ALLOWED_ATTR: ["href", "src", "alt", "title", "target", "rel", "class", "contenteditable", "data-lesson-session", "data-lesson-session-title", "data-lesson-subsession", "data-lesson-quiz", "data-lesson-quiz-data"],
+  ALLOWED_ATTR: [
+    "href",
+    "src",
+    "alt",
+    "title",
+    "target",
+    "rel",
+    "class",
+    "contenteditable",
+    "data-lesson-session",
+    "data-lesson-session-title",
+    "data-lesson-subsession",
+    "data-lesson-quiz",
+    "data-lesson-quiz-data",
+  ],
 };
 
 export function isLessonHtml(content: string): boolean {
   const trimmed = content.trim();
   if (!trimmed) return false;
-  return trimmed.startsWith("<") || /<(?:p|h[2-3]|ul|ol|li|strong|em|br|img|table|details|blockquote|pre)\b/i.test(trimmed);
+  return (
+    trimmed.startsWith("<") ||
+    /<(?:p|h[2-3]|ul|ol|li|strong|em|br|img|table|details|blockquote|pre)\b/i.test(trimmed)
+  );
 }
 
 function stripClipboardArtifacts(html: string): string {
@@ -137,7 +154,9 @@ function plainTextToLessonHtml(text: string): string {
       return;
     }
     const tag = listOrdered ? "ol" : "ul";
-    blocks.push(`<${tag}>${listItems.map((item) => `<li>${inlineMarkdownToHtml(item)}</li>`).join("")}</${tag}>`);
+    blocks.push(
+      `<${tag}>${listItems.map((item) => `<li>${inlineMarkdownToHtml(item)}</li>`).join("")}</${tag}>`,
+    );
     listItems = null;
     listOrdered = false;
   };

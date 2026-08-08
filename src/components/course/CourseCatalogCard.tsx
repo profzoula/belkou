@@ -34,11 +34,7 @@ function StarRating({ rating, count }: { rating: number; count: number }) {
   );
 }
 
-export function CourseCatalogCard({
-  course,
-  layout = "grid",
-  className,
-}: CourseCatalogCardProps) {
+export function CourseCatalogCard({ course, layout = "grid", className }: CourseCatalogCardProps) {
   const free = isFreeCourse(course);
 
   if (layout === "row") {
@@ -132,7 +128,9 @@ export function CourseCatalogCard({
         <h3 className="line-clamp-2 min-h-[2.4rem] font-display text-xs font-semibold leading-snug text-foreground group-hover:text-primary sm:min-h-[2.75rem] sm:text-base">
           {course.title}
         </h3>
-        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">{course.instructor}</p>
+        <p className="mt-1 truncate text-[10px] text-muted-foreground sm:text-xs">
+          {course.instructor}
+        </p>
         <div className="mt-2 hidden sm:mt-3 sm:block">
           <StarRating rating={course.rating} count={course.ratingsCount} />
         </div>

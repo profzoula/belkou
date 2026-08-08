@@ -77,7 +77,10 @@ function ForumCoursePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main id="main-content" className="site-container site-page-top mx-auto max-w-2xl pb-12 sm:pb-16">
+      <main
+        id="main-content"
+        className="site-container site-page-top mx-auto max-w-2xl pb-12 sm:pb-16"
+      >
         <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="gap-1 px-0">
             <Link to="/forum">
@@ -88,7 +91,9 @@ function ForumCoursePage() {
         </div>
 
         <FadeIn className="mb-8">
-          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Discussion</p>
+          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">
+            Discussion
+          </p>
           <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-3xl">
             Forum du cours
           </h1>
