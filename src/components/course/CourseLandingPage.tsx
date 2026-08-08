@@ -14,12 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   countLessons,
   formatCount,
   getAllLessons,
@@ -28,13 +22,12 @@ import {
   getCourseDisplayDuration,
   getDisplayedCourseStudentsCount,
   getFirstPreviewVideoLesson,
-  getLessonDisplayDuration,
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
   getWelcomePreviewLesson,
 } from "@/lib/courses";
-import { getLessonLockState } from "@/lib/course-access";
+import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
@@ -522,65 +515,12 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           )}
 
           <section className="mb-10">
-            <h2 className="text-xl font-bold mb-4">Contenu du cours</h2>
+            <h2 className="text-xl font-bold mb-1">Table des matières</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              {course.sections.length} sections · {countLessons(course)} leçons · {getCourseDisplayDuration(course)} · Niveau{" "}
+              {course.sections.length} parties · {countLessons(course)} leçons · {getCourseDisplayDuration(course)} · Niveau{" "}
               {course.skillLevel}
             </p>
-            <Accordion type="multiple" defaultValue={course.sections.slice(0, 1).map((s) => s.id)} className="rounded-xl border border-border px-4">
-              {course.sections.map((section) => (
-                <AccordionItem key={section.id} value={section.id}>
-                  <AccordionTrigger className="hover:no-underline py-4">
-                    <span className="font-semibold text-left">{section.title}</span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 pb-2">
-                      {section.lessons.map((lesson, index) => {
-                        const { locked } = getLessonLockState({
-                          lesson,
-                          course,
-                          hasPaidAccess,
-                        });
-                        const learnSearch = locked ? undefined : { lesson: lesson.id };
-                        const lessonDuration = getLessonDisplayDuration(lesson);
-                        const row = (
-                          <>
-                            <span>
-                              {index + 1}. {lesson.title}
-                              {lesson.preview && (
-                                <span className="ml-2 text-[10px] font-bold uppercase text-primary">Preview</span>
-                              )}
-                            </span>
-                            {lessonDuration ? (
-                              <span className="shrink-0 tabular-nums">{lessonDuration}</span>
-                            ) : null}
-                          </>
-                        );
-
-                        return (
-                          <li key={lesson.id}>
-                            {learnSearch ? (
-                              <Link
-                                to="/courses/$slug/learn"
-                                params={{ slug: course.slug }}
-                                search={learnSearch}
-                                className="flex items-center justify-between gap-3 text-sm text-muted-foreground rounded-md px-1 py-0.5 -mx-1 transition-colors hover:bg-muted/60 hover:text-foreground"
-                              >
-                                {row}
-                              </Link>
-                            ) : (
-                              <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-                                {row}
-                              </div>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            <CoursePublicCurriculum course={course} hasPaidAccess={hasPaidAccess} />
           </section>
 
           <section className="mb-10">

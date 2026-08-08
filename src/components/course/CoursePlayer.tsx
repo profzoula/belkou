@@ -1188,7 +1188,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-[14px] bg-muted/70 p-1">
                   {[
                     { value: "overview", label: "Aperçu" },
-                    { value: "curriculum", label: "Programme", mobileOnly: true },
+                    { value: "curriculum", label: "Table des matières", mobileOnly: true },
                     { value: "notes", label: "Notes" },
                     { value: "resources", label: "Fichiers" },
                     { value: "qa", label: "Q&R" },

@@ -1,34 +1,22 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  CheckCircle2,
-  Circle,
-  Clock3,
-  FileText,
-  Lock,
-  PlayCircle,
-  Search,
-} from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Clock3, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { ArticleCurriculumOutline } from "@/components/course/ArticleCurriculumOutline";
+import {
+  CourseTocItem,
+  CourseTocList,
+  CourseTocPartHeader,
+} from "@/components/course/CourseTocTimeline";
 import type { LessonLockReason } from "@/lib/course-access";
 import {
   countLessons,
   formatCourseDurationLabel,
   getCourseDisplayDuration,
-  getLessonDisplayDuration,
-  getSectionDurationMinutes,
   parseLessonDurationMinutes,
   type CourseLesson,
 } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
-import { parseArticleSessions } from "@/lib/lesson-sessions";
+import { flattenArticleSubSessions, parseArticleSessions } from "@/lib/lesson-sessions";
 import { cn } from "@/lib/utils";
 
 export type CurriculumSidebarProps = {
@@ -46,35 +34,60 @@ export type CurriculumSidebarProps = {
   onLessonQueryChange?: (query: string) => void;
 };
 
-function LessonTypeIcon({
-  lesson,
-  done,
-  locked,
-  active,
-}: {
-  lesson: CourseLesson;
-  done: boolean;
+type TocEntry = {
+  key: string;
+  title: string;
+  isQuiz: boolean;
+  lessonId: string;
+  subSessionId?: string;
   locked: boolean;
+  completed: boolean;
   active: boolean;
-}) {
-  if (done) {
-    return <CheckCircle2 className="size-4 shrink-0 text-success" aria-hidden />;
+};
+
+function buildLessonEntries(
+  lesson: CourseLesson,
+  activeLessonId: string,
+  activeArticleSubSessionId: string | null,
+  viewedArticleSubSessionIds: Set<string>,
+  lessonCompleted: boolean,
+  locked: boolean,
+): TocEntry[] {
+  const sessions =
+    lesson.type === "article" && lesson.content ? parseArticleSessions(lesson.content) : null;
+
+  if (sessions?.length) {
+    return flattenArticleSubSessions(lesson.id, sessions).map(({ id, sub }) => ({
+      key: id,
+      title: sub.title,
+      isQuiz: Boolean(sub.isQuiz),
+      lessonId: lesson.id,
+      subSessionId: id,
+      locked,
+      completed: lessonCompleted || viewedArticleSubSessionIds.has(id),
+      active: lesson.id === activeLessonId && activeArticleSubSessionId === id,
+    }));
   }
-  if (locked) {
-    return <Lock className="size-4 shrink-0 text-muted-foreground/60" aria-hidden />;
-  }
-  if (lesson.type === "article") {
-    return (
-      <FileText
-        className={cn("size-4 shrink-0", active ? "text-primary" : "text-muted-foreground")}
-        aria-hidden
-      />
-    );
-  }
-  if (active) {
-    return <PlayCircle className="size-4 shrink-0 text-primary" aria-hidden />;
-  }
-  return <Circle className="size-4 shrink-0 text-muted-foreground/45" aria-hidden />;
+
+  return [
+    {
+      key: lesson.id,
+      title: lesson.title,
+      isQuiz: false,
+      lessonId: lesson.id,
+      locked,
+      completed: lessonCompleted,
+      active: lesson.id === activeLessonId && !activeArticleSubSessionId,
+    },
+  ];
+}
+
+function getEntryState(entry: TocEntry): "completed" | "active" | "upcoming" | "quiz" | "locked" {
+  if (entry.locked) return "locked";
+  if (entry.completed) return "completed";
+  if (entry.active) return "active";
+  if (entry.isQuiz) return "quiz";
+  return "upcoming";
 }
 
 export function CurriculumSidebar({
@@ -110,25 +123,9 @@ export function CurriculumSidebar({
   }, [completedSet, course.sections]);
 
   const query = lessonQuery.trim().toLowerCase();
-  const defaultSections = useMemo(() => {
-    if (!query) return course.sections.map((section) => section.id);
-    return course.sections
-      .filter((section) =>
-        section.lessons.some(
-          (lesson) =>
-            lesson.title.toLowerCase().includes(query) ||
-            section.title.toLowerCase().includes(query),
-        ),
-      )
-      .map((section) => section.id);
-  }, [course.sections, query]);
+  const summary = `${course.sections.length} parties · ${totalLessons} leçons · ${getCourseDisplayDuration(course)}`;
 
-  const [openSections, setOpenSections] = useState<string[]>(defaultSections);
-
-  // Keep accordion open for active/search matches without fighting user collapses aggressively
-  const accordionValue = query ? defaultSections : openSections;
-
-  const summary = `${course.sections.length} modules · ${totalLessons} leçons · ${getCourseDisplayDuration(course)}`;
+  let globalStep = 0;
 
   return (
     <div
@@ -140,7 +137,9 @@ export function CurriculumSidebar({
       {variant === "sidebar" ? (
         <div className="shrink-0 space-y-4 border-b border-border/80 p-5">
           <div>
-            <h2 className="font-display text-[15px] font-semibold tracking-tight">Programme</h2>
+            <h2 className="font-display text-lg font-bold tracking-tight text-foreground">
+              Table des matières
+            </h2>
             <p className="mt-1 text-xs text-muted-foreground">{summary}</p>
           </div>
 
@@ -199,6 +198,7 @@ export function CurriculumSidebar({
         </div>
       ) : (
         <div className="shrink-0 space-y-2 border-b border-border px-4 py-3">
+          <h2 className="font-display text-base font-bold tracking-tight">Table des matières</h2>
           <p className="text-xs text-muted-foreground">{summary}</p>
           {onLessonQueryChange ? (
             <div className="relative">
@@ -221,149 +221,73 @@ export function CurriculumSidebar({
       <div
         className={cn(
           variant === "sidebar"
-            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3"
-            : "min-h-0 px-2 py-2",
+            ? "min-h-0 flex-1 overflow-y-auto overscroll-contain"
+            : "min-h-0",
         )}
       >
-        <Accordion
-          type="multiple"
-          value={accordionValue}
-          onValueChange={setOpenSections}
-          className="space-y-2"
-        >
-          {course.sections.map((section) => {
-            const sectionLessons = query
-              ? section.lessons.filter(
-                  (lesson) =>
-                    lesson.title.toLowerCase().includes(query) ||
-                    section.title.toLowerCase().includes(query),
-                )
-              : section.lessons;
-            if (query && sectionLessons.length === 0) return null;
+        {course.sections.map((section, sectionIndex) => {
+          const sectionEntries = section.lessons.flatMap((lesson) => {
+            const matchesQuery =
+              !query ||
+              lesson.title.toLowerCase().includes(query) ||
+              section.title.toLowerCase().includes(query);
+            if (!matchesQuery) return [];
 
-            const completed = section.lessons.filter((lesson) => completedSet.has(lesson.id)).length;
-            const sectionDuration = getSectionDurationMinutes(section);
+            const { locked } = getLockState(lesson);
+            const lessonCompleted = completedSet.has(lesson.id);
+            return buildLessonEntries(
+              lesson,
+              activeLessonId,
+              activeArticleSubSessionId,
+              viewedArticleSubSessionIds,
+              lessonCompleted,
+              locked,
+            ).filter((entry) => !query || entry.title.toLowerCase().includes(query));
+          });
 
-            return (
-              <AccordionItem
-                key={section.id}
-                value={section.id}
-                className="overflow-hidden rounded-[16px] border border-border/80 border-b border-b-border/80 bg-background/60 px-0"
-              >
-                <AccordionTrigger className="px-3.5 py-3.5 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                  <div className="flex w-full items-start gap-2 pr-2 text-left">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold leading-snug">{section.title}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {completed}/{section.lessons.length}
-                        {sectionDuration > 0 ? ` · ${sectionDuration} min` : ""}
-                      </p>
-                    </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-2">
-                  <ul className="space-y-1.5 px-2">
-                    {sectionLessons.map((lesson) => {
-                      const globalIndex =
-                        course.sections
-                          .flatMap((item) => item.lessons)
-                          .findIndex((item) => item.id === lesson.id) + 1;
-                      const active = lesson.id === activeLessonId;
-                      const { locked } = getLockState(lesson);
-                      const done = completedSet.has(lesson.id);
-                      const lessonDuration = getLessonDisplayDuration(lesson);
-                      const articleSessions =
-                        lesson.type === "article" && lesson.content
-                          ? parseArticleSessions(lesson.content)
-                          : null;
+          if (query && sectionEntries.length === 0) return null;
 
-                      if (articleSessions?.length) {
-                        return (
-                          <li key={lesson.id} className="rounded-xl px-1 py-1">
-                            <p
-                              className={cn(
-                                "mb-2 px-1 text-[11px] font-semibold tracking-wide uppercase",
-                                active ? "text-primary" : "text-muted-foreground",
-                              )}
-                            >
-                              {globalIndex}. {lesson.title}
-                            </p>
-                            <ArticleCurriculumOutline
-                              lesson={lesson}
-                              sessions={articleSessions}
-                              activeSubSessionId={active ? activeArticleSubSessionId : null}
-                              viewedSubSessionIds={viewedArticleSubSessionIds}
-                              lessonCompleted={done}
-                              locked={locked}
-                              onSelectSubSession={onSelectArticleSubSession}
-                            />
-                          </li>
-                        );
+          const entriesWithSteps = sectionEntries.map((entry) => {
+            const stepNumber = entry.isQuiz ? null : ++globalStep;
+            return { entry, stepNumber };
+          });
+
+          return (
+            <section key={section.id} className="border-b border-border/60 last:border-b-0">
+              <CourseTocPartHeader partNumber={sectionIndex + 1} title={section.title} />
+              <CourseTocList>
+                {entriesWithSteps.map(({ entry, stepNumber }, index) => {
+                  const state = getEntryState(entry);
+                  const isLast = index === entriesWithSteps.length - 1;
+
+                  return (
+                    <CourseTocItem
+                      key={entry.key}
+                      title={entry.title}
+                      stepNumber={stepNumber}
+                      state={state}
+                      isQuiz={entry.isQuiz}
+                      isLast={isLast}
+                      disabled={entry.locked}
+                      ariaLabel={`${entry.isQuiz ? "Quiz" : `Étape ${stepNumber}`} : ${entry.title}${entry.completed ? ", terminé" : ""}${entry.locked ? ", verrouillé" : ""}`}
+                      onClick={
+                        entry.locked
+                          ? undefined
+                          : () => {
+                              if (entry.subSessionId) {
+                                onSelectArticleSubSession(entry.lessonId, entry.subSessionId);
+                              } else {
+                                onSelectLesson(entry.lessonId);
+                              }
+                            }
                       }
-
-                      return (
-                        <li key={lesson.id}>
-                          <button
-                            type="button"
-                            disabled={locked}
-                            onClick={() => {
-                              if (!locked) onSelectLesson(lesson.id);
-                            }}
-                            aria-current={active ? "true" : undefined}
-                            aria-label={`Leçon ${globalIndex} : ${lesson.title}${done ? ", terminée" : ""}${locked ? ", verrouillée" : ""}`}
-                            className={cn(
-                              "group flex w-full cursor-pointer items-start gap-3 rounded-[14px] border px-3 py-3 text-left text-sm transition-all duration-200",
-                              active
-                                ? "border-primary/30 bg-primary/10 shadow-sm"
-                                : "border-transparent bg-card/40 hover:-translate-y-0.5 hover:border-border hover:bg-card hover:shadow-sm",
-                              locked && "cursor-not-allowed opacity-60 hover:translate-y-0 hover:shadow-none",
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                "mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg text-[11px] font-bold tabular-nums",
-                                active
-                                  ? "bg-primary text-primary-foreground"
-                                  : done
-                                    ? "bg-success/15 text-success"
-                                    : "bg-muted text-muted-foreground",
-                              )}
-                            >
-                              {globalIndex}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-start gap-2">
-                                <LessonTypeIcon
-                                  lesson={lesson}
-                                  done={done}
-                                  locked={locked}
-                                  active={active}
-                                />
-                                <span
-                                  className={cn(
-                                    "leading-snug",
-                                    active ? "font-semibold text-foreground" : "text-foreground/90",
-                                  )}
-                                >
-                                  {lesson.title}
-                                </span>
-                              </span>
-                              {lessonDuration ? (
-                                <span className="mt-1.5 block pl-6 text-[11px] text-muted-foreground tabular-nums">
-                                  {lessonDuration}
-                                </span>
-                              ) : null}
-                            </span>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            );
-          })}
-        </Accordion>
+                    />
+                  );
+                })}
+              </CourseTocList>
+            </section>
+          );
+        })}
       </div>
     </div>
   );
