@@ -269,7 +269,7 @@ export function AffiliatePanel({ accessToken }: AffiliatePanelProps) {
                       ref.status === "earned"
                         ? "bg-primary/10 text-primary"
                         : ref.status === "paid_out"
-                          ? "bg-emerald-500/10 text-emerald-700"
+                          ? "bg-success/10 text-success"
                           : "bg-muted text-muted-foreground"
                     }`}
                   >

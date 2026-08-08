@@ -39,7 +39,7 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
           return (
             <h4
               key={index}
-              className="mt-4 rounded-lg border-l-4 border-emerald-500 bg-emerald-50/60 px-4 py-2 font-display text-base font-bold text-foreground dark:bg-emerald-950/25"
+              className="mt-4 rounded-lg border-l-4 border-success bg-success/10 px-4 py-2 font-display text-base font-bold text-foreground dark:bg-success/10"
             >
               {block.text}
             </h4>
@@ -49,7 +49,7 @@ export function ArticleSubSessionBody({ sub }: { sub: ArticleSubSession }) {
           return (
             <ul key={index} className="lesson-rich-list space-y-2 rounded-xl border border-border bg-white p-4 dark:bg-card">
               {block.items.map((item) => (
-                <li key={item} className="relative list-none pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-emerald-500">
+                <li key={item} className="relative list-none pl-5 before:absolute before:left-0 before:top-2.5 before:h-1.5 before:w-1.5 before:rounded-full before:bg-success">
                   <InlineText text={item} />
                 </li>
               ))}

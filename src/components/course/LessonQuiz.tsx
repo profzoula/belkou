@@ -106,11 +106,11 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
 
   if (passed) {
     return (
-      <div className="lesson-quiz lesson-quiz--success overflow-hidden rounded-2xl border border-emerald-200/80 bg-card shadow-md dark:border-emerald-900/60">
+      <div className="lesson-quiz lesson-quiz--success overflow-hidden rounded-2xl border border-success/30 bg-card shadow-md dark:border-success/40">
         <div className="lesson-quiz-success-banner relative overflow-hidden px-6 py-8 sm:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/15 via-emerald-400/5 to-primary/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-success/15 via-success/5 to-primary/10" />
           <div className="relative flex flex-col items-center text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success text-white shadow-lg shadow-success/30">
               <Trophy className="h-8 w-8" />
             </div>
             <p className="mt-4 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -119,13 +119,13 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
             <p className="mt-1 text-sm text-muted-foreground">
               Ou reyisi quiz la ak yon nòt pafè
             </p>
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/80 bg-white/80 px-4 py-2 text-sm font-semibold text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-success/40 bg-white/80 px-4 py-2 text-sm font-semibold text-success shadow-sm dark:border-success/40 dark:bg-success/10 dark:text-success">
               <Sparkles className="h-4 w-4" />
               {quiz.passScore}/{quiz.passScore} bon repons
             </div>
           </div>
         </div>
-        <div className="border-t border-emerald-100 px-6 py-5 dark:border-emerald-900/50 sm:px-8">
+        <div className="border-t border-success/20 px-6 py-5 dark:border-success/30 sm:px-8">
           <p className="text-sm leading-relaxed text-muted-foreground">
             Ou pare pou kontinye fòmasyon an. Klike{" "}
             <strong className="text-foreground">
@@ -177,7 +177,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                       className={cn(
                         "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold",
                         isCorrect
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                          ? "bg-success/15 text-success dark:bg-success/10 dark:text-success"
                           : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400",
                       )}
                     >
@@ -187,7 +187,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                       <p className="text-sm font-semibold text-foreground">{question.prompt}</p>
                       <p className="mt-2 text-xs text-muted-foreground">
                         Repons ou:{" "}
-                        <span className={cn("font-medium", isCorrect ? "text-emerald-700" : "text-red-700")}>
+                        <span className={cn("font-medium", isCorrect ? "text-success" : "text-red-700")}>
                           {question.options.find((option) => option.id === selected)?.label ?? "—"}
                         </span>
                       </p>
@@ -199,7 +199,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                       ) : null}
                     </div>
                     {isCorrect ? (
-                      <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+                      <CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
                     ) : (
                       <XCircle className="h-5 w-5 shrink-0 text-red-500" />
                     )}
@@ -229,7 +229,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
   return (
     <div className="lesson-quiz overflow-hidden rounded-2xl border border-border bg-card shadow-md">
       <div className="lesson-quiz-header relative overflow-hidden border-b border-border px-5 py-5 sm:px-7 sm:py-6">
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-emerald-500/5 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-success/5 to-transparent" />
         <div className="relative">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -255,7 +255,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all duration-500 ease-out"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-success transition-all duration-500 ease-out"
                 style={{ width: `${Math.max(((currentIndex + 1) / total) * 100, 8)}%` }}
               />
             </div>
@@ -278,7 +278,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
                         "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20",
                       !active &&
                         done &&
-                        "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400",
+                        "border-success/40 bg-success/10 text-success dark:border-success/40 dark:bg-success/10 dark:text-success",
                       !active &&
                         !done &&
                         "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground",
@@ -301,7 +301,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
             {currentIndex + 1}
           </span>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+            <p className="text-xs font-semibold uppercase tracking-wide text-success">
               Chwazi yon sèl repons
             </p>
             <p className="mt-1 text-base font-semibold leading-relaxed text-foreground sm:text-lg">

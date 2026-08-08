@@ -13,12 +13,14 @@ This runbook defines the minimum safe process to release and rollback BelKou.
    - `npm run build`
    - `npm run audit:release`
 2. Confirm required production environment variables are configured:
-   - `SITE_URL`
-   - `SUPABASE_URL`
+   - `SITE_URL` (or `VITE_SITE_URL`)
+   - `SUPABASE_URL` (or `VITE_SUPABASE_URL`)
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `STRIPE_SECRET_KEY`
    - `STRIPE_WEBHOOK_SECRET`
-3. Deploy to production.
+3. Apply pending Supabase SQL migrations (if any), including:
+   - `migrations/supabase_stripe_webhook_events.sql` (Stripe webhook idempotency)
+4. Deploy to production (GitHub Actions `Deploy` workflow on `main`, or manual Railway deploy).
 4. Post-deploy checks:
    - `GET /healthz` returns `200` and `status: "ok"`
    - Stripe webhook endpoint receives events without errors

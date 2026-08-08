@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, CalendarClock, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Panel } from "@/components/ui/panel";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseActionLabel } from "@/lib/courses";
@@ -80,13 +83,9 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
 
   if (enrollments === undefined) {
     return (
-      <div
-        role="status"
-        aria-live="polite"
-        className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground shadow-sm"
-      >
+      <Panel padding="lg" className="text-center text-sm text-muted-foreground" role="status" aria-live="polite">
         Chargement de vos cours…
-      </div>
+      </Panel>
     );
   }
 
@@ -94,24 +93,20 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
     return (
       <section>
         <h2 className="font-display text-2xl font-semibold text-foreground">Mes cours</h2>
-        <div className="mt-6 rounded-2xl border border-border bg-card p-10 text-center shadow-sm md:p-12">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-primary/10">
-            <BookOpen className="h-7 w-7 text-primary" />
-          </div>
-          <h3 className="font-display text-lg font-semibold">Aucun cours pour le moment</h3>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre.
-          </p>
-          <p className="mx-auto mt-4 max-w-md text-xs text-muted-foreground">
-            Déjà inscrit ? Vérifiez que vous êtes connecté avec la même adresse email que celle utilisée
-            lors du paiement.
-          </p>
-          <Button asChild variant="hero" className="mt-6 shadow-primary">
-            <Link to="/courses">
-              Explorer les cours <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <Panel className="mt-6">
+          <EmptyState
+            icon={BookOpen}
+            title="Aucun cours pour le moment"
+            description="Parcourez le catalogue et inscrivez-vous à un cours pour commencer à apprendre. Déjà inscrit ? Vérifiez que vous êtes connecté avec la même adresse email que celle utilisée lors du paiement."
+            action={
+              <Button asChild variant="hero" className="shadow-primary">
+                <Link to="/courses">
+                  Explorer les cours <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            }
+          />
+        </Panel>
       </section>
     );
   }
@@ -180,9 +175,9 @@ export function MyCoursesSection({ enrollments }: MyCoursesSectionProps) {
       </div>
 
       {count === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center text-sm text-muted-foreground">
-          Aucun cours ne correspond à votre recherche.
-        </div>
+        <Panel variant="dashed">
+          <EmptyState title="Aucun résultat" description="Aucun cours ne correspond à votre recherche." />
+        </Panel>
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-3 2xl:grid-cols-4">
           {filtered?.map((enrollment, index) => (
@@ -237,16 +232,14 @@ function CourseGridCard({ enrollment }: { enrollment: StudentEnrollment }) {
 
       <div className="flex min-w-0 flex-1 flex-col p-2.5 sm:p-4">
         <div className="mb-1.5 sm:mb-2">
-          <span
-            className={cn(
-              "rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide sm:px-2 sm:text-[10px]",
-              status === "active" && "bg-success/15 text-success",
-              status === "scheduled" && "bg-primary/10 text-primary",
-              status === "pending" && "bg-brand-accent/20 text-brand-accent-foreground",
-            )}
+          <Badge
+            variant={
+              status === "active" ? "success" : status === "scheduled" ? "secondary" : "warning"
+            }
+            className="text-[9px] uppercase tracking-wide sm:text-[10px]"
           >
             {status === "active" ? "Actif" : status === "scheduled" ? "Programmé" : "En attente"}
-          </span>
+          </Badge>
         </div>
         <Link {...href} className="block min-w-0">
           <h3 className="line-clamp-2 font-display text-xs font-semibold leading-snug text-foreground transition-colors group-hover:text-primary sm:text-sm">

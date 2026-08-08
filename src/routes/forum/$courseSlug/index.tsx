@@ -77,7 +77,7 @@ function ForumCoursePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top mx-auto max-w-2xl pb-12 sm:pb-16">
+      <main id="main-content" className="site-container site-page-top mx-auto max-w-2xl pb-12 sm:pb-16">
         <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="gap-1 px-0">
             <Link to="/forum">

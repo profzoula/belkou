@@ -40,7 +40,7 @@ function ForumIndexPage() {
   return (
     <div className="min-h-dvh bg-background">
       <Navbar />
-      <main>
+      <main id="main-content">
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container site-page-top pb-8 pt-8 sm:pb-10">
             <FadeIn>

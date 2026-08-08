@@ -13,6 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   countLessons,
   formatCount,
@@ -31,8 +32,8 @@ import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurricul
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
+import { getEnrolledCourse, type PublicCourse } from "@/lib/fns/courses";
 import { getCourseProgress } from "@/lib/fns/progress";
-import type { PublicCourse } from "@/lib/fns/courses";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/hooks/use-auth";
@@ -101,8 +102,10 @@ function CourseThumbnail({
 export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const { user, session, loading: authLoading } = useAuth();
   const accessFn = useServerFn(getCourseAccess);
+  const enrolledCourseFn = useServerFn(getEnrolledCourse);
   const progressFn = useServerFn(getCourseProgress);
   const [access, setAccess] = useState<CourseAccessStatus | null>(null);
+  const [enrolledCourse, setEnrolledCourse] = useState<PublicCourse | null>(null);
   const [progress, setProgress] = useState<{
     completedLessonIds: string[];
     progressPercent: number;
@@ -172,6 +175,34 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const accessLoading = authLoading || (Boolean(user) && access === null);
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
+  const previewCourse = enrolledCourse ?? course;
+
+  useEffect(() => {
+    if (!session?.access_token || !hasPaidAccess) {
+      setEnrolledCourse(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    void enrolledCourseFn({
+      data: {
+        courseSlug: course.slug,
+        accessToken: session.access_token,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setEnrolledCourse(result);
+      })
+      .catch(() => {
+        if (!cancelled) setEnrolledCourse(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course.slug, enrolledCourseFn, hasPaidAccess, session?.access_token]);
+
   const enrolledWaiting = hasPaidAccess && !contentLive;
   const canStartCourse = hasPaidAccess && contentLive;
 
@@ -214,6 +245,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </div>
       </header>
 
+      <main id="main-content">
       <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-10 pt-6">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60" />
         <div className="site-container relative">
@@ -426,8 +458,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           </div>
         </aside>
 
-        <main className="min-w-0 lg:order-1">
-          <CoursePreviewVideo course={course} hasPaidAccess={hasPaidAccess} />
+        <div className="min-w-0 lg:order-1">
+          <CoursePreviewVideo course={previewCourse} hasPaidAccess={hasPaidAccess} />
 
           <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
             <span className="inline-flex items-center gap-1 font-bold text-foreground">
@@ -440,7 +472,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
             </span>
             {courseDiscount > 0 && (
-              <span className="text-xs font-semibold text-emerald-600">{courseDiscount}% off aujourd&apos;hui</span>
+              <Badge variant="success">{courseDiscount}% off aujourd&apos;hui</Badge>
             )}
           </div>
 
@@ -495,8 +527,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </p>
             </div>
           </section>
-        </main>
+        </div>
       </div>
+      </main>
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden">
         <div className="site-container flex items-center gap-3">
@@ -513,7 +546,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <div className="min-w-0 flex-1">
             <p className="text-xs text-muted-foreground truncate">{course.title}</p>
             {hasPaidAccess ? (
-              <p className="text-sm font-semibold text-emerald-700">
+              <p className="text-sm font-semibold text-success">
                 {canStartCourse
                   ? "Accès actif"
                   : access?.scheduledPublishAt

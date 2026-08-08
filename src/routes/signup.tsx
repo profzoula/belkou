@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
@@ -20,6 +21,7 @@ import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   email: z.string().optional(),
+  redirect: z.string().optional(),
 });
 
 export const Route = createFileRoute("/signup")({
@@ -35,7 +37,7 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const { email: emailFromSearch } = Route.useSearch();
+  const { email: emailFromSearch, redirect: redirectFromSearch } = Route.useSearch();
   const claimReferralFn = useServerFn(claimSignupReferral);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState(emailFromSearch ?? "");
@@ -43,6 +45,7 @@ function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = getStoredReferralCode();
@@ -110,11 +113,7 @@ function SignupPage() {
       if (alreadyRegistered) {
         toast.info("Un compte existe déjà avec cet email. Renvoyez la confirmation si besoin.");
       }
-      const params = new URLSearchParams({
-        check_email: "1",
-        email,
-      });
-      window.location.replace(`/login?${params.toString()}`);
+      setPendingConfirmationEmail(email);
       return;
     }
 
@@ -127,8 +126,40 @@ function SignupPage() {
     }
 
     toast.success("Compte créé avec succès.");
-    window.location.href = "/dashboard";
+    const redirect =
+      redirectFromSearch?.startsWith("/") && !redirectFromSearch.startsWith("//")
+        ? redirectFromSearch
+        : "/dashboard";
+    window.location.href = redirect;
   };
+
+  if (pendingConfirmationEmail) {
+    return (
+      <AuthSplitLayout>
+        <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Inscription</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Presque terminé
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          Confirmez votre email pour activer votre compte et accéder à vos cours.
+        </p>
+        <div className="mt-8 space-y-4">
+          <EmailConfirmationNotice email={pendingConfirmationEmail} />
+          <Button asChild variant="soft" size="lg" className="h-11 w-full">
+            <Link
+              to="/login"
+              search={{
+                email: pendingConfirmationEmail,
+                ...(redirectFromSearch ? { redirect: redirectFromSearch } : {}),
+              }}
+            >
+              Aller à la connexion
+            </Link>
+          </Button>
+        </div>
+      </AuthSplitLayout>
+    );
+  }
 
   return (
     <AuthSplitLayout>
@@ -176,6 +207,9 @@ function SignupPage() {
                 className="h-11 rounded-xl"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Utilisez la même adresse que lors de votre inscription au cours, si vous avez déjà payé.
+              </p>
             </div>
 
             <div className="space-y-2">

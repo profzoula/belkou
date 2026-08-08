@@ -15,21 +15,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { StudentPaymentStatusBadge } from "@/components/admin/AdminStatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { adminGrantCourseAccess, getAdminStudents } from "@/lib/fns/admin";
 
 const ROWS_PER_PAGE = 20;
-
-const statusLabel: Record<string, string> = {
-  paid: "Accès actif",
-  pending: "Paiement en attente",
-  manual_pending: "Paiement manuel",
-};
-
-const statusClass: Record<string, string> = {
-  paid: "bg-emerald-500/10 text-emerald-700",
-  pending: "bg-amber-500/10 text-amber-700",
-  manual_pending: "bg-blue-500/10 text-blue-700",
-};
 
 type StudentsData = Awaited<ReturnType<typeof getAdminStudents>>;
 
@@ -257,11 +247,7 @@ export function AdminStudentsTab() {
                     </td>
                     <td className="px-5 py-3">
                       {student.paymentStatus ? (
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusClass[student.paymentStatus] ?? ""}`}
-                        >
-                          {statusLabel[student.paymentStatus] ?? student.paymentStatus}
-                        </span>
+                        <StudentPaymentStatusBadge status={student.paymentStatus} className="text-[11px]" />
                       ) : (
                         <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                           Compte seul
@@ -271,7 +257,7 @@ export function AdminStudentsTab() {
                     <td className="px-5 py-3">
                       {student.paymentStatus === "paid" && student.courseSlug ? (
                         <div className="flex flex-col items-start gap-1.5">
-                          <span className="text-xs font-medium text-emerald-700">Accès confirmé</span>
+                          <Badge variant="success" className="text-xs">Accès confirmé</Badge>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -314,11 +300,7 @@ export function AdminStudentsTab() {
                     <p className="text-sm text-muted-foreground truncate">{student.email}</p>
                   </div>
                   {student.paymentStatus ? (
-                    <span
-                      className={`shrink-0 inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusClass[student.paymentStatus] ?? ""}`}
-                    >
-                      {statusLabel[student.paymentStatus] ?? student.paymentStatus}
-                    </span>
+                    <StudentPaymentStatusBadge status={student.paymentStatus} className="shrink-0 text-[11px]" />
                   ) : (
                     <span className="shrink-0 inline-flex rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                       Compte seul

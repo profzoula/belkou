@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   adminDeleteCourseResource,
+  adminGetCourseResourceUrl,
   adminUpdateCourseResource,
   adminUploadCourseResource,
 } from "@/lib/fns/admin";
@@ -79,15 +80,31 @@ export function AdminCourseResourcesEditor({
   const uploadFn = useServerFn(adminUploadCourseResource);
   const deleteFn = useServerFn(adminDeleteCourseResource);
   const updateFn = useServerFn(adminUpdateCourseResource);
+  const resourceUrlFn = useServerFn(adminGetCourseResourceUrl);
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState("");
   const [pendingTitle, setPendingTitle] = useState("");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
 
   const sorted = sortCourseResources(resources);
+
+  const openResource = async (resourceId: string) => {
+    setDownloadingId(resourceId);
+    try {
+      const result = await resourceUrlFn({
+        data: { courseSlug, resourceId },
+      });
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ouverture impossible");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handlePickFile = (file: File) => {
     if (file.size > MAX_BYTES) {
@@ -195,10 +212,17 @@ export function AdminCourseResourcesEditor({
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
-                <Button asChild variant="outline" size="sm">
-                  <a href={resource.fileUrl} target="_blank" rel="noreferrer">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={downloadingId === resource.id}
+                  onClick={() => void openResource(resource.id)}
+                >
+                  {downloadingId === resource.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
                     <Download className="h-4 w-4" />
-                  </a>
+                  )}
                 </Button>
                 <Button
                   variant="ghost"

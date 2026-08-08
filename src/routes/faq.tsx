@@ -21,7 +21,7 @@ function FaqPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
+      <main id="main-content">
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container site-page-top mx-auto max-w-3xl pb-10 pt-8 text-center sm:pb-14 sm:pt-12">
             <FadeIn>

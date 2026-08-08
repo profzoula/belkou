@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Play, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatCount } from "@/lib/courses";
 
 type HeroProps = {
@@ -52,26 +53,29 @@ export function Hero({ studentCount }: HeroProps) {
             <span className="text-primary">embaucher</span>
           </h1>
 
-          <p className="mt-2 max-w-lg text-[11px] leading-relaxed text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
+          <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground sm:mt-4 sm:text-base md:text-lg">
             Parcours premium pour bâtir des apps IA et SaaS — de l&apos;idée au déploiement, avec
             mentors et projets concrets.
           </p>
 
           <div className="mt-4 flex flex-nowrap items-center gap-2 sm:mt-7 sm:gap-3">
-            <Link
-              to="/courses"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-full bg-primary px-4 text-xs font-semibold whitespace-nowrap text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
+            <Button asChild variant="hero" size="lg" className="rounded-full px-4 text-xs sm:h-12 sm:px-7 sm:text-sm">
+              <Link to="/courses">
+                Commencer
+                <ArrowRight className="size-3 sm:size-4" aria-hidden />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="rounded-full bg-card px-4 text-xs sm:h-12 sm:px-7 sm:text-sm"
             >
-              Commencer
-              <ArrowRight className="size-3 sm:size-4" aria-hidden />
-            </Link>
-            <Link
-              to="/courses"
-              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1 rounded-full border border-border bg-card px-4 text-xs font-semibold whitespace-nowrap text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-12 sm:gap-2 sm:px-7 sm:text-sm"
-            >
-              <Play className="size-3 text-primary sm:size-4" aria-hidden />
-              Voir les cours
-            </Link>
+              <Link to="/courses">
+                <Play className="size-3 text-primary sm:size-4" aria-hidden />
+                Voir les cours
+              </Link>
+            </Button>
           </div>
         </motion.div>
 
@@ -86,14 +90,18 @@ export function Hero({ studentCount }: HeroProps) {
             className="absolute inset-x-6 bottom-6 h-28 rounded-[100%] bg-primary/20 blur-3xl"
           />
           <div className="relative z-10 mx-auto w-full max-w-[660px]">
-            <img
-              src="/hero/student-original.png"
-              alt="Diplômée BelKou prête pour sa carrière"
-              className="mx-auto h-auto w-full max-h-[min(54vh,395px)] object-contain object-bottom drop-shadow-[0_24px_60px_rgba(2,8,23,0.20)] [mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-[1.03]"
-              width={900}
-              height={1200}
-              fetchPriority="high"
-            />
+            <picture>
+              <source srcSet="/hero/student-original.webp" type="image/webp" />
+              <img
+                src="/hero/student-original.png"
+                alt="Diplômée BelKou prête pour sa carrière"
+                className="mx-auto h-auto w-full max-h-[min(54vh,395px)] object-contain object-bottom drop-shadow-[0_24px_60px_rgba(2,8,23,0.20)] [mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_84%,transparent_100%)] sm:max-h-[min(68vh,620px)] md:max-h-[min(76vh,680px)] md:scale-[1.03]"
+                width={900}
+                height={1200}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
           </div>
         </motion.div>
       </div>

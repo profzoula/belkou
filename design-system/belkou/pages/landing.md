@@ -9,14 +9,15 @@ Follow Master unless noted.
 - Light trust line (ratings + student count) sits below CTAs only
 
 ## Section order
-1. Hero
-2. Impact stats (overlap ok)
-3. Trending courses (catalog / “marketplace”)
-4. Upcoming courses
-5. How it works
-6. Testimonials
-7. Final CTA
-8. Footer
+1. Hero (with Navbar overlay)
+2. Trending courses (`CoursesSection` — catalog grid)
+3. Impact stats (`TrustStrip`)
+4. Services (`ServicesSection`)
+5. Upcoming courses (`UpcomingCourses`)
+6. How it works (`HowItWorks`)
+7. Testimonials (`Testimonials`)
+8. Final CTA (`CTA`)
+9. Footer
 
 ## Motion
 - Hero: staggered FadeIn via Framer Motion (≤ 300–500ms)

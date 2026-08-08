@@ -33,7 +33,7 @@ function ServicesIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main>
+      <main id="main-content">
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div
             aria-hidden

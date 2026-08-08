@@ -59,6 +59,16 @@ const port = Number(process.env.PORT) || 3000;
 const host = "0.0.0.0";
 const startedAt = Date.now();
 
+function envValue(key) {
+  if (key === "SUPABASE_URL") {
+    return process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+  }
+  if (key === "SITE_URL") {
+    return process.env.SITE_URL ?? process.env.VITE_SITE_URL;
+  }
+  return process.env[key];
+}
+
 function checkEnvConfig() {
   const required = [
     "SITE_URL",
@@ -71,11 +81,11 @@ function checkEnvConfig() {
 
   const requiredChecks = required.map((key) => ({
     name: key,
-    ok: Boolean(process.env[key]),
+    ok: Boolean(envValue(key)),
   }));
   const optionalChecks = optional.map((key) => ({
     name: key,
-    ok: Boolean(process.env[key]),
+    ok: Boolean(envValue(key)),
   }));
   const requiredOk = requiredChecks.every((item) => item.ok);
 

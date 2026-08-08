@@ -2,11 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navbar } from "@/components/site/Navbar";
-import { Footer } from "@/components/site/Footer";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
@@ -35,7 +35,6 @@ function ResetPasswordPage() {
       setHasSession(false);
       return;
     }
-    // Supabase auto-detects the recovery token from the URL hash
     supabase.auth.getSession().then(({ data }) => {
       setHasSession(!!data.session);
     });
@@ -81,100 +80,97 @@ function ResetPasswordPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <main className="site-page-top min-h-[calc(100dvh-var(--site-header-height))] flex items-center justify-center px-4 py-8 sm:py-12 pb-[env(safe-area-inset-bottom,0px)]">
-        <div className="surface w-full max-w-md p-8 rounded-2xl">
-          {!isSupabaseConfigured && (
-            <div className="bg-amber-500/10 text-amber-700 rounded-lg p-3 text-sm mb-6">
-              Authentification non configurée.
-            </div>
-          )}
+    <AuthSplitLayout>
+      {!isSupabaseConfigured ? (
+        <p className="mb-6 rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-brand-accent-foreground">
+          Authentification non configurée.
+        </p>
+      ) : null}
 
-          <h1 className="text-2xl font-display font-bold mb-2">Nouveau mot de passe</h1>
+      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">Mot de passe</p>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        Nouveau mot de passe
+      </h1>
 
-          {hasSession === null && (
-            <p className="text-muted-foreground text-sm">Vérification en cours…</p>
-          )}
+      {hasSession === null && (
+        <p className="mt-6 text-sm text-muted-foreground">Vérification en cours…</p>
+      )}
 
-          {hasSession === false && (
-            <div className="space-y-4">
-              <p className="text-muted-foreground text-sm">
-                Ce lien est invalide ou a expiré. Veuillez faire une nouvelle demande.
-              </p>
-              <Link to="/forgot-password">
-                <Button variant="outline">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Demander un nouveau lien
-                </Button>
-              </Link>
-            </div>
-          )}
-
-          {hasSession && !done && (
-            <>
-              <p className="text-muted-foreground text-sm mb-8">
-                Définissez un nouveau mot de passe pour votre compte.
-              </p>
-              <form onSubmit={submit} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="rp-password">Nouveau mot de passe</Label>
-                  <div className="relative">
-                    <Input
-                      id="rp-password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      minLength={6}
-                      placeholder="Au moins 6 caractères"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      tabIndex={-1}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rp-confirm">Confirmer le mot de passe</Label>
-                  <Input
-                    id="rp-confirm"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    minLength={6}
-                    placeholder="Répétez le mot de passe"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
-                </Button>
-              </form>
-            </>
-          )}
-
-          {done && (
-            <div className="text-center space-y-4 mt-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <Check className="h-8 w-8 text-emerald-600" />
-              </div>
-              <h2 className="text-lg font-semibold">Mot de passe mis à jour !</h2>
-              <p className="text-sm text-muted-foreground">
-                Votre mot de passe a été changé avec succès.
-              </p>
-              <Link to="/dashboard">
-                <Button className="mt-4">Accéder à mon espace</Button>
-              </Link>
-            </div>
-          )}
+      {hasSession === false && (
+        <div className="mt-8 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Ce lien est invalide ou a expiré. Veuillez faire une nouvelle demande.
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/forgot-password">
+              <ArrowLeft className="h-4 w-4" />
+              Demander un nouveau lien
+            </Link>
+          </Button>
         </div>
-      </main>
-      <Footer />
-    </>
+      )}
+
+      {hasSession && !done && (
+        <>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Définissez un nouveau mot de passe pour votre compte.
+          </p>
+          <form onSubmit={submit} className="mt-8 space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="rp-password">Nouveau mot de passe</Label>
+              <div className="relative">
+                <Input
+                  id="rp-password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  placeholder="Au moins 6 caractères"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="rp-confirm">Confirmer le mot de passe</Label>
+              <Input
+                id="rp-confirm"
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                placeholder="Répétez le mot de passe"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full" variant="hero" disabled={loading}>
+              {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
+            </Button>
+          </form>
+        </>
+      )}
+
+      {done && (
+        <div className="mt-8">
+          <EmptyState
+            icon={Check}
+            title="Mot de passe mis à jour !"
+            description="Votre mot de passe a été changé avec succès."
+            action={
+              <Button asChild variant="hero">
+                <Link to="/dashboard">Accéder à mon espace</Link>
+              </Button>
+            }
+          />
+        </div>
+      )}
+    </AuthSplitLayout>
   );
 }

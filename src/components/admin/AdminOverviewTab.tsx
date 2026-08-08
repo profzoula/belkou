@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { PaymentStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { AdminStatCard } from "@/components/admin/AdminStatCard";
 import type { AdminSection } from "@/components/admin/AdminLayout";
 import type { getAdminOverview } from "@/lib/fns/admin";
@@ -23,18 +24,6 @@ type OverviewData = Awaited<ReturnType<typeof getAdminOverview>>;
 type OverviewProps = {
   data: OverviewData;
   onNavigate: (section: AdminSection) => void;
-};
-
-const statusLabel: Record<string, string> = {
-  paid: "Payé",
-  pending: "En attente",
-  manual_pending: "Paiement manuel",
-};
-
-const statusClass: Record<string, string> = {
-  paid: "bg-success/10 text-success",
-  pending: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-  manual_pending: "bg-primary/10 text-primary",
 };
 
 function formatActivityDate(iso: string): string {
@@ -235,11 +224,7 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
                     <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {row.plan}
                     </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusClass[row.payment_status] ?? "bg-muted text-muted-foreground"}`}
-                    >
-                      {statusLabel[row.payment_status] ?? row.payment_status}
-                    </span>
+                    <PaymentStatusBadge status={row.payment_status} className="text-[10px]" />
                   </div>
                   <p className="mt-1 truncate text-sm text-muted-foreground">{row.email}</p>
                 </div>

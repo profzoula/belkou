@@ -66,7 +66,7 @@ export function AdminLayout({
   const activeLabel = navItems.find((item) => item.id === active)?.label ?? "Admin";
 
   return (
-    <div className="min-h-dvh bg-[#F8FAFC] text-foreground dark:bg-background">
+    <div className="min-h-dvh bg-background text-foreground">
       <div className="lg:grid lg:grid-cols-[272px_minmax(0,1fr)]">
         <aside className="sticky top-0 z-30 flex flex-col border-b border-border/80 bg-card/90 backdrop-blur-xl lg:h-dvh lg:border-b-0 lg:border-r">
           <div className="border-b border-border/70 px-5 py-5">
@@ -194,7 +194,7 @@ export function AdminLayout({
         </aside>
 
         <div className="min-w-0">
-          <header className="sticky top-0 z-20 border-b border-border/70 bg-[#F8FAFC]/85 backdrop-blur-xl dark:bg-background/85">
+          <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
             <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold tracking-tight">{activeLabel}</p>
@@ -235,7 +235,7 @@ export function AdminLayout({
             </div>
           </header>
 
-          <main className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <main id="main-content" className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             {children}
           </main>
         </div>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { PaymentStatusBadge } from "@/components/admin/AdminStatusBadge";
 import {
   adminAddCashRegistration,
   adminGrantFreeVip,
@@ -19,12 +20,6 @@ const statusLabel: Record<string, string> = {
   paid: "Payé",
   pending: "En attente",
   manual_pending: "Paiement manuel",
-};
-
-const statusClass: Record<string, string> = {
-  paid: "bg-emerald-500/10 text-emerald-700",
-  pending: "bg-amber-500/10 text-amber-700",
-  manual_pending: "bg-blue-500/10 text-blue-700",
 };
 
 const emptyForm = {
@@ -369,11 +364,7 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                   <td className="px-5 py-3">{r.email}</td>
                   <td className="px-5 py-3 uppercase text-xs font-semibold">{r.plan}</td>
                   <td className="px-5 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${statusClass[r.payment_status] ?? ""}`}
-                    >
-                      {statusLabel[r.payment_status] ?? r.payment_status}
-                    </span>
+                    <PaymentStatusBadge status={r.payment_status} className="text-[11px]" />
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex flex-wrap gap-1.5">

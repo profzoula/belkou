@@ -39,14 +39,14 @@ export function ArticleCurriculumOutline({
 
         return (
           <div key={session.number} className="overflow-hidden rounded-lg border border-border/80">
-            <div className="flex items-center justify-between gap-2 bg-emerald-50 px-3 py-2.5 dark:bg-emerald-950/30">
+            <div className="flex items-center justify-between gap-2 bg-success/10 px-3 py-2.5 dark:bg-success/10">
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-success">
                   Session {session.number}
                 </p>
                 <p className="truncate text-xs font-bold leading-snug text-foreground">{session.title}</p>
               </div>
-              <span className="shrink-0 text-[10px] font-medium tabular-nums text-emerald-700 dark:text-emerald-400">
+              <span className="shrink-0 text-[10px] font-medium tabular-nums text-success">
                 {viewedInSession}/{visibleSubCount}
               </span>
             </div>
@@ -65,7 +65,7 @@ export function ArticleCurriculumOutline({
                     {!last ? (
                       <span
                         aria-hidden
-                        className="absolute left-[13px] top-7 bottom-0 w-px border-l border-dashed border-emerald-300/80"
+                        className="absolute left-[13px] top-7 bottom-0 w-px border-l border-dashed border-success/40"
                       />
                     ) : null}
                     <button
@@ -75,7 +75,7 @@ export function ArticleCurriculumOutline({
                       className={cn(
                         "flex w-full items-start gap-2 px-3 py-2 text-left text-xs transition-colors",
                         active
-                          ? "bg-emerald-50 font-medium text-foreground dark:bg-emerald-950/25"
+                          ? "bg-success/10 font-medium text-foreground dark:bg-success/10"
                           : "hover:bg-muted/50",
                         locked && "cursor-not-allowed opacity-60",
                       )}
@@ -84,13 +84,13 @@ export function ArticleCurriculumOutline({
                         {locked ? (
                           <Lock className="h-3.5 w-3.5 text-muted-foreground/60" />
                         ) : viewed ? (
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                          <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                         ) : (
-                          <Circle className="h-3.5 w-3.5 text-emerald-500/70" />
+                          <Circle className="h-3.5 w-3.5 text-success/70" />
                         )}
                       </span>
                       <span className="min-w-0 flex-1 leading-snug">
-                        <span className="tabular-nums text-emerald-700 dark:text-emerald-400">{sub.number}</span>{" "}
+                        <span className="tabular-nums text-success">{sub.number}</span>{" "}
                         {sub.title}
                       </span>
                     </button>

@@ -93,7 +93,7 @@ function AboutPage() {
 
       <ImpactStats studentCount={studentCount} courseCount={courseCount} />
 
-      <main>
+      <main id="main-content">
         <section className="site-section-anchor py-14 sm:py-16 md:py-20">
           <div className="site-container">
             <SectionHeader

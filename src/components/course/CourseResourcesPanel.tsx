@@ -1,21 +1,28 @@
 import { useMemo, useState } from "react";
-import { Download, FileSpreadsheet, FileText, Search } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Download, FileSpreadsheet, FileText, Loader2, Search } from "lucide-react";
+import { toast } from "sonner";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { Panel } from "@/components/ui/panel";
 import {
   inferResourceKind,
   resourceKindLabel,
   sortCourseResources,
-  type CourseResource,
+  type ClientCourseResource,
 } from "@/lib/course-resources";
+import { getCourseResourceDownloadUrl } from "@/lib/fns/course-resources";
 import { cn } from "@/lib/utils";
 
 type CourseResourcesPanelProps = {
-  resources: CourseResource[];
+  courseSlug: string;
+  accessToken: string;
+  resources: ClientCourseResource[];
 };
 
-function ResourceIcon({ resource }: { resource: CourseResource }) {
+function ResourceIcon({ resource }: { resource: ClientCourseResource }) {
   const kind = inferResourceKind(resource.contentType, resource.fileName);
-  const className = "h-5 w-5 shrink-0 text-emerald-600";
+  const className = "h-5 w-5 shrink-0 text-success";
 
   if (kind === "spreadsheet") {
     return <FileSpreadsheet className={className} aria-hidden />;
@@ -24,8 +31,14 @@ function ResourceIcon({ resource }: { resource: CourseResource }) {
   return <FileText className={className} aria-hidden />;
 }
 
-export function CourseResourcesPanel({ resources }: CourseResourcesPanelProps) {
+export function CourseResourcesPanel({
+  courseSlug,
+  accessToken,
+  resources,
+}: CourseResourcesPanelProps) {
   const [search, setSearch] = useState("");
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const downloadFn = useServerFn(getCourseResourceDownloadUrl);
   const sorted = useMemo(() => sortCourseResources(resources), [resources]);
 
   const filtered = useMemo(() => {
@@ -41,6 +54,24 @@ export function CourseResourcesPanel({ resources }: CourseResourcesPanelProps) {
     );
   }, [search, sorted]);
 
+  const downloadResource = async (resource: ClientCourseResource) => {
+    setDownloadingId(resource.id);
+    try {
+      const result = await downloadFn({
+        data: {
+          courseSlug,
+          resourceId: resource.id,
+          accessToken,
+        },
+      });
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Téléchargement impossible");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-1 pb-8 pt-2 sm:px-0">
       <div className="relative max-w-xl">
@@ -53,7 +84,7 @@ export function CourseResourcesPanel({ resources }: CourseResourcesPanelProps) {
         />
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
+      <Panel className="mt-6">
         <div className="border-b border-border px-4 py-3 sm:px-5">
           <h3 className="font-display text-lg font-bold">Ressources du cours</h3>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -62,25 +93,28 @@ export function CourseResourcesPanel({ resources }: CourseResourcesPanelProps) {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="px-4 py-10 text-center text-sm text-muted-foreground sm:px-5">
-            {resources.length === 0
-              ? "Aucune ressource disponible pour le moment."
-              : "Aucune ressource ne correspond à votre recherche."}
-          </div>
+          <EmptyState
+            title={resources.length === 0 ? "Aucune ressource disponible" : "Aucun résultat"}
+            description={
+              resources.length === 0
+                ? "Les documents du cours apparaîtront ici dès qu'ils seront publiés."
+                : "Aucune ressource ne correspond à votre recherche."
+            }
+          />
         ) : (
           <ul className="divide-y divide-border">
             {filtered.map((resource) => {
               const kind = inferResourceKind(resource.contentType, resource.fileName);
+              const loading = downloadingId === resource.id;
               return (
                 <li key={resource.id}>
-                  <a
-                    href={resource.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    download={resource.fileName}
+                  <button
+                    type="button"
+                    onClick={() => void downloadResource(resource)}
+                    disabled={loading}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-4 transition-colors sm:px-5",
-                      "hover:bg-muted/40",
+                      "flex w-full items-center gap-3 px-4 py-4 text-left transition-colors sm:px-5",
+                      "hover:bg-muted/40 disabled:opacity-60",
                     )}
                   >
                     <ResourceIcon resource={resource} />
@@ -90,17 +124,21 @@ export function CourseResourcesPanel({ resources }: CourseResourcesPanelProps) {
                         {resourceKindLabel(kind)} · {resource.fileName}
                       </p>
                     </div>
-                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
-                      <Download className="h-4 w-4" aria-hidden />
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                      {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      ) : (
+                        <Download className="h-4 w-4" aria-hidden />
+                      )}
                       <span className="sr-only">Télécharger</span>
                     </span>
-                  </a>
+                  </button>
                 </li>
               );
             })}
           </ul>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }

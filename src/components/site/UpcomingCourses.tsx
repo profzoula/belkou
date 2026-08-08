@@ -35,7 +35,7 @@ function UpcomingCourseCard({ course }: { course: PublicCourse }) {
         <h3 className="line-clamp-2 text-sm font-bold leading-snug group-hover:text-primary">{course.title}</h3>
         <p className="mt-1 truncate text-xs text-muted-foreground">{course.instructor}</p>
 
-        <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-sky-800">
+        <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
           <CalendarClock className="h-3.5 w-3.5 shrink-0" />
           {course.scheduledPublishAt
             ? `Lancement le ${formatScheduledPublishLabel(course.scheduledPublishAt)}`

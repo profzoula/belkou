@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { RefreshCw, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { WithdrawalStatusBadge } from "@/components/admin/AdminStatusBadge";
 import { Button } from "@/components/ui/button";
 import { adminProcessWithdrawal, getAdminAffiliateOverview } from "@/lib/fns/admin";
 import {
@@ -13,18 +14,6 @@ import {
 } from "@/lib/affiliate-config";
 
 type Overview = Awaited<ReturnType<typeof getAdminAffiliateOverview>>;
-
-const withdrawalStatusLabel: Record<string, string> = {
-  pending: "En attente",
-  paid: "Payé",
-  rejected: "Rejeté",
-};
-
-const withdrawalStatusClass: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  paid: "bg-emerald-500/10 text-emerald-700",
-  rejected: "bg-red-500/10 text-red-700",
-};
 
 export function AdminCommissionsTab() {
   const overviewFn = useServerFn(getAdminAffiliateOverview);
@@ -195,11 +184,7 @@ export function AdminCommissionsTab() {
                       </div>
                     </td>
                     <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${withdrawalStatusClass[w.status] ?? ""}`}
-                      >
-                        {withdrawalStatusLabel[w.status] ?? w.status}
-                      </span>
+                      <WithdrawalStatusBadge status={w.status} className="text-[11px]" />
                     </td>
                     <td className="px-5 py-3 whitespace-nowrap">
                       {w.status === "pending" ? (

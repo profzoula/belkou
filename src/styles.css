@@ -35,6 +35,8 @@
   --color-brand-accent-foreground: var(--brand-accent-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  --color-logo-bg: var(--logo-bg);
+  --color-nav-dark: var(--nav-dark);
 
   --font-display: "Poppins", "Inter", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
@@ -80,6 +82,8 @@
   --ring: #0046d5;
 
   --ink: #0f172a;
+  --logo-bg: #1a2744;
+  --nav-dark: #07080d;
   --primary-soft: #e8effc;
   --course-hero: linear-gradient(160deg, #eef4ff 0%, #dce8ff 55%, #c9dbff 100%);
 
@@ -245,6 +249,7 @@
   .dark .glass {
     background: oklch(0.16 0.008 285 / 0.92);
   }
+  /* Legacy CSS badge — prefer <Badge /> from @/components/ui/badge */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -399,7 +404,7 @@
     @apply my-4 border-l-4 border-primary/40 bg-primary/5 pl-3 pt-2 font-display text-lg font-bold text-foreground;
   }
   .rich-text-editor h3[data-lesson-subsession] {
-    @apply mt-4 border-l-2 border-emerald-500/40 bg-emerald-50/40 pl-3 pt-1 text-base font-semibold text-foreground dark:bg-emerald-950/20;
+    @apply mt-4 border-l-2 border-success/40 bg-success/10 pl-3 pt-1 text-base font-semibold text-foreground dark:bg-success/10;
   }
   .rich-text-editor .lesson-quiz-data-block {
     @apply sr-only;

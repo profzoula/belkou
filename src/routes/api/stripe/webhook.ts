@@ -8,52 +8,13 @@ import { earnAffiliateCommission } from "@/server/affiliates";
 import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/stripe-access";
 import { sendOpsAlert } from "@/server/ops-alerts";
 import { getResolvedCourseBySlug } from "@/server/site-content";
+import { beginWebhookEvent, finishWebhookEvent } from "@/server/stripe-webhook-idempotency";
 
 function webhookOk() {
   return new Response(JSON.stringify({ received: true }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
-}
-
-const WEBHOOK_EVENTS_SQL = `
-CREATE TABLE IF NOT EXISTS stripe_webhook_events (
-  event_id TEXT PRIMARY KEY,
-  status TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-`;
-
-async function beginWebhookEvent(
-  db: D1Database | null,
-  eventId: string,
-): Promise<"process" | "duplicate"> {
-  if (!db) return "process";
-  await db.exec(WEBHOOK_EVENTS_SQL);
-
-  const existing = await db
-    .prepare(`SELECT status FROM stripe_webhook_events WHERE event_id = ?`)
-    .bind(eventId)
-    .first<{ status?: string | null }>();
-  if (existing?.status === "success") return "duplicate";
-
-  await db
-    .prepare(
-      `INSERT INTO stripe_webhook_events (event_id, status, updated_at)
-       VALUES (?, 'processing', ?)
-       ON CONFLICT(event_id) DO UPDATE SET status = 'processing', updated_at = excluded.updated_at`,
-    )
-    .bind(eventId, new Date().toISOString())
-    .run();
-  return "process";
-}
-
-async function finishWebhookEvent(db: D1Database | null, eventId: string): Promise<void> {
-  if (!db) return;
-  await db
-    .prepare(`UPDATE stripe_webhook_events SET status = 'success', updated_at = ? WHERE event_id = ?`)
-    .bind(new Date().toISOString(), eventId)
-    .run();
 }
 
 async function handleCheckoutPaid(session: {

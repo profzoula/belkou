@@ -74,7 +74,7 @@ function AuthCallbackPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16">
+      <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16">
         <div className="mx-auto max-w-sm text-center">
           <div className="surface rounded-2xl p-8 flex flex-col items-center gap-3">
             {error ? (

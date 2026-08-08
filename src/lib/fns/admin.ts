@@ -1270,7 +1270,7 @@ export const adminUploadCourseResource = createServerFn({ method: "POST" })
     const nextResource = {
       id: crypto.randomUUID(),
       title: data.title.trim(),
-      fileUrl: uploaded.publicUrl,
+      storagePath: uploaded.storagePath,
       fileName: uploaded.fileName,
       contentType: uploaded.contentType,
       sortOrder: (course.resources?.length ?? 0) + 1,
@@ -1349,4 +1349,37 @@ export const adminUpdateCourseResource = createServerFn({ method: "POST" })
     }
 
     return { ok: true as const, courses: adminCoursesResponse(await getResolvedCourses()) };
+  });
+
+export const adminGetCourseResourceUrl = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ courseSlug: z.string().min(1), resourceId: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { resolveResourceStoragePath } = await import("@/lib/course-resources");
+    const { createSignedCourseResourceUrl } = await import("@/server/course-resource-storage");
+    const { getResolvedCourseBySlug } = await import("@/server/site-content");
+
+    const course = await getResolvedCourseBySlug(data.courseSlug);
+    if (!course) {
+      throw new Error("Cours introuvable");
+    }
+
+    const resource = course.resources?.find((item) => item.id === data.resourceId);
+    if (!resource) {
+      throw new Error("Ressource introuvable");
+    }
+
+    const storagePath = resolveResourceStoragePath(resource);
+    if (!storagePath) {
+      throw new Error("Fichier introuvable");
+    }
+
+    const signed = await createSignedCourseResourceUrl(storagePath);
+    if (!signed.ok) {
+      throw new Error(signed.reason);
+    }
+
+    return { url: signed.url, fileName: resource.fileName };
   });

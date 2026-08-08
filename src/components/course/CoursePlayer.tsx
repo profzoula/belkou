@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, Clock, FileText, Globe, Lock, Star } from "lucide-react";
+import { CheckCircle2, Clock, FileText, Globe, Lock, LogIn, Star, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -36,7 +36,7 @@ import {
   saveLessonLastAccess,
   saveLessonPlayback,
 } from "@/lib/fns/progress";
-import type { PublicCourse } from "@/lib/fns/courses";
+import { getEnrolledCourse, type PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { getLessonVideoPlayback, getLessonVimeoPlayback } from "@/lib/fns/videos";
@@ -487,6 +487,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const { session } = useAuth();
   const navigate = useNavigate();
   const accessFn = useServerFn(getCourseAccess);
+  const enrolledCourseFn = useServerFn(getEnrolledCourse);
   const completeFn = useServerFn(completeLesson);
   const progressFn = useServerFn(getCourseProgress);
   const savePlaybackFn = useServerFn(saveLessonPlayback);
@@ -502,6 +503,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   const lastPlaybackSaveRef = useRef(0);
   const resumeAppliedRef = useRef(Boolean(initialLessonId));
   const lastAccessSavedRef = useRef<string | null>(null);
+  const [enrolledCourse, setEnrolledCourse] = useState<PublicCourse | null>(null);
+
+  useEffect(() => {
+    setEnrolledCourse(null);
+  }, [course.slug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -533,6 +539,33 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
+  const activeCourse = enrolledCourse ?? course;
+
+  useEffect(() => {
+    if (!session?.access_token || !hasPaidAccess) {
+      setEnrolledCourse(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    void enrolledCourseFn({
+      data: {
+        courseSlug: course.slug,
+        accessToken: session.access_token,
+      },
+    })
+      .then((result) => {
+        if (!cancelled) setEnrolledCourse(result);
+      })
+      .catch(() => {
+        if (!cancelled) setEnrolledCourse(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [course.slug, enrolledCourseFn, hasPaidAccess, session?.access_token]);
 
   useEffect(() => {
     if (!session?.access_token || !hasPaidAccess) {
@@ -571,8 +604,8 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     };
   }, [course.slug, hasPaidAccess, progressFn, session?.access_token]);
 
-  const allLessons = useMemo(() => getAllLessons(course), [course]);
-  const welcomeLesson = useMemo(() => getWelcomePreviewLesson(course), [course]);
+  const allLessons = useMemo(() => getAllLessons(activeCourse), [activeCourse]);
+  const welcomeLesson = useMemo(() => getWelcomePreviewLesson(activeCourse), [activeCourse]);
   const orderedLessonIds = useMemo(() => allLessons.map((lesson) => lesson.id), [allLessons]);
   const completedLessonIds = progress?.completedLessonIds ?? [];
   const playbackByLessonId = progress?.playbackByLessonId ?? {};
@@ -615,11 +648,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     (lesson: CourseLesson) =>
       getLessonLockState({
         lesson,
-        course,
+        course: activeCourse,
         hasPaidAccess,
         ...(hasPaidAccess && contentLive ? { completedLessonIds, orderedLessonIds } : {}),
       }),
-    [completedLessonIds, contentLive, course, hasPaidAccess, orderedLessonIds],
+    [activeCourse, completedLessonIds, contentLive, hasPaidAccess, orderedLessonIds],
   );
 
   const resolveLessonId = (lessonId?: string) => {
@@ -827,7 +860,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     [activeLessonId, selectLesson],
   );
 
-  const activeSection = getSectionForLesson(course, activeLesson.id);
+  const activeSection = getSectionForLesson(activeCourse, activeLesson.id);
   const [lessonQuery, setLessonQuery] = useState("");
   const lessonNumber =
     allLessons.findIndex((lesson) => lesson.id === activeLessonId) + 1;
@@ -1018,15 +1051,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     <div
       className={cn(
         "min-h-dvh text-foreground dark:bg-background",
-        activeLesson.type === "article" ? "bg-white" : "bg-[#F8FAFC]",
+        activeLesson.type === "article" ? "bg-white" : "bg-background",
       )}
     >
-      <a
-        href="#learn-main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-foreground focus:ring-2 focus:ring-primary"
-      >
-        Aller au contenu du cours
-      </a>
       <LearnHeader
         courseTitle={course.title}
         courseSlug={course.slug}
@@ -1058,11 +1085,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
         </div>
       )}
 
-      <main id="learn-main" className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
+      <main id="main-content" className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8">
         <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
           <aside className="hidden lg:sticky lg:top-[calc(4rem+1rem)] lg:flex lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:flex-col lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
             <CurriculumSidebar
-              course={course}
+              course={activeCourse}
               activeLessonId={activeLessonId}
               activeArticleSubSessionId={activeArticleSubSessionId}
               viewedArticleSubSessionIds={viewedArticleSubSessionIds}
@@ -1092,7 +1119,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
               <div className={activeLesson.type === "article" ? "bg-white" : "bg-black/95"}>
                 <CourseVideoArea
-                  course={course}
+                  course={activeCourse}
                   lesson={activeLesson}
                   hasPaidAccess={hasPaidAccess}
                   welcomeLessonId={welcomeLesson?.id}
@@ -1174,7 +1201,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 <TabsContent value="curriculum" className="mt-4 pb-12 lg:hidden">
                   <CurriculumSidebar
                     variant="tab"
-                    course={course}
+                    course={activeCourse}
                     activeLessonId={activeLessonId}
                     activeArticleSubSessionId={activeArticleSubSessionId}
                     viewedArticleSubSessionIds={viewedArticleSubSessionIds}
@@ -1270,8 +1297,29 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 </TabsContent>
 
                 <TabsContent value="resources" className="mt-4 px-1 pb-12 sm:px-2">
-                  {hasPaidAccess ? (
-                    <CourseResourcesPanel resources={course.resources ?? []} />
+                  {hasPaidAccess && session?.access_token ? (
+                    <CourseResourcesPanel
+                      courseSlug={course.slug}
+                      accessToken={session.access_token}
+                      resources={activeCourse.resources ?? []}
+                    />
+                  ) : hasPaidAccess ? (
+                    <div className="mx-auto max-w-sm space-y-4 py-8 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Connectez-vous pour télécharger les ressources du cours.
+                      </p>
+                      <Button asChild size="sm">
+                        <Link
+                          to="/login"
+                          search={{
+                            redirect: `/courses/${course.slug}/learn`,
+                          }}
+                        >
+                          <LogIn className="h-4 w-4" />
+                          Se connecter
+                        </Link>
+                      </Button>
+                    </div>
                   ) : (
                     <div className="py-12 text-center">
                       <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
@@ -1290,9 +1338,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 {["qa", "notes", "reviews"].map((tab) => (
                   <TabsContent key={tab} value={tab} className="mt-4 px-1 py-8 pb-12 text-center sm:px-2">
                     {hasPaidAccess && session?.access_token ? (
-                      <EnrolledExtraTab
-                        tab={tab}
-                        course={course}
+                    <EnrolledExtraTab
+                      tab={tab}
+                      course={activeCourse}
                         contentLive={contentLive}
                         startLabel={courseStartsAtLabel(course)}
                         activeLessonId={activeLessonId}
@@ -1300,9 +1348,35 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                         accessToken={session.access_token}
                       />
                     ) : hasPaidAccess ? (
-                      <p className="text-sm text-muted-foreground">
-                        Reconnectez-vous pour accéder à cette section.
-                      </p>
+                      <div className="mx-auto max-w-sm space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          Connectez-vous pour accéder à cette section et synchroniser votre progression.
+                        </p>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                          <Button asChild size="sm">
+                            <Link
+                              to="/login"
+                              search={{
+                                redirect: `/courses/${course.slug}/learn`,
+                              }}
+                            >
+                              <LogIn className="h-4 w-4" />
+                              Se connecter
+                            </Link>
+                          </Button>
+                          <Button asChild variant="outline" size="sm">
+                            <Link
+                              to="/signup"
+                              search={{
+                                redirect: `/courses/${course.slug}/learn`,
+                              }}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                              Créer un compte
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
                     ) : (
                       <>
                         <Globe className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />

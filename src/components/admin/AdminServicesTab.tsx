@@ -591,7 +591,7 @@ export function AdminServicesTab() {
                   <span
                     className={cn(
                       "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase",
-                      service.published ? "bg-emerald-600 text-white" : "bg-muted text-muted-foreground",
+                      service.published ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground",
                     )}
                   >
                     {service.published ? "Publié" : "Masqué"}

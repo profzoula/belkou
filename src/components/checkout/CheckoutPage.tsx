@@ -20,6 +20,8 @@ import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
+import { saveRegistrationHandoff } from "@/lib/registration-handoff";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { getCourseIcon } from "@/lib/course-icons";
 
@@ -60,6 +62,7 @@ export function CheckoutPage({
   initialCourse = null,
 }: CheckoutPageProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const submitFn = useServerFn(submitRegistration);
   const loadCourseFn = useServerFn(getPublicCourse);
   const [course, setCourse] = useState<PublicCourse | null>(initialCourse);
@@ -85,6 +88,12 @@ export function CheckoutPage({
     const stored = getStoredReferralCode();
     if (stored) setForm((s) => ({ ...s, referral_code: stored }));
   }, [refCode]);
+
+  useEffect(() => {
+    if (user?.email) {
+      setForm((current) => (current.email.trim() ? current : { ...current, email: user.email! }));
+    }
+  }, [user?.email]);
 
   useEffect(() => {
     if (!courseSlug) {
@@ -157,6 +166,13 @@ export function CheckoutPage({
     setLoading(true);
     try {
       const result = await submitFn({ data: parsed.data });
+
+      saveRegistrationHandoff({
+        email: parsed.data.email,
+        registrationId: result.registrationId,
+        courseSlug: parsed.data.course_slug,
+        paid: false,
+      });
 
       if (result.resumed) {
         toast.info("Inscription retrouvée — redirection vers le paiement.");
@@ -320,6 +336,10 @@ export function CheckoutPage({
             {/* Personal info */}
             <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
               <h2 className="font-display text-lg font-semibold text-foreground">Vos informations</h2>
+              <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+                <strong className="font-semibold text-foreground">Cet email = votre accès aux cours.</strong>{" "}
+                Utilisez la même adresse pour créer votre compte BelKou après le paiement.
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="full_name">Nom complet</Label>
                 <Input
@@ -347,9 +367,12 @@ export function CheckoutPage({
                     onChange={(e) => update("email", e.target.value)}
                     className="h-11 rounded-xl"
                     aria-invalid={Boolean(fieldErrors.email)}
-                    aria-describedby={fieldErrors.email ? "checkout-email-error" : undefined}
+                    aria-describedby="checkout-email-hint checkout-email-error"
                     required
                   />
+                  <p id="checkout-email-hint" className="text-xs text-muted-foreground">
+                    Conservez cet email — il sera demandé à la connexion pour accéder à vos cours.
+                  </p>
                   {fieldErrors.email ? (
                     <p id="checkout-email-error" className="text-xs text-destructive" role="alert">
                       {fieldErrors.email}

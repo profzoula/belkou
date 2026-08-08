@@ -255,6 +255,7 @@ export async function getCourseOverrides(): Promise<CourseOverridesMap> {
 }
 
 export async function saveCourseOverrides(overrides: CourseOverridesMap) {
+  invalidateResolvedCoursesCache();
   return writeJson(COURSE_OVERRIDES_KEY, overrides);
 }
 
@@ -263,10 +264,18 @@ export async function getStoredAdminCourses(): Promise<StoredCourse[]> {
 }
 
 export async function saveStoredAdminCourses(courses: StoredCourse[]) {
+  invalidateResolvedCoursesCache();
   return writeJson(ADMIN_COURSES_KEY, courses);
 }
 
-async function resolveCourseList(): Promise<Course[]> {
+const RESOLVED_COURSES_TTL_MS = 45_000;
+let resolvedCoursesCache: { expiresAt: number; promise: Promise<Course[]> } | null = null;
+
+export function invalidateResolvedCoursesCache(): void {
+  resolvedCoursesCache = null;
+}
+
+async function resolveCourseListFresh(): Promise<Course[]> {
   const [overrides, stored] = await Promise.all([getCourseOverrides(), getStoredAdminCourses()]);
 
   const baseResolved = baseCourses.map((course) => mergeCourse(course, overrides[course.slug]));
@@ -277,6 +286,17 @@ async function resolveCourseList(): Promise<Course[]> {
   });
 
   return [...baseResolved, ...adminResolved];
+}
+
+async function resolveCourseList(): Promise<Course[]> {
+  const now = Date.now();
+  if (resolvedCoursesCache && resolvedCoursesCache.expiresAt > now) {
+    return resolvedCoursesCache.promise;
+  }
+
+  const promise = resolveCourseListFresh();
+  resolvedCoursesCache = { expiresAt: now + RESOLVED_COURSES_TTL_MS, promise };
+  return promise;
 }
 
 export async function getResolvedCourses(): Promise<Course[]> {

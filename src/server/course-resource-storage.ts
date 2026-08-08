@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 const BUCKET = "course-resources";
 const MAX_BYTES = 25 * 1024 * 1024;
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 const ALLOWED_TYPES = new Set([
   "application/pdf",
@@ -57,7 +58,7 @@ export async function uploadCourseResource(params: {
   dataBase64: string;
   fileName: string;
 }): Promise<
-  | { ok: true; publicUrl: string; fileName: string; contentType: string }
+  | { ok: true; storagePath: string; fileName: string; contentType: string }
   | { ok: false; reason: string }
 > {
   const sb = getSupabaseAdmin();
@@ -112,11 +113,33 @@ export async function uploadCourseResource(params: {
     return { ok: false, reason: error.message };
   }
 
-  const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
   return {
     ok: true,
-    publicUrl: data.publicUrl,
+    storagePath: path,
     fileName: safeName,
     contentType,
   };
+}
+
+export async function createSignedCourseResourceUrl(
+  storagePath: string,
+  expiresInSeconds = SIGNED_URL_TTL_SECONDS,
+): Promise<{ ok: true; url: string } | { ok: false; reason: string }> {
+  const sb = getSupabaseAdmin();
+  if (!sb) {
+    return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };
+  }
+
+  const path = storagePath.trim();
+  if (!path || path.includes("..")) {
+    return { ok: false, reason: "Chemin de fichier invalide" };
+  }
+
+  const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(path, expiresInSeconds);
+  if (error || !data?.signedUrl) {
+    console.error("[BelKou] course resource signed URL:", error?.message);
+    return { ok: false, reason: error?.message ?? "URL signée indisponible" };
+  }
+
+  return { ok: true, url: data.signedUrl };
 }

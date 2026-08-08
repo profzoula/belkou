@@ -19,6 +19,11 @@ import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from 
 import { seoHead } from "@/lib/seo";
 import { useAuth } from "@/hooks/use-auth";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
+import {
+  clearRegistrationHandoff,
+  emailsMatch,
+  saveRegistrationHandoff,
+} from "@/lib/registration-handoff";
 
 const searchSchema = z.object({
   registrationId: z.string().optional(),
@@ -122,14 +127,38 @@ function SuccessPage() {
   const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
   const registrationEmail = status?.email;
-  const emailMatchesUser = Boolean(
-    user?.email && registrationEmail && user.email.toLowerCase() === registrationEmail.toLowerCase(),
-  );
+  const emailMatchesUser = emailsMatch(user?.email, registrationEmail);
+
+  useEffect(() => {
+    if (!registrationEmail) return;
+
+    if (isPaid) {
+      saveRegistrationHandoff({
+        email: registrationEmail,
+        registrationId,
+        courseSlug,
+        paid: true,
+      });
+    } else if (registrationId) {
+      saveRegistrationHandoff({
+        email: registrationEmail,
+        registrationId,
+        courseSlug,
+        paid: false,
+      });
+    }
+  }, [registrationEmail, registrationId, courseSlug, isPaid]);
+
+  useEffect(() => {
+    if (emailMatchesUser && user) {
+      clearRegistrationHandoff();
+    }
+  }, [emailMatchesUser, user]);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg text-center">
+      <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16 max-w-lg text-center">
         <div className="inline-grid place-items-center h-14 w-14 rounded-full bg-primary/10 text-primary mb-5">
           <CheckCircle2 className="h-7 w-7" />
         </div>
@@ -138,9 +167,17 @@ function SuccessPage() {
           {loading ? "Vérification..." : isPaid ? "Paiement confirmé !" : "Inscription enregistrée"}
         </h1>
         <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-          {isPaid
-            ? "Votre accès au cours sera disponible selon le calendrier du programme. Créez votre compte avec le même email que l'inscription."
-            : "Consultez votre email pour les instructions de paiement."}
+          {isPaid ? (
+            <>
+              Votre accès au cours sera disponible selon le calendrier du programme.{" "}
+              <strong className="font-medium text-foreground">
+                Créez votre compte avec le même email que l&apos;inscription
+              </strong>{" "}
+              — sans cela, vos cours n&apos;apparaîtront pas dans Mes cours.
+            </>
+          ) : (
+            "Consultez votre email pour les instructions de paiement."
+          )}
         </p>
 
         <div className="space-y-3 text-left">

@@ -1014,13 +1014,13 @@ export function AdminCoursesTab() {
             )}
           </div>
           {selectedCourse.isScheduled && selectedCourse.scheduledPublishAt && (
-            <p className="text-sm text-sky-700 bg-sky-50 rounded-lg px-3 py-2">
+            <p className="text-sm text-primary bg-primary/10 rounded-lg px-3 py-2">
               Inscriptions ouvertes — vidéos disponibles le{" "}
               {formatScheduledPublishLabel(selectedCourse.scheduledPublishAt)}
             </p>
           )}
           {selectedCourse.isLive && !selectedCourse.isScheduled && (
-            <p className="text-sm text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+            <p className="text-sm text-success bg-success/10 rounded-lg px-3 py-2">
               Ce cours est actuellement visible sur le site public.
             </p>
           )}
@@ -1673,7 +1673,7 @@ export function AdminCoursesTab() {
             className={cn(
               "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
               priceFilter === filter
-                ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+                ? "border-success bg-success/10 text-success"
                 : "border-border bg-card text-muted-foreground hover:text-foreground",
             )}
           >
@@ -1748,7 +1748,7 @@ export function AdminCoursesTab() {
                     </td>
                     <td className="px-4 py-4">
                       {isFreeCourse(course) ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2.5 py-0.5 text-xs font-medium text-success">
                           <Gift className="h-3 w-3" />
                           Gratuit
                         </span>
@@ -1759,7 +1759,7 @@ export function AdminCoursesTab() {
                       )}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="inline-flex rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-medium text-sky-800">
+                      <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                         {courseTypeBadge(course.isBase)}
                       </span>
                     </td>
@@ -1819,7 +1819,7 @@ export function AdminCoursesTab() {
                                 checked={course.isLive}
                                 disabled={togglingSlug === course.slug || course.isScheduled}
                                 onCheckedChange={(checked) => togglePublished(course, checked)}
-                                className="data-[state=checked]:bg-[#1a2744]"
+                                className="data-[state=checked]:bg-logo-bg"
                               />
                               <span className="text-xs text-muted-foreground">
                                 {course.isLive ? "Publié" : "Masqué"}

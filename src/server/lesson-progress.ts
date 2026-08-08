@@ -29,12 +29,50 @@ export async function listLessonProgress(
     return [];
   }
 
-  return (data ?? []).map((row) => ({
+  return (data ?? []).map((row) => mapLessonProgressRow(row));
+}
+
+function mapLessonProgressRow(row: {
+  lesson_id: unknown;
+  completed_at: unknown;
+  current_time_seconds: unknown;
+  last_watched_at: unknown;
+}): LessonProgressRow {
+  return {
     lesson_id: String(row.lesson_id),
     completed_at: row.completed_at ? String(row.completed_at) : null,
     current_time_seconds: Number(row.current_time_seconds) || 0,
     last_watched_at: row.last_watched_at ? String(row.last_watched_at) : null,
-  }));
+  };
+}
+
+/** All lesson progress rows for a student, grouped by course slug (one query). */
+export async function listAllLessonProgressForEmail(
+  email: string,
+): Promise<Record<string, LessonProgressRow[]>> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return {};
+
+  const normalized = normalizeRegistrationEmail(email);
+  const { data, error } = await sb
+    .from("lesson_progress")
+    .select("course_slug, lesson_id, completed_at, current_time_seconds, last_watched_at")
+    .ilike("email", normalized);
+
+  if (error) {
+    if (!error.message.includes("lesson_progress")) {
+      console.error("[BelKou] list all lesson progress:", error.message);
+    }
+    return {};
+  }
+
+  const byCourse: Record<string, LessonProgressRow[]> = {};
+  for (const row of data ?? []) {
+    const courseSlug = String(row.course_slug ?? "").trim();
+    if (!courseSlug) continue;
+    (byCourse[courseSlug] ??= []).push(mapLessonProgressRow(row));
+  }
+  return byCourse;
 }
 
 /** Most recently opened/watched lesson for resume (ignores unknown lesson ids). */

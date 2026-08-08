@@ -23,19 +23,19 @@ export function LessonArticleSessions({ sessions }: LessonArticleSessionsProps) 
     <div className="space-y-6">
       {sessions.map((session) => (
         <section key={session.number} className="overflow-hidden rounded-xl border border-border">
-          <div className="flex items-center justify-between gap-3 bg-emerald-50 px-4 py-3 dark:bg-emerald-950/30">
+          <div className="flex items-center justify-between gap-3 bg-success/10 px-4 py-3 dark:bg-success/10">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-emerald-500/40 bg-white text-xs font-bold text-emerald-700 dark:bg-emerald-950">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 border-success/40 bg-white text-xs font-bold text-success dark:bg-success/10">
                 {session.number}
               </span>
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-success">
                   Session {session.number}
                 </p>
                 <p className="truncate text-sm font-bold text-foreground">{session.title}</p>
               </div>
             </div>
-            <span className="shrink-0 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+            <span className="shrink-0 text-xs font-medium text-success">
               {session.subSessions.length} module{session.subSessions.length > 1 ? "s" : ""}
             </span>
           </div>
@@ -60,7 +60,7 @@ export function LessonArticleSessions({ sessions }: LessonArticleSessionsProps) 
                     {!last ? (
                       <span
                         aria-hidden
-                        className="absolute left-[15px] top-8 bottom-0 w-px border-l border-dashed border-emerald-300/80"
+                        className="absolute left-[15px] top-8 bottom-0 w-px border-l border-dashed border-success/40"
                       />
                     ) : null}
                     <button
@@ -68,25 +68,25 @@ export function LessonArticleSessions({ sessions }: LessonArticleSessionsProps) 
                       onClick={() => toggleSub(id)}
                       className={cn(
                         "flex w-full items-start gap-3 rounded-lg px-2 py-2.5 text-left transition-colors",
-                        open ? "bg-emerald-50/80 dark:bg-emerald-950/20" : "hover:bg-muted/50",
+                        open ? "bg-success/10 dark:bg-success/10" : "hover:bg-muted/50",
                       )}
                     >
                       <span className="absolute left-1 top-3">
                         {done ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-success" />
                         ) : (
-                          <Circle className="h-4 w-4 text-emerald-500/70" />
+                          <Circle className="h-4 w-4 text-success/70" />
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-semibold text-foreground">
-                          <span className="tabular-nums text-emerald-700 dark:text-emerald-400">{sub.number}</span>{" "}
+                          <span className="tabular-nums text-success">{sub.number}</span>{" "}
                           {sub.title}
                         </span>
                       </span>
                     </button>
                     {open ? (
-                      <div className="mb-2 ml-2 border-l-2 border-emerald-200 pl-5 pr-2 pb-3 dark:border-emerald-800">
+                      <div className="mb-2 ml-2 border-l-2 border-success/30 pl-5 pr-2 pb-3 dark:border-success/40">
                         <ArticleSubSessionBody sub={sub} />
                       </div>
                     ) : null}

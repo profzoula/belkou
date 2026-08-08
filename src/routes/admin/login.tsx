@@ -48,7 +48,7 @@ function AdminLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-dvh items-center justify-center bg-[#F8FAFC] px-4 dark:bg-background">
+    <div className="relative flex min-h-dvh items-center justify-center bg-background px-4">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(0_70_213_/_0.12),transparent_55%)]"
@@ -59,7 +59,7 @@ function AdminLoginPage() {
         <ThemeToggle />
       </div>
 
-      <div className="relative w-full max-w-[420px] py-10">
+      <main id="main-content" className="relative w-full max-w-[420px] py-10">
         <div className="mb-8 text-center">
           <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/80 bg-card/80 px-3 py-1.5 shadow-sm backdrop-blur">
             <SiteLogo className="size-6 rounded-md" alt="" />
@@ -121,7 +121,7 @@ function AdminLoginPage() {
             ← Retour au site
           </Link>
         </p>
-      </div>
+      </main>
     </div>
   );
 }

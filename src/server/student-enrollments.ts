@@ -16,13 +16,13 @@ import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
 import { ensureFreeCourseEnrollment } from "@/server/course-enrollment";
 import {
+  listAllLessonProgressForEmail,
   listDistinctCourseSlugsForEmail,
-  listLessonProgress,
   pickLastAccessedLessonId,
 } from "@/server/lesson-progress";
 import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
-import { getResolvedCourseBySlug } from "@/server/site-content";
+import { getResolvedCourses } from "@/server/site-content";
 
 export type StudentEnrollment = {
   id: string;
@@ -73,14 +73,20 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
     courseSlugs.add(LEGACY_COURSE_SLUG);
   }
 
+  const [resolvedCourses, progressByCourse] = await Promise.all([
+    getResolvedCourses(),
+    listAllLessonProgressForEmail(email),
+  ]);
+  const courseBySlug = new Map(resolvedCourses.map((course) => [course.slug, course]));
+
   const enrollments: StudentEnrollment[] = [];
 
   for (const slug of courseSlugs) {
     const registration = pickRegistrationForCourse(registrations, slug);
     if (!registration) continue;
 
-    const course = await getResolvedCourseBySlug(slug);
-    const progressRows = await listLessonProgress(email, slug);
+    const course = courseBySlug.get(slug);
+    const progressRows = progressByCourse[slug] ?? [];
     const completedLessonIds = progressRows
       .filter((row) => row.completed_at)
       .map((row) => row.lesson_id);

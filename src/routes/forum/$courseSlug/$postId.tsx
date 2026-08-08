@@ -90,7 +90,7 @@ function ForumThreadPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-lg mx-auto">
+      <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16 max-w-lg mx-auto">
         <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="gap-1 px-0">
             <Link to="/forum/$courseSlug" params={{ courseSlug }}>

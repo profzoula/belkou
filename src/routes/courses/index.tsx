@@ -8,6 +8,8 @@ import { CourseCatalogCard } from "@/components/course/CourseCatalogCard";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Panel } from "@/components/ui/panel";
 import { isFreeCourse } from "@/lib/courses";
 import {
   COURSE_CATEGORIES,
@@ -84,7 +86,7 @@ function CoursesIndexPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-page-top">
+      <main id="main-content" className="site-page-top">
         <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
           <div className="site-container py-12 sm:py-16">
             <FadeIn>
@@ -225,25 +227,26 @@ function CoursesIndexPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="mt-14 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
-              <p className="font-display text-lg font-semibold text-foreground">Aucun cours trouvé</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Modifiez votre recherche ou réinitialisez les filtres.
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-5"
-                onClick={() => {
-                  setQuery("");
-                  setPriceFilter("all");
-                  setLevelFilter("all");
-                  clearCategory();
-                }}
-              >
-                Réinitialiser
-              </Button>
-            </div>
+            <Panel variant="dashed" className="mt-14">
+              <EmptyState
+                title="Aucun cours trouvé"
+                description="Modifiez votre recherche ou réinitialisez les filtres."
+                action={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setQuery("");
+                      setPriceFilter("all");
+                      setLevelFilter("all");
+                      clearCategory();
+                    }}
+                  >
+                    Réinitialiser
+                  </Button>
+                }
+              />
+            </Panel>
           ) : (
             <div
               className={cn(

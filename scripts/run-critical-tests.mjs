@@ -32,9 +32,11 @@ async function run() {
   // Stripe webhook hardening guards
   expectIncludes(webhook, "event.type === \"checkout.session.completed\"", "webhook");
   expectIncludes(webhook, "event.type === \"checkout.session.async_payment_succeeded\"", "webhook");
+  expectIncludes(webhook, "stripe-webhook-idempotency", "webhook idempotency module");
   expectIncludes(webhook, "requireRegistrationMetadata: true", "webhook strict mode");
   expectIncludes(webhook, "requireAmountAndCurrencyMatch: true", "webhook strict mode");
-  expectIncludes(webhook, "stripe_webhook_events", "webhook idempotency");
+  const idempotency = read("src/server/stripe-webhook-idempotency.ts");
+  expectIncludes(idempotency, "stripe_webhook_events", "webhook idempotency");
 
   // Access grant/payment integrity guards
   expectIncludes(stripeAccessSource, "hasExpectedStripePricingForSession", "stripe access pricing");

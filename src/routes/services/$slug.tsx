@@ -41,7 +41,7 @@ function ServiceDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-page-top site-container py-10 sm:py-14">
+      <main id="main-content" className="site-page-top site-container py-10 sm:py-14">
         <div className="mx-auto max-w-5xl text-center">
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Services</p>
           <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl">

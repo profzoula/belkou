@@ -1,4 +1,5 @@
 import { CalendarClock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { formatScheduledPublishLabel, isScheduledInFuture } from "@/lib/course-publish";
 import { cn } from "@/lib/utils";
 
@@ -21,27 +22,22 @@ export function CourseScheduleBadge({
 
   if (variant === "overlay") {
     return (
-      <span
+      <Badge
         className={cn(
-          "absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-md bg-sky-600/95 px-2.5 py-1 text-[10px] font-bold text-white shadow-sm backdrop-blur-sm",
+          "absolute left-3 top-3 z-10 gap-1 rounded-md border-transparent bg-primary/95 px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow-sm backdrop-blur-sm",
           className,
         )}
       >
         <CalendarClock className="h-3 w-3 shrink-0" aria-hidden />
         Disponible le {label}
-      </span>
+      </Badge>
     );
   }
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:bg-sky-900/40 dark:text-sky-200",
-        className,
-      )}
-    >
+    <Badge variant="secondary" className={cn("gap-1 text-[10px] font-semibold", className)}>
       <CalendarClock className="h-3 w-3 shrink-0" aria-hidden />
       Disponible le {label}
-    </span>
+    </Badge>
   );
 }

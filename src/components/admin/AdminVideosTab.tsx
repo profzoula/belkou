@@ -39,7 +39,7 @@ function statusBadgeClass(video: Pick<VideoRecord, "status" | "storagePath">): s
   }
   switch (video.status) {
     case "ready":
-      return "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
+      return "bg-success/15 text-success dark:bg-success/10 dark:text-success";
     case "processing":
       return "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200";
     default:

@@ -22,9 +22,9 @@ export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
           <ThemeToggle />
         </div>
 
-        <div className="flex flex-1 flex-col justify-center">
+        <main id="main-content" className="flex flex-1 flex-col justify-center">
           <div className="mx-auto w-full max-w-[400px]">{children}</div>
-        </div>
+        </main>
       </div>
 
       <div className="relative hidden overflow-hidden border-l border-border bg-gradient-mesh lg:block">

@@ -29,6 +29,7 @@ expect(
 );
 
 const webhookSource = readText("src/routes/api/stripe/webhook.ts");
+const idempotencySource = readText("src/server/stripe-webhook-idempotency.ts");
 const supabaseRegistrationsSource = readText("src/server/supabase-registrations.ts");
 expect(
   webhookSource.includes("requireRegistrationMetadata: true"),
@@ -41,8 +42,13 @@ expect(
   failures,
 );
 expect(
-  webhookSource.includes("stripe_webhook_events"),
-  "Webhook idempotency table is missing",
+  webhookSource.includes("stripe-webhook-idempotency"),
+  "Webhook must use shared idempotency module",
+  failures,
+);
+expect(
+  idempotencySource.includes("stripe_webhook_events"),
+  "Supabase webhook idempotency table integration missing",
   failures,
 );
 expect(
@@ -58,11 +64,17 @@ expect(
 
 const serverSource = readText("scripts/railway.mjs");
 expect(serverSource.includes('pathname === "/healthz"'), "Health endpoint /healthz missing", failures);
+expect(serverSource.includes("VITE_SUPABASE_URL"), "Health check must accept VITE_SUPABASE_URL fallback", failures);
 
 const ciWorkflow = readText(".github/workflows/ci.yml");
 expect(ciWorkflow.includes("npm run lint"), "CI does not run lint", failures);
 expect(ciWorkflow.includes("npm run test:ci"), "CI does not run runtime tests", failures);
 expect(ciWorkflow.includes("npm run audit:release"), "CI does not run release audit checks", failures);
+
+expect(existsSync(join(root, ".github/workflows/deploy.yml")), "Missing deploy workflow", failures);
+
+const deployWorkflow = readText(".github/workflows/deploy.yml");
+expect(deployWorkflow.includes("railway up"), "Deploy workflow must invoke Railway CLI", failures);
 
 expect(existsSync(join(root, "README.md")), "Missing root README.md", failures);
 expect(

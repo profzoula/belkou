@@ -12,7 +12,13 @@ import { seoHead } from "@/lib/seo";
 import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
 import { AccountSettingsPanel } from "@/components/dashboard/AccountSettingsPanel";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
+import { PaymentAccountLinkBanner } from "@/components/dashboard/PaymentAccountLinkBanner";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
+import {
+  clearRegistrationHandoff,
+  getRegistrationHandoff,
+  type RegistrationHandoff,
+} from "@/lib/registration-handoff";
 import { clearStoredReferralCode } from "@/lib/referral-storage";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +46,24 @@ function DashboardPage() {
   const dashboardFn = useServerFn(getStudentDashboard);
   const claimReferralFn = useServerFn(claimSignupReferral);
   const [enrollments, setEnrollments] = useState<StudentEnrollment[] | undefined>(undefined);
+  const [registrationHandoff, setRegistrationHandoff] = useState<RegistrationHandoff | null>(null);
 
   useEffect(() => {
     if (!loading && configured && !user) {
       navigate({ to: "/login" });
     }
   }, [user, loading, configured, navigate]);
+
+  useEffect(() => {
+    setRegistrationHandoff(getRegistrationHandoff());
+  }, []);
+
+  useEffect(() => {
+    if (enrollments && enrollments.length > 0) {
+      clearRegistrationHandoff();
+      setRegistrationHandoff(null);
+    }
+  }, [enrollments]);
 
   useEffect(() => {
     if (!session?.access_token) return;
@@ -101,7 +119,7 @@ function DashboardPage() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="site-container site-page-top max-w-lg pb-12 text-center sm:pb-16">
+        <main id="main-content" className="site-container site-page-top max-w-lg pb-12 text-center sm:pb-16">
           <p className="text-muted-foreground">Authentification Supabase non configurée.</p>
         </main>
         <Footer />
@@ -172,6 +190,14 @@ function DashboardPage() {
         </section>
 
         <div className="site-container max-w-7xl space-y-10 py-8 sm:space-y-12 sm:py-12">
+          {registrationHandoff ? (
+            <PaymentAccountLinkBanner
+              handoff={registrationHandoff}
+              userEmail={user.email ?? ""}
+              hasEnrollments={(enrollments?.length ?? 0) > 0}
+            />
+          ) : null}
+
           <div id="courses" className="scroll-mt-24">
             <MyCoursesSection enrollments={enrollments} />
           </div>

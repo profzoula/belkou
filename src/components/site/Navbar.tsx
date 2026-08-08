@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const links = [
   { href: "/courses", label: "Cours", route: true },
@@ -181,20 +182,13 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
       ? "touch-target rounded-xl px-3 py-3 text-sm text-foreground hover:bg-primary/5 hover:text-primary"
       : "touch-target rounded-xl px-3 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-foreground";
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top,0px)]">
       <PromoTopbar />
       <div
         className={
           isDark
-            ? "border-b border-white/10 bg-[#07080d]/80 backdrop-blur-md"
+            ? "border-b border-white/10 bg-nav-dark/80 backdrop-blur-md"
             : isHero
               ? "border-b border-border/50 bg-background/75 backdrop-blur-xl"
               : "glass"
@@ -253,41 +247,36 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
         </div>
       </div>
 
-      {open && (
-        <button
-          type="button"
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          aria-label="Fermer le menu"
-          onClick={close}
-        />
-      )}
-
-      {open && (
-        <div
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
           id={mobileMenuId}
+          side="top"
           className={cn(
-            "relative z-50 md:hidden border-t site-container py-4 shadow-md max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain",
-            isDark ? "border-white/10 bg-[#07080d]" : "border-border bg-card",
+            "md:hidden inset-x-0 top-[var(--site-header-height)] mt-0 h-auto max-h-[calc(100dvh-var(--site-header-height))] w-full max-w-none rounded-none border-x-0 border-b p-0 shadow-md [&>button]:hidden",
+            isDark ? "border-white/10 bg-nav-dark text-white" : "border-border bg-card",
           )}
         >
-          <nav className="flex flex-col gap-1" aria-label="Navigation principale mobile">
-            {links.map((l) =>
-              l.route ? (
-                <Link key={l.href} to={l.href} onClick={close} className={mobileLinkClass}>
-                  {l.label}
-                </Link>
-              ) : (
-                <a key={l.href} href={l.href} onClick={close} className={mobileLinkClass}>
-                  {l.label}
-                </a>
-              ),
-            )}
-            <div className={cn("mt-3 pt-3 border-t", isDark ? "border-white/10" : "border-border")}>
-              <NavActions onNavigate={close} stacked dark={isDark} hero={isHero} />
-            </div>
-          </nav>
-        </div>
-      )}
+          <SheetTitle className="sr-only">Navigation principale</SheetTitle>
+          <div className="site-container max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain py-4">
+            <nav className="flex flex-col gap-1" aria-label="Navigation principale mobile">
+              {links.map((l) =>
+                l.route ? (
+                  <Link key={l.href} to={l.href} onClick={close} className={mobileLinkClass}>
+                    {l.label}
+                  </Link>
+                ) : (
+                  <a key={l.href} href={l.href} onClick={close} className={mobileLinkClass}>
+                    {l.label}
+                  </a>
+                ),
+              )}
+              <div className={cn("mt-3 pt-3 border-t", isDark ? "border-white/10" : "border-border")}>
+                <NavActions onNavigate={close} stacked dark={isDark} hero={isHero} />
+              </div>
+            </nav>
+          </div>
+        </SheetContent>
+      </Sheet>
     </header>
   );
 }

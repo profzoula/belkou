@@ -12,7 +12,7 @@ export function LegalLayout({ title, children }: LegalLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="site-container site-page-top pb-12 sm:pb-16 max-w-2xl">
+      <main id="main-content" className="site-container site-page-top pb-12 sm:pb-16 max-w-2xl">
         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-6 sm:mb-8 inline-block touch-target">
           ← Retour
         </Link>

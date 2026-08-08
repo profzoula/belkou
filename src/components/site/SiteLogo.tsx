@@ -10,7 +10,7 @@ export function SiteLogo({ className, alt = siteConfig.name }: SiteLogoProps) {
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-lg bg-[#1a2744] p-1 shadow-sm",
+        "inline-flex shrink-0 items-center justify-center rounded-lg bg-logo-bg p-1 shadow-sm",
         className ?? "h-8 w-8",
       )}
     >
