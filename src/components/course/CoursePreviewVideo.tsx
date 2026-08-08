@@ -198,8 +198,6 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
 
   if (!lesson) return null;
 
-  const thumbnailUrl = course.thumbnail.imageUrl;
-
   return (
     <section
       ref={sectionRef}
@@ -216,18 +214,8 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
       </div>
 
       {!activated ? (
-        <div className="relative aspect-video w-full overflow-hidden bg-muted/30">
-          {thumbnailUrl ? (
-            <img
-              src={thumbnailUrl}
-              alt=""
-              aria-hidden
-              className="absolute inset-0 h-full w-full object-cover opacity-90"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : null}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/35 px-6 text-center">
+        <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-muted/80 via-muted/40 to-background">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
             <Button
               type="button"
               variant="hero"
@@ -238,7 +226,7 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
               <Play className="h-5 w-5 fill-current" aria-hidden />
               Lancer l&apos;aperçu
             </Button>
-            <p className="max-w-sm text-xs text-white/90">
+            <p className="max-w-sm text-xs text-muted-foreground">
               La vidéo se charge uniquement quand vous la demandez.
             </p>
           </div>
