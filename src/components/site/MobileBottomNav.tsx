@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, Home, MessageCircle, UserRound } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, Home, UserRound } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
@@ -42,11 +42,11 @@ export function MobileBottomNav() {
       to: "/courses" as const,
     },
     {
-      key: "support",
-      label: "Support",
-      icon: MessageCircle,
-      active: pathname.startsWith("/forum"),
-      to: "/forum" as const,
+      key: "services",
+      label: "Services",
+      icon: BriefcaseBusiness,
+      active: pathname.startsWith("/services"),
+      to: "/services" as const,
     },
     {
       key: "account",
