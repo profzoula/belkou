@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -25,8 +25,8 @@ import {
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
-  getWelcomePreviewLesson,
 } from "@/lib/courses";
+import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
 import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { isCourseContentLive, isScheduledInFuture, formatScheduledPublishLabel } from "@/lib/course-publish";
@@ -50,29 +50,17 @@ function discountPercent(price: number, original: number) {
 
 function CourseThumbnail({
   course,
-  hasPaidAccess,
-  contentLive,
-  scheduledPublishAt,
   accessLoading = false,
-  continueLearnSearch,
-  courseActionLabel = "Commencer le cours",
+  enrolledWaiting = false,
+  scheduledPublishAt,
+  playableLearnSearch,
 }: {
   course: PublicCourse;
-  hasPaidAccess: boolean;
-  contentLive: boolean;
-  scheduledPublishAt?: string;
   accessLoading?: boolean;
-  continueLearnSearch?: { lesson: string };
-  courseActionLabel?: string;
+  enrolledWaiting?: boolean;
+  scheduledPublishAt?: string;
+  playableLearnSearch?: { lesson: string };
 }) {
-  const enrolledWaiting = hasPaidAccess && !contentLive;
-  const canStartCourse = hasPaidAccess && contentLive;
-  const previewLesson = useMemo(
-    () => getFirstPreviewVideoLesson(course) ?? getWelcomePreviewLesson(course),
-    [course],
-  );
-  const playableLearnSearch = getPlayableLearnSearch(course);
-
   const availabilityLabel = scheduledPublishAt
     ? formatScheduledPublishLabel(scheduledPublishAt)
     : null;
@@ -85,30 +73,13 @@ function CourseThumbnail({
       className="border-b border-border"
       showLabel={false}
       showIcon={false}
+      showOverlay={false}
     >
       {accessLoading ? (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20">
           <span className="h-10 w-10 animate-pulse rounded-full bg-white/40" />
         </div>
-      ) : enrolledWaiting && availabilityLabel ? (
-        playableLearnSearch ? (
-          <Link
-            to="/courses/$slug/learn"
-            params={{ slug: course.slug }}
-            search={playableLearnSearch}
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/35 px-4 text-center transition-colors hover:bg-black/45"
-          >
-            <span className="absolute right-3 top-3 rounded-full bg-black/55 px-3 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
-              Cours le {availabilityLabel}
-            </span>
-            <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform group-hover:scale-105">
-              <Play className="ml-1 h-7 w-7 fill-current" />
-            </span>
-            <span className="text-sm font-semibold text-white drop-shadow-sm">
-              {previewLesson?.preview ? "Voir la preview" : "Voir la vidéo de bienvenue"}
-            </span>
-          </Link>
-        ) : (
+      ) : enrolledWaiting && availabilityLabel && !playableLearnSearch ? (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45 px-4 text-center">
           <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-primary shadow-lg">
             <CalendarClock className="h-7 w-7" />
@@ -122,34 +93,7 @@ function CourseThumbnail({
             </p>
           </div>
         </div>
-        )
-      ) : canStartCourse ? (
-        <Link
-          to="/courses/$slug/learn"
-          params={{ slug: course.slug }}
-          search={continueLearnSearch}
-          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
-        >
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
-            <Play className="ml-1 h-7 w-7 fill-current" />
-          </span>
-          <span className="text-sm font-semibold text-white drop-shadow-sm">{courseActionLabel}</span>
-        </Link>
-      ) : (
-        <Link
-          to="/courses/$slug/learn"
-          params={{ slug: course.slug }}
-          search={playableLearnSearch}
-          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/15 transition-colors hover:bg-black/25"
-        >
-          <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform hover:scale-105">
-            <Play className="ml-1 h-7 w-7 fill-current" />
-          </span>
-          <span className="text-sm font-semibold text-white drop-shadow-sm">
-            {previewLesson ? "Preview gratuite" : "Voir le cours"}
-          </span>
-        </Link>
-      )}
+      ) : null}
     </CourseThumbnailBanner>
   );
 }
@@ -343,12 +287,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <CourseThumbnail
               course={course}
-              hasPaidAccess={accessLoading ? false : hasPaidAccess}
-              contentLive={contentLive}
-              scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
               accessLoading={accessLoading}
-              continueLearnSearch={continueLearnSearch}
-              courseActionLabel={courseActionLabel}
+              enrolledWaiting={enrolledWaiting}
+              scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
+              playableLearnSearch={playableLearnSearch}
             />
 
             <div className="space-y-4 p-5">
@@ -485,6 +427,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </aside>
 
         <main className="min-w-0 lg:order-1">
+          <CoursePreviewVideo course={course} hasPaidAccess={hasPaidAccess} />
+
           <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
             <span className="inline-flex items-center gap-1 font-bold text-foreground">
               {course.rating.toFixed(1)}

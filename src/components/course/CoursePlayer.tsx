@@ -1013,7 +1013,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   ]);
 
   const progressPercent = progress?.progressPercent ?? 0;
-  const remainingLessons = Math.max(countLessons(course) - completedLessonIds.length, 0);
 
   return (
     <div
@@ -1115,41 +1114,6 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               </div>
 
               <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
-                {hasPaidAccess && contentLive ? (
-                  <div className="rounded-[16px] border border-border bg-muted/40 p-4">
-                    <div className="flex flex-wrap items-end justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Progression du cours</p>
-                        <p className="mt-1 font-display text-2xl font-bold tabular-nums">
-                          {progressPercent}%
-                        </p>
-                      </div>
-                      <div className="text-right text-xs text-muted-foreground">
-                        <p>
-                          <span className="font-semibold text-foreground">
-                            {completedLessonIds.length}
-                          </span>{" "}
-                          terminées
-                        </p>
-                        <p className="mt-0.5">{remainingLessons} restantes</p>
-                      </div>
-                    </div>
-                    <div
-                      className="mt-3 h-2.5 overflow-hidden rounded-full bg-background"
-                      role="progressbar"
-                      aria-valuenow={progressPercent}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`Progression : ${progressPercent} %`}
-                    >
-                      <div
-                        className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out"
-                        style={{ width: `${Math.min(Math.max(progressPercent, 0), 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                ) : null}
-
                 <LessonNavControls
                   canGoPrevious={Boolean(previousLesson)}
                   canGoNext={Boolean(nextLesson)}

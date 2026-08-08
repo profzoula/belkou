@@ -11,6 +11,7 @@ type CourseThumbnailBannerProps = {
   aspectClass?: string;
   showLabel?: boolean;
   showIcon?: boolean;
+  showOverlay?: boolean;
   labelClassName?: string;
   children?: React.ReactNode;
 };
@@ -23,6 +24,7 @@ export function CourseThumbnailBanner({
   aspectClass = "aspect-[16/10]",
   showLabel = true,
   showIcon = true,
+  showOverlay = true,
   labelClassName,
   children,
 }: CourseThumbnailBannerProps) {
@@ -48,7 +50,9 @@ export function CourseThumbnailBanner({
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
+        {showOverlay ? (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-black/20" />
+        ) : null}
         {label}
         {showIcon && !hasImage && Icon && (
           <Icon className="absolute right-3 top-3 z-10 h-8 w-8 text-white/30" aria-hidden />
