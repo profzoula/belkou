@@ -291,9 +291,23 @@ export const getLessonVimeoPlayback = createServerFn({ method: "POST" })
 
     const embedUrl = buildVimeoEmbedUrl(parsed, data.lessonId);
 
+    let posterUrl: string | undefined;
+    try {
+      const oembedRes = await fetch(
+        `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoUrl)}`,
+      );
+      if (oembedRes.ok) {
+        const oembed = (await oembedRes.json()) as { thumbnail_url?: string };
+        posterUrl = oembed.thumbnail_url?.trim() || undefined;
+      }
+    } catch {
+      /* poster optional */
+    }
+
     return {
       kind: "vimeo" as const,
       url: embedUrl,
+      posterUrl,
       status: "ready",
     };
   });

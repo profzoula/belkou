@@ -9,8 +9,6 @@ import {
   type RefObject,
 } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import {
   getFirstPreviewVideoLesson,
@@ -103,7 +101,7 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
   const videoId = lesson ? getLessonVideoId(lesson) : null;
   const vimeoUrl = lesson ? getLessonVimeoUrl(lesson) : null;
   const usePreviewMode = Boolean(lesson?.preview) && !hasPaidAccess;
-  const shouldLoad = inViewport && activated;
+  const shouldFetchPlayback = inViewport;
 
   const loadPlayback = useCallback(async (): Promise<VideoPlaybackSource | null> => {
     if (!lesson || lesson.type !== "video") return null;
@@ -145,8 +143,8 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
   refreshPlaybackRef.current = loadPlayback;
 
   useEffect(() => {
-    if (!shouldLoad || !lesson || lesson.type !== "video" || (!videoId && !vimeoUrl)) {
-      if (!shouldLoad) {
+    if (!shouldFetchPlayback || !lesson || lesson.type !== "video" || (!videoId && !vimeoUrl)) {
+      if (!shouldFetchPlayback) {
         setPlayback(null);
         setPlaybackError(null);
         setPlaybackLoading(false);
@@ -175,7 +173,7 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
     return () => {
       cancelled = true;
     };
-  }, [shouldLoad, lesson, loadPlayback, videoId, vimeoUrl]);
+  }, [shouldFetchPlayback, lesson, loadPlayback, videoId, vimeoUrl]);
 
   useEffect(() => {
     if (!playback?.urlExpiresAt || !lesson || lesson.type !== "video") return;
@@ -198,6 +196,8 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
 
   if (!lesson) return null;
 
+  const posterUrl = playback?.posterUrl?.trim() || null;
+
   return (
     <section
       ref={sectionRef}
@@ -214,23 +214,25 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
       </div>
 
       {!activated ? (
-        <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-muted/80 via-muted/40 to-background">
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-            <Button
-              type="button"
-              variant="hero"
-              size="lg"
-              className="gap-2 rounded-full px-6 shadow-lg"
-              onClick={() => setActivated(true)}
-            >
-              <Play className="h-5 w-5 fill-current" aria-hidden />
-              Lancer l&apos;aperçu
-            </Button>
-            <p className="max-w-sm text-xs text-muted-foreground">
-              La vidéo se charge uniquement quand vous la demandez.
+        playbackLoading ? (
+          <div className="aspect-video w-full animate-pulse bg-muted/60" aria-hidden />
+        ) : posterUrl ? (
+          <button
+            type="button"
+            className="relative block aspect-video w-full overflow-hidden bg-black"
+            onClick={() => setActivated(true)}
+            aria-label={`Lire l'aperçu : ${lesson.title}`}
+          >
+            <img src={posterUrl} alt="" className="h-full w-full object-cover" />
+          </button>
+        ) : (
+          <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted/40 px-6 text-center">
+            <p className="text-sm font-medium text-foreground">{lesson.title}</p>
+            <p className="text-sm text-muted-foreground">
+              {playbackError ?? "Aperçu vidéo indisponible pour le moment."}
             </p>
           </div>
-        </div>
+        )
       ) : playbackLoading ? (
         <div className="flex aspect-video w-full items-center justify-center bg-black text-sm text-white/80">
           Chargement de la vidéo…
