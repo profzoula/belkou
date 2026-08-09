@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
+import { CareerInvestSection } from "@/components/site/CareerInvestSection";
 import { TrustStrip } from "@/components/site/TrustStrip";
 import { CoursesSection } from "@/components/site/CoursesSection";
 import { ServicesSection } from "@/components/site/ServicesSection";
@@ -53,6 +54,7 @@ function Index() {
         <Hero studentCount={studentCount} />
       </div>
       <main id="main-content" className="max-w-full overflow-x-hidden">
+        <CareerInvestSection />
         <CoursesSection courses={courses} />
         <TrustStrip />
         <ServicesSection services={serviceItems} />
