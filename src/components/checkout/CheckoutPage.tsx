@@ -603,7 +603,7 @@ export function CheckoutPage({
                 type="submit"
                 disabled={loading || !acceptedTerms}
                 size="xl"
-                className="mt-5 h-12 w-full shadow-primary"
+                className="mt-5 h-12 w-full"
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1 h-4 w-4" />

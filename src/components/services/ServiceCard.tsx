@@ -60,11 +60,11 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
         <div className="mt-4">
           {service.action.type === "link" ? (
-            <Button asChild variant="hero" className="w-full shadow-primary">
+            <Button asChild variant="hero" className="w-full">
               <Link to={service.action.href}>{service.action.label}</Link>
             </Button>
           ) : (
-            <Button asChild variant="hero" className="w-full shadow-primary">
+            <Button asChild variant="hero" className="w-full">
               <Link to="/services/$slug" params={{ slug: service.slug }}>
                 Prendre rendez-vous
               </Link>

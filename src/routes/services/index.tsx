@@ -56,7 +56,7 @@ function ServicesIndexPage() {
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
                   href={contactHref}
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-primary transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   Prendre rendez-vous
                   <ArrowRight className="size-4" aria-hidden />

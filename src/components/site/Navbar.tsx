@@ -120,7 +120,7 @@ function NavActions({
     <div className={wrapClass}>
       {hero ? (
         <>
-          <Button asChild size={stacked ? "lg" : "sm"} className="rounded-xl px-6 shadow-primary">
+          <Button asChild size={stacked ? "lg" : "sm"} className="rounded-xl px-6">
             <Link to="/courses" onClick={onNavigate}>
               Commencer
             </Link>

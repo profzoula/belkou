@@ -112,7 +112,7 @@ function AdminLoginPage() {
           <Button
             type="submit"
             variant="hero"
-            className="w-full rounded-xl shadow-primary"
+            className="w-full rounded-xl"
             disabled={loading}
           >
             {loading ? "Connexion…" : "Se connecter"}

@@ -56,7 +56,7 @@ export function PaymentAccountLinkBanner({
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button asChild variant="hero" size="sm" className="shadow-primary">
+            <Button asChild variant="hero" size="sm">
               <Link to="/login" search={{ email: handoff.email }}>
                 <LogIn className="h-4 w-4" />
                 Se connecter avec {handoff.email}

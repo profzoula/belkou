@@ -59,7 +59,7 @@ export function CourseHeroEnrollCta({
           asChild
           variant="hero"
           size="lg"
-          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left shadow-md"
+          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
         >
           <Link
             to="/courses/$slug/learn"
@@ -67,12 +67,12 @@ export function CourseHeroEnrollCta({
             search={continueLearnSearch}
             className="flex flex-col items-start gap-0.5"
           >
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold">
               <BookOpen className="size-4" aria-hidden />
               {courseActionLabel}
             </span>
             {(progressPercent ?? 0) > 0 ? (
-              <span className="text-[11px] font-normal opacity-90">{progressPercent}% terminé</span>
+              <span className="text-xs font-normal opacity-90">{progressPercent}% terminé</span>
             ) : null}
           </Link>
         </Button>
@@ -81,7 +81,7 @@ export function CourseHeroEnrollCta({
           asChild
           variant="hero"
           size="lg"
-          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left shadow-md"
+          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
         >
           <Link
             to="/courses/$slug/learn"
@@ -89,12 +89,12 @@ export function CourseHeroEnrollCta({
             search={playableLearnSearch}
             className="flex flex-col items-start gap-0.5"
           >
-            <span className="inline-flex items-center gap-1.5 text-sm font-bold">
+            <span className="inline-flex items-center gap-1.5 text-base font-semibold">
               <Play className="size-4 fill-current" aria-hidden />
               {hasPublicPreview ? "Voir la preview" : "Voir la bienvenue"}
             </span>
             {enrolledWaiting && startLabel ? (
-              <span className="text-[11px] font-normal opacity-90">Cours complet le {startLabel}</span>
+              <span className="text-xs font-normal opacity-90">Cours complet le {startLabel}</span>
             ) : null}
           </Link>
         </Button>
@@ -104,18 +104,18 @@ export function CourseHeroEnrollCta({
             asChild
             variant="hero"
             size="lg"
-            className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left shadow-md"
+            className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
           >
             <Link
               to="/checkout"
               search={{ course: courseSlug }}
               className="flex flex-col items-start gap-0.5"
             >
-              <span className="text-sm font-bold">S&apos;inscrire · ${price}</span>
+              <span className="text-base font-semibold">S&apos;inscrire · ${price}</span>
               {scheduledSoon && startLabel ? (
-                <span className="text-[11px] font-normal opacity-90">Accès complet le {startLabel}</span>
+                <span className="text-xs font-normal opacity-90">Accès complet le {startLabel}</span>
               ) : (
-                <span className="text-[11px] font-normal opacity-90">Paiement unique · accès à vie</span>
+                <span className="text-xs font-normal opacity-90">Paiement unique · accès à vie</span>
               )}
             </Link>
           </Button>
@@ -126,7 +126,7 @@ export function CourseHeroEnrollCta({
                 to="/courses/$slug/learn"
                 params={{ slug: courseSlug }}
                 search={previewLearnSearch}
-                className="inline-flex items-center gap-1 text-xs font-semibold"
+                className="inline-flex items-center gap-1 text-sm font-semibold"
               >
                 <Play className="size-3.5 fill-current" aria-hidden />
                 Voir la preview gratuite
@@ -138,7 +138,7 @@ export function CourseHeroEnrollCta({
                 to="/courses/$slug/learn"
                 params={{ slug: courseSlug }}
                 search={previewLearnSearch}
-                className="inline-flex items-center gap-1 text-xs font-semibold"
+                className="inline-flex items-center gap-1 text-sm font-semibold"
               >
                 <Play className="size-3.5 fill-current" aria-hidden />
                 Preview gratuite avant achat
@@ -148,7 +148,7 @@ export function CourseHeroEnrollCta({
         </>
       )}
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         <span className="font-semibold text-foreground">{enrolledLabel}</span> déjà inscrits
       </p>
     </div>

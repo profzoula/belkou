@@ -307,10 +307,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </p>
             )}
 
-            <h1 className="max-w-4xl font-display text-[1.75rem] font-bold leading-[1.15] tracking-[-0.01em] sm:text-3xl md:text-4xl">
+            <h1 className="max-w-4xl font-display text-3xl font-bold leading-[1.15] tracking-[-0.01em] md:text-4xl">
               {course.title}
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-normal text-muted-foreground sm:text-base">
+            <p className="mt-3 max-w-3xl text-lg leading-normal text-muted-foreground">
               {course.description}
             </p>
 
@@ -338,7 +338,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </p>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Globe className="h-3.5 w-3.5" />
                 Dernière mise à jour {course.lastUpdated}

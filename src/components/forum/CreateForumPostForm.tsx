@@ -120,7 +120,7 @@ export function CreateForumPostForm({
         type="submit"
         variant="hero"
         disabled={loading}
-        className="w-full shadow-primary sm:w-auto"
+        className="w-full sm:w-auto"
       >
         {loading ? "Publication…" : "Publier"}
       </Button>

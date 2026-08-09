@@ -47,7 +47,7 @@ export function ForumCoursePicker() {
         <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
           Inscrivez-vous à un cours pour poser des questions et échanger avec les autres étudiants.
         </p>
-        <Button asChild className="mt-6 shadow-primary" variant="hero">
+        <Button asChild className="mt-6" variant="hero">
           <Link to="/courses">
             Explorer les cours
             <ArrowRight className="h-4 w-4" />

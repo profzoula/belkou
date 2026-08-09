@@ -63,7 +63,7 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
             <Button
               variant="hero"
               size="sm"
-              className="rounded-xl shadow-primary"
+              className="rounded-xl"
               onClick={() => onNavigate("courses")}
             >
               Gérer les cours

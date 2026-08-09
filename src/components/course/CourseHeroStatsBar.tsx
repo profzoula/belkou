@@ -61,13 +61,13 @@ export function CourseHeroStatsBar({ course, className }: CourseHeroStatsBarProp
           <li key={index} className="px-5 py-5 sm:px-6 sm:py-6">
             <p
               className={cn(
-                "text-sm font-bold text-foreground sm:text-[0.9375rem]",
+                "text-base font-semibold text-foreground",
                 item.underline && "underline decoration-foreground/30 underline-offset-4",
               )}
             >
               {item.title}
             </p>
-            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-[0.8125rem]">
+            <p className="mt-1.5 text-sm leading-normal text-muted-foreground">
               {item.subtitle}
             </p>
           </li>

@@ -264,7 +264,7 @@ function SignupPage() {
               variant="hero"
               size="lg"
               disabled={loading}
-              className="h-11 w-full shadow-primary"
+              className="h-11 w-full"
             >
               {loading ? "Création…" : "Créer mon compte"}
             </Button>
