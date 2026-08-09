@@ -26,29 +26,31 @@ export function CareerInvestSection() {
   return (
     <section
       aria-labelledby="career-invest-heading"
-      className="border-b border-border/50 bg-[#f5f8fc] py-12 sm:py-14 md:py-16 dark:bg-muted/30"
+      className="border-b border-border/50 bg-[#f5f8fc] py-8 sm:py-10 dark:bg-muted/30"
     >
       <div className="site-container px-4">
         <FadeIn>
           <h2
             id="career-invest-heading"
-            className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-[2rem]"
+            className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
           >
             Investissez dans votre carrière
           </h2>
 
-          <ul className="mt-8 grid gap-8 sm:mt-10 md:grid-cols-3 md:gap-10 lg:gap-12">
+          <ul className="mt-5 grid gap-6 sm:mt-6 md:grid-cols-3 md:gap-8">
             {pillars.map((item) => {
               const Icon = item.icon;
               return (
                 <li key={item.title} className="min-w-0 text-left">
                   <Icon
-                    className="size-7 text-foreground sm:size-8"
+                    className="size-5 text-foreground sm:size-6"
                     strokeWidth={1.5}
                     aria-hidden
                   />
-                  <h3 className="mt-4 text-base font-bold text-foreground sm:text-lg">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
+                  <h3 className="mt-2.5 text-sm font-semibold text-foreground sm:text-[0.9375rem]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                     {item.description}
                   </p>
                 </li>

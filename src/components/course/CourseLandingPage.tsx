@@ -29,6 +29,7 @@ import {
 } from "@/lib/courses";
 import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
 import { CourseHeroStatsBar } from "@/components/course/CourseHeroStatsBar";
+import { CourseHeroEnrollCta } from "@/components/course/CourseHeroEnrollCta";
 import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import {
@@ -328,6 +329,24 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <span>{course.language}</span>
               {course.captions && <span>Sous-titres</span>}
             </div>
+
+            <CourseHeroEnrollCta
+              courseSlug={course.slug}
+              price={course.price}
+              studentCount={getDisplayedCourseStudentsCount(course)}
+              accessLoading={accessLoading}
+              hasPaidAccess={hasPaidAccess}
+              canStartCourse={canStartCourse}
+              enrolledWaiting={enrolledWaiting}
+              scheduledSoon={scheduledSoon}
+              startLabel={startLabel}
+              hasPublicPreview={hasPublicPreview}
+              courseActionLabel={courseActionLabel}
+              continueLearnSearch={continueLearnSearch}
+              playableLearnSearch={playableLearnSearch}
+              previewLearnSearch={previewLearnSearch}
+              progressPercent={progress?.progressPercent ?? 0}
+            />
           </div>
         </section>
 
