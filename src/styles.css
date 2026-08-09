@@ -38,9 +38,9 @@
   --color-logo-bg: var(--logo-bg);
   --color-nav-dark: var(--nav-dark);
 
-  --font-display: "Poppins", "Inter", system-ui, sans-serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Source Sans 3", "Source Sans Pro", "Open Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-display: "Source Sans 3", "Source Sans Pro", "Open Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
 
 :root {
@@ -192,9 +192,12 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-size: 0.9375rem;
-    line-height: 1.6;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern", "liga";
     overflow-x: clip;
     min-height: 100dvh;
     padding-left: env(safe-area-inset-left, 0px);
@@ -203,8 +206,8 @@
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
   }
 }
 

@@ -10,7 +10,7 @@ export function SiteWordmark({ className }: SiteWordmarkProps) {
   return (
     <span
       className={cn(
-        "font-display text-[1.625rem] font-bold leading-none tracking-tight text-primary sm:text-[1.75rem]",
+        "font-display text-[1.625rem] font-bold leading-none tracking-[-0.005em] text-primary sm:text-[1.75rem]",
         className,
       )}
     >

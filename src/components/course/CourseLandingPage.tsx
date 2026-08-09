@@ -307,10 +307,10 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </p>
             )}
 
-            <h1 className="max-w-4xl font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+            <h1 className="max-w-4xl font-display text-[1.75rem] font-bold leading-[1.15] tracking-[-0.01em] sm:text-3xl md:text-4xl">
               {course.title}
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-3 max-w-3xl text-sm leading-normal text-muted-foreground sm:text-base">
               {course.description}
             </p>
 
