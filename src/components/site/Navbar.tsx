@@ -4,8 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/forum/NotificationBell";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
-import { SiteLogo } from "@/components/site/SiteLogo";
-import { siteConfig } from "@/lib/site-config";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
@@ -205,13 +204,9 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
         <div className="site-container flex h-14 sm:h-16 items-center justify-between gap-3">
           <Link
             to="/"
-            className={cn(
-              "flex min-w-0 items-center gap-2.5 font-display font-bold tracking-tight",
-              isDark && "text-white",
-            )}
+            className={cn("flex min-w-0 shrink-0 items-center", isDark && "text-white")}
           >
-            <SiteLogo className="h-8 w-8" alt={siteConfig.name} />
-            <span className="truncate text-[15px]">{siteConfig.name}</span>
+            <SiteWordmark className={cn(isDark && "text-white")} />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">

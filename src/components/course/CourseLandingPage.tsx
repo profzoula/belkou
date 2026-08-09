@@ -44,7 +44,7 @@ import { getCourseProgress } from "@/lib/fns/progress";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useAuth } from "@/hooks/use-auth";
-import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { siteConfig } from "@/lib/site-config";
 
 type CourseLandingPageProps = {
@@ -233,10 +233,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 text-foreground backdrop-blur-xl">
-        <div className="site-container flex h-14 items-center justify-between gap-3">
-          <Link to="/" className="flex min-w-0 items-center gap-2 font-display text-sm font-bold">
-            <SiteLogo className="h-8 w-8 shrink-0" alt="" />
-            {siteConfig.name}
+        <div className="site-container flex h-16 items-center justify-between gap-3">
+          <Link to="/" className="shrink-0">
+            <SiteWordmark />
           </Link>
           <div className="flex shrink-0 items-center gap-1.5">
             <ThemeToggle />
