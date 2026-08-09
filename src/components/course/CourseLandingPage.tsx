@@ -332,9 +332,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 </AvatarFallback>
               </Avatar>
               <p className="text-muted-foreground">
-                Créé par{" "}
+                Instructeur:{" "}
                 <span className="font-medium text-primary underline underline-offset-2">
-                  {course.instructor}
+                  {siteConfig.founder.name}
                 </span>
               </p>
             </div>
