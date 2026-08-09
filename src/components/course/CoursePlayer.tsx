@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Clock, FileText, Globe, Lock, LogIn, Star, UserPlus } from "lucide-react";
@@ -8,12 +9,15 @@ import {
   computeCourseProgressPercent,
   countLessons,
   formatCount,
+  formatLessonDurationLabel,
   getAllLessons,
   getCourseDisplayDuration,
   getDisplayedCourseStudentsCount,
   getLessonDisplayDuration,
   getLessonVideoId,
   getLessonVimeoUrl,
+  getNextLessonToWatch,
+  getResumeLesson,
   getSectionForLesson,
   getWelcomePreviewLesson,
   lastLessonStorageKey,
@@ -75,6 +79,7 @@ function CourseVideoArea({
   getLockState,
   startAtSeconds = 0,
   onPlaybackTimeUpdate,
+  onDurationSeconds,
   activeArticleSubSessionId,
   onArticleSubSessionChange,
   onVideoPlay,
@@ -90,6 +95,7 @@ function CourseVideoArea({
   getLockState: (lesson: CourseLesson) => { locked: boolean; reason: LessonLockReason };
   startAtSeconds?: number;
   onPlaybackTimeUpdate?: (currentTime: number) => void;
+  onDurationSeconds?: (durationSeconds: number) => void;
   activeArticleSubSessionId?: string | null;
   onArticleSubSessionChange?: (
     subSessionId: string,
@@ -324,6 +330,7 @@ function CourseVideoArea({
           lessonKey={lesson.id}
           startAtSeconds={startAtSeconds}
           onTimeUpdate={onPlaybackTimeUpdate}
+          onDurationSeconds={onDurationSeconds}
           nextLessonTitle={nextLessonTitle}
           onNextLesson={onNextLesson}
           onLessonComplete={onLessonComplete}
@@ -683,6 +690,15 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
     const firstUnlocked = allLessons.find((lesson) => !getLockState(lesson).locked);
 
+    const resume = getResumeLesson(activeCourse, {
+      completedLessonIds,
+      lastLessonId: progress?.lastLessonId,
+    });
+    if (resume && !getLockState(resume).locked) return resume.id;
+
+    const nextIncomplete = getNextLessonToWatch(activeCourse, completedLessonIds);
+    if (nextIncomplete && !getLockState(nextIncomplete).locked) return nextIncomplete.id;
+
     return firstUnlocked?.id ?? welcomeLesson?.id ?? allLessons[0]?.id ?? "";
   };
 
@@ -692,9 +708,11 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     new Set(),
   );
   const [resumeAtSeconds, setResumeAtSeconds] = useState(0);
+  const [liveLessonDurationSeconds, setLiveLessonDurationSeconds] = useState<number | null>(null);
 
   useEffect(() => {
     setResumeAtSeconds(playbackByLessonId[activeLessonId] ?? 0);
+    setLiveLessonDurationSeconds(null);
     // Only restore saved position when switching lessons — not on every 15s autosave.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLessonId]);
@@ -940,7 +958,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
             return {
               completedLessonIds,
               playbackByLessonId: current?.playbackByLessonId ?? {},
-              progressPercent: computeCourseProgressPercent(course, completedLessonIds),
+              progressPercent: computeCourseProgressPercent(activeCourse, completedLessonIds),
               lastLessonId: current?.lastLessonId ?? null,
             };
           });
@@ -963,12 +981,14 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     const completedId = activeLesson.id;
     const optimisticCompleted = [...new Set([...completedLessonIds, completedId])];
 
-    setProgress((current) => ({
-      completedLessonIds: optimisticCompleted,
-      playbackByLessonId: current?.playbackByLessonId ?? {},
-      progressPercent: computeCourseProgressPercent(course, optimisticCompleted),
-      lastLessonId: completedId,
-    }));
+    flushSync(() => {
+      setProgress((current) => ({
+        completedLessonIds: optimisticCompleted,
+        playbackByLessonId: current?.playbackByLessonId ?? {},
+        progressPercent: computeCourseProgressPercent(activeCourse, optimisticCompleted),
+        lastLessonId: completedId,
+      }));
+    });
 
     recordLessonComplete(completedId);
 
@@ -997,6 +1017,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
     }
   }, [
     activeArticleSubSessionId,
+    activeCourse,
     activeLesson,
     allLessons,
     completedLessonIds,
@@ -1120,7 +1141,13 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   lessonNumber={Math.max(lessonNumber, 1)}
                   lessonTitle={activeLesson.title}
                   instructor={course.instructor}
-                  duration={getLessonDisplayDuration(activeLesson)}
+                  duration={
+                    liveLessonDurationSeconds && liveLessonDurationSeconds > 0
+                      ? formatLessonDurationLabel(
+                          String(Math.max(1, Math.round(liveLessonDurationSeconds / 60))),
+                        )
+                      : getLessonDisplayDuration(activeLesson)
+                  }
                   publishedLabel={course.lastUpdated}
                 />
               </div>
@@ -1133,7 +1160,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   welcomeLessonId={welcomeLesson?.id}
                   nextLessonTitle={nextLesson?.title}
                   onNextLesson={
-                    nextLesson && !quizBlocksComplete ? handleActiveLessonComplete : undefined
+                    nextLesson && !quizBlocksComplete ? goToNextLesson : undefined
                   }
                   onLessonComplete={handleActiveLessonComplete}
                   getLockState={getLockState}
@@ -1141,6 +1168,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                   onPlaybackTimeUpdate={(currentTime) =>
                     handlePlaybackTimeUpdate(activeLesson.id, currentTime)
                   }
+                  onDurationSeconds={(seconds) => {
+                    if (seconds > 0) setLiveLessonDurationSeconds(seconds);
+                  }}
                   activeArticleSubSessionId={activeArticleSubSessionId}
                   onArticleSubSessionChange={handleArticleSubSessionChange}
                   onVideoPlay={openCurriculumTab}
@@ -1240,7 +1270,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                         {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
                       </span>
                       <span className="text-muted-foreground">
-                        {getCourseDisplayDuration(course)}
+                        {getCourseDisplayDuration(activeCourse)}
                       </span>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -1296,7 +1326,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                         </div>
                         <div className="flex justify-between gap-4 py-2">
                           <dt className="text-muted-foreground">Durée</dt>
-                          <dd className="font-medium">{getCourseDisplayDuration(course)}</dd>
+                          <dd className="font-medium">{getCourseDisplayDuration(activeCourse)}</dd>
                         </div>
                       </dl>
                     </div>

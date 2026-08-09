@@ -449,23 +449,27 @@ export function getCourseDisplayDuration(course: { sections: CourseSection[] }):
   return formatCourseDurationLabel(getCourseContentDurationMinutes(course));
 }
 
-/** Progress weighted by video duration (hours/minutes), not lesson count. */
 export function computeCourseProgressPercent(
   course: { sections: CourseSection[] },
   completedLessonIds: string[],
 ): number {
-  const lessons = getVideoLessons(course);
+  const completableLessons = getAllLessons(course).filter(lessonIsCompletable);
   const completedSet = new Set(completedLessonIds);
-  const totalMinutes = getCourseVideoDurationMinutes(course);
+
+  const totalMinutes = completableLessons.reduce(
+    (sum, lesson) => sum + parseLessonDurationMinutes(lesson.duration ?? ""),
+    0,
+  );
 
   if (totalMinutes <= 0) {
-    if (lessons.length === 0) return 0;
-    return Math.min(100, Math.round((completedSet.size / lessons.length) * 100));
+    if (completableLessons.length === 0) return 0;
+    const completedCount = completableLessons.filter((lesson) => completedSet.has(lesson.id)).length;
+    return Math.min(100, Math.round((completedCount / completableLessons.length) * 100));
   }
 
   let completedMinutes = 0;
-  for (const lesson of lessons) {
-    if (!completedSet.has(lesson.id) || !lessonHasVideo(lesson)) continue;
+  for (const lesson of completableLessons) {
+    if (!completedSet.has(lesson.id)) continue;
     completedMinutes += parseLessonDurationMinutes(lesson.duration ?? "");
   }
 

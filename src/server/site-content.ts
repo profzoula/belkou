@@ -333,7 +333,11 @@ export async function getPublishedCourseCount(): Promise<number> {
 
 export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {
   const all = await getResolvedCourses();
-  return all.find((course) => course.slug === slug);
+  const course = all.find((item) => item.slug === slug);
+  if (!course) return undefined;
+
+  const { enrichCourseWithVideoDurations } = await import("@/server/course-video-durations");
+  return enrichCourseWithVideoDurations(course);
 }
 
 export function getDefaultSiteSettings(): SiteSettings {

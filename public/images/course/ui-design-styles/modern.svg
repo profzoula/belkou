@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Modern">
+  <rect width="960" height="540" fill="#f8fafc"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#0ea5e9" font-weight="700" letter-spacing="0.12em">TEMPLATE · MODERN</text>
+  
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs>
+  <rect x="48" y="72" width="864" height="420" rx="24" fill="#ffffff" filter="url(#none)"/>
+  <rect x="88" y="112" width="220" height="14" rx="7" fill="#0f172a"/>
+  <rect x="88" y="142" width="380" height="10" rx="5" fill="#94a3b8"/>
+  <rect x="88" y="190" width="784" height="180" rx="20" fill="url(#g)" opacity="0.12"/>
+  <rect x="120" y="220" width="280" height="120" rx="16" fill="#ffffff"/>
+  <rect x="120" y="244" width="160" height="10" rx="5" fill="#0f172a"/>
+  <rect x="120" y="268" width="220" height="8" rx="4" fill="#cbd5e1"/>
+  <rect x="120" y="304" width="96" height="32" rx="10" fill="url(#g)"/>
+  <rect x="440" y="220" width="380" height="120" rx="16" fill="#ffffff"/>
+  <rect x="472" y="252" width="300" height="8" rx="4" fill="#e2e8f0"/>
+  <rect x="472" y="276" width="260" height="8" rx="4" fill="#e2e8f0"/>
+  <rect x="472" y="300" width="220" height="8" rx="4" fill="#e2e8f0"/>
+  <rect x="0" y="536" width="960" height="4" fill="#0ea5e9" opacity="0.85"/>
+</svg>

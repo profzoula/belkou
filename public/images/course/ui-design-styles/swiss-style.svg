@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Swiss Style">
+  <rect width="960" height="540" fill="#ffffff"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#dc2626" font-weight="700" letter-spacing="0.12em">TEMPLATE · SWISS STYLE</text>
+  
+  <rect x="48" y="72" width="864" height="420" fill="#ffffff"/>
+  <line x1="48" y1="72" x2="48" y2="492" stroke="#dc2626" stroke-width="6"/>
+  <rect x="88" y="112" width="8" height="120" fill="#dc2626"/>
+  <text x="112" y="150" font-family="Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#111827">Grid</text>
+  <text x="112" y="195" font-family="Helvetica, Arial, sans-serif" font-size="42" font-weight="700" fill="#111827">System</text>
+  <line x1="88" y1="240" x2="880" y2="240" stroke="#e5e7eb" stroke-width="2"/>
+  <rect x="88" y="280" width="250" height="8" fill="#111827"/>
+  <rect x="88" y="304" width="380" height="6" fill="#6b7280"/>
+  <rect x="88" y="324" width="340" height="6" fill="#6b7280"/>
+  <rect x="520" y="280" width="320" height="160" fill="#f3f4f6"/>
+  <line x1="680" y1="280" x2="680" y2="440" stroke="#dc2626" stroke-width="2"/>
+  <rect x="0" y="536" width="960" height="4" fill="#dc2626" opacity="0.85"/>
+</svg>

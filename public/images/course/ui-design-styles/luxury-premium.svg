@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Luxury Premium">
+  <rect width="960" height="540" fill="#0c0a09"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#d4af37" font-weight="700" letter-spacing="0.12em">TEMPLATE · LUXURY PREMIUM</text>
+  
+  <rect x="48" y="72" width="864" height="420" fill="#0c0a09"/>
+  <rect x="88" y="112" width="120" height="1" fill="#d4af37"/>
+  <text x="88" y="160" font-family="Georgia, serif" font-size="14" fill="#d4af37" letter-spacing="0.35em">PREMIUM COLLECTION</text>
+  <text x="88" y="220" font-family="Georgia, serif" font-size="46" fill="#fafaf9">Refined</text>
+  <text x="88" y="278" font-family="Georgia, serif" font-size="46" fill="#fafaf9">Experience</text>
+  <rect x="88" y="260" width="360" height="1" fill="#44403c"/>
+  <rect x="520" y="140" width="360" height="280" fill="none" stroke="#d4af37" stroke-width="1" opacity="0.6"/>
+  <rect x="560" y="180" width="280" height="8" fill="#78716c"/>
+  <rect x="560" y="204" width="240" height="6" fill="#57534e"/>
+  <rect x="88" y="400" width="160" height="40" rx="0" fill="none" stroke="#d4af37" stroke-width="1"/>
+  <text x="168" y="426" font-family="Georgia, serif" font-size="13" fill="#d4af37" text-anchor="middle">Discover</text>
+  <rect x="0" y="536" width="960" height="4" fill="#d4af37" opacity="0.85"/>
+</svg>

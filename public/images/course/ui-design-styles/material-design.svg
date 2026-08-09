@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Material Design">
+  <rect width="960" height="540" fill="#eceff1"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6200ee" font-weight="700" letter-spacing="0.12em">TEMPLATE · MATERIAL DESIGN</text>
+  
+  <rect x="48" y="72" width="864" height="420" rx="8" fill="#ffffff"/>
+  <rect x="48" y="72" width="864" height="64" fill="#6200ee"/>
+  <rect x="88" y="96" width="160" height="16" rx="4" fill="#ffffff"/>
+  <rect x="88" y="168" width="784" height="120" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="120" y="200" width="200" height="12" rx="6" fill="#212121"/>
+  <rect x="120" y="228" width="320" height="8" rx="4" fill="#757575"/>
+  <rect x="88" y="320" width="240" height="120" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="352" y="320" width="240" height="120" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="616" y="320" width="256" height="120" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="120" y="400" width="96" height="36" rx="18" fill="#6200ee"/>
+  <rect x="0" y="536" width="960" height="4" fill="#6200ee" opacity="0.85"/>
+</svg>

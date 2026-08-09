@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Minimalist">
+  <rect width="960" height="540" fill="#ffffff"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#111827" font-weight="700" letter-spacing="0.12em">TEMPLATE · MINIMALIST</text>
+  
+  <rect x="48" y="72" width="864" height="420" rx="16" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="88" y="112" width="180" height="12" rx="6" fill="#111827"/>
+  <rect x="88" y="140" width="320" height="8" rx="4" fill="#d1d5db"/>
+  <rect x="88" y="200" width="784" height="1" fill="#f3f4f6"/>
+  <rect x="88" y="240" width="240" height="160" rx="12" fill="#fafafa" stroke="#e5e7eb"/>
+  <rect x="360" y="240" width="240" height="160" rx="12" fill="#fafafa" stroke="#e5e7eb"/>
+  <rect x="632" y="240" width="240" height="160" rx="12" fill="#fafafa" stroke="#e5e7eb"/>
+  <rect x="88" y="430" width="120" height="36" rx="18" fill="#111827"/>
+  <text x="118" y="453" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#ffffff" text-anchor="middle">Action</text>
+  <rect x="0" y="536" width="960" height="4" fill="#111827" opacity="0.85"/>
+</svg>

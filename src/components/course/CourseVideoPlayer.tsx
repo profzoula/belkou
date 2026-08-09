@@ -13,6 +13,7 @@ type CourseVideoPlayerProps = {
   onNextLesson?: () => void;
   onLessonComplete?: () => void;
   onTimeUpdate?: (currentTime: number) => void;
+  onDurationSeconds?: (durationSeconds: number) => void;
   onPlay?: () => void;
   onPlaybackError?: () => void;
 };
@@ -40,6 +41,7 @@ export function CourseVideoPlayer({
   onNextLesson,
   onLessonComplete,
   onTimeUpdate,
+  onDurationSeconds,
   onPlay,
   onPlaybackError,
 }: CourseVideoPlayerProps) {
@@ -48,6 +50,7 @@ export function CourseVideoPlayer({
   const resumeAppliedRef = useRef(false);
   const onLessonCompleteRef = useRef(onLessonComplete);
   const onTimeUpdateRef = useRef(onTimeUpdate);
+  const onDurationSecondsRef = useRef(onDurationSeconds);
   const onPlaybackErrorRef = useRef(onPlaybackError);
   const onPlayRef = useRef(onPlay);
   const [ended, setEnded] = useState(false);
@@ -57,6 +60,7 @@ export function CourseVideoPlayer({
 
   onLessonCompleteRef.current = onLessonComplete;
   onTimeUpdateRef.current = onTimeUpdate;
+  onDurationSecondsRef.current = onDurationSeconds;
   onPlayRef.current = onPlay;
   onPlaybackErrorRef.current = onPlaybackError;
 
@@ -93,9 +97,16 @@ export function CourseVideoPlayer({
       resumeAppliedRef.current = true;
     };
 
+    const handleLoadedMetadata = () => {
+      if (video.duration && Number.isFinite(video.duration) && video.duration > 0) {
+        onDurationSecondsRef.current?.(video.duration);
+      }
+    };
+
     const markReady = () => {
       setLoading(false);
       applyResumePosition();
+      handleLoadedMetadata();
     };
 
     const handleEnded = () => {
@@ -126,6 +137,7 @@ export function CourseVideoPlayer({
     };
 
     video.addEventListener("loadedmetadata", markReady);
+    video.addEventListener("durationchange", handleLoadedMetadata);
     video.addEventListener("canplay", markReady);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("timeupdate", handleTimeUpdate);
@@ -181,6 +193,7 @@ export function CourseVideoPlayer({
     return () => {
       window.clearTimeout(loadTimeout);
       video.removeEventListener("loadedmetadata", markReady);
+      video.removeEventListener("durationchange", handleLoadedMetadata);
       video.removeEventListener("canplay", markReady);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("timeupdate", handleTimeUpdate);

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Editorial">
+  <rect width="960" height="540" fill="#faf7f2"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#92400e" font-weight="700" letter-spacing="0.12em">TEMPLATE · EDITORIAL</text>
+  
+  <rect x="48" y="72" width="864" height="420" fill="#faf7f2"/>
+  <text x="88" y="130" font-family="Georgia, serif" font-size="14" fill="#92400e" letter-spacing="0.2em">MAGAZINE · FEATURE</text>
+  <text x="88" y="190" font-family="Georgia, serif" font-size="52" fill="#1c1917">Design</text>
+  <text x="88" y="248" font-family="Georgia, serif" font-size="52" fill="#1c1917">as Story</text>
+  <rect x="520" y="120" width="340" height="260" fill="#d6d3d1"/>
+  <rect x="88" y="320" width="380" height="8" fill="#78716c"/>
+  <rect x="88" y="344" width="420" height="6" fill="#a8a29e"/>
+  <rect x="88" y="364" width="400" height="6" fill="#a8a29e"/>
+  <rect x="88" y="384" width="360" height="6" fill="#a8a29e"/>
+  <rect x="0" y="536" width="960" height="4" fill="#92400e" opacity="0.85"/>
+</svg>

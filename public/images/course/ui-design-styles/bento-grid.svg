@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Bento Grid">
+  <rect width="960" height="540" fill="#0f172a"/>
+  <text x="32" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#f97316" font-weight="700" letter-spacing="0.12em">TEMPLATE · BENTO GRID</text>
+  
+  <rect x="64" y="96" width="420" height="180" rx="20" fill="#1e293b"/>
+  <rect x="504" y="96" width="200" height="180" rx="20" fill="#334155"/>
+  <rect x="724" y="96" width="172" height="84" rx="16" fill="#475569"/>
+  <rect x="724" y="192" width="172" height="84" rx="16" fill="#64748b"/>
+  <rect x="64" y="296" width="200" height="160" rx="20" fill="#334155"/>
+  <rect x="284" y="296" width="200" height="160" rx="20" fill="#475569"/>
+  <rect x="504" y="296" width="392" height="160" rx="20" fill="#1e293b"/>
+  <rect x="96" y="128" width="160" height="12" rx="6" fill="#f8fafc"/>
+  <rect x="96" y="152" width="280" height="8" rx="4" fill="#94a3b8"/>
+  <rect x="0" y="536" width="960" height="4" fill="#f97316" opacity="0.85"/>
+</svg>
