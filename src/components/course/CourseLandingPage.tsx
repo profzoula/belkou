@@ -378,20 +378,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </div>
                 ) : (
                   <>
-                    {hasPaidAccess ? (
-                      <div className="rounded-xl border border-success/30 bg-success/10 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-success">
-                          {canStartCourse ? "Accès actif" : "Inscription confirmée"}
-                        </p>
-                        <p className="mt-2 text-sm text-foreground">
-                          {canStartCourse
-                            ? "Vous avez accès à toutes les leçons de ce cours."
-                            : enrolledWaiting && access?.scheduledPublishAt
-                              ? `Les vidéos seront disponibles le ${formatScheduledPublishLabel(access.scheduledPublishAt)}.`
-                              : "Votre accès sera activé dès le lancement du cours."}
-                        </p>
-                      </div>
-                    ) : (
+                    {!hasPaidAccess && (
                       <div className="rounded-xl border border-border bg-muted/30 p-4">
                         <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
                         <div className="mt-2 flex flex-wrap items-baseline gap-2">
