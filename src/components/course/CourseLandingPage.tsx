@@ -28,6 +28,7 @@ import {
   getPreviewVideoLessons,
 } from "@/lib/courses";
 import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
+import { CourseHeroStatsBar } from "@/components/course/CourseHeroStatsBar";
 import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import {
@@ -180,6 +181,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
   const hasPaidAccess = access?.hasPaidAccess ?? false;
   const contentLive = access?.contentLive ?? isCourseContentLive(course);
   const previewCourse = enrolledCourse ?? course;
+  const statsCourse = enrolledCourse ?? course;
 
   useEffect(() => {
     if (!session?.access_token || !hasPaidAccess) {
@@ -250,7 +252,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
       </header>
 
       <main id="main-content">
-        <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-10 pt-6">
+        <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-16 pt-6 sm:pb-20">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60"
@@ -329,7 +331,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
           </div>
         </section>
 
-        <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
+        <div className="site-container relative z-10 -mt-8 sm:-mt-10">
+          <CourseHeroStatsBar course={statsCourse} />
+        </div>
+
+        <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10 lg:pt-10">
           <aside className="mb-8 lg:sticky lg:top-6 lg:order-2 lg:mb-0 lg:self-start">
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
               <CourseThumbnail
