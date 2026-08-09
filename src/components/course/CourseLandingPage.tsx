@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   countLessons,
   formatCount,
@@ -314,12 +315,29 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               {course.description}
             </p>
 
-            <p className="mt-3 text-sm text-muted-foreground">
-              Créé par{" "}
-              <span className="font-medium text-primary underline-offset-2 hover:underline">
-                {course.instructor}
-              </span>
-            </p>
+            <div className="mt-3 flex items-center gap-2.5 text-sm">
+              <Avatar className="h-7 w-7 border border-border/60">
+                <AvatarImage
+                  src={siteConfig.founder.avatarUrl}
+                  alt={siteConfig.founder.name}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-[10px] font-semibold">
+                  {siteConfig.founder.name
+                    .split(/\s+/)
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <p className="text-muted-foreground">
+                Créé par{" "}
+                <span className="font-medium text-primary underline underline-offset-2">
+                  {course.instructor}
+                </span>
+              </p>
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
