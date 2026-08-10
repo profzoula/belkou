@@ -41,10 +41,8 @@ import {
 import { getCourseAccess, type CourseAccessStatus } from "@/lib/fns/course-access";
 import { getEnrolledCourse, type PublicCourse } from "@/lib/fns/courses";
 import { getCourseProgress } from "@/lib/fns/progress";
-import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Navbar } from "@/components/site/Navbar";
 import { useAuth } from "@/hooks/use-auth";
-import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { siteConfig } from "@/lib/site-config";
 
 type CourseLandingPageProps = {
@@ -232,27 +230,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 text-foreground backdrop-blur-xl">
-        <div className="site-container flex h-16 items-center justify-between gap-3">
-          <Link to="/" className="shrink-0">
-            <SiteWordmark />
-          </Link>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <ThemeToggle />
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link to="/courses">Tous les cours</Link>
-            </Button>
-            {!authLoading && !user ? (
-              <Button asChild variant="outline" size="sm">
-                <Link to="/login">Connexion</Link>
-              </Button>
-            ) : null}
-            {!authLoading && user ? <UserAccountMenu /> : null}
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <main id="main-content">
+      <main id="main-content" className="site-page-top">
         <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-16 pt-6 sm:pb-20">
           <div
             aria-hidden
