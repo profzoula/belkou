@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutGrid, List, Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
@@ -53,6 +53,10 @@ function CoursesIndexPage() {
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [layout, setLayout] = useState<LayoutMode>("grid");
+
+  useEffect(() => {
+    setQuery(search.q ?? "");
+  }, [search.q]);
 
   const levels = useMemo(() => {
     const set = new Set(courses.map((course) => course.skillLevel).filter(Boolean));

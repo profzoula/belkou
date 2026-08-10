@@ -117,16 +117,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
   return (
     <section id="courses" className="site-section-anchor py-10 sm:py-16 md:py-20">
       <div className="site-container">
-        <FadeIn className="text-center">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
-            Nos <span className="text-primary">cours</span>
-          </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-            Choisissez une catégorie et explorez les parcours BelKou.
-          </p>
-        </FadeIn>
-
-        <FadeIn delay={0.06} className="mt-8">
+        <FadeIn delay={0.06}>
           <div className="flex items-center gap-2 rounded-2xl bg-primary/[0.06] p-2 sm:gap-3 sm:p-3">
             <button
               type="button"

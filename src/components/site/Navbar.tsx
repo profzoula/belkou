@@ -8,6 +8,7 @@ import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { PromoTopbar } from "@/components/site/PromoTopbar";
+import { NavbarCourseSearch } from "@/components/site/NavbarCourseSearch";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
@@ -201,7 +202,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
               : "glass"
         }
       >
-        <div className="site-container flex h-14 sm:h-16 items-center justify-between gap-3">
+        <div className="site-container flex h-14 sm:h-16 items-center gap-2 sm:gap-3">
           <Link
             to="/"
             className={cn("flex min-w-0 shrink-0 items-center", isDark && "text-white")}
@@ -209,7 +210,13 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             <SiteWordmark className={cn(isDark && "text-white")} />
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
+          <NavbarCourseSearch
+            dark={isDark}
+            hero={isHero}
+            className="hidden min-w-0 flex-1 sm:flex lg:max-w-md xl:max-w-xl"
+          />
+
+          <nav className="hidden items-center gap-1 xl:flex" aria-label="Navigation principale">
             {links.map((l) =>
               l.route ? (
                 <Link key={l.href} to={l.href} className={linkClass}>
@@ -223,14 +230,14 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             )}
           </nav>
 
-          <div className="hidden md:flex items-center gap-1.5">
+          <div className="ml-auto hidden md:flex items-center gap-1.5 shrink-0">
             <ThemeToggle
               className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
             />
             <NavActions dark={isDark} hero={isHero} />
           </div>
 
-          <div className="flex items-center gap-1.5 md:hidden">
+          <div className="ml-auto flex items-center gap-1.5 shrink-0 md:ml-0">
             <ThemeToggle
               className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
             />
@@ -265,6 +272,12 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
         >
           <SheetTitle className="sr-only">Navigation principale</SheetTitle>
           <div className="site-container max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain py-4">
+            <NavbarCourseSearch
+              dark={isDark}
+              hero={isHero}
+              className="mb-4 sm:hidden"
+              onSubmit={close}
+            />
             <nav className="flex flex-col gap-1" aria-label="Navigation principale mobile">
               {links.map((l) =>
                 l.route ? (
