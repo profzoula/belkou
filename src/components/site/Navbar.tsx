@@ -210,13 +210,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             <SiteWordmark className={cn(isDark && "text-white")} />
           </Link>
 
-          <NavbarCourseSearch
-            dark={isDark}
-            hero={isHero}
-            className="hidden min-w-0 flex-1 sm:flex lg:max-w-md xl:max-w-xl"
-          />
-
-          <nav className="hidden items-center gap-1 xl:flex" aria-label="Navigation principale">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">
             {links.map((l) =>
               l.route ? (
                 <Link key={l.href} to={l.href} className={linkClass}>
@@ -230,6 +224,12 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             )}
           </nav>
 
+          <NavbarCourseSearch
+            dark={isDark}
+            hero={isHero}
+            className="hidden min-w-0 flex-1 sm:flex lg:max-w-sm xl:max-w-md"
+          />
+
           <div className="ml-auto hidden md:flex items-center gap-1.5 shrink-0">
             <ThemeToggle
               className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
@@ -237,7 +237,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
             <NavActions dark={isDark} hero={isHero} />
           </div>
 
-          <div className="ml-auto flex items-center gap-1.5 shrink-0 md:ml-0">
+          <div className="ml-auto flex items-center gap-1.5 shrink-0 md:hidden">
             <ThemeToggle
               className={isDark ? "text-white/80 hover:text-white hover:bg-white/10" : undefined}
             />
@@ -272,12 +272,6 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
         >
           <SheetTitle className="sr-only">Navigation principale</SheetTitle>
           <div className="site-container max-h-[calc(100dvh-var(--site-header-height))] overflow-y-auto overscroll-contain py-4">
-            <NavbarCourseSearch
-              dark={isDark}
-              hero={isHero}
-              className="mb-4 sm:hidden"
-              onSubmit={close}
-            />
             <nav className="flex flex-col gap-1" aria-label="Navigation principale mobile">
               {links.map((l) =>
                 l.route ? (
@@ -290,6 +284,12 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
                   </a>
                 ),
               )}
+              <NavbarCourseSearch
+                dark={isDark}
+                hero={isHero}
+                className="mt-3 sm:hidden"
+                onSubmit={close}
+              />
               <div
                 className={cn("mt-3 pt-3 border-t", isDark ? "border-white/10" : "border-border")}
               >
