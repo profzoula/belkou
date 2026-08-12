@@ -40,6 +40,7 @@ type CourseTocSectionProps = {
   onOpenChange: (open: boolean) => void;
   completedCount: number;
   totalCount: number;
+  summaryLabel?: string;
   children: ReactNode;
 };
 
@@ -49,6 +50,7 @@ export function CourseTocCollapsibleSection({
   onOpenChange,
   completedCount,
   totalCount,
+  summaryLabel,
   children,
 }: CourseTocSectionProps) {
   return (
@@ -56,7 +58,9 @@ export function CourseTocCollapsibleSection({
       <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/40">
         <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-foreground">{title}</span>
         <span className="flex shrink-0 items-center gap-2">
-          {totalCount > 0 ? (
+          {summaryLabel ? (
+            <span className="text-[11px] text-muted-foreground">{summaryLabel}</span>
+          ) : totalCount > 0 ? (
             <span className="text-[11px] tabular-nums text-muted-foreground">
               {completedCount}/{totalCount}
             </span>

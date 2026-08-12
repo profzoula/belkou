@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Award,
   CheckCircle2,
@@ -33,11 +34,145 @@ function optionLetter(index: number): string {
   return OPTION_LETTERS[index] ?? String.fromCharCode(65 + index);
 }
 
+const successStagger = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
+  },
+};
+
+const successItem = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+  },
+};
+
+function QuizSuccessPanel({
+  quiz,
+  nextLessonTitle,
+  celebrate,
+}: {
+  quiz: LessonQuizData;
+  nextLessonTitle?: string;
+  celebrate: boolean;
+}) {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="lesson-quiz lesson-quiz--success overflow-hidden rounded-2xl border border-success/30 bg-card shadow-md dark:border-success/40"
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="lesson-quiz-success-banner relative overflow-hidden px-6 py-8 sm:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-success/15 via-success/5 to-primary/10" />
+        <motion.div
+          className="relative flex flex-col items-center text-center"
+          variants={reduceMotion ? undefined : successStagger}
+          initial={reduceMotion ? false : "hidden"}
+          animate="show"
+        >
+          <div className="relative">
+            {celebrate && !reduceMotion
+              ? Array.from({ length: 8 }, (_, index) => {
+                  const angle = (index / 8) * Math.PI * 2;
+                  return (
+                    <motion.span
+                      key={index}
+                      aria-hidden
+                      className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-success/70"
+                      initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                      animate={{
+                        x: Math.cos(angle) * 52,
+                        y: Math.sin(angle) * 52,
+                        opacity: 0,
+                        scale: 0.2,
+                      }}
+                      transition={{ duration: 0.65, ease: "easeOut", delay: 0.1 }}
+                    />
+                  );
+                })
+              : null}
+            <motion.div
+              className="flex h-16 w-16 items-center justify-center rounded-full bg-success text-white shadow-lg shadow-success/30"
+              initial={reduceMotion ? false : { scale: 0, rotate: -12 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={
+                reduceMotion
+                  ? undefined
+                  : { type: "spring", stiffness: 420, damping: 16, delay: celebrate ? 0.05 : 0 }
+              }
+            >
+              <motion.div
+                animate={
+                  reduceMotion || !celebrate
+                    ? undefined
+                    : { rotate: [0, -8, 8, -4, 0], scale: [1, 1.08, 1] }
+                }
+                transition={{ duration: 0.55, delay: 0.25, ease: "easeInOut" }}
+              >
+                <Trophy className="h-8 w-8" />
+              </motion.div>
+            </motion.div>
+          </div>
+          <motion.p
+            variants={reduceMotion ? undefined : successItem}
+            className="mt-4 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          >
+            Felisitasyon!
+          </motion.p>
+          <motion.p
+            variants={reduceMotion ? undefined : successItem}
+            className="mt-1 text-sm text-muted-foreground"
+          >
+            Ou reyisi quiz la ak yon nòt pafè
+          </motion.p>
+          <motion.div
+            variants={reduceMotion ? undefined : successItem}
+            className="mt-5 inline-flex items-center gap-2 rounded-full border border-success/40 bg-white/80 px-4 py-2 text-sm font-semibold text-success shadow-sm dark:border-success/40 dark:bg-success/10 dark:text-success"
+          >
+            <motion.span
+              animate={
+                reduceMotion || !celebrate
+                  ? undefined
+                  : { rotate: [0, 14, -10, 0], scale: [1, 1.15, 1] }
+              }
+              transition={{ duration: 0.5, delay: 0.45, ease: "easeInOut" }}
+            >
+              <Sparkles className="h-4 w-4" />
+            </motion.span>
+            {quiz.passScore}/{quiz.passScore} bon repons
+          </motion.div>
+        </motion.div>
+      </div>
+      <motion.div
+        className="border-t border-success/20 px-6 py-5 dark:border-success/30 sm:px-8"
+        initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: celebrate ? 0.55 : 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Ou pare pou kontinye fòmasyon an. Klike{" "}
+          <strong className="text-foreground">
+            {nextLessonTitle ? `Leçon suivante · ${nextLessonTitle}` : "Marquer comme terminé"}
+          </strong>{" "}
+          anba a.
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: LessonQuizProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [passed, setPassed] = useState(() => readQuizPass(storageKey));
+  const [celebratePass, setCelebratePass] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
 
   const total = quiz.questions.length;
@@ -71,6 +206,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
     const graded = gradeLessonQuiz(quiz, answers);
     if (graded.passed) {
       writeQuizPass(storageKey);
+      setCelebratePass(true);
       setPassed(true);
       onPass?.();
     }
@@ -80,6 +216,7 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
     setAnswers({});
     setSubmitted(false);
     setPassed(false);
+    setCelebratePass(false);
     setCurrentIndex(0);
     setStepError(null);
     try {
@@ -106,33 +243,11 @@ export function LessonQuiz({ quiz, storageKey, nextLessonTitle, onPass }: Lesson
 
   if (passed) {
     return (
-      <div className="lesson-quiz lesson-quiz--success overflow-hidden rounded-2xl border border-success/30 bg-card shadow-md dark:border-success/40">
-        <div className="lesson-quiz-success-banner relative overflow-hidden px-6 py-8 sm:px-8">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-success/15 via-success/5 to-primary/10" />
-          <div className="relative flex flex-col items-center text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-success text-white shadow-lg shadow-success/30">
-              <Trophy className="h-8 w-8" />
-            </div>
-            <p className="mt-4 font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-              Felisitasyon!
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">Ou reyisi quiz la ak yon nòt pafè</p>
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-success/40 bg-white/80 px-4 py-2 text-sm font-semibold text-success shadow-sm dark:border-success/40 dark:bg-success/10 dark:text-success">
-              <Sparkles className="h-4 w-4" />
-              {quiz.passScore}/{quiz.passScore} bon repons
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-success/20 px-6 py-5 dark:border-success/30 sm:px-8">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Ou pare pou kontinye fòmasyon an. Klike{" "}
-            <strong className="text-foreground">
-              {nextLessonTitle ? `Leçon suivante · ${nextLessonTitle}` : "Marquer comme terminé"}
-            </strong>{" "}
-            anba a.
-          </p>
-        </div>
-      </div>
+      <QuizSuccessPanel
+        quiz={quiz}
+        nextLessonTitle={nextLessonTitle}
+        celebrate={celebratePass}
+      />
     );
   }
 
