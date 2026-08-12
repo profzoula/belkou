@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BookOpen, Check, CheckCircle2, ChevronDown, Circle, ClipboardList, Lock } from "lucide-react";
+import { BookOpen, Check, CheckCircle2, ChevronDown, Circle, ClipboardList, FileText, Lock, PlayCircle } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -74,15 +74,45 @@ export function CourseTocCollapsibleSection({
 
 export type CourseTocRowState = "completed" | "active" | "upcoming" | "quiz" | "locked";
 
+export type CourseTocContentType = "article" | "video" | "resource" | "quiz";
+
 type CourseTocRowProps = {
   title: string;
   stepNumber?: number | null;
   state: CourseTocRowState;
   isQuiz?: boolean;
+  contentType?: CourseTocContentType;
   disabled?: boolean;
   className?: string;
   markerStyle?: CourseTocMarkerStyle;
 };
+
+function TocContentIcon({
+  contentType,
+  state,
+}: {
+  contentType: CourseTocContentType;
+  state: CourseTocRowState;
+}) {
+  const className = cn(
+    "size-4 shrink-0",
+    state === "active" ? "text-foreground" : "text-muted-foreground",
+  );
+
+  if (contentType === "video") {
+    return <PlayCircle className={className} aria-hidden />;
+  }
+
+  if (contentType === "quiz") {
+    return <ClipboardList className={className} aria-hidden />;
+  }
+
+  if (contentType === "resource") {
+    return <FileText className={className} aria-hidden />;
+  }
+
+  return <BookOpen className={className} aria-hidden />;
+}
 
 function TocMarker({
   state,
@@ -98,9 +128,6 @@ function TocMarker({
   if (markerStyle === "odin") {
     if (state === "locked") {
       return <Lock className="size-4 shrink-0 text-muted-foreground/70" aria-hidden />;
-    }
-    if (isQuiz) {
-      return <ClipboardList className="size-4 shrink-0 text-muted-foreground" aria-hidden />;
     }
     if (state === "completed") {
       return <CheckCircle2 className="size-[18px] shrink-0 fill-success text-white" aria-hidden />;
@@ -164,6 +191,7 @@ export function CourseTocRow({
   stepNumber,
   state,
   isQuiz = false,
+  contentType = "article",
   disabled = false,
   className,
   markerStyle = "odin",
@@ -188,14 +216,8 @@ export function CourseTocRow({
           markerStyle={markerStyle}
         />
       </span>
-      {isOdin && !isQuiz && state !== "locked" ? (
-        <BookOpen
-          className={cn(
-            "size-4 shrink-0",
-            state === "active" ? "text-foreground" : "text-muted-foreground",
-          )}
-          aria-hidden
-        />
+      {isOdin && state !== "locked" ? (
+        <TocContentIcon contentType={isQuiz ? "quiz" : contentType} state={state} />
       ) : null}
       <span
         className={cn(
@@ -250,6 +272,7 @@ export function CourseTocItem({
   stepNumber,
   state,
   isQuiz = false,
+  contentType = "article",
   isLast = false,
   onClick,
   disabled = false,
@@ -277,6 +300,7 @@ export function CourseTocItem({
             stepNumber={stepNumber}
             state={state}
             isQuiz={isQuiz}
+            contentType={contentType}
             disabled={disabled}
             markerStyle={markerStyle}
           />
@@ -287,6 +311,7 @@ export function CourseTocItem({
           stepNumber={stepNumber}
           state={state}
           isQuiz={isQuiz}
+          contentType={contentType}
           disabled={disabled}
           markerStyle={markerStyle}
         />

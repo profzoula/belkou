@@ -6,6 +6,7 @@ import {
   CourseTocCollapsibleSection,
   CourseTocItem,
   CourseTocList,
+  type CourseTocContentType,
 } from "@/components/course/CourseTocTimeline";
 import type { LessonLockReason } from "@/lib/course-access";
 import { countLessons, type CourseLesson } from "@/lib/courses";
@@ -32,6 +33,7 @@ type TocEntry = {
   key: string;
   title: string;
   isQuiz: boolean;
+  contentType: CourseTocContentType;
   lessonId: string;
   subSessionId?: string;
   locked: boolean;
@@ -55,6 +57,7 @@ function buildLessonEntries(
       key: id,
       title: sub.title,
       isQuiz: Boolean(sub.isQuiz),
+      contentType: sub.isQuiz ? "quiz" : "article",
       lessonId: lesson.id,
       subSessionId: id,
       locked,
@@ -63,11 +66,15 @@ function buildLessonEntries(
     }));
   }
 
+  const contentType: CourseTocContentType =
+    lesson.type === "video" ? "video" : lesson.type === "resource" ? "resource" : "article";
+
   return [
     {
       key: lesson.id,
       title: lesson.title,
       isQuiz: false,
+      contentType,
       lessonId: lesson.id,
       locked,
       completed: lessonCompleted,
@@ -269,6 +276,7 @@ export function CurriculumSidebar({
                       title={entry.title}
                       state={state}
                       isQuiz={entry.isQuiz}
+                      contentType={entry.contentType}
                       isLast={isLast}
                       disabled={entry.locked}
                       markerStyle="odin"
