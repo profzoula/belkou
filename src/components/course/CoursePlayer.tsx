@@ -1072,12 +1072,13 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   ]);
 
   const progressPercent = progress?.progressPercent ?? 0;
+  const isArticleLesson = activeLesson.type === "article";
 
   return (
     <div
       className={cn(
         "min-h-dvh text-foreground dark:bg-background",
-        activeLesson.type === "article" ? "bg-white" : "bg-background",
+        isArticleLesson ? "bg-white" : "bg-background",
       )}
     >
       <LearnHeader
@@ -1113,10 +1114,27 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
 
       <main
         id="main-content"
-        className="mx-auto max-w-[1400px] px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8"
+        className={cn(
+          "mx-auto max-w-[1400px]",
+          isArticleLesson ? "pb-24 lg:pb-0" : "px-4 py-4 pb-24 sm:px-6 sm:py-6 lg:pb-8",
+        )}
       >
-        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[360px_minmax(0,1fr)] lg:items-start lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-          <aside className="hidden lg:sticky lg:top-[calc(4rem+1rem)] lg:flex lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:flex-col lg:overflow-hidden lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]">
+        <div
+          className={cn(
+            "flex flex-col lg:grid lg:items-start lg:gap-0",
+            isArticleLesson
+              ? "lg:grid-cols-[minmax(280px,320px)_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]"
+              : "gap-4 lg:grid-cols-[360px_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[380px_minmax(0,1fr)]",
+          )}
+        >
+          <aside
+            className={cn(
+              "hidden lg:sticky lg:top-16 lg:flex lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] lg:flex-col lg:overflow-hidden",
+              isArticleLesson
+                ? "border-r border-border bg-background"
+                : "lg:top-[calc(4rem+1rem)] lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]",
+            )}
+          >
             <CurriculumSidebar
               course={activeCourse}
               activeLessonId={activeLessonId}
@@ -1133,26 +1151,35 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
           </aside>
 
           <div className="flex min-w-0 flex-col gap-4">
-            <div className="overflow-hidden rounded-[20px] border border-border bg-card shadow-[0_12px_40px_rgb(15_23_42_/_0.08)]">
-              <div className="space-y-4 border-b border-border px-4 py-4 sm:px-6 sm:py-5">
-                <LessonContextHeader
-                  courseTitle={course.title}
-                  moduleTitle={activeSection?.title}
-                  lessonNumber={Math.max(lessonNumber, 1)}
-                  lessonTitle={activeLesson.title}
-                  instructor={course.instructor}
-                  duration={
-                    liveLessonDurationSeconds && liveLessonDurationSeconds > 0
-                      ? formatLessonDurationLabel(
-                          String(Math.max(1, Math.round(liveLessonDurationSeconds / 60))),
-                        )
-                      : getLessonDisplayDuration(activeLesson)
-                  }
-                  publishedLabel={course.lastUpdated}
-                />
-              </div>
+            <div
+              className={cn(
+                "overflow-hidden",
+                isArticleLesson
+                  ? "bg-white"
+                  : "rounded-[20px] border border-border bg-card shadow-[0_12px_40px_rgb(15_23_42_/_0.08)]",
+              )}
+            >
+              {!isArticleLesson ? (
+                <div className="space-y-4 border-b border-border px-4 py-4 sm:px-6 sm:py-5">
+                  <LessonContextHeader
+                    courseTitle={course.title}
+                    moduleTitle={activeSection?.title}
+                    lessonNumber={Math.max(lessonNumber, 1)}
+                    lessonTitle={activeLesson.title}
+                    instructor={course.instructor}
+                    duration={
+                      liveLessonDurationSeconds && liveLessonDurationSeconds > 0
+                        ? formatLessonDurationLabel(
+                            String(Math.max(1, Math.round(liveLessonDurationSeconds / 60))),
+                          )
+                        : getLessonDisplayDuration(activeLesson)
+                    }
+                    publishedLabel={course.lastUpdated}
+                  />
+                </div>
+              ) : null}
 
-              <div className={activeLesson.type === "article" ? "bg-white" : "bg-black/95"}>
+              <div className={isArticleLesson ? "bg-white" : "bg-black/95"}>
                 <CourseVideoArea
                   course={activeCourse}
                   lesson={activeLesson}
@@ -1178,41 +1205,50 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 />
               </div>
 
-              <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
-                <LessonNavControls
-                  canGoPrevious={Boolean(previousLesson)}
-                  canGoNext={Boolean(nextLesson)}
-                  canMarkComplete={
-                    hasPaidAccess &&
-                    contentLive &&
-                    lessonIsCompletable(activeLesson) &&
-                    !quizBlocksComplete
-                  }
-                  isCompleted={activeLessonCompleted}
-                  previousTitle={previousLesson?.title}
-                  nextTitle={nextLesson?.title}
-                  onPrevious={goToPreviousLesson}
-                  onNext={goToNextLesson}
-                  onMarkComplete={handleActiveLessonComplete}
-                />
+              {!isArticleLesson ? (
+                <div className="space-y-4 px-4 py-4 sm:px-6 sm:py-5">
+                  <LessonNavControls
+                    canGoPrevious={Boolean(previousLesson)}
+                    canGoNext={Boolean(nextLesson)}
+                    canMarkComplete={
+                      hasPaidAccess &&
+                      contentLive &&
+                      lessonIsCompletable(activeLesson) &&
+                      !quizBlocksComplete
+                    }
+                    isCompleted={activeLessonCompleted}
+                    previousTitle={previousLesson?.title}
+                    nextTitle={nextLesson?.title}
+                    onPrevious={goToPreviousLesson}
+                    onNext={goToNextLesson}
+                    onMarkComplete={handleActiveLessonComplete}
+                  />
 
-                {(course.resources?.length ?? 0) > 0 && hasPaidAccess ? (
-                  <p className="text-sm text-muted-foreground">
-                    Ressources disponibles dans l&apos;onglet{" "}
-                    <button
-                      type="button"
-                      className="font-semibold text-primary underline-offset-2 hover:underline"
-                      onClick={() => setPlayerTab("resources")}
-                    >
-                      Téléchargements
-                    </button>
-                    .
-                  </p>
-                ) : null}
-              </div>
+                  {(course.resources?.length ?? 0) > 0 && hasPaidAccess ? (
+                    <p className="text-sm text-muted-foreground">
+                      Ressources disponibles dans l&apos;onglet{" "}
+                      <button
+                        type="button"
+                        className="font-semibold text-primary underline-offset-2 hover:underline"
+                        onClick={() => setPlayerTab("resources")}
+                      >
+                        Téléchargements
+                      </button>
+                      .
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
 
-            <div className="rounded-[20px] border border-border bg-card p-3 shadow-sm sm:p-4">
+            <div
+              className={cn(
+                "p-3 sm:p-4",
+                isArticleLesson
+                  ? "border-t border-border bg-white pt-6"
+                  : "rounded-[20px] border border-border bg-card shadow-sm",
+              )}
+            >
               <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
                 <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-[14px] bg-muted/70 p-1">
                   {[

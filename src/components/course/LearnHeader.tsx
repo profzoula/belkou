@@ -70,7 +70,7 @@ export function LearnHeader({
           {courseTitle}
         </p>
 
-        <div className="relative ml-auto hidden w-full max-w-[220px] md:block lg:max-w-[260px]">
+        <div className="relative ml-auto hidden w-full max-w-[220px] md:block md:max-w-[260px] lg:hidden">
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden

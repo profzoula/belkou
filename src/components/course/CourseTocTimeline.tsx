@@ -1,8 +1,27 @@
 import type { ReactNode } from "react";
-import { Check, ClipboardList, Lock } from "lucide-react";
+import { BookOpen, Check, CheckCircle2, ChevronDown, Circle, ClipboardList, Lock } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
-export function CourseTocPartHeader({ partNumber, title }: { partNumber: number; title: string }) {
+export type CourseTocMarkerStyle = "odin" | "timeline";
+
+export function CourseTocPartHeader({
+  partNumber,
+  title,
+  markerStyle = "timeline",
+}: {
+  partNumber: number;
+  title: string;
+  markerStyle?: CourseTocMarkerStyle;
+}) {
+  if (markerStyle === "odin") {
+    return null;
+  }
+
   return (
     <div className="course-toc-part-header border-y border-border/70 bg-slate-100/90 px-4 py-3 dark:bg-muted/35">
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-500 dark:text-muted-foreground">
@@ -15,6 +34,44 @@ export function CourseTocPartHeader({ partNumber, title }: { partNumber: number;
   );
 }
 
+type CourseTocSectionProps = {
+  title: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  completedCount: number;
+  totalCount: number;
+  children: ReactNode;
+};
+
+export function CourseTocCollapsibleSection({
+  title,
+  open,
+  onOpenChange,
+  completedCount,
+  totalCount,
+  children,
+}: CourseTocSectionProps) {
+  return (
+    <Collapsible open={open} onOpenChange={onOpenChange} className="border-b border-border/60 last:border-b-0">
+      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/40">
+        <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-foreground">{title}</span>
+        <span className="flex shrink-0 items-center gap-2">
+          {totalCount > 0 ? (
+            <span className="text-[11px] tabular-nums text-muted-foreground">
+              {completedCount}/{totalCount}
+            </span>
+          ) : null}
+          <ChevronDown
+            className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")}
+            aria-hidden
+          />
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>{children}</CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 export type CourseTocRowState = "completed" | "active" | "upcoming" | "quiz" | "locked";
 
 type CourseTocRowProps = {
@@ -24,17 +81,41 @@ type CourseTocRowProps = {
   isQuiz?: boolean;
   disabled?: boolean;
   className?: string;
+  markerStyle?: CourseTocMarkerStyle;
 };
 
 function TocMarker({
   state,
   stepNumber,
   isQuiz = false,
+  markerStyle = "odin",
 }: {
   state: CourseTocRowState;
   stepNumber?: number | null;
   isQuiz?: boolean;
+  markerStyle?: CourseTocMarkerStyle;
 }) {
+  if (markerStyle === "odin") {
+    if (state === "locked") {
+      return <Lock className="size-4 shrink-0 text-muted-foreground/70" aria-hidden />;
+    }
+    if (isQuiz) {
+      return <ClipboardList className="size-4 shrink-0 text-muted-foreground" aria-hidden />;
+    }
+    if (state === "completed") {
+      return <CheckCircle2 className="size-[18px] shrink-0 fill-success text-white" aria-hidden />;
+    }
+    return (
+      <Circle
+        className={cn(
+          "size-[18px] shrink-0",
+          state === "active" ? "text-primary" : "text-muted-foreground/45",
+        )}
+        aria-hidden
+      />
+    );
+  }
+
   if (state === "completed") {
     return (
       <span className="grid size-7 place-items-center rounded-full bg-success text-white shadow-sm">
@@ -85,22 +166,41 @@ export function CourseTocRow({
   isQuiz = false,
   disabled = false,
   className,
+  markerStyle = "odin",
 }: CourseTocRowProps) {
+  const isOdin = markerStyle === "odin";
+
   return (
     <div
       className={cn(
-        "relative flex w-full items-start gap-3 rounded-lg px-2 py-2.5 text-left",
-        state === "active" && "bg-primary/5",
+        "relative flex w-full items-center gap-2.5 text-left",
+        isOdin ? "px-4 py-2.5" : "items-start gap-3 rounded-lg px-2 py-2.5",
+        state === "active" && (isOdin ? "bg-muted/70" : "bg-primary/5"),
         disabled && "opacity-60",
         className,
       )}
     >
-      <span className="relative z-[1] mt-0.5 shrink-0">
-        <TocMarker state={state} stepNumber={stepNumber} isQuiz={isQuiz} />
+      <span className={cn("shrink-0", !isOdin && "relative z-[1] mt-0.5")}>
+        <TocMarker
+          state={state}
+          stepNumber={stepNumber}
+          isQuiz={isQuiz}
+          markerStyle={markerStyle}
+        />
       </span>
+      {isOdin && !isQuiz && state !== "locked" ? (
+        <BookOpen
+          className={cn(
+            "size-4 shrink-0",
+            state === "active" ? "text-foreground" : "text-muted-foreground",
+          )}
+          aria-hidden
+        />
+      ) : null}
       <span
         className={cn(
-          "min-w-0 flex-1 pt-1 text-sm leading-snug",
+          "min-w-0 flex-1 leading-snug",
+          isOdin ? "text-sm" : "pt-1 text-sm",
           state === "active"
             ? "font-semibold text-foreground"
             : state === "completed"
@@ -117,11 +217,17 @@ export function CourseTocRow({
 
 export function CourseTocItemShell({
   isLast = false,
+  markerStyle = "odin",
   children,
 }: {
   isLast?: boolean;
+  markerStyle?: CourseTocMarkerStyle;
   children: ReactNode;
 }) {
+  if (markerStyle === "odin") {
+    return <li className="course-toc-item">{children}</li>;
+  }
+
   return (
     <li className="course-toc-item relative pl-3">
       {!isLast ? (
@@ -136,6 +242,7 @@ type CourseTocItemProps = CourseTocRowProps & {
   isLast?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  markerStyle?: CourseTocMarkerStyle;
 };
 
 export function CourseTocItem({
@@ -147,9 +254,10 @@ export function CourseTocItem({
   onClick,
   disabled = false,
   ariaLabel,
+  markerStyle = "odin",
 }: CourseTocItemProps) {
   return (
-    <CourseTocItemShell isLast={isLast}>
+    <CourseTocItemShell isLast={isLast} markerStyle={markerStyle}>
       {onClick ? (
         <button
           type="button"
@@ -159,7 +267,8 @@ export function CourseTocItem({
           aria-current={state === "active" ? "step" : undefined}
           className={cn(
             "w-full transition-colors",
-            !disabled && "hover:bg-muted/45",
+            !disabled && markerStyle === "odin" && "hover:bg-muted/45",
+            !disabled && markerStyle === "timeline" && "hover:bg-muted/45",
             disabled && "cursor-not-allowed",
           )}
         >
@@ -169,6 +278,7 @@ export function CourseTocItem({
             state={state}
             isQuiz={isQuiz}
             disabled={disabled}
+            markerStyle={markerStyle}
           />
         </button>
       ) : (
@@ -178,12 +288,28 @@ export function CourseTocItem({
           state={state}
           isQuiz={isQuiz}
           disabled={disabled}
+          markerStyle={markerStyle}
         />
       )}
     </CourseTocItemShell>
   );
 }
 
-export function CourseTocList({ children }: { children: ReactNode }) {
-  return <ul className="course-toc-list space-y-0.5 px-2 py-3">{children}</ul>;
+export function CourseTocList({
+  children,
+  markerStyle = "odin",
+}: {
+  children: ReactNode;
+  markerStyle?: CourseTocMarkerStyle;
+}) {
+  return (
+    <ul
+      className={cn(
+        "course-toc-list",
+        markerStyle === "odin" ? "space-y-0 py-1" : "space-y-0.5 px-2 py-3",
+      )}
+    >
+      {children}
+    </ul>
+  );
 }

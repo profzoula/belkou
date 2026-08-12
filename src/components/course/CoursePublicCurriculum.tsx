@@ -56,15 +56,15 @@ export function CoursePublicCurriculum({ course, hasPaidAccess }: CoursePublicCu
 
         return (
           <section key={section.id} className="border-b border-border/60 last:border-b-0">
-            <CourseTocPartHeader partNumber={sectionIndex + 1} title={section.title} />
-            <CourseTocList>
+            <CourseTocPartHeader partNumber={sectionIndex + 1} title={section.title} markerStyle="timeline" />
+            <CourseTocList markerStyle="timeline">
               {entriesWithSteps.map(({ entry, stepNumber }, index) => {
                 const state = entry.locked ? "locked" : entry.isQuiz ? "quiz" : "upcoming";
                 const isLast = index === entriesWithSteps.length - 1;
 
                 if (entry.learnSearch) {
                   return (
-                    <CourseTocItemShell key={entry.key} isLast={isLast}>
+                    <CourseTocItemShell key={entry.key} isLast={isLast} markerStyle="timeline">
                       <Link
                         to="/courses/$slug/learn"
                         params={{ slug: course.slug }}
@@ -76,6 +76,7 @@ export function CoursePublicCurriculum({ course, hasPaidAccess }: CoursePublicCu
                           stepNumber={stepNumber}
                           state={state}
                           isQuiz={entry.isQuiz}
+                          markerStyle="timeline"
                         />
                       </Link>
                     </CourseTocItemShell>
@@ -91,6 +92,7 @@ export function CoursePublicCurriculum({ course, hasPaidAccess }: CoursePublicCu
                     isQuiz={entry.isQuiz}
                     isLast={isLast}
                     disabled={entry.locked}
+                    markerStyle="timeline"
                   />
                 );
               })}
