@@ -100,7 +100,7 @@ export function Hero({ studentCount }: HeroProps) {
         {/* `contents` on mobile so CTA/social can order below the image */}
         <div className="contents lg:flex lg:min-h-[32rem] lg:flex-col lg:justify-center lg:pb-12 xl:min-h-[34rem]">
           <motion.div
-            className="order-1 flex min-w-0 flex-col items-start text-left"
+            className="max-lg:order-1 flex min-w-0 flex-col items-start text-left"
             initial={reduceMotion ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease }}
@@ -122,7 +122,7 @@ export function Hero({ studentCount }: HeroProps) {
           </motion.div>
 
           <motion.div
-            className="order-3 flex min-w-0 flex-col items-start pb-8 text-left sm:pb-10 lg:order-none lg:pb-0"
+            className="max-lg:order-3 flex min-w-0 flex-col items-start pb-8 text-left sm:pb-10 lg:pb-0"
             initial={reduceMotion ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.12, ease }}
@@ -183,7 +183,7 @@ export function Hero({ studentCount }: HeroProps) {
         </div>
 
         <motion.div
-          className="relative order-2 mx-auto w-full lg:order-none lg:mx-0 lg:self-end"
+          className="relative mx-auto w-full max-lg:order-2 lg:mx-0 lg:self-end"
           initial={reduceMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease }}
