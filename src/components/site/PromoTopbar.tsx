@@ -27,7 +27,7 @@ export function PromoTopbar() {
             <span className="font-semibold text-brand-accent">inscriptions ouvertes</span>
           </span>
           <span className="hidden sm:inline">
-            Parcours premium IA &amp; SaaS —{" "}
+            Parcours de formation en ligne —{" "}
             <span className="font-semibold text-brand-accent">inscriptions ouvertes</span>
           </span>
           <Link

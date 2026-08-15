@@ -26,7 +26,7 @@ export const faqs = [
   },
   {
     q: "Dans quelle langue sont les cours ?",
-    a: "Les cours sont en français. Quelques termes techniques en anglais peuvent apparaître pour le code et les outils.",
+    a: "Tout kou yo an Creole. Gen kèk tèm teknik an angle ki ka parèt pou kòd ak zouti yo.",
   },
   {
     q: "Comment fonctionne le paiement ?",

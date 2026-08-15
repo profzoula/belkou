@@ -199,7 +199,7 @@ export function CheckoutPage({
     }
   };
 
-  const productTitle = course?.title ?? `Formation BelKou ${plan.name} — Apps IA & SaaS`;
+  const productTitle = course?.title ?? `Formation BelKou ${plan.name} — Formation en ligne`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">

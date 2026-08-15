@@ -15,7 +15,7 @@ const pillars = [
     icon: Sparkles,
     title: "Notre mission",
     description:
-      "Rendre accessibles les compétences tech et l'IA à Haïti et à la diaspora — en français, avec des formations concrètes et applicables.",
+      "Rendre accessibles les compétences tech et l'IA à Haïti et à la diaspora — en Creole, avec des formations concrètes et applicables.",
   },
   {
     icon: GraduationCap,
@@ -32,7 +32,7 @@ const pillars = [
 ] as const;
 
 const commitments = [
-  "Formations 100 % en français, pensées pour Haïti et la diaspora",
+  "Formations 100 % en Creole, pensées pour Haïti et la diaspora",
   "Preview gratuite avant achat sur chaque cours du catalogue",
   "Accès à vie au contenu acheté, avec progression sauvegardée",
   "Outils IA modernes : Cursor, Claude, déploiement et bonnes pratiques",
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/about")({
     seoHead({
       title: "À propos — BelKou",
       description:
-        "Découvrez BelKou, la plateforme de formations IA & SaaS en français pour Haïti et la diaspora — et rencontrez son fondateur.",
+        "Découvrez BelKou, la plateforme de formation en ligne en Creole pour Haïti et la diaspora — et rencontrez son fondateur.",
       path: "/about",
     }),
   loader: async () => {
@@ -69,12 +69,12 @@ function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <p className="section-label mb-4 justify-center">À propos</p>
             <h1 className="font-display text-3xl font-semibold tracking-tight text-balance sm:text-4xl md:text-5xl">
-              Former la nouvelle génération tech <span className="text-gradient">en français</span>
+              Former la nouvelle génération tech <span className="text-gradient">en Creole</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {siteConfig.name} est une plateforme de formations en ligne spécialisée en
-              développement, applications IA et SaaS. Nous accompagnons les apprenants d'Haïti, de
-              la diaspora et d'ailleurs pour créer, lancer et monétiser des projets numériques.
+              {siteConfig.name} est une plateforme de formation en ligne avec une variété de cours
+              en Creole. Nous accompagnons les apprenants d&apos;Haïti, de la diaspora et
+              d&apos;ailleurs pour apprendre, créer et progresser à leur rythme.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <span className="badge">

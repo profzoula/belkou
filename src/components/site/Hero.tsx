@@ -22,7 +22,7 @@ const heroAvatars = [
 
 const heroStats = (studentLabel: string) =>
   [
-    { icon: Wrench, value: siteConfig.stats.tools, label: "Outils IA & frameworks" },
+    { icon: Wrench, value: siteConfig.stats.tools, label: "Outils & ressources" },
     { icon: Star, value: siteConfig.stats.rating, label: "Note moyenne" },
     { icon: Users, value: `${studentLabel}+`, label: "Étudiants actifs" },
   ] as const;
@@ -41,18 +41,18 @@ function HeroStatCard({
   return (
     <div
       className={cn(
-        "flex min-w-[9.5rem] items-center gap-3 rounded-2xl border border-border/70 bg-card/95 px-3.5 py-3 shadow-[0_14px_40px_rgb(15_23_42_/_0.08)] backdrop-blur-sm sm:min-w-[10.5rem] sm:px-4",
+        "flex w-[8.75rem] items-center gap-2 rounded-2xl border border-border/50 bg-white px-2.5 py-2 shadow-[0_18px_44px_rgb(15_23_42_/_0.14)] dark:border-border/70 dark:bg-card sm:w-[10.25rem] sm:gap-2.5 sm:px-3.5 sm:py-2.5 md:w-[10.75rem] md:py-3",
         className,
       )}
     >
-      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-        <Icon className="size-[1.125rem]" strokeWidth={2} />
+      <div className="grid size-8 shrink-0 place-items-center rounded-full bg-primary/10 text-primary sm:size-9">
+        <Icon className="size-3.5 sm:size-4" strokeWidth={2} />
       </div>
       <div className="min-w-0">
-        <p className="font-display text-lg font-bold leading-none tracking-tight text-foreground">
+        <p className="font-display text-sm font-bold leading-none tracking-tight text-foreground sm:text-base md:text-lg">
           {value}
         </p>
-        <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{label}</p>
+        <p className="mt-1 text-[9px] leading-snug text-muted-foreground sm:text-[10px] md:text-[11px]">{label}</p>
       </div>
     </div>
   );
@@ -96,7 +96,7 @@ export function Hero({ studentCount }: HeroProps) {
         height={800}
       />
 
-      <div className="site-container relative grid items-center gap-8 px-4 pb-8 pt-6 sm:gap-10 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12 xl:gap-16">
+      <div className="site-container relative grid items-center gap-8 px-4 pb-8 pt-6 sm:gap-10 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-end lg:gap-8 xl:gap-10">
         <motion.div
           className="flex min-w-0 flex-col items-start text-left"
           initial={reduceMotion ? false : { opacity: 0, y: 14 }}
@@ -104,17 +104,17 @@ export function Hero({ studentCount }: HeroProps) {
           transition={{ duration: 0.5, ease }}
         >
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
-            Formations premium · IA &amp; SaaS
+            Formation en ligne
           </p>
 
           <h1 className="mt-4 max-w-xl font-display text-[1.65rem] font-bold leading-[1.08] tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] lg:text-5xl">
             Apprenez. Appliquez.
             <br />
-            <span className="text-primary">Lancez vos apps IA &amp; SaaS.</span>
+            <span className="text-primary">Progressez à votre rythme.</span>
           </h1>
 
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-            Accédez à des parcours structurés en français — de l&apos;idée au déploiement, avec
+            Accédez à une variété de cours en Creole — tech, business, création et plus — avec
             mentors, projets concrets et une communauté active.
           </p>
 
@@ -173,61 +173,51 @@ export function Hero({ studentCount }: HeroProps) {
         </motion.div>
 
         <motion.div
-          className="relative mx-auto w-full max-w-[min(100%,30rem)] lg:max-w-[34rem] xl:max-w-[38rem]"
+          className="relative mx-auto w-full pb-2 lg:mx-0 lg:pb-0"
           initial={reduceMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease }}
         >
-          <div className="relative lg:min-h-[34rem]">
+          {/* AMZ-style: portrait toward center + reserved right gutter for floating cards */}
+          <div className="relative flex justify-center lg:justify-start">
             <div
               aria-hidden
-              className="absolute inset-x-4 bottom-0 h-24 rounded-[100%] bg-primary/15 blur-3xl sm:inset-x-8 sm:h-28"
+              className="absolute bottom-2 left-1/2 h-28 w-[70%] -translate-x-1/2 rounded-[100%] bg-primary/20 blur-3xl lg:left-[35%] lg:translate-x-0"
             />
 
-            <HeroSquiggle className="absolute left-0 top-[14%] z-10 hidden w-24 sm:block lg:w-28" />
+            <div className="relative isolate w-fit max-w-full pr-[7.5rem] sm:pr-[9rem] lg:pr-[9.75rem] xl:pr-[10.5rem]">
+              <HeroSquiggle className="absolute -left-5 top-[20%] z-10 hidden w-20 sm:block lg:-left-8 lg:w-28" />
 
-            <div className="relative z-[1] flex justify-center lg:justify-start">
               <img
                 src="/about/Mackenson.png"
                 alt={`${siteConfig.founder.name} — fondateur BelKou`}
-                className="h-auto w-full max-w-[18rem] object-contain object-bottom drop-shadow-[0_24px_50px_rgb(2_8_23_/_0.18)] sm:max-w-[22rem] md:max-w-[26rem] lg:max-h-[min(68vh,600px)] lg:max-w-none lg:w-full"
+                className="relative z-[1] block h-auto max-h-[min(58vh,420px)] w-auto max-w-[min(100%,14rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-normal sm:max-h-[min(68vh,520px)] sm:max-w-[20rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
                 width={900}
                 height={1200}
                 fetchPriority="high"
                 decoding="async"
               />
+
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex w-[8.75rem] -translate-x-1 flex-col justify-center gap-3 sm:w-[10.25rem] sm:gap-3.5 sm:-translate-x-2 lg:w-[10.75rem] lg:gap-4 xl:w-[11.25rem]">
+                {stats.map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    className={cn(index === 1 && "translate-x-2 sm:translate-x-3")}
+                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.2 + index * 0.08, ease }}
+                  >
+                    <HeroStatCard icon={stat.icon} value={stat.value} label={stat.label} />
+                  </motion.div>
+                ))}
+
+                <Sparkles
+                  aria-hidden
+                  className="ml-auto size-5 text-foreground/80 sm:size-7"
+                  strokeWidth={1.75}
+                />
+              </div>
             </div>
-
-            <div className="absolute inset-0 z-20 hidden lg:block">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  className={cn(
-                    "absolute",
-                    index === 0 && "right-[2%] top-[10%]",
-                    index === 1 && "right-0 top-[40%]",
-                    index === 2 && "right-[4%] bottom-[14%]",
-                  )}
-                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.2 + index * 0.08, ease }}
-                >
-                  <HeroStatCard icon={stat.icon} value={stat.value} label={stat.label} />
-                </motion.div>
-              ))}
-            </div>
-
-            <Sparkles
-              aria-hidden
-              className="absolute bottom-[10%] right-[2%] z-10 hidden size-7 text-foreground/75 lg:block"
-              strokeWidth={1.75}
-            />
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:hidden">
-            {stats.map((stat) => (
-              <HeroStatCard key={stat.label} icon={stat.icon} value={stat.value} label={stat.label} />
-            ))}
           </div>
         </motion.div>
       </div>

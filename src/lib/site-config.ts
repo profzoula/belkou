@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "BelKou",
   siteUrl: envString(import.meta.env.VITE_SITE_URL, "https://belkou.online"),
   logo: "/favicon/logo.svg",
-  tagline: "Plateforme de cours IA & SaaS en français",
+  tagline: "Plateforme de formation en ligne en Creole",
   contactEmail: envString(import.meta.env.VITE_CONTACT_EMAIL, "profzoula@gmail.com"),
   contactWhatsApp: envString(import.meta.env.VITE_WHATSAPP_PHONE, "9413010414"),
   whatsappGroups: {
@@ -74,7 +74,7 @@ export const siteConfig = {
     ),
     bio: envString(
       import.meta.env.VITE_FOUNDER_BIO,
-      "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou. Il forme Haïti et la diaspora à créer des applications et des SaaS grâce à l'IA, avec Cursor, Claude et les outils du développement moderne.",
+      "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou. Il forme Haïti et la diaspora avec des cours en ligne pratiques, de la tech au business, grâce à l'IA et aux outils du développement moderne.",
     ),
     avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/Mackenson.png"),
     githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),

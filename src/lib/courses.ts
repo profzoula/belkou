@@ -57,11 +57,19 @@ export type Course = {
   resources?: CourseResource[];
 };
 
-export const DEFAULT_COURSE_LANGUAGE = "Créole";
+export const DEFAULT_COURSE_LANGUAGE = "Creole";
 
 export function getCourseDisplayLanguage(language?: string): string {
   const value = language?.trim();
-  if (!value || value === "Français" || value.toLowerCase() === "francais") {
+  if (
+    !value ||
+    value === "Français" ||
+    value === "Créole" ||
+    value === "Kreyòl" ||
+    value.toLowerCase() === "francais" ||
+    value.toLowerCase() === "creole" ||
+    value.toLowerCase() === "kreyol"
+  ) {
     return DEFAULT_COURSE_LANGUAGE;
   }
   return value;

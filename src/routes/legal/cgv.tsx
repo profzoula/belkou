@@ -31,7 +31,7 @@ function CgvPage() {
         Les présentes CGV ont pour objet de définir les conditions dans lesquelles {siteName}{" "}
         propose ses services de formation en ligne spécialisée dans le développement d'applications
         utilisant l'intelligence artificielle (IA) et les technologies SaaS (Software as a Service).
-        Les formations sont dispensées en français, sous forme de cours en ligne à la carte, avec
+        Les formations sont dispensées en Creole, sous forme de cours en ligne à la carte, avec
         des programmes structurés et un accès à vie au contenu acheté.
       </p>
 

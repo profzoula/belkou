@@ -29,8 +29,8 @@ const benefits = [
   },
   {
     icon: Globe,
-    title: "100 % en français",
-    description: "Formations adaptées à la diaspora — Haïti, USA, Canada et au-delà.",
+    title: "100 % en Creole",
+    description: "Tout kou yo an Creole — adapte pou Ayiti, dyaspora a ak pi lwen.",
   },
   {
     icon: Shield,

@@ -260,7 +260,7 @@ export function getDefaultServices(): StoredService[] {
       linkHref: "/courses",
       linkLabel: "Plus de détails",
       deliverables: [
-        "Cours vidéo en français",
+        "Cours vidéo en Creole",
         "Preview gratuite avant inscription",
         "Progression sauvegardée",
         "Accès à vie par cours acheté",

@@ -208,8 +208,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
-              {siteConfig.tagline}. Formations vidéo en français pour créer des apps IA, des SaaS et
-              monétiser en ligne — Haïti, diaspora & monde entier.
+              {siteConfig.tagline}. Une variété de cours vidéo en Creole — tech, business,
+              création et plus — pour Haïti, la diaspora et le monde entier.
             </p>
             <div className="flex gap-3">
               <a

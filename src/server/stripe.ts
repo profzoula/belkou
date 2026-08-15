@@ -49,7 +49,7 @@ export async function createCheckoutSession(params: {
             unit_amount: params.plan === "premium" ? 19900 : 29000,
             product_data: {
               name: `BelKou ${params.plan === "premium" ? "Premium" : "VIP"}`,
-              description: "Formation BelKou — apps IA & SaaS",
+              description: "Formation BelKou — formation en ligne",
             },
           },
           quantity: 1,

@@ -34,7 +34,7 @@ function TermsPage() {
       <p>
         {siteName} propose un catalogue de formations en ligne spécialisées dans le développement
         d'applications utilisant l'intelligence artificielle (IA) et les technologies SaaS (Software
-        as a Service). Les formations sont dispensées en français, accessibles à la carte, avec une
+        as a Service). Les formations sont dispensées en Creole, accessibles à la carte, avec une
         durée indicative de {siteConfig.formation.durationRecommended}. Le programme comprend des
         cours structurés, des exercices pratiques, des projets concrets et un accès à une communauté
         de participants via WhatsApp.

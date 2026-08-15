@@ -2,10 +2,10 @@ import { siteConfig } from "@/lib/site-config";
 
 export const siteUrl = siteConfig.siteUrl.replace(/\/$/, "");
 
-export const defaultTitle = "BelKou — Cours en ligne Apps IA & SaaS";
+export const defaultTitle = "BelKou — Formation en ligne en Creole";
 
 export const defaultDescription =
-  "Plateforme de formations vidéo en français : apps IA, SaaS, déploiement et monétisation. Preview gratuite, paiement flexible, communauté active.";
+  "Plateforme de formation en ligne en Creole : une variété de cours, preview gratuite, paiement flexible et communauté active.";
 
 export function absoluteUrl(path = "/"): string {
   if (path.startsWith("http")) return path;
@@ -56,7 +56,7 @@ export function courseJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Course",
-    name: "Formation BelKou — Apps IA & SaaS",
+    name: "Formation BelKou — Formation en ligne",
     description: defaultDescription,
     provider: {
       "@type": "Organization",
@@ -64,7 +64,7 @@ export function courseJsonLd() {
       url: siteUrl,
       email: siteConfig.contactEmail,
     },
-    inLanguage: "fr",
+    inLanguage: "ht",
     offers: [
       {
         "@type": "Offer",
