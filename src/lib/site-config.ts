@@ -76,7 +76,7 @@ export const siteConfig = {
       import.meta.env.VITE_FOUNDER_BIO,
       "Mackenson Lundi — professionnel IT, développeur logiciel et web, fondateur de BelKou. Il forme Haïti et la diaspora à créer des applications et des SaaS grâce à l'IA, avec Cursor, Claude et les outils du développement moderne.",
     ),
-    avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/mackenson-lundi.png"),
+    avatarUrl: envString(import.meta.env.VITE_FOUNDER_AVATAR_URL, "/about/Mackenson.png"),
     githubUrl: envString(import.meta.env.VITE_FOUNDER_GITHUB_URL, ""),
     linkedinUrl: envString(import.meta.env.VITE_FOUNDER_LINKEDIN_URL, ""),
     facebookUrl: envString(
