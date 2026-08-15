@@ -29,6 +29,7 @@ import {
   getPreviewVideoLessons,
 } from "@/lib/courses";
 import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
+import { CourseLiveBanner } from "@/components/course/CourseLiveBanner";
 import { CourseHeroStatsBar } from "@/components/course/CourseHeroStatsBar";
 import { CourseHeroEnrollCta } from "@/components/course/CourseHeroEnrollCta";
 import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
@@ -253,6 +254,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <ChevronRight className="h-3 w-3" />
               <span className="line-clamp-1 text-foreground/90">{course.title}</span>
             </nav>
+
+            <CourseLiveBanner courseSlug={course.slug} />
 
             {!authLoading && !user && (
               <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-foreground">

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/forum/NotificationBell";
@@ -11,13 +12,39 @@ import { PromoTopbar } from "@/components/site/PromoTopbar";
 import { NavbarCourseSearch } from "@/components/site/NavbarCourseSearch";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { getPublicLiveSummary } from "@/lib/fns/live";
 
 const links = [
   { href: "/courses", label: "Cours", route: true },
   { href: "/services", label: "Services", route: true },
   { href: "/about", label: "À propos", route: true },
-  { href: "/faq", label: "FAQ", route: true },
+  { href: "/live", label: "Live", route: true },
 ];
+
+function LiveDot() {
+  const summaryFn = useServerFn(getPublicLiveSummary);
+  const [onAir, setOnAir] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    summaryFn()
+      .then((summary) => {
+        if (!cancelled) setOnAir(summary.liveCount > 0);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [summaryFn]);
+
+  if (!onAir) return null;
+  return (
+    <span
+      className="ml-1.5 inline-block size-1.5 rounded-full bg-red-500 shadow-[0_0_0_3px_rgb(239_68_68_/_0.25)]"
+      aria-label="Live en cours"
+    />
+  );
+}
 
 function NavActions({
   onNavigate,
@@ -215,6 +242,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
               l.route ? (
                 <Link key={l.href} to={l.href} className={linkClass}>
                   {l.label}
+                  {l.href === "/live" ? <LiveDot /> : null}
                 </Link>
               ) : (
                 <a key={l.href} href={l.href} className={linkClass}>
@@ -277,6 +305,7 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
                 l.route ? (
                   <Link key={l.href} to={l.href} onClick={close} className={mobileLinkClass}>
                     {l.label}
+                    {l.href === "/live" ? <LiveDot /> : null}
                   </Link>
                 ) : (
                   <a key={l.href} href={l.href} onClick={close} className={mobileLinkClass}>

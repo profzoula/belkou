@@ -21,6 +21,10 @@ export const faqs = [
     a: "Oui. Chaque cours a sa propre page avec programme, preview et prix. Vous vous inscrivez au cours qui vous intéresse — pas besoin de tout acheter d'un coup.",
   },
   {
+    q: "Comment fonctionne un live ?",
+    a: "Les lives sont liés à un cours. Si vous avez déjà acheté ce cours, le live est offert : connectez-vous. Sinon, l’accès live coûte 9,99 $ (regarder et commenter, sans le programme complet).",
+  },
+  {
     q: "Un cours est « bientôt disponible » — que puis-je faire ?",
     a: "Vous pouvez vous inscrire dès maintenant. La preview gratuite est souvent accessible avant le lancement, et le contenu complet se débloque automatiquement à la date indiquée sur la page du cours.",
   },

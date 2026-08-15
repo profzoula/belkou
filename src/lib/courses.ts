@@ -12,6 +12,8 @@ export type CourseLesson = {
   videoId?: string;
   /** Vimeo URL for larger videos (e.g. https://vimeo.com/123456789). */
   vimeoUrl?: string;
+  /** YouTube / YouTube Live URL for live replays. */
+  youtubeUrl?: string;
   /** Markdown — titres ##, sections repliables ### Titre */
   content?: string;
 };
@@ -237,8 +239,16 @@ export function getLessonVimeoUrl(lesson: CourseLesson): string | null {
   return trimmed || null;
 }
 
+export function getLessonYoutubeUrl(lesson: CourseLesson): string | null {
+  const trimmed = lesson.youtubeUrl?.trim();
+  return trimmed || null;
+}
+
 export function lessonHasVideo(lesson: CourseLesson): boolean {
-  return lesson.type === "video" && Boolean(getLessonVideoId(lesson) || getLessonVimeoUrl(lesson));
+  return (
+    lesson.type === "video" &&
+    Boolean(getLessonVideoId(lesson) || getLessonVimeoUrl(lesson) || getLessonYoutubeUrl(lesson))
+  );
 }
 
 export function isWelcomePreviewLesson(lesson: Pick<CourseLesson, "id" | "title">): boolean {

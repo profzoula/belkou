@@ -3,6 +3,7 @@ import { getSequenceLessonIds, isWelcomePreviewLesson, lessonHasVideo } from "@/
 import type { CourseLesson, CourseSection } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
+import { isLiveTicketPlan } from "@/lib/schemas/registration";
 
 export const LEGACY_COURSE_SLUG = BASE_COURSE_SLUGS[0];
 
@@ -42,10 +43,11 @@ export function pickRegistrationForCourse(
 }
 
 export function hasPaidAccessToCourse(
-  registration: Pick<RegistrationRecord, "payment_status" | "course_slug"> | null | undefined,
+  registration: Pick<RegistrationRecord, "payment_status" | "course_slug" | "plan"> | null | undefined,
   courseSlug: string,
 ): boolean {
   if (!registration || registration.payment_status !== "paid") return false;
+  if (isLiveTicketPlan(registration.plan)) return false;
   if (registrationCoversCourse(registration, courseSlug)) return true;
   // Legacy cohort: paid Premium/VIP before course_slug existed
   if (
@@ -55,6 +57,16 @@ export function hasPaidAccessToCourse(
     return true;
   }
   return false;
+}
+
+/** Live watch/comment: full course purchase or a paid $9.99 live ticket for that course. */
+export function hasLiveAccessToCourse(
+  registration: Pick<RegistrationRecord, "payment_status" | "course_slug" | "plan"> | null | undefined,
+  courseSlug: string,
+): boolean {
+  if (!registration || registration.payment_status !== "paid") return false;
+  if (hasPaidAccessToCourse(registration, courseSlug)) return true;
+  return isLiveTicketPlan(registration.plan) && registrationCoversCourse(registration, courseSlug);
 }
 
 export type LessonLockReason = "none" | "schedule" | "enrollment" | "sequential";

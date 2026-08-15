@@ -23,6 +23,7 @@ import {
 import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourses } from "@/server/site-content";
+import { isLiveTicketPlan } from "@/lib/schemas/registration";
 
 export type StudentEnrollment = {
   id: string;
@@ -86,6 +87,7 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
   for (const slug of courseSlugs) {
     const registration = pickRegistrationForCourse(registrations, slug);
     if (!registration) continue;
+    if (isLiveTicketPlan(registration.plan) && registration.payment_status === "paid") continue;
 
     const course = courseBySlug.get(slug);
     const progressRows = progressByCourse[slug] ?? [];

@@ -45,10 +45,10 @@ export function patchLessonInStoredCourse(
   course: StoredCourse,
   lessonId: string,
   patch: Partial<
-    Pick<
-      CourseLesson,
-      "videoId" | "vimeoUrl" | "preview" | "title" | "duration" | "content" | "type"
-    >
+      Pick<
+        CourseLesson,
+        "videoId" | "vimeoUrl" | "youtubeUrl" | "preview" | "title" | "duration" | "content" | "type"
+      >
   >,
 ): StoredCourse {
   return {
@@ -121,6 +121,7 @@ export type AddLessonInput = {
   duration?: string;
   videoId?: string;
   vimeoUrl?: string;
+  youtubeUrl?: string;
   preview?: boolean;
   content?: string;
 };
@@ -140,7 +141,9 @@ export function buildNewLesson(input: AddLessonInput): CourseLesson {
     };
   }
 
-  const hasVideo = Boolean(input.videoId?.trim() || input.vimeoUrl?.trim());
+  const hasVideo = Boolean(
+    input.videoId?.trim() || input.vimeoUrl?.trim() || input.youtubeUrl?.trim(),
+  );
 
   return {
     id,
@@ -150,6 +153,7 @@ export function buildNewLesson(input: AddLessonInput): CourseLesson {
     preview: input.preview ?? false,
     videoId: input.videoId?.trim() || undefined,
     vimeoUrl: input.vimeoUrl?.trim() || undefined,
+    youtubeUrl: input.youtubeUrl?.trim() || undefined,
   };
 }
 

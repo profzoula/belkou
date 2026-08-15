@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { getServerEnvResolved } from "@/server/env";
+import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
 import type { PlanId } from "@/lib/site-config";
 
 export async function getStripe(): Promise<Stripe | null> {
@@ -21,15 +22,30 @@ export async function createCheckoutSession(params: {
   const env = await getServerEnvResolved();
   if (!stripe) return null;
 
-  const isCourseCheckout = Boolean(params.courseSlug && params.amountUsd != null);
+  const isLiveCheckout = params.plan === "live";
+  const isCourseCheckout = Boolean(params.courseSlug && params.amountUsd != null) && !isLiveCheckout;
 
-  const priceId = isCourseCheckout
+  const priceId = isCourseCheckout || isLiveCheckout
     ? null
     : params.plan === "premium"
       ? env.STRIPE_PRICE_PREMIUM
       : env.STRIPE_PRICE_VIP;
 
-  const lineItem = isCourseCheckout
+  const liveAmount = Math.round(LIVE_TICKET_PRICE_USD * 100);
+
+  const lineItem = isLiveCheckout
+    ? {
+        price_data: {
+          currency: "usd" as const,
+          unit_amount: liveAmount,
+          product_data: {
+            name: `Accès live — ${params.courseTitle ?? "BelKou"}`,
+            description: "Regarder et commenter les lives de ce cours sur BelKou",
+          },
+        },
+        quantity: 1,
+      }
+    : isCourseCheckout
     ? {
         price_data: {
           currency: "usd",
@@ -55,16 +71,20 @@ export async function createCheckoutSession(params: {
           quantity: 1,
         };
 
-  const expectedAmountCents = isCourseCheckout
-    ? Math.round(params.amountUsd! * 100)
-    : priceId
-      ? null
-      : params.plan === "premium"
-        ? 19900
-        : 29000;
+  const expectedAmountCents = isLiveCheckout
+    ? liveAmount
+    : isCourseCheckout
+      ? Math.round(params.amountUsd! * 100)
+      : priceId
+        ? null
+        : params.plan === "premium"
+          ? 19900
+          : 29000;
 
   const cancelUrl = params.courseSlug
-    ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
+    ? isLiveCheckout
+      ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}&live=1`
+      : `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
     : `${env.SITE_URL}/checkout?plan=${params.plan}`;
 
   const session = await stripe.checkout.sessions.create({

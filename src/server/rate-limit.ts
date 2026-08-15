@@ -61,4 +61,5 @@ export const RATE_LIMITS = {
   login: { limit: 5, windowMs: 60 * 1000 }, // 5 per minute
   adminLogin: { limit: 5, windowMs: 60 * 1000 }, // 5 per minute
   forgotPassword: { limit: 3, windowMs: 5 * 60 * 1000 }, // 3 per 5 minutes
+  liveComment: { limit: 20, windowMs: 60 * 1000 },
 } as const;

@@ -1,10 +1,11 @@
 import type { RegistrationRecord } from "@/lib/schemas/registration";
-import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
+import { isLiveTicketPlan, normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
   getRegistrationByEmailAndCourse,
   getRegistrationById,
   getRegistrationByStripeSession,
   listRegistrationsByEmail,
+  updateRegistrationGrant,
   updateRegistrationPayment,
 } from "@/server/db";
 import { getCheckoutSession } from "@/server/stripe";
@@ -120,6 +121,12 @@ export async function grantAccessFromCheckoutSession(
   }
 
   const alreadyPaid = record.payment_status === "paid";
+  const metadataPlan = session.metadata?.plan?.trim();
+  const shouldUpgradeLiveTicket =
+    alreadyPaid &&
+    isLiveTicketPlan(record.plan) &&
+    (metadataPlan === "premium" || metadataPlan === "vip");
+
   if (!alreadyPaid) {
     await updateRegistrationPayment(db, record.id, {
       payment_status: "paid",
@@ -132,7 +139,14 @@ export async function grantAccessFromCheckoutSession(
     });
   }
 
-  return { registrationId: record.id, alreadyPaid };
+  if (shouldUpgradeLiveTicket && (metadataPlan === "premium" || metadataPlan === "vip")) {
+    await updateRegistrationGrant(db, record.id, {
+      plan: metadataPlan,
+      payment_status: "paid",
+    });
+  }
+
+  return { registrationId: record.id, alreadyPaid: alreadyPaid && !shouldUpgradeLiveTicket };
 }
 
 function maskEmail(value: string): string {

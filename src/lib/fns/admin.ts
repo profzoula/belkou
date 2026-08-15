@@ -32,13 +32,14 @@ import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 async function sendPaymentConfirmed(
   fullName: string,
   email: string,
-  plan: "premium" | "vip",
+  plan: "premium" | "vip" | "live",
   courseSlug?: string | null,
   registrationId?: string,
 ) {
   try {
     const course = courseSlug ? await getResolvedCourseBySlug(courseSlug) : null;
-    const amountUsd = course?.price ?? siteConfig.plans[plan].price;
+    const amountUsd =
+      plan === "live" ? siteConfig.plans.live.price : (course?.price ?? siteConfig.plans[plan].price);
     const result = await sendEmail({
       to: email,
       subject: "Paiement confirmé — BelKou",
@@ -774,6 +775,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         duration: z.string().optional(),
         videoId: z.string().optional(),
         vimeoUrl: z.string().optional(),
+        youtubeUrl: z.string().optional(),
         preview: z.boolean().optional(),
         content: z.string().optional(),
       })
@@ -785,16 +787,26 @@ export const adminAddLesson = createServerFn({ method: "POST" })
     const { getVideoRecord } = await import("@/server/videos");
     const { formatCourseDurationLabel } = await import("@/lib/courses");
     const { isValidVimeoUrl } = await import("@/lib/vimeo");
+    const { isValidYoutubeUrl } = await import("@/lib/youtube");
 
     const isArticle = data.type === "article";
     let duration = data.duration;
     let videoId = data.videoId?.trim() || undefined;
     let vimeoUrl = data.vimeoUrl?.trim() || undefined;
+    let youtubeUrl = data.youtubeUrl?.trim() || undefined;
 
     if (isArticle) {
       duration = data.duration?.trim() || "5 min";
       videoId = undefined;
       vimeoUrl = undefined;
+      youtubeUrl = undefined;
+    } else if (youtubeUrl) {
+      if (!isValidYoutubeUrl(youtubeUrl)) {
+        throw new Error("URL YouTube invalide");
+      }
+      videoId = undefined;
+      vimeoUrl = undefined;
+      duration = data.duration?.trim() || "";
     } else if (vimeoUrl) {
       if (!isValidVimeoUrl(vimeoUrl)) {
         throw new Error("URL Vimeo invalide — ex. https://vimeo.com/123456789");
@@ -820,6 +832,7 @@ export const adminAddLesson = createServerFn({ method: "POST" })
         duration,
         videoId,
         vimeoUrl,
+        youtubeUrl,
         preview: data.preview,
         content: data.content,
       },

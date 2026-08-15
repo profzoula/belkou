@@ -184,15 +184,25 @@ function SuccessPage() {
           {loading ? "Vérification..." : isPaid ? "Paiement confirmé !" : "Inscription enregistrée"}
         </h1>
         <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-          {isPaid ? (
-            <>
-              Votre accès au cours sera disponible selon le calendrier du programme.{" "}
-              <strong className="font-medium text-foreground">
-                Créez votre compte avec le même email que l&apos;inscription
-              </strong>{" "}
-              — sans cela, vos cours n&apos;apparaîtront pas dans Mes cours.
-            </>
-          ) : (
+            {isPaid ? (
+              planId === "live" ? (
+                <>
+                  Accès live confirmé.{" "}
+                  <strong className="font-medium text-foreground">
+                    Connectez-vous avec le même email
+                  </strong>{" "}
+                  pour regarder le live sur BelKou.
+                </>
+              ) : (
+                <>
+                  Votre accès au cours sera disponible selon le calendrier du programme.{" "}
+                  <strong className="font-medium text-foreground">
+                    Créez votre compte avec le même email que l&apos;inscription
+                  </strong>{" "}
+                  — sans cela, vos cours n&apos;apparaîtront pas dans Mes cours.
+                </>
+              )
+            ) : (
             "Consultez votre email pour les instructions de paiement."
           )}
         </p>
@@ -268,21 +278,32 @@ function SuccessPage() {
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           {isPaid && (emailMatchesUser || !registrationEmail) && (
             <>
-              <Button asChild variant="hero" size="lg" className="touch-target">
-                <Link to="/dashboard">
-                  <BookOpen className="h-4 w-4" />
-                  Mes cours
-                </Link>
-              </Button>
-              <Button asChild variant="soft" size="lg" className="touch-target">
-                <Link
-                  to="/courses/$slug/learn"
-                  params={{ slug: courseSlug }}
-                  search={welcomeLessonId ? { lesson: welcomeLessonId } : undefined}
-                >
-                  Voir le cours
-                </Link>
-              </Button>
+              {planId === "live" ? (
+                <Button asChild variant="hero" size="lg" className="touch-target">
+                  <Link to="/live">
+                    <BookOpen className="h-4 w-4" />
+                    Voir les lives
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="hero" size="lg" className="touch-target">
+                    <Link to="/dashboard">
+                      <BookOpen className="h-4 w-4" />
+                      Mes cours
+                    </Link>
+                  </Button>
+                  <Button asChild variant="soft" size="lg" className="touch-target">
+                    <Link
+                      to="/courses/$slug/learn"
+                      params={{ slug: courseSlug }}
+                      search={welcomeLessonId ? { lesson: welcomeLessonId } : undefined}
+                    >
+                      Voir le cours
+                    </Link>
+                  </Button>
+                </>
+              )}
             </>
           )}
           {!isPaid && (

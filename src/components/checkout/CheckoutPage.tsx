@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
+import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
@@ -28,6 +29,7 @@ import { getCourseIcon } from "@/lib/course-icons";
 type CheckoutPageProps = {
   plan?: PlanId;
   courseSlug?: string;
+  liveTicket?: boolean;
   refCode?: string;
   initialCourse?: PublicCourse | null;
 };
@@ -58,6 +60,7 @@ function discountPercent(price: number, original: number) {
 export function CheckoutPage({
   plan: initialPlan,
   courseSlug,
+  liveTicket = false,
   refCode,
   initialCourse = null,
 }: CheckoutPageProps) {
@@ -111,12 +114,19 @@ export function CheckoutPage({
       .catch(() => setCourse(null));
   }, [courseSlug, initialCourse, loadCourseFn]);
 
+  const isLiveTicket = Boolean(liveTicket && courseSlug);
   const plan = planDetails[selectedPlan];
   const coursePrice = course?.price;
   const courseOriginalPrice = course?.originalPrice;
-  const displayPrice = toMoney(courseSlug && course ? coursePrice! : plan.price);
+  const displayPrice = toMoney(
+    isLiveTicket ? LIVE_TICKET_PRICE_USD : courseSlug && course ? coursePrice! : plan.price,
+  );
   const displayOriginal = toMoney(
-    courseSlug && course ? courseOriginalPrice! : ORIGINAL_PRICES[selectedPlan],
+    isLiveTicket
+      ? LIVE_TICKET_PRICE_USD
+      : courseSlug && course
+        ? courseOriginalPrice!
+        : ORIGINAL_PRICES[selectedPlan],
   );
   const savings = toMoney(displayOriginal - displayPrice);
   const pctOff = discountPercent(displayPrice, displayOriginal);
@@ -143,7 +153,7 @@ export function CheckoutPage({
 
     const payload = {
       ...form,
-      plan: courseSlug && course ? "premium" : selectedPlan,
+      plan: isLiveTicket ? "live" : courseSlug && course ? "premium" : selectedPlan,
       course_slug: courseSlug && course ? courseSlug : undefined,
       referral_code: form.referral_code || undefined,
     };
@@ -220,10 +230,12 @@ export function CheckoutPage({
         <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
           <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Finalisez votre inscription
+            {isLiveTicket ? "Accès live — $9.99" : "Finalisez votre inscription"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Quelques informations, puis paiement sécurisé via Stripe.
+            {isLiveTicket
+              ? "Déjà inscrit au cours ? Le live est offert. Sinon, payez 9,99 $ pour regarder et commenter."
+              : "Quelques informations, puis paiement sécurisé via Stripe."}
           </p>
         </div>
 
@@ -249,10 +261,21 @@ export function CheckoutPage({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-snug text-foreground">
-                    Accès complet à <strong>{productTitle}</strong>.
+                    {isLiveTicket ? (
+                      <>
+                        Accès live à <strong>{productTitle}</strong> — lives et commentaires, sans
+                        le programme on-demand.
+                      </>
+                    ) : (
+                      <>
+                        Accès complet à <strong>{productTitle}</strong>.
+                      </>
+                    )}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Paiement unique · accès immédiat après confirmation.
+                    {isLiveTicket
+                      ? "Les étudiants déjà inscrits au cours regardent gratuitement."
+                      : "Paiement unique · accès immédiat après confirmation."}
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-success/15 px-2 py-1 text-[11px] font-bold text-success">
@@ -261,7 +284,15 @@ export function CheckoutPage({
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {courseSlug && course ? (
+                {isLiveTicket && courseSlug && course ? (
+                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
+                    <p className="font-bold text-sm">Accès live — {course.title}</p>
+                    <p className="mt-1 text-2xl font-bold">{formatUsd(LIVE_TICKET_PRICE_USD)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paiement unique · lives et commentaires de ce cours
+                    </p>
+                  </div>
+                ) : courseSlug && course ? (
                   <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
                     <p className="font-bold text-sm">{course.title}</p>
                     <p className="mt-1 text-2xl font-bold">{formatUsd(course.price)}</p>
@@ -321,9 +352,17 @@ export function CheckoutPage({
               <div className="mt-5 border-t border-border pt-5">
                 <p className="text-sm font-bold mb-3">Ce qui est inclus :</p>
                 <ul className="space-y-2">
-                  {(courseSlug && course
+                  {(isLiveTicket
+                    ? [
+                        "Regarder le live sur BelKou",
+                        "Commenter pendant le direct",
+                        "Replay du live dans Sessions live",
+                        "N’inclut pas le programme complet du cours",
+                      ]
+                    : courseSlug && course
                     ? [
                         "Accès complet au cours",
+                        "Lives de ce cours offerts",
                         "Vidéos et ressources à vie",
                         "Support communauté BelKou",
                       ]
@@ -523,7 +562,11 @@ export function CheckoutPage({
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted-foreground">
-                    {courseSlug && course ? course.title : `Plan ${plan.name}`}
+                    {isLiveTicket && courseSlug && course
+                      ? `Accès live — ${course.title}`
+                      : courseSlug && course
+                        ? course.title
+                        : `Plan ${plan.name}`}
                   </dt>
                   <dd className="font-medium">
                     {formatUsd(pctOff > 0 ? displayOriginal : displayPrice)}
@@ -607,7 +650,7 @@ export function CheckoutPage({
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1 h-4 w-4" />
-                {loading ? "Redirection…" : "Payer et commencer"}
+                {loading ? "Redirection…" : isLiveTicket ? "Payer 9,99 $ et rejoindre" : "Payer et commencer"}
               </Button>
               <p
                 id="checkout-submit-help"

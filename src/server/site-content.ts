@@ -36,7 +36,10 @@ import { isCourseListed } from "@/lib/course-publish";
 import { getSupabaseAdmin } from "@/server/supabase-registrations";
 
 export type CourseLessonOverride = Partial<
-  Pick<CourseLesson, "videoId" | "vimeoUrl" | "preview" | "title" | "duration" | "content" | "type">
+  Pick<
+    CourseLesson,
+    "videoId" | "vimeoUrl" | "youtubeUrl" | "preview" | "title" | "duration" | "content" | "type"
+  >
 >;
 
 export type CourseMetaOverride = CourseMetaPatch;

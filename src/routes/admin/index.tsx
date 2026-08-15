@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AdminCommissionsTab } from "@/components/admin/AdminCommissionsTab";
 import { AdminCoursesTab } from "@/components/admin/AdminCoursesTab";
 import { AdminLayout, type AdminSection } from "@/components/admin/AdminLayout";
+import { AdminLiveTab } from "@/components/admin/AdminLiveTab";
 import { AdminOverviewTab } from "@/components/admin/AdminOverviewTab";
 import { AdminRegistrationsTab } from "@/components/admin/AdminRegistrationsTab";
 import { AdminServicesTab } from "@/components/admin/AdminServicesTab";
@@ -99,6 +100,8 @@ function AdminDashboardPage() {
       )}
 
       {section === "courses" && <AdminCoursesTab key={refreshKey} />}
+
+      {section === "live" && <AdminLiveTab key={refreshKey} />}
 
       {section === "videos" && <AdminVideosTab key={refreshKey} />}
 

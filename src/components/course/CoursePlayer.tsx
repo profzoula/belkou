@@ -16,6 +16,7 @@ import {
   getLessonDisplayDuration,
   getLessonVideoId,
   getLessonVimeoUrl,
+  getLessonYoutubeUrl,
   getNextLessonToWatch,
   getResumeLesson,
   getSectionForLesson,
@@ -43,10 +44,12 @@ import {
 import { getEnrolledCourse, type PublicCourse } from "@/lib/fns/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { youtubeUrlToEmbedUrl } from "@/lib/youtube";
 import { getLessonVideoPlayback, getLessonVimeoPlayback } from "@/lib/fns/videos";
 import type { VideoPlaybackSource } from "@/lib/videos";
 import { CourseVideoPlayer } from "@/components/course/CourseVideoPlayer";
 import { VimeoVideoPlayer } from "@/components/course/VimeoVideoPlayer";
+import { YouTubeVideoPlayer } from "@/components/course/YouTubeVideoPlayer";
 import { CourseNotesPanel } from "@/components/course/CourseNotesPanel";
 import { CourseReviewsPanel } from "@/components/course/CourseReviewsPanel";
 import { LessonArticleContent } from "@/components/course/LessonArticleContent";
@@ -109,6 +112,8 @@ function CourseVideoArea({
   const { locked, reason } = getLockState(lesson);
   const videoId = getLessonVideoId(lesson);
   const vimeoUrl = getLessonVimeoUrl(lesson);
+  const youtubeUrl = getLessonYoutubeUrl(lesson);
+  const youtubeEmbed = youtubeUrl ? youtubeUrlToEmbedUrl(youtubeUrl) : null;
   const playbackFn = useServerFn(getLessonVideoPlayback);
   const vimeoPlaybackFn = useServerFn(getLessonVimeoPlayback);
   const [playback, setPlayback] = useState<VideoPlaybackSource | null>(null);
@@ -160,7 +165,7 @@ function CourseVideoArea({
   refreshPlaybackRef.current = loadPlayback;
 
   useEffect(() => {
-    if (locked || lesson.type !== "video" || (!videoId && !vimeoUrl)) {
+    if (locked || lesson.type !== "video" || youtubeEmbed || (!videoId && !vimeoUrl)) {
       setPlayback(null);
       setPlaybackError(null);
       setPlaybackLoading(false);
@@ -188,7 +193,7 @@ function CourseVideoArea({
     return () => {
       cancelled = true;
     };
-  }, [lesson.id, lesson.type, loadPlayback, locked, videoId, vimeoUrl]);
+  }, [lesson.id, lesson.type, loadPlayback, locked, videoId, vimeoUrl, youtubeEmbed]);
 
   useEffect(() => {
     if (!playback?.urlExpiresAt || locked || lesson.type !== "video") return;
@@ -309,6 +314,10 @@ function CourseVideoArea({
         ) : null}
       </div>
     );
+  }
+
+  if (!locked && youtubeEmbed) {
+    return <YouTubeVideoPlayer embedUrl={youtubeEmbed} title={lesson.title} />;
   }
 
   if (!locked && playback) {

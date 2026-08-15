@@ -19,6 +19,8 @@ import type { PlanId } from "@/lib/site-config";
 import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
+import { isLiveTicketPlan } from "@/lib/schemas/registration";
+import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
 import { getWelcomePreviewLesson } from "@/lib/courses";
 
 function manualPaymentHtml() {
@@ -50,6 +52,22 @@ function manualPaymentHtml() {
 }
 
 async function resolveCheckoutPricing(data: RegistrationInput) {
+  if (data.plan === "live") {
+    if (!data.course_slug) {
+      throw new Error("Choisissez le cours du live.");
+    }
+    const course = await getResolvedCourseBySlug(data.course_slug);
+    if (!course) {
+      throw new Error("Cours introuvable.");
+    }
+    return {
+      price: LIVE_TICKET_PRICE_USD,
+      label: `Accès live — ${course.title}`,
+      courseSlug: course.slug,
+      courseTitle: course.title,
+    };
+  }
+
   if (data.course_slug) {
     const course = await getResolvedCourseBySlug(data.course_slug);
     if (!course) {
@@ -76,6 +94,7 @@ async function startCheckout(
   db: Awaited<ReturnType<typeof getDb>>,
   record: RegistrationRecord,
   pricing: Awaited<ReturnType<typeof resolveCheckoutPricing>>,
+  intendedPlan: RegistrationRecord["plan"],
 ) {
   if (pricing.price <= 0) {
     await updateRegistrationPayment(db, record.id, { payment_status: "paid" });
@@ -83,11 +102,12 @@ async function startCheckout(
   }
 
   let checkoutUrl: string | null = null;
+  const alreadyPaid = record.payment_status === "paid";
 
   try {
     const session = await createCheckoutSession({
       registrationId: record.id,
-      plan: record.plan,
+      plan: intendedPlan,
       email: record.email,
       fullName: record.full_name,
       courseSlug: pricing.courseSlug,
@@ -98,13 +118,17 @@ async function startCheckout(
     if (session?.url && session.id) {
       checkoutUrl = session.url;
       await setStripeSessionId(db, record.id, session.id);
-      await updateRegistrationPayment(db, record.id, { payment_status: "pending" });
-    } else {
+      if (!alreadyPaid) {
+        await updateRegistrationPayment(db, record.id, { payment_status: "pending" });
+      }
+    } else if (!alreadyPaid) {
       await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
     }
   } catch (error) {
     console.error("Stripe checkout error:", error);
-    await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
+    if (!alreadyPaid) {
+      await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
+    }
   }
 
   return checkoutUrl;
@@ -134,14 +158,23 @@ export const submitRegistration = createServerFn({ method: "POST" })
 
     if (existing) {
       if (existing.payment_status === "paid") {
-        throw new Error(
-          "Vous avez déjà accès à ce cours. Connectez-vous sur /login pour continuer.",
-        );
+        if (data.plan === "live") {
+          throw new Error(
+            "Vous avez déjà accès au live de ce cours. Connectez-vous pour le regarder.",
+          );
+        }
+        if (!isLiveTicketPlan(existing.plan)) {
+          throw new Error(
+            "Vous avez déjà accès à ce cours. Connectez-vous sur /login pour continuer.",
+          );
+        }
+        record = existing;
+        resumed = true;
+      } else {
+        const updated = await updateRegistrationDetails(db, existing.id, data);
+        record = updated ?? { ...existing, ...data };
+        resumed = true;
       }
-
-      const updated = await updateRegistrationDetails(db, existing.id, data);
-      record = updated ?? { ...existing, ...data };
-      resumed = true;
     } else {
       record = await saveRegistration(db, data);
     }
@@ -167,7 +200,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
 
     const pricing = await resolveCheckoutPricing(data);
     const manualHtml = manualPaymentHtml();
-    const checkoutUrl = await startCheckout(db, record, pricing);
+    const checkoutUrl = await startCheckout(db, record, pricing, data.plan);
 
     void sendEmail({
       to: data.email,
@@ -290,7 +323,10 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
           const course = unlocked.course_slug
             ? await getResolvedCourseBySlug(unlocked.course_slug)
             : null;
-          const fallbackAmount = course?.price ?? siteConfig.plans[unlocked.plan].price;
+          const fallbackAmount =
+            unlocked.plan === "live"
+              ? LIVE_TICKET_PRICE_USD
+              : (course?.price ?? siteConfig.plans[unlocked.plan].price);
           await sendEmail({
             to: unlocked.email,
             subject: "Paiement confirmé — BelKou",

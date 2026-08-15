@@ -10,7 +10,7 @@ export const registrationSchema = z.object({
   whatsapp: z.string().trim().min(6, "Numéro invalide").max(30),
   country: z.string().min(1, "Choisissez un pays"),
   level: z.string().min(1, "Choisissez un niveau"),
-  plan: z.enum(["premium", "vip"]),
+  plan: z.enum(["premium", "vip", "live"]),
   course_slug: z.string().trim().min(1).optional(),
   referral_code: z
     .string()
@@ -21,6 +21,12 @@ export const registrationSchema = z.object({
 });
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
+
+export type RegistrationPlan = RegistrationInput["plan"];
+
+export function isLiveTicketPlan(plan: string | null | undefined): boolean {
+  return plan === "live";
+}
 
 export type RegistrationRecord = Omit<RegistrationInput, "course_slug" | "referral_code"> & {
   id: string;

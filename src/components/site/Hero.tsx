@@ -41,7 +41,7 @@ function HeroStatCard({
   return (
     <div
       className={cn(
-        "flex w-[8.75rem] items-center gap-2 rounded-2xl border border-border/50 bg-white px-2.5 py-2 shadow-[0_18px_44px_rgb(15_23_42_/_0.14)] dark:border-border/70 dark:bg-card sm:w-[10.25rem] sm:gap-2.5 sm:px-3.5 sm:py-2.5 md:w-[10.75rem] md:py-3",
+        "flex w-[8.75rem] items-center gap-2 rounded-2xl border border-border/50 bg-white px-2.5 py-2 shadow-[0_18px_44px_rgb(15_23_42_/_0.14)] dark:border-white/10 dark:bg-card dark:shadow-[0_18px_44px_rgb(0_0_0_/_0.45)] sm:w-[10.25rem] sm:gap-2.5 sm:px-3.5 sm:py-2.5 md:w-[10.75rem] md:py-3",
         className,
       )}
     >
@@ -85,15 +85,28 @@ export function Hero({ studentCount }: HeroProps) {
     <section className="relative overflow-hidden bg-background site-page-top">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(0_70_213_/_0.12),transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgb(0_70_213_/_0.12),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_top_left,rgb(59_130_246_/_0.22),transparent_58%)]"
       />
       <img
         src="/hero/bg-with-grid.png"
         alt=""
         aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.55]"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.55] dark:hidden"
         width={1200}
         height={800}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden dark:block"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgb(147 197 253 / 0.09) 1px, transparent 1px), linear-gradient(to bottom, rgb(147 197 253 / 0.09) 1px, transparent 1px)",
+          backgroundSize: "44px 44px",
+          maskImage:
+            "radial-gradient(ellipse 75% 70% at 72% 28%, black 12%, transparent 72%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 75% 70% at 72% 28%, black 12%, transparent 72%)",
+        }}
       />
 
       <div className="site-container relative grid items-start gap-6 px-4 pb-0 pt-6 sm:gap-8 sm:pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-end lg:gap-8 xl:gap-10">
@@ -201,7 +214,7 @@ export function Hero({ studentCount }: HeroProps) {
               <img
                 src="/about/Mackenson.png"
                 alt={`${siteConfig.founder.name} — fondateur BelKou`}
-                className="relative z-[1] block h-auto max-h-[min(52vh,380px)] w-auto max-w-[min(100%,13.5rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-normal sm:max-h-[min(60vh,460px)] sm:max-w-[18rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
+                className="relative z-[1] block h-auto max-h-[min(52vh,380px)] w-auto max-w-[min(100%,13.5rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-screen sm:max-h-[min(60vh,460px)] sm:max-w-[18rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
                 width={900}
                 height={1200}
                 fetchPriority="high"

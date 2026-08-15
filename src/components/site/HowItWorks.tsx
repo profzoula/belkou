@@ -47,7 +47,7 @@ function WaveBackground() {
            C648 520 708 548 748 560
            H0
            Z"
-        fill="#e8eefc"
+        className="fill-[var(--primary-soft)]"
       />
 
       {/* Primary blue panel with organic S edge */}

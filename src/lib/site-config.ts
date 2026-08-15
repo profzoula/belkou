@@ -55,6 +55,7 @@ export const siteConfig = {
       priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "",
     },
     vip: { name: "VIP", price: 290, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },
+    live: { name: "Accès live", price: 9.99, priceId: "" },
   },
   paymentMethods: ["Stripe (carte bancaire)", "PayPal", "MonCash", "Zelle", "Virement bancaire"],
   manualPayment: {
@@ -94,7 +95,7 @@ export const siteConfig = {
   },
 } as const;
 
-export type PlanId = "premium" | "vip";
+export type PlanId = "premium" | "vip" | "live";
 export const VIBECODING_COURSE_SLUG = "apps-ia-cursor-claude";
 
 export function getWhatsappGroupUrl(plan: PlanId | string | undefined): string {

@@ -7,6 +7,7 @@ export async function getPaidEnrollmentCountsByCourse(): Promise<Record<string, 
 
   for (const row of rows) {
     if (row.payment_status !== "paid") continue;
+    if (row.plan === "live") continue;
     const key = registrationCourseKey(row.course_slug);
     counts[key] = (counts[key] ?? 0) + 1;
   }
@@ -26,7 +27,8 @@ export async function countPaidEnrollmentsForCourse(courseSlug: string): Promise
     .from("registrations")
     .select("*", { count: "exact", head: true })
     .eq("payment_status", "paid")
-    .eq("course_slug", key);
+    .eq("course_slug", key)
+    .neq("plan", "live");
 
   if (explicitError) {
     const counts = await getPaidEnrollmentCountsByCourse();

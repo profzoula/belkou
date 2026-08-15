@@ -17,7 +17,13 @@ function stripLessonForPublic(lesson: CourseLesson): CourseLesson {
     return { ...lesson };
   }
 
-  const { content: _content, videoId: _videoId, vimeoUrl: _vimeoUrl, ...rest } = lesson;
+  const {
+    content: _content,
+    videoId: _videoId,
+    vimeoUrl: _vimeoUrl,
+    youtubeUrl: _youtubeUrl,
+    ...rest
+  } = lesson;
   return rest;
 }
 

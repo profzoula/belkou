@@ -5,8 +5,9 @@ import { getPublicCourse } from "@/lib/fns/courses";
 import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
-  plan: z.enum(["premium", "vip"]).optional(),
+  plan: z.enum(["premium", "vip", "live"]).optional(),
   course: z.string().optional(),
+  live: z.string().optional(),
   ref: z.string().optional(),
 });
 
@@ -30,9 +31,15 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function CheckoutRoute() {
-  const { plan, course, ref } = Route.useSearch();
+  const { plan, course, live, ref } = Route.useSearch();
   const { course: initialCourse } = Route.useLoaderData();
   return (
-    <CheckoutPage plan={plan} courseSlug={course} refCode={ref} initialCourse={initialCourse} />
+    <CheckoutPage
+      plan={plan === "live" ? undefined : plan}
+      courseSlug={course}
+      liveTicket={live === "1" || plan === "live"}
+      refCode={ref}
+      initialCourse={initialCourse}
+    />
   );
 }

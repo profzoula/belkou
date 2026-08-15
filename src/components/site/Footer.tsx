@@ -20,6 +20,7 @@ const footerColumns: FooterColumn[] = [
     title: "Formations",
     items: [
       { name: "Tous les cours", href: "/courses" },
+      { name: "Live", href: "/live" },
       { name: "Services", href: "/services" },
       { name: "Tableau de bord", href: "/dashboard" },
       { name: "Créer un compte", href: "/signup" },
