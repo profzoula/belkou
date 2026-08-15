@@ -173,54 +173,56 @@ export function Hero({ studentCount }: HeroProps) {
         </motion.div>
 
         <motion.div
-          className="relative mx-auto w-full max-w-[min(100%,28rem)] lg:min-h-[34rem] lg:max-w-none lg:justify-self-end"
+          className="relative mx-auto w-full max-w-[min(100%,30rem)] lg:max-w-[34rem] xl:max-w-[38rem]"
           initial={reduceMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease }}
         >
-          <div
-            aria-hidden
-            className="absolute inset-x-6 bottom-2 h-24 rounded-[100%] bg-primary/15 blur-3xl sm:inset-x-10 sm:bottom-4 sm:h-32"
-          />
+          <div className="relative lg:min-h-[34rem]">
+            <div
+              aria-hidden
+              className="absolute inset-x-4 bottom-0 h-24 rounded-[100%] bg-primary/15 blur-3xl sm:inset-x-8 sm:h-28"
+            />
 
-          <HeroSquiggle className="absolute left-2 top-[18%] z-20 hidden w-24 sm:block lg:left-4 lg:w-28" />
+            <HeroSquiggle className="absolute left-0 top-[14%] z-10 hidden w-24 sm:block lg:w-28" />
 
-          <div className="relative z-10 flex justify-center lg:justify-end">
-            <img
-              src="/about/Mackenson.png"
-              alt={`${siteConfig.founder.name} — fondateur BelKou`}
-              className="h-auto w-full max-w-[18rem] object-contain object-bottom drop-shadow-[0_24px_50px_rgb(2_8_23_/_0.18)] sm:max-w-[22rem] md:max-w-[26rem] lg:max-h-[min(72vh,640px)] lg:max-w-none lg:w-[88%]"
-              width={900}
-              height={1200}
-              fetchPriority="high"
-              decoding="async"
+            <div className="relative z-[1] flex justify-center lg:justify-start">
+              <img
+                src="/about/Mackenson.png"
+                alt={`${siteConfig.founder.name} — fondateur BelKou`}
+                className="h-auto w-full max-w-[18rem] object-contain object-bottom drop-shadow-[0_24px_50px_rgb(2_8_23_/_0.18)] sm:max-w-[22rem] md:max-w-[26rem] lg:max-h-[min(68vh,600px)] lg:max-w-none lg:w-full"
+                width={900}
+                height={1200}
+                fetchPriority="high"
+                decoding="async"
+              />
+            </div>
+
+            <div className="absolute inset-0 z-20 hidden lg:block">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  className={cn(
+                    "absolute",
+                    index === 0 && "right-[2%] top-[10%]",
+                    index === 1 && "right-0 top-[40%]",
+                    index === 2 && "right-[4%] bottom-[14%]",
+                  )}
+                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: 0.2 + index * 0.08, ease }}
+                >
+                  <HeroStatCard icon={stat.icon} value={stat.value} label={stat.label} />
+                </motion.div>
+              ))}
+            </div>
+
+            <Sparkles
+              aria-hidden
+              className="absolute bottom-[10%] right-[2%] z-10 hidden size-7 text-foreground/75 lg:block"
+              strokeWidth={1.75}
             />
           </div>
-
-          <div className="pointer-events-none absolute inset-0 hidden lg:block">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className={cn(
-                  "absolute",
-                  index === 0 && "right-0 top-[12%]",
-                  index === 1 && "-right-2 top-[44%]",
-                  index === 2 && "right-4 bottom-[14%]",
-                )}
-                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.2 + index * 0.08, ease }}
-              >
-                <HeroStatCard icon={stat.icon} value={stat.value} label={stat.label} />
-              </motion.div>
-            ))}
-          </div>
-
-          <Sparkles
-            aria-hidden
-            className="absolute bottom-[8%] right-0 hidden size-7 text-foreground/75 lg:block"
-            strokeWidth={1.75}
-          />
 
           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:hidden">
             {stats.map((stat) => (
