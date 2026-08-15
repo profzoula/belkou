@@ -96,102 +96,112 @@ export function Hero({ studentCount }: HeroProps) {
         height={800}
       />
 
-      <div className="site-container relative grid items-center gap-8 px-4 pb-8 pt-6 sm:gap-10 sm:pb-10 sm:pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-end lg:gap-8 xl:gap-10">
-        <motion.div
-          className="flex min-w-0 flex-col items-start text-left"
-          initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-        >
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
-            Formation en ligne
-          </p>
+      <div className="site-container relative grid items-start gap-6 px-4 pb-0 pt-6 sm:gap-8 sm:pt-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-end lg:gap-8 xl:gap-10">
+        {/* `contents` on mobile so CTA/social can order below the image */}
+        <div className="contents lg:flex lg:min-h-[32rem] lg:flex-col lg:justify-center lg:pb-12 xl:min-h-[34rem]">
+          <motion.div
+            className="order-1 flex min-w-0 flex-col items-start text-left"
+            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease }}
+          >
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
+              Formation en ligne
+            </p>
 
-          <h1 className="mt-4 max-w-xl font-display text-[1.65rem] font-bold leading-[1.08] tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] lg:text-5xl">
-            Apprenez. Appliquez.
-            <br />
-            <span className="text-primary">Progressez à votre rythme.</span>
-          </h1>
+            <h1 className="mt-4 max-w-xl font-display text-[1.65rem] font-bold leading-[1.08] tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] lg:text-5xl">
+              Apprenez. Appliquez.
+              <br />
+              <span className="text-primary">Progressez à votre rythme.</span>
+            </h1>
 
-          <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-            Accédez à une variété de cours en Creole — tech, business, création et plus — avec
-            mentors, projets concrets et une communauté active.
-          </p>
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
+              Accédez à une variété de cours en Creole — tech, business, création et plus — avec
+              mentors, projets concrets et une communauté active.
+            </p>
+          </motion.div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
-            <Button
-              asChild
-              variant="hero"
-              size="lg"
-              className="h-12 rounded-xl px-6 text-sm sm:px-7"
-            >
-              <Link to="/courses">
-                Explorer les cours
-                <ArrowRight className="size-4" aria-hidden />
+          <motion.div
+            className="order-3 flex min-w-0 flex-col items-start pb-8 text-left sm:pb-10 lg:order-none lg:pb-0"
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.12, ease }}
+          >
+            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4 lg:mt-8">
+              <Button
+                asChild
+                variant="hero"
+                size="lg"
+                className="h-12 rounded-xl px-6 text-sm sm:px-7"
+              >
+                <Link to="/courses">
+                  Explorer les cours
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
+              </Button>
+              <Link
+                to="/courses"
+                className="inline-flex items-center gap-2.5 text-sm font-semibold text-primary transition-opacity hover:opacity-85"
+              >
+                <span className="grid size-10 place-items-center rounded-full border-2 border-primary/25 bg-card/80">
+                  <Play className="size-4 fill-primary text-primary" aria-hidden />
+                </span>
+                Voir les cours
               </Link>
-            </Button>
-            <Link
-              to="/courses"
-              className="inline-flex items-center gap-2.5 text-sm font-semibold text-primary transition-opacity hover:opacity-85"
-            >
-              <span className="grid size-10 place-items-center rounded-full border-2 border-primary/25 bg-card/80">
-                <Play className="size-4 fill-primary text-primary" aria-hidden />
-              </span>
-              Voir les cours
-            </Link>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3 sm:mt-10">
-            <div className="flex -space-x-2.5">
-              {heroAvatars.map((src, index) => (
-                <img
-                  key={src}
-                  src={src}
-                  alt=""
-                  width={36}
-                  height={36}
-                  className="size-9 rounded-full border-2 border-background object-cover ring-1 ring-border/60"
-                  style={{ zIndex: heroAvatars.length - index }}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ))}
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-0.5 text-brand-accent" aria-label="5 étoiles">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} className="size-3.5 fill-current sm:size-4" />
+
+            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
+              <div className="flex -space-x-2.5">
+                {heroAvatars.map((src, index) => (
+                  <img
+                    key={src}
+                    src={src}
+                    alt=""
+                    width={36}
+                    height={36}
+                    className="size-9 rounded-full border-2 border-background object-cover ring-1 ring-border/60"
+                    style={{ zIndex: heroAvatars.length - index }}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 ))}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                Rejoignez{" "}
-                <span className="font-semibold text-foreground">{studentLabel}+</span> étudiants
-                qui développent avec BelKou
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-0.5 text-brand-accent" aria-label="5 étoiles">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Star key={index} className="size-3.5 fill-current sm:size-4" />
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                  Rejoignez{" "}
+                  <span className="font-semibold text-foreground">{studentLabel}+</span> étudiants
+                  qui développent avec BelKou
+                </p>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
-          className="relative mx-auto w-full pb-2 lg:mx-0 lg:pb-0"
+          className="relative order-2 mx-auto w-full lg:order-none lg:mx-0 lg:self-end"
           initial={reduceMotion ? false : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.55, delay: 0.08, ease }}
         >
-          {/* AMZ-style: portrait toward center + reserved right gutter for floating cards */}
+          {/* Portrait sits flush on the bottom edge of the hero */}
           <div className="relative flex justify-center lg:justify-start">
             <div
               aria-hidden
-              className="absolute bottom-2 left-1/2 h-28 w-[70%] -translate-x-1/2 rounded-[100%] bg-primary/20 blur-3xl lg:left-[35%] lg:translate-x-0"
+              className="absolute bottom-0 left-1/2 h-24 w-[65%] -translate-x-1/2 rounded-[100%] bg-primary/20 blur-3xl lg:left-[32%] lg:translate-x-0"
             />
 
             <div className="relative isolate w-fit max-w-full pr-[7.5rem] sm:pr-[9rem] lg:pr-[9.75rem] xl:pr-[10.5rem]">
-              <HeroSquiggle className="absolute -left-5 top-[20%] z-10 hidden w-20 sm:block lg:-left-8 lg:w-28" />
+              <HeroSquiggle className="absolute -left-5 top-[18%] z-10 hidden w-20 sm:block lg:-left-8 lg:w-28" />
 
               <img
                 src="/about/Mackenson.png"
                 alt={`${siteConfig.founder.name} — fondateur BelKou`}
-                className="relative z-[1] block h-auto max-h-[min(58vh,420px)] w-auto max-w-[min(100%,14rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-normal sm:max-h-[min(68vh,520px)] sm:max-w-[20rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
+                className="relative z-[1] block h-auto max-h-[min(52vh,380px)] w-auto max-w-[min(100%,13.5rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-normal sm:max-h-[min(60vh,460px)] sm:max-w-[18rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
                 width={900}
                 height={1200}
                 fetchPriority="high"
