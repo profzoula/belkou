@@ -37,11 +37,14 @@ export function CareerInvestSection() {
             Investissez dans votre carrière
           </h2>
 
-          <ul className="mt-5 grid gap-6 sm:mt-6 md:grid-cols-3 md:gap-8">
+          <ul className="-mx-4 mt-5 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto overscroll-x-contain px-4 pb-1 sm:mt-6 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible lg:px-0 lg:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {pillars.map((item) => {
               const Icon = item.icon;
               return (
-                <li key={item.title} className="min-w-0 text-left">
+                <li
+                  key={item.title}
+                  className="w-[76%] min-w-0 max-w-[17rem] shrink-0 snap-start rounded-2xl border border-border/60 bg-card p-4 text-left sm:w-[46%] lg:w-auto lg:max-w-none lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0"
+                >
                   <Icon
                     className="size-5 text-foreground sm:size-6"
                     strokeWidth={1.5}

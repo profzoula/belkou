@@ -13,6 +13,7 @@ import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
 import { AccountSettingsPanel } from "@/components/dashboard/AccountSettingsPanel";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
 import { PaymentAccountLinkBanner } from "@/components/dashboard/PaymentAccountLinkBanner";
+import { VipUnlimitedCta } from "@/components/site/VipUnlimitedCta";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
 import {
   clearRegistrationHandoff,
@@ -46,6 +47,7 @@ function DashboardPage() {
   const dashboardFn = useServerFn(getStudentDashboard);
   const claimReferralFn = useServerFn(claimSignupReferral);
   const [enrollments, setEnrollments] = useState<StudentEnrollment[] | undefined>(undefined);
+  const [isVip, setIsVip] = useState(false);
   const [registrationHandoff, setRegistrationHandoff] = useState<RegistrationHandoff | null>(null);
 
   useEffect(() => {
@@ -82,6 +84,7 @@ function DashboardPage() {
 
       const result = await dashboardFn({ data: { accessToken: session.access_token } });
       setEnrollments(result.enrollments);
+      setIsVip(result.vip);
     })().catch(() => setEnrollments([]));
   }, [session?.access_token, dashboardFn, claimReferralFn]);
 
@@ -208,6 +211,8 @@ function DashboardPage() {
           <div id="courses" className="scroll-mt-24">
             <MyCoursesSection enrollments={enrollments} />
           </div>
+
+          {enrollments && !isVip ? <VipUnlimitedCta embedded /> : null}
 
           <div id="account" className="scroll-mt-24">
             <AccountSettingsPanel user={user} />

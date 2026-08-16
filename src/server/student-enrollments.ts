@@ -43,9 +43,21 @@ export type StudentEnrollment = {
   continueLessonId?: string;
 };
 
+export type StudentEnrollmentsResult = {
+  enrollments: StudentEnrollment[];
+  vip: boolean;
+};
+
 export async function loadStudentEnrollments(accessToken: string): Promise<StudentEnrollment[]> {
+  const { enrollments } = await loadStudentEnrollmentsWithPlan(accessToken);
+  return enrollments;
+}
+
+export async function loadStudentEnrollmentsWithPlan(
+  accessToken: string,
+): Promise<StudentEnrollmentsResult> {
   const user = await getUserFromAccessToken(accessToken);
-  if (!user?.email) return [];
+  if (!user?.email) return { enrollments: [], vip: false };
 
   const db = await getDb();
   const email = normalizeRegistrationEmail(user.email);
@@ -68,7 +80,7 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
   });
 
   const registrations = await listRegistrationsByEmail(db, email);
-  if (!registrations.length) return [];
+  if (!registrations.length) return { enrollments: [], vip: false };
 
   const [resolvedCourses, progressByCourse] = await Promise.all([
     getResolvedCourses(),
@@ -149,5 +161,5 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
   }
 
   enrollments.sort((a, b) => Date.parse(b.purchasedAt) - Date.parse(a.purchasedAt));
-  return enrollments;
+  return { enrollments, vip: vipPaid };
 }

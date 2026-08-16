@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Star } from "lucide-react";
 import {
   countLessons,
@@ -24,7 +25,7 @@ export function CourseHeroStatsBar({ course, className }: CourseHeroStatsBarProp
   const duration = getCourseDisplayDuration(course);
   const levelHint = skillLevelHints[course.skillLevel] ?? "Adapté à votre niveau";
 
-  const items = [
+  const items: { title: ReactNode; subtitle: string; underline?: boolean }[] = [
     {
       title: `${sectionCount} partie${sectionCount > 1 ? "s" : ""} · ${lessonCount} leçon${lessonCount > 1 ? "s" : ""}`,
       subtitle: "Parcours structuré pas à pas",
@@ -47,7 +48,7 @@ export function CourseHeroStatsBar({ course, className }: CourseHeroStatsBarProp
       title: duration,
       subtitle: "Apprenez à votre rythme · accès à vie",
     },
-  ] as const;
+  ];
 
   return (
     <div

@@ -19,7 +19,7 @@ async function exitNativeFullscreen() {
     await document.exitFullscreen();
     return;
   }
-  if (doc.webkitExitFullscreen && doc.webkitFullscreenElement) {
+  if (doc.webkitExitFullscreen && getFullscreenElement()) {
     await doc.webkitExitFullscreen();
   }
 }
