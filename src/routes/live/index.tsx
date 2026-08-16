@@ -60,7 +60,8 @@ function LiveIndexPage() {
               <p className="section-label mb-2">BelKou</p>
               <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Live</h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Directs, questions en live, puis replay — le tout sur BelKou.
+                Directs, questions en live, puis replay — le tout sur BelKou. Chaque live a son prix
+                : réservez votre place dès l&apos;annonce, avant le début.
               </p>
             </div>
             {liveNow.length > 0 ? (

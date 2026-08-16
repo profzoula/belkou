@@ -2,6 +2,7 @@ import { BASE_COURSE_SLUGS } from "@/lib/courses";
 import { getSequenceLessonIds, isWelcomePreviewLesson, lessonHasVideo } from "@/lib/courses";
 import type { CourseLesson, CourseSection } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
+import { STANDALONE_LIVE_SLUG, liveTicketSlug } from "@/lib/live";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
 
@@ -71,14 +72,22 @@ export function hasPaidAccessToCourse(
   return false;
 }
 
-/** Live watch/comment: VIP, full course purchase, or a paid $9.99 live ticket. */
-export function hasLiveAccessToCourse(
-  registration: Pick<RegistrationRecord, "payment_status" | "course_slug" | "plan"> | null | undefined,
+/**
+ * Tickets are sold per event. Passes bought before that change (`__live__`, or the course slug
+ * for a course-linked live) stay valid for every live, since they were sold that way.
+ */
+export function hasLiveTicketForSession(
+  rows: RegistrationRecord[],
+  sessionId: string,
   courseSlug: string,
 ): boolean {
-  if (!registration || registration.payment_status !== "paid") return false;
-  if (hasPaidAccessToCourse(registration, courseSlug)) return true;
-  return isLiveTicketPlan(registration.plan) && registrationCoversCourse(registration, courseSlug);
+  const ticketSlug = liveTicketSlug(sessionId);
+  return rows.some((row) => {
+    if (row.payment_status !== "paid" || !isLiveTicketPlan(row.plan)) return false;
+    const slug = row.course_slug?.trim() ?? "";
+    if (slug === ticketSlug) return true;
+    return slug === STANDALONE_LIVE_SLUG || slug === courseSlug.trim();
+  });
 }
 
 export type LessonLockReason = "none" | "schedule" | "enrollment" | "sequential";

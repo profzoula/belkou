@@ -187,11 +187,11 @@ function SuccessPage() {
             {isPaid ? (
               planId === "live" ? (
                 <>
-                  Accès live confirmé.{" "}
+                  Place réservée pour ce live.{" "}
                   <strong className="font-medium text-foreground">
                     Connectez-vous avec le même email
                   </strong>{" "}
-                  pour regarder le live sur BelKou.
+                  le jour du direct — le replay reste disponible ensuite.
                 </>
               ) : planId === "vip" ? (
                 <>

@@ -21,7 +21,7 @@ import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates"
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { LEGACY_COURSE_SLUG, VIP_MEMBERSHIP_SLUG } from "@/lib/course-access";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
-import { LIVE_TICKET_PRICE_USD, STANDALONE_LIVE_SLUG, isStandaloneLiveSlug } from "@/lib/live";
+import { liveTicketSlug, parseLiveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { getWelcomePreviewLesson } from "@/lib/courses";
 
 function manualPaymentHtml() {
@@ -63,23 +63,20 @@ async function resolveCheckoutPricing(data: RegistrationInput) {
   }
 
   if (data.plan === "live") {
-    if (data.course_slug && !isStandaloneLiveSlug(data.course_slug)) {
-      const course = await getResolvedCourseBySlug(data.course_slug);
-      if (!course) {
-        throw new Error("Cours introuvable.");
-      }
-      return {
-        price: LIVE_TICKET_PRICE_USD,
-        label: `Accès live — ${course.title}`,
-        courseSlug: course.slug,
-        courseTitle: course.title,
-      };
+    const sessionId = parseLiveTicketSlug(data.course_slug);
+    if (!sessionId) {
+      throw new Error("Choisissez le live que vous voulez réserver.");
+    }
+    const { getLiveSession } = await import("@/server/live");
+    const session = await getLiveSession(sessionId);
+    if (!session || session.status === "canceled") {
+      throw new Error("Live introuvable.");
     }
     return {
-      price: LIVE_TICKET_PRICE_USD,
-      label: "Accès live BelKou",
-      courseSlug: STANDALONE_LIVE_SLUG,
-      courseTitle: "BelKou Live",
+      price: resolveLivePrice(session.priceUsd),
+      label: `Accès live — ${session.title}`,
+      courseSlug: liveTicketSlug(sessionId),
+      courseTitle: session.title,
     };
   }
 
@@ -163,15 +160,18 @@ export const submitRegistration = createServerFn({ method: "POST" })
       throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
     }
 
+    const liveSessionId = raw.plan === "live" ? parseLiveTicketSlug(raw.course_slug) : null;
+    if (raw.plan === "live" && !liveSessionId) {
+      throw new Error("Choisissez le live que vous voulez réserver.");
+    }
+
     const data = {
       ...raw,
       course_slug:
         raw.plan === "vip"
           ? VIP_MEMBERSHIP_SLUG
-          : raw.plan === "live"
-            ? (raw.course_slug && !isStandaloneLiveSlug(raw.course_slug)
-              ? raw.course_slug
-              : STANDALONE_LIVE_SLUG)
+          : liveSessionId
+            ? liveTicketSlug(liveSessionId)
             : raw.course_slug,
     };
 
@@ -199,7 +199,7 @@ export const submitRegistration = createServerFn({ method: "POST" })
         }
         if (data.plan === "live") {
           throw new Error(
-            "Vous avez déjà accès au live de ce cours. Connectez-vous pour le regarder.",
+            "Votre place est déjà réservée pour ce live. Connectez-vous pour y accéder.",
           );
         }
         if (!isLiveTicketPlan(existing.plan)) {
@@ -244,20 +244,26 @@ export const submitRegistration = createServerFn({ method: "POST" })
     const pricing = await resolveCheckoutPricing(data);
     const manualHtml = manualPaymentHtml();
     const checkoutUrl = await startCheckout(db, record, pricing, data.plan);
+    // A free event still needs a reservation row, but there is nothing to pay for.
+    const free = pricing.price <= 0;
 
     void sendEmail({
       to: data.email,
-      subject: resumed
-        ? `Reprise inscription BelKou — ${pricing.label}`
-        : `Inscription BelKou — ${pricing.label}`,
-      html: registrationPendingEmail({
-        name: data.full_name,
-        plan: data.plan,
-        price: pricing.price,
-        registrationId: record.id,
-        checkoutUrl,
-        manualPaymentHtml: manualHtml,
-      }),
+      subject: free
+        ? `Place réservée — ${pricing.label}`
+        : resumed
+          ? `Reprise inscription BelKou — ${pricing.label}`
+          : `Inscription BelKou — ${pricing.label}`,
+      html: free
+        ? paymentConfirmedEmail(data.full_name, data.plan, "")
+        : registrationPendingEmail({
+            name: data.full_name,
+            plan: data.plan,
+            price: pricing.price,
+            registrationId: record.id,
+            checkoutUrl,
+            manualPaymentHtml: manualHtml,
+          }),
     })
       .then((emailResult) => {
         if (!emailResult.ok) {
@@ -271,7 +277,8 @@ export const submitRegistration = createServerFn({ method: "POST" })
     return {
       registrationId: record.id,
       checkoutUrl,
-      manualPayment: !checkoutUrl,
+      manualPayment: !checkoutUrl && !free,
+      free,
       plan: data.plan,
       resumed,
     };
@@ -363,13 +370,17 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
       const unlocked = await getRegistrationById(db, granted.registrationId);
       if (unlocked) {
         try {
+          const liveSessionId = parseLiveTicketSlug(unlocked.course_slug);
+          const liveSession = liveSessionId
+            ? await (await import("@/server/live")).getLiveSession(liveSessionId)
+            : null;
           const course =
-            unlocked.course_slug && unlocked.course_slug !== VIP_MEMBERSHIP_SLUG
+            unlocked.course_slug && unlocked.course_slug !== VIP_MEMBERSHIP_SLUG && !liveSessionId
               ? await getResolvedCourseBySlug(unlocked.course_slug)
               : null;
           const fallbackAmount =
             unlocked.plan === "live"
-              ? LIVE_TICKET_PRICE_USD
+              ? resolveLivePrice(liveSession?.priceUsd)
               : unlocked.plan === "vip"
                 ? siteConfig.plans.vip.price
                 : (course?.price ?? siteConfig.plans[unlocked.plan].price);
@@ -385,7 +396,9 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
                 itemLabel:
                   unlocked.plan === "vip"
                     ? "Accès illimité VIP"
-                    : (course?.title ?? `Plan ${unlocked.plan.toUpperCase()} BelKou`),
+                    : liveSession
+                      ? `Place live — ${liveSession.title}`
+                      : (course?.title ?? `Plan ${unlocked.plan.toUpperCase()} BelKou`),
                 amountUsd:
                   typeof session.amount_total === "number"
                     ? Math.max(session.amount_total, 0) / 100

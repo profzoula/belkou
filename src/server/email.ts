@@ -134,7 +134,11 @@ export function paymentConfirmedEmail(
   return `
     <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
       <h1 style="font-size:22px;">Paiement confirmé — merci ${name} !</h1>
-      <p>Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Accédez à vos cours depuis votre espace BelKou.</p>
+      <p>${
+        plan === "live"
+          ? "Votre place est réservée. Connectez-vous sur BelKou avec ce même email le jour du direct — le replay reste disponible après la session."
+          : `Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Accédez à vos cours depuis votre espace BelKou.`
+      }</p>
       ${invoiceBlock}
       ${
         whatsappUrl

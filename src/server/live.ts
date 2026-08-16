@@ -10,6 +10,17 @@ function isMissingTable(message: string): boolean {
   );
 }
 
+/** True until migrations/supabase_live_price.sql has been run. */
+function isMissingPriceColumn(message: string): boolean {
+  return message.includes("price_usd");
+}
+
+function warnMissingPriceColumn() {
+  console.error(
+    "[BelKou] live_sessions.price_usd is missing — run migrations/supabase_live_price.sql to set per-event prices.",
+  );
+}
+
 function mapSession(
   row: Record<string, unknown>,
   courseTitle = "",
@@ -29,6 +40,7 @@ function mapSession(
     recordingUrl: row.recording_url ? String(row.recording_url) : null,
     recordingLessonId: row.recording_lesson_id ? String(row.recording_lesson_id) : null,
     thumbnailUrl: row.thumbnail_url ? String(row.thumbnail_url) : null,
+    priceUsd: row.price_usd == null ? null : Number(row.price_usd),
     createdAt: String(row.created_at),
   };
 }
@@ -80,24 +92,33 @@ export async function createLiveSession(input: {
   playbackUrl: string;
   scheduledAt: string;
   thumbnailUrl?: string | null;
+  priceUsd?: number | null;
 }): Promise<LiveSession> {
   const sb = getSupabaseAdmin();
   if (!sb) throw new Error("Live indisponible — configurez Supabase.");
 
-  const { data, error } = await sb
-    .from("live_sessions")
-    .insert({
-      course_slug: registrationCourseKey(input.courseSlug),
-      title: input.title.trim(),
-      description: input.description?.trim() || null,
-      provider: input.provider,
-      playback_url: input.playbackUrl.trim(),
-      scheduled_at: input.scheduledAt,
-      status: "scheduled",
-      thumbnail_url: input.thumbnailUrl?.trim() || null,
-    })
-    .select("*")
-    .single();
+  const base = {
+    course_slug: registrationCourseKey(input.courseSlug),
+    title: input.title.trim(),
+    description: input.description?.trim() || null,
+    provider: input.provider,
+    playback_url: input.playbackUrl.trim(),
+    scheduled_at: input.scheduledAt,
+    status: "scheduled",
+    thumbnail_url: input.thumbnailUrl?.trim() || null,
+  };
+
+  const insert = async (row: Record<string, unknown>) =>
+    sb.from("live_sessions").insert(row).select("*").single();
+
+  let { data, error } = await insert(
+    input.priceUsd == null ? base : { ...base, price_usd: input.priceUsd },
+  );
+
+  if (error && input.priceUsd != null && isMissingPriceColumn(error.message)) {
+    warnMissingPriceColumn();
+    ({ data, error } = await insert(base));
+  }
 
   if (error || !data) {
     throw new Error(error?.message ?? "Impossible de créer le live.");
@@ -120,6 +141,7 @@ export async function updateLiveSession(
     recordingUrl: string | null;
     recordingLessonId: string | null;
     thumbnailUrl: string | null;
+    priceUsd: number | null;
   }>,
 ): Promise<LiveSession> {
   const sb = getSupabaseAdmin();
@@ -139,8 +161,20 @@ export async function updateLiveSession(
   if (patch.recordingUrl !== undefined) row.recording_url = patch.recordingUrl;
   if (patch.recordingLessonId !== undefined) row.recording_lesson_id = patch.recordingLessonId;
   if (patch.thumbnailUrl !== undefined) row.thumbnail_url = patch.thumbnailUrl;
+  if (patch.priceUsd !== undefined) row.price_usd = patch.priceUsd;
 
-  const { data, error } = await sb.from("live_sessions").update(row).eq("id", id).select("*").single();
+  const update = async (payload: Record<string, unknown>) =>
+    sb.from("live_sessions").update(payload).eq("id", id).select("*").single();
+
+  const { data, error } = await update(row);
+
+  if (error && patch.priceUsd !== undefined && isMissingPriceColumn(error.message)) {
+    warnMissingPriceColumn();
+    throw new Error(
+      "Le prix par live n'est pas encore activé — exécutez migrations/supabase_live_price.sql dans Supabase.",
+    );
+  }
+
   if (error || !data) {
     throw new Error(error?.message ?? "Mise à jour impossible.");
   }

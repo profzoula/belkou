@@ -23,14 +23,18 @@ import {
   adminEndLiveSession,
   adminListLiveSessions,
   adminRemoveLiveThumbnail,
+  adminSetLiveSessionPrice,
   adminStartLiveSession,
   adminUploadLiveThumbnail,
 } from "@/lib/fns/live";
 import {
+  LIVE_TICKET_PRICE_USD,
   detectLiveProvider,
+  formatLivePrice,
   formatLiveSchedule,
   liveProviderLabel,
   liveStatusLabel,
+  resolveLivePrice,
   type LiveProvider,
   type LiveSession,
 } from "@/lib/live";
@@ -66,6 +70,15 @@ function defaultScheduleValue() {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** `null` means "keep the default price"; `"invalid"` blocks the submit. */
+function parsePriceInput(raw: string): number | null | "invalid" {
+  const trimmed = raw.trim().replace(",", ".");
+  if (!trimmed) return null;
+  const value = Number(trimmed);
+  if (!Number.isFinite(value) || value < 0) return "invalid";
+  return Math.round(value * 100) / 100;
+}
+
 function statusClass(status: LiveSession["status"]) {
   if (status === "live") return "bg-red-500/15 text-red-600 dark:text-red-400";
   if (status === "ended") return "bg-success/15 text-success";
@@ -81,6 +94,7 @@ export function AdminLiveTab() {
   const cancelFn = useServerFn(adminCancelLiveSession);
   const uploadThumbFn = useServerFn(adminUploadLiveThumbnail);
   const removeThumbFn = useServerFn(adminRemoveLiveThumbnail);
+  const setPriceFn = useServerFn(adminSetLiveSessionPrice);
   const coursesFn = useServerFn(getAdminCourses);
 
   const [sessions, setSessions] = useState<LiveSession[]>([]);
@@ -90,6 +104,7 @@ export function AdminLiveTab() {
   const [actingId, setActingId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [playbackUrl, setPlaybackUrl] = useState("");
   const [scheduledAt, setScheduledAt] = useState(defaultScheduleValue);
@@ -124,6 +139,11 @@ export function AdminLiveTab() {
       toast.error("Titre et lien de diffusion sont requis.");
       return;
     }
+    const parsedPrice = parsePriceInput(price);
+    if (parsedPrice === "invalid") {
+      toast.error("Prix invalide — entrez un montant en dollars (ex. 9.99).");
+      return;
+    }
     setSaving(true);
     try {
       let thumbnailBase64: string | undefined;
@@ -137,6 +157,7 @@ export function AdminLiveTab() {
           provider,
           playbackUrl: playbackUrl.trim(),
           scheduledAt: new Date(scheduledAt).toISOString(),
+          ...(parsedPrice == null ? {} : { priceUsd: parsedPrice }),
           ...(thumbFile && thumbnailBase64
             ? { thumbnailContentType: thumbFile.type, thumbnailBase64 }
             : {}),
@@ -144,6 +165,7 @@ export function AdminLiveTab() {
       });
       setSessions(result.sessions);
       setTitle("");
+      setPrice("");
       setDescription("");
       setPlaybackUrl("");
       setScheduledAt(defaultScheduleValue());
@@ -210,6 +232,19 @@ export function AdminLiveTab() {
     }
   };
 
+  const savePrice = async (sessionId: string, priceUsd: number) => {
+    setActingId(sessionId);
+    try {
+      const result = await setPriceFn({ data: { sessionId, priceUsd } });
+      setSessions(result.sessions);
+      toast.success(`Prix mis à jour — ${formatLivePrice(priceUsd)}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Prix non enregistré");
+    } finally {
+      setActingId(null);
+    }
+  };
+
   const runAction = async (id: string, action: "start" | "end" | "cancel") => {
     setActingId(id);
     try {
@@ -262,6 +297,24 @@ export function AdminLiveTab() {
               onChange={(event) => setScheduledAt(event.target.value)}
               className="rounded-xl"
             />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="live-price">Prix de l&apos;événement (USD)</Label>
+            <Input
+              id="live-price"
+              type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              placeholder={String(LIVE_TICKET_PRICE_USD)}
+              className="rounded-xl sm:max-w-[200px]"
+            />
+            <p className="text-xs text-muted-foreground">
+              Chaque live se paie séparément. Laissez vide pour {formatLivePrice(null)}, ou mettez 0
+              pour un live gratuit sur réservation. Les membres VIP entrent sans payer.
+            </p>
           </div>
           <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="live-title">Titre du live</Label>
@@ -405,30 +458,37 @@ export function AdminLiveTab() {
                     onRemove={() => void removeSessionThumb(session.id)}
                   />
                   <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={cn(
-                        "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                        statusClass(session.status),
-                      )}
-                    >
-                      {liveStatusLabel(session.status)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {liveProviderLabel(session.provider)}
-                    </span>
-                  </div>
-                  <p className="mt-2 font-semibold text-foreground">{session.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">
-                    {session.courseTitle
-                      ? `${session.courseTitle} · ${formatLiveSchedule(session.scheduledAt)}`
-                      : formatLiveSchedule(session.scheduledAt)}
-                  </p>
-                  {session.recordingLessonId ? (
-                    <p className="mt-1 text-xs text-success">Replay ajouté au programme du cours.</p>
-                  ) : session.status === "ended" ? (
-                    <p className="mt-1 text-xs text-success">Replay disponible sur /live.</p>
-                  ) : null}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                          statusClass(session.status),
+                        )}
+                      >
+                        {liveStatusLabel(session.status)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {liveProviderLabel(session.provider)}
+                      </span>
+                    </div>
+                    <p className="mt-2 font-semibold text-foreground">{session.title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                      {session.courseTitle
+                        ? `${session.courseTitle} · ${formatLiveSchedule(session.scheduledAt)}`
+                        : formatLiveSchedule(session.scheduledAt)}
+                    </p>
+                    {session.recordingLessonId ? (
+                      <p className="mt-1 text-xs text-success">
+                        Replay ajouté au programme du cours.
+                      </p>
+                    ) : session.status === "ended" ? (
+                      <p className="mt-1 text-xs text-success">Replay disponible sur /live.</p>
+                    ) : null}
+                    <AdminLivePriceField
+                      session={session}
+                      busy={actingId === session.id}
+                      onSave={(priceUsd) => savePrice(session.id, priceUsd)}
+                    />
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 sm:mt-0 sm:shrink-0">
@@ -474,6 +534,68 @@ export function AdminLiveTab() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+function AdminLivePriceField({
+  session,
+  busy,
+  onSave,
+}: {
+  session: LiveSession;
+  busy: boolean;
+  onSave: (priceUsd: number) => void;
+}) {
+  const saved = resolveLivePrice(session.priceUsd);
+  const [value, setValue] = useState(String(saved));
+
+  useEffect(() => {
+    setValue(String(resolveLivePrice(session.priceUsd)));
+  }, [session.priceUsd]);
+
+  const parsed = parsePriceInput(value);
+  const dirty = parsed !== "invalid" && parsed != null && parsed !== saved;
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2">
+      <Label htmlFor={`live-price-${session.id}`} className="text-xs text-muted-foreground">
+        Prix
+      </Label>
+      <div className="flex items-center gap-1">
+        <Input
+          id={`live-price-${session.id}`}
+          type="number"
+          min={0}
+          step="0.01"
+          inputMode="decimal"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={busy}
+          className="h-8 w-24 rounded-lg"
+        />
+        <span className="text-xs text-muted-foreground">USD</span>
+      </div>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="h-8 rounded-lg px-2.5 text-[11px]"
+        disabled={busy || !dirty}
+        onClick={() => {
+          if (parsed === "invalid" || parsed == null) return;
+          onSave(parsed);
+        }}
+      >
+        Enregistrer
+      </Button>
+      {session.priceUsd == null ? (
+        <span className="text-[11px] text-muted-foreground">
+          Prix par défaut ({formatLivePrice(LIVE_TICKET_PRICE_USD)})
+        </span>
+      ) : saved <= 0 ? (
+        <span className="text-[11px] font-medium text-success">Gratuit sur réservation</span>
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   STANDALONE_LIVE_SLUG,
   detectLiveProvider,
   isStandaloneLiveSlug,
+  resolveLivePrice,
   type LiveCourseInfo,
   type LiveProvider,
   type PublicLiveListItem,
@@ -18,6 +19,11 @@ import { isValidYoutubeUrl } from "@/lib/youtube";
 import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
 
 const providerSchema = z.enum(LIVE_PROVIDERS);
+const livePriceSchema = z
+  .number()
+  .min(0, "Le prix ne peut pas être négatif.")
+  .max(5000, "Prix trop élevé.")
+  .transform((value) => Math.round(value * 100) / 100);
 
 function validatePlaybackUrl(provider: LiveProvider, url: string) {
   const trimmed = url.trim();
@@ -134,75 +140,41 @@ async function withPublicCourse<T extends { courseSlug: string; courseTitle: str
   );
 }
 
+/**
+ * A live is its own product: only VIP membership or a ticket for that exact event opens it.
+ * Owning the course a live belongs to is not enough — the student still enrolls in the live.
+ */
 async function resolveLiveAccess(
   courseSlug: string,
+  sessionId: string,
   accessToken?: string,
 ): Promise<{
   canWatch: boolean;
   canComment: boolean;
-  hasCourseAccess: boolean;
   actorUserId?: string;
 }> {
-  const { hasLiveAccessToCourse, hasPaidAccessToCourse, pickRegistrationForCourse } =
-    await import("@/lib/course-access");
-  const accessSlug = isStandaloneLiveSlug(courseSlug) ? STANDALONE_LIVE_SLUG : courseSlug;
-
-  if (!isStandaloneLiveSlug(courseSlug)) {
-    const { getResolvedCourseBySlug } = await import("@/server/site-content");
-    const { isFreeCourse } = await import("@/lib/courses");
-    const course = await getResolvedCourseBySlug(courseSlug);
-    if (!course) {
-      return resolveLiveAccess(STANDALONE_LIVE_SLUG, accessToken);
-    }
-    const free = isFreeCourse(course);
-    if (!accessToken?.trim()) {
-      return { canWatch: free, canComment: false, hasCourseAccess: false };
-    }
-    const { getUserFromAccessToken } = await import("@/server/supabase-auth");
-    const user = await getUserFromAccessToken(accessToken);
-    if (!user?.email || !user.id) {
-      return { canWatch: free, canComment: false, hasCourseAccess: false };
-    }
-    const { getDb } = await import("@/server/env");
-    const { listRegistrationsByEmail } = await import("@/server/db");
-    const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
-    const db = await getDb();
-    const email = normalizeRegistrationEmail(user.email);
-    const rows = await listRegistrationsByEmail(db, email);
-    const registration = pickRegistrationForCourse(rows, accessSlug);
-    const hasCourseAccess = hasPaidAccessToCourse(registration, accessSlug) || free;
-    const canWatch = hasLiveAccessToCourse(registration, accessSlug) || free;
-    return {
-      canWatch,
-      canComment: canWatch,
-      hasCourseAccess,
-      actorUserId: user.id,
-    };
-  }
-
-  if (!accessToken?.trim()) {
-    return { canWatch: false, canComment: false, hasCourseAccess: false };
-  }
+  const denied = { canWatch: false, canComment: false };
+  if (!accessToken?.trim()) return denied;
 
   const { getUserFromAccessToken } = await import("@/server/supabase-auth");
   const user = await getUserFromAccessToken(accessToken);
-  if (!user?.email || !user.id) {
-    return { canWatch: false, canComment: false, hasCourseAccess: false };
-  }
+  if (!user?.email || !user.id) return denied;
 
+  const { hasLiveTicketForSession, isPaidVipPlan } = await import("@/lib/course-access");
   const { getDb } = await import("@/server/env");
   const { listRegistrationsByEmail } = await import("@/server/db");
   const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
+
   const db = await getDb();
-  const email = normalizeRegistrationEmail(user.email);
-  const rows = await listRegistrationsByEmail(db, email);
-  const registration = pickRegistrationForCourse(rows, STANDALONE_LIVE_SLUG);
-  const canWatch = hasLiveAccessToCourse(registration, STANDALONE_LIVE_SLUG);
+  const rows = await listRegistrationsByEmail(db, normalizeRegistrationEmail(user.email));
+
+  const accessSlug = isStandaloneLiveSlug(courseSlug) ? STANDALONE_LIVE_SLUG : courseSlug;
+  const isVip = rows.some((row) => row.payment_status === "paid" && isPaidVipPlan(row.plan));
+  const canWatch = isVip || hasLiveTicketForSession(rows, sessionId, accessSlug);
 
   return {
     canWatch,
     canComment: canWatch,
-    hasCourseAccess: false,
     actorUserId: user.id,
   };
 }
@@ -211,7 +183,7 @@ function toPublicSession(
   session: Awaited<ReturnType<typeof import("@/server/live").getLiveSession>> & {
     course: LiveCourseInfo;
   },
-  access: { canWatch: boolean; canComment: boolean; hasCourseAccess: boolean },
+  access: { canWatch: boolean; canComment: boolean },
 ): PublicLiveSession {
   if (!session) {
     throw new Error("Live introuvable.");
@@ -227,8 +199,7 @@ function toPublicSession(
       : undefined,
     canWatch: access.canWatch,
     canComment: access.canComment && session.status === "live",
-    hasCourseAccess: access.hasCourseAccess,
-    liveTicketPrice: LIVE_TICKET_PRICE_USD,
+    liveTicketPrice: resolveLivePrice(session.priceUsd),
     course: session.course,
   };
 }
@@ -264,6 +235,7 @@ export const listPublicLiveSessions = createServerFn({ method: "GET" }).handler(
         endedAt: session.endedAt,
         recordingLessonId: session.recordingLessonId,
         thumbnailUrl: session.thumbnailUrl,
+        ticketPrice: resolveLivePrice(session.priceUsd),
         course: session.course,
       }));
   },
@@ -285,7 +257,7 @@ export const getPublicLiveSession = createServerFn({ method: "POST" })
       throw new Error("Live introuvable.");
     }
     const [withCourse] = await withPublicCourse([session]);
-    const access = await resolveLiveAccess(session.courseSlug, data.accessToken);
+    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
     return toPublicSession(withCourse, access);
   });
 
@@ -304,7 +276,7 @@ export const listLiveComments = createServerFn({ method: "POST" })
     if (!session || session.status === "canceled") {
       throw new Error("Live introuvable.");
     }
-    const access = await resolveLiveAccess(session.courseSlug, data.accessToken);
+    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
     if (!access.canWatch && session.status === "live") {
       return { comments: [] as const };
     }
@@ -347,9 +319,9 @@ export const postLiveComment = createServerFn({ method: "POST" })
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email || !user.id) throw new Error("Connexion requise.");
 
-    const access = await resolveLiveAccess(session.courseSlug, data.accessToken);
+    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
     if (!access.canComment) {
-      throw new Error("Inscrivez-vous au cours pour commenter.");
+      throw new Error("Réservez votre place pour ce live afin de commenter.");
     }
 
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
@@ -386,6 +358,7 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
         provider: providerSchema.optional(),
         playbackUrl: z.string().trim().min(8),
         scheduledAt: z.string().min(1),
+        priceUsd: livePriceSchema.optional(),
         thumbnailContentType: z.string().min(1).optional(),
         thumbnailBase64: z.string().min(1).optional(),
       })
@@ -422,7 +395,26 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
       playbackUrl,
       scheduledAt: scheduled.toISOString(),
       thumbnailUrl,
+      priceUsd: data.priceUsd ?? null,
     });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
+export const adminSetLiveSessionPrice = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        priceUsd: livePriceSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    await updateLiveSession(data.sessionId, { priceUsd: data.priceUsd });
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 

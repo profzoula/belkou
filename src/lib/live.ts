@@ -10,6 +10,33 @@ export function isStandaloneLiveSlug(slug?: string | null): boolean {
   return !trimmed || trimmed === STANDALONE_LIVE_SLUG;
 }
 
+const LIVE_TICKET_SLUG_PREFIX = `${STANDALONE_LIVE_SLUG}:`;
+
+/** A ticket is sold per event, so its registration slug carries the session id. */
+export function liveTicketSlug(sessionId: string): string {
+  return `${LIVE_TICKET_SLUG_PREFIX}${sessionId.trim()}`;
+}
+
+export function parseLiveTicketSlug(slug?: string | null): string | null {
+  const trimmed = slug?.trim() ?? "";
+  if (!trimmed.startsWith(LIVE_TICKET_SLUG_PREFIX)) return null;
+  return trimmed.slice(LIVE_TICKET_SLUG_PREFIX.length) || null;
+}
+
+/** Admins price each event; an unpriced event falls back to the default ticket. */
+export function resolveLivePrice(priceUsd?: number | null): number {
+  if (priceUsd == null || !Number.isFinite(priceUsd) || priceUsd < 0) {
+    return LIVE_TICKET_PRICE_USD;
+  }
+  return Math.round(priceUsd * 100) / 100;
+}
+
+export function formatLivePrice(priceUsd?: number | null): string {
+  const price = resolveLivePrice(priceUsd);
+  if (price <= 0) return "Gratuit";
+  return `${price.toFixed(2).replace(".", ",")} $`;
+}
+
 export type LiveProvider = (typeof LIVE_PROVIDERS)[number];
 export type LiveStatus = (typeof LIVE_STATUSES)[number];
 
@@ -28,6 +55,8 @@ export type LiveSession = {
   recordingUrl: string | null;
   recordingLessonId: string | null;
   thumbnailUrl: string | null;
+  /** Null until an admin sets a price — see `resolveLivePrice`. */
+  priceUsd: number | null;
   createdAt: string;
 };
 
@@ -70,6 +99,7 @@ export type PublicLiveListItem = {
   endedAt: string | null;
   recordingLessonId: string | null;
   thumbnailUrl: string | null;
+  ticketPrice: number;
   course: LiveCourseInfo;
 };
 
@@ -77,7 +107,6 @@ export type PublicLiveSession = Omit<LiveSession, "playbackUrl"> & {
   playbackUrl?: string;
   canWatch: boolean;
   canComment: boolean;
-  hasCourseAccess: boolean;
   liveTicketPrice: number;
   course: LiveCourseInfo;
 };

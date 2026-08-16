@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
-import { LIVE_TICKET_PRICE_USD, STANDALONE_LIVE_SLUG, isStandaloneLiveSlug } from "@/lib/live";
+import { formatLivePrice, formatLiveSchedule, liveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
@@ -30,6 +30,11 @@ type CheckoutPageProps = {
   plan?: PlanId;
   courseSlug?: string;
   liveTicket?: boolean;
+  /** Live tickets are sold per event, so a ticket checkout always names its session. */
+  liveSessionId?: string;
+  liveSessionTitle?: string;
+  liveSessionScheduledAt?: string;
+  liveSessionPrice?: number;
   refCode?: string;
   initialCourse?: PublicCourse | null;
 };
@@ -61,6 +66,10 @@ export function CheckoutPage({
   plan: initialPlan,
   courseSlug,
   liveTicket = false,
+  liveSessionId,
+  liveSessionTitle,
+  liveSessionScheduledAt,
+  liveSessionPrice,
   refCode,
   initialCourse = null,
 }: CheckoutPageProps) {
@@ -119,12 +128,13 @@ export function CheckoutPage({
   const plan = planDetails[selectedPlan];
   const coursePrice = course?.price;
   const courseOriginalPrice = course?.originalPrice;
+  const liveTicketPrice = resolveLivePrice(liveSessionPrice);
   const displayPrice = toMoney(
-    isLiveTicket ? LIVE_TICKET_PRICE_USD : courseSlug && course ? coursePrice! : plan.price,
+    isLiveTicket ? liveTicketPrice : courseSlug && course ? coursePrice! : plan.price,
   );
   const displayOriginal = toMoney(
     isLiveTicket
-      ? LIVE_TICKET_PRICE_USD
+      ? liveTicketPrice
       : courseSlug && course
         ? courseOriginalPrice!
         : ORIGINAL_PRICES[selectedPlan],
@@ -151,6 +161,11 @@ export function CheckoutPage({
       toast.error("Acceptez les conditions pour continuer.");
       return;
     }
+    if (isLiveTicket && !liveSessionId) {
+      toast.error("Choisissez le live que vous voulez réserver.");
+      navigate({ to: "/live" });
+      return;
+    }
 
     const payload = {
       ...form,
@@ -162,9 +177,7 @@ export function CheckoutPage({
             ? "premium"
             : selectedPlan,
       course_slug: isLiveTicket
-        ? courseSlug && course && !isStandaloneLiveSlug(courseSlug)
-          ? courseSlug
-          : STANDALONE_LIVE_SLUG
+        ? liveTicketSlug(liveSessionId ?? "")
         : courseSlug && course
           ? courseSlug
           : undefined,
@@ -194,10 +207,10 @@ export function CheckoutPage({
         email: parsed.data.email,
         registrationId: result.registrationId,
         courseSlug: parsed.data.course_slug,
-        paid: false,
+        paid: result.free,
       });
 
-      if (result.resumed) {
+      if (result.resumed && !result.free) {
         toast.info("Inscription retrouvée — redirection vers le paiement.");
       }
 
@@ -206,7 +219,11 @@ export function CheckoutPage({
         return;
       }
 
-      toast.info("Stripe indisponible — suivez les instructions de paiement manuel.");
+      toast[result.free ? "success" : "info"](
+        result.free
+          ? "Place réservée — rendez-vous le jour du live."
+          : "Stripe indisponible — suivez les instructions de paiement manuel.",
+      );
       navigate({
         to: "/success",
         search: {
@@ -225,8 +242,11 @@ export function CheckoutPage({
   const productTitle = isVipMembership
     ? "BelKou VIP — Accès illimité"
     : isLiveTicket
-      ? course?.title ?? "BelKou Live"
-      : course?.title ?? `Formation BelKou ${plan.name} — Formation en ligne`;
+      ? (liveSessionTitle ?? course?.title ?? "BelKou Live")
+      : (course?.title ?? `Formation BelKou ${plan.name} — Formation en ligne`);
+  const liveScheduleLabel = liveSessionScheduledAt
+    ? formatLiveSchedule(liveSessionScheduledAt)
+    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
@@ -247,13 +267,22 @@ export function CheckoutPage({
         <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
           <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            {isLiveTicket ? "Accès live — $9.99" : "Finalisez votre inscription"}
+            {isLiveTicket
+              ? `Réservez votre place — ${formatLivePrice(liveTicketPrice)}`
+              : "Finalisez votre inscription"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             {isLiveTicket
-              ? "Payez 9,99 $ pour regarder et commenter les lives BelKou. Les membres VIP regardent gratuitement."
+              ? liveSessionId
+                ? `Votre place pour ce live${liveScheduleLabel ? ` du ${liveScheduleLabel}` : ""} : le direct, les commentaires et le replay. Les membres VIP y ont déjà accès.`
+                : "Ce live n'est plus disponible. Choisissez une session sur la page Live pour réserver votre place."
               : "Quelques informations, puis paiement sécurisé via Stripe."}
           </p>
+          {isLiveTicket && !liveSessionId ? (
+            <Button asChild variant="hero" size="lg" className="mt-4 touch-target">
+              <Link to="/live">Voir les lives</Link>
+            </Button>
+          ) : null}
         </div>
 
         <form
@@ -284,8 +313,8 @@ export function CheckoutPage({
                   <p className="text-sm leading-snug text-foreground">
                     {isLiveTicket ? (
                       <>
-                        Accès live à <strong>{productTitle}</strong> — lives et commentaires sur
-                        BelKou.
+                        Place réservée pour <strong>{productTitle}</strong> — direct, commentaires
+                        et replay.
                       </>
                     ) : isVipMembership ? (
                       <>
@@ -299,7 +328,7 @@ export function CheckoutPage({
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {isLiveTicket
-                      ? "Les membres VIP regardent tous les lives gratuitement."
+                      ? "Une place par live · les membres VIP ont déjà tous les lives."
                       : isVipMembership
                         ? "Paiement unique · tous les cours et lives, à vie."
                         : "Paiement unique · accès immédiat après confirmation."}
@@ -313,12 +342,14 @@ export function CheckoutPage({
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {isLiveTicket ? (
                   <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
-                    <p className="font-bold text-sm">
-                      Accès live{course?.title ? ` — ${course.title}` : ""}
+                    <p className="font-bold text-sm">{productTitle}</p>
+                    <p className="mt-1 text-2xl font-bold">
+                      {liveTicketPrice > 0 ? formatUsd(liveTicketPrice) : "Gratuit"}
                     </p>
-                    <p className="mt-1 text-2xl font-bold">{formatUsd(LIVE_TICKET_PRICE_USD)}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Paiement unique · lives et commentaires
+                      {liveScheduleLabel
+                        ? `Direct ${liveScheduleLabel} · replay inclus`
+                        : "Paiement unique · direct et replay"}
                     </p>
                   </div>
                 ) : isVipMembership ? (
@@ -393,19 +424,19 @@ export function CheckoutPage({
                 <ul className="space-y-2">
                   {(isLiveTicket
                     ? [
-                        "Regarder le live sur BelKou",
+                        "Votre place réservée dès maintenant",
+                        "Regarder ce live en direct sur BelKou",
                         "Commenter pendant le direct",
-                        "Replay du live dans Sessions live",
-                        "N’inclut pas le programme complet du cours",
+                        "Replay de ce live après la session",
+                        "Valable pour ce live uniquement",
                       ]
                     : courseSlug && course
-                    ? [
-                        "Accès complet au cours",
-                        "Lives de ce cours offerts",
-                        "Vidéos et ressources à vie",
-                        "Support communauté BelKou",
-                      ]
-                    : plan.features
+                      ? [
+                          "Accès complet au cours",
+                          "Vidéos et ressources à vie",
+                          "Support communauté BelKou",
+                        ]
+                      : plan.features
                   ).map((feature) => (
                     <li key={feature} className="flex gap-2 text-sm">
                       <Check className="h-4 w-4 shrink-0 text-primary" />
@@ -601,8 +632,8 @@ export function CheckoutPage({
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
                   <dt className="text-muted-foreground">
-                    {isLiveTicket && courseSlug && course
-                      ? `Accès live — ${course.title}`
+                    {isLiveTicket
+                      ? `Place live — ${productTitle}`
                       : courseSlug && course
                         ? course.title
                         : `Plan ${plan.name}`}
@@ -689,7 +720,11 @@ export function CheckoutPage({
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1 h-4 w-4" />
-                {loading ? "Redirection…" : isLiveTicket ? "Payer 9,99 $ et rejoindre" : "Payer et commencer"}
+                {loading
+                  ? "Redirection…"
+                  : isLiveTicket
+                    ? `Réserver ma place — ${formatLivePrice(liveTicketPrice)}`
+                    : "Payer et commencer"}
               </Button>
               <p
                 id="checkout-submit-help"

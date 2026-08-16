@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { getServerEnvResolved } from "@/server/env";
-import { LIVE_TICKET_PRICE_USD, isStandaloneLiveSlug } from "@/lib/live";
+import { LIVE_TICKET_PRICE_USD, parseLiveTicketSlug } from "@/lib/live";
 import { siteConfig, type PlanId } from "@/lib/site-config";
 
 export async function getStripe(): Promise<Stripe | null> {
@@ -33,7 +33,7 @@ export async function createCheckoutSession(params: {
       ? env.STRIPE_PRICE_PREMIUM
       : env.STRIPE_PRICE_VIP;
 
-  const liveAmount = Math.round(LIVE_TICKET_PRICE_USD * 100);
+  const liveAmount = Math.round((params.amountUsd ?? LIVE_TICKET_PRICE_USD) * 100);
   const vipAmount = Math.round(siteConfig.plans.vip.price * 100);
 
   const lineItem = isLiveCheckout
@@ -43,7 +43,7 @@ export async function createCheckoutSession(params: {
           unit_amount: liveAmount,
           product_data: {
             name: `Accès live — ${params.courseTitle ?? "BelKou"}`,
-            description: "Regarder et commenter les lives de ce cours sur BelKou",
+            description: "Place réservée pour ce live BelKou : direct, commentaires et replay",
           },
         },
         quantity: 1,
@@ -101,12 +101,13 @@ export async function createCheckoutSession(params: {
           ? 19900
           : vipAmount;
 
+  const liveSessionId = isLiveCheckout ? parseLiveTicketSlug(params.courseSlug) : null;
   const cancelUrl = isVipMembership
     ? `${env.SITE_URL}/checkout?plan=vip`
     : isLiveCheckout
-      ? params.courseSlug && !isStandaloneLiveSlug(params.courseSlug)
-        ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}&live=1`
-        : `${env.SITE_URL}/checkout?live=1`
+      ? liveSessionId
+        ? `${env.SITE_URL}/checkout?plan=live&session=${encodeURIComponent(liveSessionId)}`
+        : `${env.SITE_URL}/live`
       : params.courseSlug
         ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
         : `${env.SITE_URL}/checkout?plan=${params.plan}`;

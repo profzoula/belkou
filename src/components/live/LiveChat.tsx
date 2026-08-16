@@ -146,7 +146,7 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
         </form>
       ) : live ? (
         <p className="border-t border-zinc-800 px-4 py-3 text-xs text-zinc-500">
-          Inscrivez-vous pour commenter.
+          Réservez votre place pour commenter.
         </p>
       ) : (
         <p className="border-t border-zinc-800 px-4 py-3 text-xs text-zinc-500">Le chat est fermé.</p>
