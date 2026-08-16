@@ -20,6 +20,7 @@ export type LiveSession = {
   endedAt: string | null;
   recordingUrl: string | null;
   recordingLessonId: string | null;
+  thumbnailUrl: string | null;
   createdAt: string;
 };
 
@@ -31,6 +32,21 @@ export type LiveComment = {
   body: string;
   createdAt: string;
   mine?: boolean;
+};
+
+export type LiveCourseInfo = {
+  slug: string;
+  title: string;
+  instructor: string;
+  price: number;
+  originalPrice: number;
+  studentsCount: number;
+  description: string;
+  thumbnail: {
+    gradient: string;
+    label: string;
+    imageUrl?: string;
+  };
 };
 
 export type PublicLiveListItem = {
@@ -45,6 +61,8 @@ export type PublicLiveListItem = {
   startedAt: string | null;
   endedAt: string | null;
   recordingLessonId: string | null;
+  thumbnailUrl: string | null;
+  course: LiveCourseInfo;
 };
 
 export type PublicLiveSession = Omit<LiveSession, "playbackUrl"> & {
@@ -53,6 +71,7 @@ export type PublicLiveSession = Omit<LiveSession, "playbackUrl"> & {
   canComment: boolean;
   hasCourseAccess: boolean;
   liveTicketPrice: number;
+  course: LiveCourseInfo;
 };
 
 export function liveStatusLabel(status: LiveStatus): string {
@@ -98,4 +117,16 @@ export function detectLiveProvider(url: string): LiveProvider {
   if (trimmed.includes("vimeo.com")) return "vimeo";
   if (trimmed.includes(".m3u8") || trimmed.includes("/hls")) return "hls";
   return "youtube";
+}
+
+export function liveEventThumbnail(
+  session: { thumbnailUrl?: string | null },
+  course: LiveCourseInfo,
+): LiveCourseInfo["thumbnail"] {
+  const imageUrl = session.thumbnailUrl?.trim() || course.thumbnail.imageUrl;
+  return {
+    gradient: course.thumbnail.gradient,
+    label: course.thumbnail.label,
+    ...(imageUrl ? { imageUrl } : {}),
+  };
 }

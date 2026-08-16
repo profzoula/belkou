@@ -74,3 +74,18 @@ export async function uploadCourseThumbnail(params: {
   const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
   return { ok: true, publicUrl: data.publicUrl };
 }
+
+export async function uploadLiveThumbnail(params: {
+  sessionId?: string;
+  contentType: string;
+  dataBase64: string;
+}): Promise<{ ok: true; publicUrl: string } | { ok: false; reason: string }> {
+  const folder = params.sessionId?.trim()
+    ? `live/${params.sessionId.trim()}`
+    : `live/new/${crypto.randomUUID()}`;
+  return uploadCourseThumbnail({
+    courseSlug: folder,
+    contentType: params.contentType,
+    dataBase64: params.dataBase64,
+  });
+}

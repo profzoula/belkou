@@ -15,6 +15,7 @@ create table if not exists public.live_sessions (
   ended_at timestamptz,
   recording_url text,
   recording_lesson_id text,
+  thumbnail_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

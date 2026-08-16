@@ -11,6 +11,7 @@ type LiveStreamPlayerProps = {
   url: string;
   title: string;
   live?: boolean;
+  fill?: boolean;
 };
 
 function HlsLivePlayer({ url, title }: { url: string; title: string }) {
@@ -38,8 +39,9 @@ function HlsLivePlayer({ url, title }: { url: string; title: string }) {
   return (
     <video
       ref={videoRef}
-      className="absolute inset-0 h-full w-full bg-black"
+      className="absolute inset-0 h-full w-full bg-black object-contain"
       controls
+      controlsList="nofullscreen"
       playsInline
       autoPlay
       title={title}
@@ -47,22 +49,30 @@ function HlsLivePlayer({ url, title }: { url: string; title: string }) {
   );
 }
 
-export function LiveStreamPlayer({ provider, url, title, live = false }: LiveStreamPlayerProps) {
+export function LiveStreamPlayer({
+  provider,
+  url,
+  title,
+  live = false,
+  fill = false,
+}: LiveStreamPlayerProps) {
+  const frame = fill ? "relative h-full w-full overflow-hidden bg-black" : "relative aspect-video w-full overflow-hidden bg-black";
+
   if (provider === "youtube") {
     const embed = youtubeUrlToEmbedUrl(url, live);
     if (!embed) {
-      return <LivePlayerFallback />;
+      return <LivePlayerFallback fill={fill} />;
     }
-    return <YouTubeVideoPlayer embedUrl={embed} title={title} />;
+    return <YouTubeVideoPlayer embedUrl={embed} title={title} fill={fill} />;
   }
 
   if (provider === "vimeo") {
     const embed = vimeoUrlToEmbedUrl(url);
     if (!embed) {
-      return <LivePlayerFallback />;
+      return <LivePlayerFallback fill={fill} />;
     }
     return (
-      <div className="relative aspect-video w-full overflow-hidden bg-black">
+      <div className={frame}>
         <iframe
           src={`${embed}${live ? "&autoplay=1" : ""}`}
           title={title}
@@ -75,15 +85,21 @@ export function LiveStreamPlayer({ provider, url, title, live = false }: LiveStr
   }
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden bg-black">
+    <div className={frame}>
       <HlsLivePlayer url={url} title={title} />
     </div>
   );
 }
 
-function LivePlayerFallback() {
+function LivePlayerFallback({ fill = false }: { fill?: boolean }) {
   return (
-    <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground">
+    <div
+      className={
+        fill
+          ? "flex h-full w-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground"
+          : "flex aspect-video w-full flex-col items-center justify-center gap-2 bg-muted text-muted-foreground"
+      }
+    >
       <Radio className="size-8" aria-hidden />
       <p className="text-sm">Lien de diffusion invalide.</p>
     </div>

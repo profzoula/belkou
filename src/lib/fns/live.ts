@@ -6,6 +6,7 @@ import {
   LIVE_RECORDING_SECTION_TITLE,
   LIVE_TICKET_PRICE_USD,
   detectLiveProvider,
+  type LiveCourseInfo,
   type LiveProvider,
   type PublicLiveListItem,
   type PublicLiveSession,
@@ -52,6 +53,38 @@ async function requireAdmin() {
   }
 }
 
+function toLiveCourseInfo(
+  slug: string,
+  course: Awaited<ReturnType<typeof import("@/server/site-content").getResolvedCourseBySlug>>,
+): LiveCourseInfo {
+  if (!course) {
+    return {
+      slug,
+      title: slug,
+      instructor: "",
+      price: 0,
+      originalPrice: 0,
+      studentsCount: 0,
+      description: "",
+      thumbnail: { gradient: "from-primary/80 to-primary", label: "LIVE" },
+    };
+  }
+  return {
+    slug: course.slug,
+    title: course.title,
+    instructor: course.instructor,
+    price: course.price,
+    originalPrice: course.originalPrice,
+    studentsCount: course.studentsCount,
+    description: course.description,
+    thumbnail: {
+      gradient: course.thumbnail.gradient,
+      label: course.thumbnail.label,
+      ...(course.thumbnail.imageUrl ? { imageUrl: course.thumbnail.imageUrl } : {}),
+    },
+  };
+}
+
 async function withCourseTitles<T extends { courseSlug: string; courseTitle: string }>(
   sessions: T[],
 ): Promise<T[]> {
@@ -60,6 +93,30 @@ async function withCourseTitles<T extends { courseSlug: string; courseTitle: str
     sessions.map(async (session) => {
       const course = await getResolvedCourseBySlug(session.courseSlug);
       return { ...session, courseTitle: course?.title ?? session.courseSlug };
+    }),
+  );
+}
+
+async function withPublicCourse<T extends { courseSlug: string; courseTitle: string }>(
+  sessions: T[],
+): Promise<(T & { courseTitle: string; course: LiveCourseInfo })[]> {
+  const { getResolvedCourseBySlug } = await import("@/server/site-content");
+  const { getDisplayedCourseStudentsCount } = await import("@/lib/courses");
+  return Promise.all(
+    sessions.map(async (session) => {
+      const resolved = await getResolvedCourseBySlug(session.courseSlug);
+      const course = toLiveCourseInfo(session.courseSlug, resolved);
+      return {
+        ...session,
+        courseTitle: course.title,
+        course: {
+          ...course,
+          studentsCount: getDisplayedCourseStudentsCount({
+            studentsCount: course.studentsCount,
+            slug: course.slug,
+          }),
+        },
+      };
     }),
   );
 }
@@ -112,7 +169,9 @@ async function resolveLiveAccess(
 }
 
 function toPublicSession(
-  session: Awaited<ReturnType<typeof import("@/server/live").getLiveSession>> & object,
+  session: Awaited<ReturnType<typeof import("@/server/live").getLiveSession>> & {
+    course: LiveCourseInfo;
+  },
   access: { canWatch: boolean; canComment: boolean; hasCourseAccess: boolean },
 ): PublicLiveSession {
   if (!session) {
@@ -131,6 +190,7 @@ function toPublicSession(
     canComment: access.canComment && session.status === "live",
     hasCourseAccess: access.hasCourseAccess,
     liveTicketPrice: LIVE_TICKET_PRICE_USD,
+    course: session.course,
   };
 }
 
@@ -149,7 +209,7 @@ export const getPublicLiveSummary = createServerFn({ method: "GET" }).handler(as
 export const listPublicLiveSessions = createServerFn({ method: "GET" }).handler(
   async (): Promise<PublicLiveListItem[]> => {
     const { listLiveSessions } = await import("@/server/live");
-    const sessions = await withCourseTitles(await listLiveSessions());
+    const sessions = await withPublicCourse(await listLiveSessions());
     return sessions
       .filter((session) => session.status !== "canceled")
       .map((session) => ({
@@ -164,6 +224,8 @@ export const listPublicLiveSessions = createServerFn({ method: "GET" }).handler(
         startedAt: session.startedAt,
         endedAt: session.endedAt,
         recordingLessonId: session.recordingLessonId,
+        thumbnailUrl: session.thumbnailUrl,
+        course: session.course,
       }));
   },
 );
@@ -183,9 +245,9 @@ export const getPublicLiveSession = createServerFn({ method: "POST" })
     if (!session || session.status === "canceled") {
       throw new Error("Live introuvable.");
     }
-    const [withTitle] = await withCourseTitles([session]);
+    const [withCourse] = await withPublicCourse([session]);
     const access = await resolveLiveAccess(session.courseSlug, data.accessToken);
-    return toPublicSession(withTitle, access);
+    return toPublicSession(withCourse, access);
   });
 
 export const listLiveComments = createServerFn({ method: "POST" })
@@ -277,6 +339,8 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
         provider: providerSchema.optional(),
         playbackUrl: z.string().trim().min(8),
         scheduledAt: z.string().min(1),
+        thumbnailContentType: z.string().min(1).optional(),
+        thumbnailBase64: z.string().min(1).optional(),
       })
       .parse(data),
   )
@@ -294,6 +358,17 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
     const provider = data.provider ?? detectLiveProvider(data.playbackUrl);
     const playbackUrl = validatePlaybackUrl(provider, data.playbackUrl);
 
+    let thumbnailUrl: string | undefined;
+    if (data.thumbnailBase64 && data.thumbnailContentType) {
+      const { uploadLiveThumbnail } = await import("@/server/course-thumbnail-storage");
+      const upload = await uploadLiveThumbnail({
+        contentType: data.thumbnailContentType,
+        dataBase64: data.thumbnailBase64,
+      });
+      if (!upload.ok) throw new Error(upload.reason);
+      thumbnailUrl = upload.publicUrl;
+    }
+
     const { createLiveSession, listLiveSessions } = await import("@/server/live");
     await createLiveSession({
       courseSlug: data.courseSlug,
@@ -302,6 +377,7 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
       provider,
       playbackUrl,
       scheduledAt: scheduled.toISOString(),
+      thumbnailUrl,
     });
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
@@ -369,6 +445,45 @@ export const adminCancelLiveSession = createServerFn({ method: "POST" })
     if (!session) throw new Error("Live introuvable.");
     if (session.status === "ended") throw new Error("Un replay ne peut pas être annulé.");
     await updateLiveSession(data.sessionId, { status: "canceled" });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
+export const adminUploadLiveThumbnail = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+
+    const { uploadLiveThumbnail } = await import("@/server/course-thumbnail-storage");
+    const upload = await uploadLiveThumbnail({
+      sessionId: data.sessionId,
+      contentType: data.contentType,
+      dataBase64: data.dataBase64,
+    });
+    if (!upload.ok) throw new Error(upload.reason);
+
+    await updateLiveSession(data.sessionId, { thumbnailUrl: upload.publicUrl });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
+export const adminRemoveLiveThumbnail = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ sessionId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    await updateLiveSession(data.sessionId, { thumbnailUrl: null });
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 

@@ -28,6 +28,7 @@ function mapSession(
     endedAt: row.ended_at ? String(row.ended_at) : null,
     recordingUrl: row.recording_url ? String(row.recording_url) : null,
     recordingLessonId: row.recording_lesson_id ? String(row.recording_lesson_id) : null,
+    thumbnailUrl: row.thumbnail_url ? String(row.thumbnail_url) : null,
     createdAt: String(row.created_at),
   };
 }
@@ -78,6 +79,7 @@ export async function createLiveSession(input: {
   provider: LiveProvider;
   playbackUrl: string;
   scheduledAt: string;
+  thumbnailUrl?: string | null;
 }): Promise<LiveSession> {
   const sb = getSupabaseAdmin();
   if (!sb) throw new Error("Live indisponible — configurez Supabase.");
@@ -92,6 +94,7 @@ export async function createLiveSession(input: {
       playback_url: input.playbackUrl.trim(),
       scheduled_at: input.scheduledAt,
       status: "scheduled",
+      thumbnail_url: input.thumbnailUrl?.trim() || null,
     })
     .select("*")
     .single();
@@ -116,6 +119,7 @@ export async function updateLiveSession(
     endedAt: string | null;
     recordingUrl: string | null;
     recordingLessonId: string | null;
+    thumbnailUrl: string | null;
   }>,
 ): Promise<LiveSession> {
   const sb = getSupabaseAdmin();
@@ -134,6 +138,7 @@ export async function updateLiveSession(
   if (patch.endedAt !== undefined) row.ended_at = patch.endedAt;
   if (patch.recordingUrl !== undefined) row.recording_url = patch.recordingUrl;
   if (patch.recordingLessonId !== undefined) row.recording_lesson_id = patch.recordingLessonId;
+  if (patch.thumbnailUrl !== undefined) row.thumbnail_url = patch.thumbnailUrl;
 
   const { data, error } = await sb.from("live_sessions").update(row).eq("id", id).select("*").single();
   if (error || !data) {
