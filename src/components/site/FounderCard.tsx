@@ -7,6 +7,9 @@ type FounderCardProps = {
   variant?: "default" | "featured";
 };
 
+/** The source photo is a three-quarter portrait, so zoom in on the head to fill the circle. */
+const FOUNDER_AVATAR_CROP = "origin-top scale-[1.85] object-cover object-top";
+
 function SocialLink({
   href,
   label,
@@ -134,7 +137,11 @@ export function FounderCard({ variant = "default" }: FounderCardProps) {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,oklch(0.50_0.18_272/0.08),transparent_55%)]" />
             <Avatar className="relative z-10 h-36 w-36 border-[3px] border-card shadow-lg md:h-44 md:w-44">
               {founder.avatarUrl ? (
-                <AvatarImage src={founder.avatarUrl} alt={founder.name} className="object-cover" />
+                <AvatarImage
+                  src={founder.avatarUrl}
+                  alt={founder.name}
+                  className={FOUNDER_AVATAR_CROP}
+                />
               ) : null}
               <AvatarFallback className="bg-gradient-to-br from-primary/20 to-indigo-500/20 text-2xl font-bold text-primary">
                 {initials}
@@ -179,7 +186,11 @@ export function FounderCard({ variant = "default" }: FounderCardProps) {
     <article className="mx-auto w-full max-w-sm rounded-2xl border border-border/70 bg-card px-8 py-10 text-center shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
       <Avatar className="mx-auto h-24 w-24 border-2 border-primary/15 shadow-sm">
         {founder.avatarUrl ? (
-          <AvatarImage src={founder.avatarUrl} alt={founder.name} className="object-cover" />
+          <AvatarImage
+            src={founder.avatarUrl}
+            alt={founder.name}
+            className={FOUNDER_AVATAR_CROP}
+          />
         ) : null}
         <AvatarFallback className="bg-gradient-to-br from-primary/20 to-indigo-500/20 text-xl font-bold text-primary">
           {initials}

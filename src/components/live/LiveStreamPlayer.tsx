@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { Check, Radio, Settings } from "lucide-react";
 import { YouTubeVideoPlayer } from "@/components/course/YouTubeVideoPlayer";
+import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
 import type { LiveProvider } from "@/lib/live";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -97,7 +98,15 @@ function HlsQualityMenu({
   );
 }
 
-function HlsLivePlayer({ url, title }: { url: string; title: string }) {
+function HlsLivePlayer({
+  url,
+  title,
+  nativeFullscreen,
+}: {
+  url: string;
+  title: string;
+  nativeFullscreen: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [levels, setLevels] = useState<QualityLevel[]>([]);
@@ -155,7 +164,7 @@ function HlsLivePlayer({ url, title }: { url: string; title: string }) {
         ref={videoRef}
         className="absolute inset-0 h-full w-full bg-black object-contain"
         controls
-        controlsList="nofullscreen"
+        controlsList={nativeFullscreen ? undefined : "nofullscreen"}
         playsInline
         autoPlay
         title={title}
@@ -193,12 +202,21 @@ export function LiveStreamPlayer({
   live = false,
   fill = false,
 }: LiveStreamPlayerProps) {
+  // Mobile players refuse to start playback when fullscreen is blocked, so only
+  // desktop gets the in-page theater treatment.
+  const nativeFullscreen = useCoarsePointer();
+
   const media = (() => {
     if (provider === "youtube") {
-      const embed = youtubeUrlToEmbedUrl(url, live, { nativeFullscreen: false });
+      const embed = youtubeUrlToEmbedUrl(url, live, { nativeFullscreen });
       if (!embed) return null;
       return (
-        <YouTubeVideoPlayer embedUrl={embed} title={title} fill nativeFullscreen={false} />
+        <YouTubeVideoPlayer
+          embedUrl={embed}
+          title={title}
+          fill
+          nativeFullscreen={nativeFullscreen}
+        />
       );
     }
 
@@ -207,15 +225,20 @@ export function LiveStreamPlayer({
       if (!embed) return null;
       return (
         <iframe
-          src={`${embed}${live ? "&autoplay=1" : ""}&fullscreen=0`}
+          src={`${embed}${live ? "&autoplay=1" : ""}${nativeFullscreen ? "" : "&fullscreen=0"}`}
           title={title}
-          allow="autoplay; picture-in-picture"
+          allow={
+            nativeFullscreen
+              ? "autoplay; picture-in-picture; fullscreen"
+              : "autoplay; picture-in-picture"
+          }
+          allowFullScreen={nativeFullscreen}
           className="absolute inset-0 h-full w-full"
         />
       );
     }
 
-    return <HlsLivePlayer url={url} title={title} />;
+    return <HlsLivePlayer url={url} title={title} nativeFullscreen={nativeFullscreen} />;
   })();
 
   if (!media) return <LivePlayerFallback fill={fill} />;

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Maximize, Minimize } from "lucide-react";
+import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
 import { cn } from "@/lib/utils";
 
 type LiveWatchStageProps = {
@@ -26,6 +27,7 @@ async function exitNativeFullscreen() {
 
 export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const touchDevice = useCoarsePointer();
   const [theater, setTheater] = useState(false);
 
   const enterTheater = useCallback(() => setTheater(true), []);
@@ -44,6 +46,9 @@ export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
   }, [theater]);
 
   useEffect(() => {
+    // Phones and tablets keep their real fullscreen; hijacking it breaks playback.
+    if (touchDevice) return;
+
     const onNativeFullscreen = () => {
       const node = stageRef.current;
       const fs = getFullscreenElement();
@@ -61,7 +66,7 @@ export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
       document.removeEventListener("fullscreenchange", onNativeFullscreen);
       document.removeEventListener("webkitfullscreenchange", onNativeFullscreen);
     };
-  }, [enterTheater]);
+  }, [enterTheater, touchDevice]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {

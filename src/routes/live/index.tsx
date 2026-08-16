@@ -73,7 +73,9 @@ function LiveIndexPage() {
 
           {featured ? (
             <div className="space-y-10">
-              <LiveVideoCard session={featured} featured />
+              <div className="max-w-3xl xl:max-w-4xl">
+                <LiveVideoCard session={featured} featured />
+              </div>
               <LiveSection title="Aussi en direct" sessions={moreLive} />
               <LiveSection
                 title={featured.status === "live" ? "À venir" : "Autres sessions"}
