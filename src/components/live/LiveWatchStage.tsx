@@ -28,7 +28,10 @@ async function exitNativeFullscreen() {
 export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const touchDevice = useCoarsePointer();
-  const [theater, setTheater] = useState(false);
+  const [theaterRequested, setTheater] = useState(false);
+  // Phones get their own fullscreen from the player, so theater mode would only
+  // shrink the video and lock the page.
+  const theater = theaterRequested && !touchDevice;
 
   const enterTheater = useCallback(() => setTheater(true), []);
   const exitTheater = useCallback(() => setTheater(false), []);
@@ -114,15 +117,21 @@ export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
           )}
         >
           {player}
-          <button
-            type="button"
-            onClick={toggle}
-            className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-            aria-label={theater ? "Quitter le plein écran" : "Plein écran"}
-            title={theater ? "Quitter le plein écran (F)" : "Plein écran (F)"}
-          >
-            {theater ? <Minimize className="size-5" aria-hidden /> : <Maximize className="size-5" aria-hidden />}
-          </button>
+          {touchDevice ? null : (
+            <button
+              type="button"
+              onClick={toggle}
+              className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              aria-label={theater ? "Quitter le plein écran" : "Plein écran"}
+              title={theater ? "Quitter le plein écran (F)" : "Plein écran (F)"}
+            >
+              {theater ? (
+                <Minimize className="size-5" aria-hidden />
+              ) : (
+                <Maximize className="size-5" aria-hidden />
+              )}
+            </button>
+          )}
         </div>
         {caption && !theater ? (
           <div className="bg-zinc-950 px-4 py-4 sm:px-5 lg:col-start-1 lg:row-start-2">
