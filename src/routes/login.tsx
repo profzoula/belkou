@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Info, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthField } from "@/components/auth/AuthField";
 import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
@@ -34,6 +34,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [oauthError, setOauthError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ function LoginPage() {
     }
 
     setLoading(true);
+    setFormError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
@@ -81,11 +83,12 @@ function LoginPage() {
         toast.error("Confirmez votre email dans Gmail avant de vous connecter.");
         return;
       }
-      toast.error(
+      const readable =
         error.message === "Invalid login credentials"
           ? "Email ou mot de passe incorrect."
-          : error.message,
-      );
+          : error.message;
+      setFormError(readable);
+      toast.error(readable);
       return;
     }
 
@@ -98,17 +101,17 @@ function LoginPage() {
   };
 
   return (
-    <AuthSplitLayout>
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-        Connexion
-      </p>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Accédez à votre espace
+    <AuthSplitLayout activeTab="login" tabRedirect={redirectFromSearch}>
+      <h1 className="font-display text-[26px] font-bold tracking-tight text-foreground sm:text-3xl">
+        Accédez à votre espace<span className="text-primary">.</span>
       </h1>
-      <p className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-        Vous avez déjà payé pour un cours ? Connectez-vous avec{" "}
-        <strong className="text-foreground">le même email</strong> que votre inscription pour
-        accéder à Mes cours.
+      <p className="mt-2 flex gap-2.5 rounded-xl border border-border bg-muted/40 px-3.5 py-3 text-[13px] leading-relaxed text-muted-foreground">
+        <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+        <span>
+          Déjà payé un cours ? Connectez-vous avec{" "}
+          <strong className="font-semibold text-foreground">le même email</strong> que votre
+          inscription pour retrouver Mes cours.
+        </span>
       </p>
 
       {!isSupabaseConfigured ? (
@@ -118,40 +121,56 @@ function LoginPage() {
           <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       ) : (
-        <div className="mt-8 space-y-6">
+        <div className="mt-6 space-y-5">
           {pendingEmail ? <EmailConfirmationNotice email={pendingEmail} /> : null}
 
-          {oauthError ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-              {oauthError}
-            </div>
+          {oauthError || formError ? (
+            <p
+              role="alert"
+              className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            >
+              {oauthError ?? formError}
+            </p>
           ) : null}
 
-          <form onSubmit={submit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@email.com"
-                className="h-11 rounded-xl"
-                required
-              />
-            </div>
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} />
+
+          <AuthDivider />
+
+          <form onSubmit={submit} className="space-y-4">
+            <AuthField
+              id="email"
+              label="Email"
+              type="email"
+              icon={Mail}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="vous@email.com"
+              autoComplete="email"
+              inputMode="email"
+              autoFocus
+              required
+            />
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input
+              <AuthField
                 id="password"
+                label="Mot de passe"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-xl"
+                autoComplete="current-password"
                 required
               />
+              <p className="text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </p>
             </div>
 
             <Button
@@ -159,34 +178,11 @@ function LoginPage() {
               variant="hero"
               size="lg"
               disabled={loading}
-              className="h-11 w-full"
+              className="h-12 w-full rounded-full text-base"
             >
               {loading ? "Connexion…" : "Se connecter"}
             </Button>
           </form>
-
-          <AuthDivider />
-
-          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
-
-          <p className="text-center text-sm text-muted-foreground">
-            Pas encore de compte ?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              Créer un compte
-            </Link>
-          </p>
-
-          <p className="text-center text-sm">
-            <Link
-              to="/forgot-password"
-              className="text-muted-foreground hover:text-foreground hover:underline"
-            >
-              Mot de passe oublié ?
-            </Link>
-          </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             En vous connectant, vous acceptez les{" "}

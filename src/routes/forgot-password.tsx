@@ -3,10 +3,9 @@ import { useState } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthField } from "@/components/auth/AuthField";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
@@ -69,8 +68,8 @@ function ForgotPasswordPage() {
       <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
         Mot de passe
       </p>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Mot de passe oublié
+      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Mot de passe oublié<span className="text-primary">.</span>
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de
@@ -94,25 +93,28 @@ function ForgotPasswordPage() {
           />
         </div>
       ) : (
-        <form onSubmit={submit} className="mt-8 space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="fp-email">Adresse email</Label>
-            <Input
-              id="fp-email"
-              type="email"
-              required
-              placeholder="vous@exemple.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+        <form onSubmit={submit} className="mt-8 space-y-4">
+          <AuthField
+            id="fp-email"
+            label="Adresse email"
+            type="email"
+            icon={Mail}
+            required
+            placeholder="vous@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            inputMode="email"
+            autoFocus
+          />
           <Button
             type="submit"
-            className="w-full"
+            className="h-12 w-full rounded-full text-base"
+            size="lg"
             variant="hero"
             disabled={loading || !isSupabaseConfigured}
           >
-            {loading ? "Envoi en cours…" : "Envoyer le lien de réinitialisation"}
+            {loading ? "Envoi en cours…" : "Envoyer le lien"}
           </Button>
         </form>
       )}

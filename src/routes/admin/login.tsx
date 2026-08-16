@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Lock, ShieldCheck } from "lucide-react";
+import { ArrowRight, Lock, ShieldCheck, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AuthField } from "@/components/auth/AuthField";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { adminLogin } from "@/lib/fns/admin";
@@ -86,33 +85,28 @@ function AdminLoginPage() {
           onSubmit={submit}
           className="space-y-4 rounded-[20px] border border-border/80 bg-card/95 p-6 shadow-[0_16px_48px_rgb(15_23_42_/_0.08)] backdrop-blur sm:p-7"
         >
-          <div className="space-y-2">
-            <Label htmlFor="username">Identifiant</Label>
-            <Input
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              className="h-11 rounded-xl"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              className="h-11 rounded-xl"
-              required
-            />
-          </div>
+          <AuthField
+            id="username"
+            label="Identifiant"
+            icon={UserRound}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+            required
+          />
+          <AuthField
+            id="password"
+            label="Mot de passe"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            required
+          />
           <Button
             type="submit"
             variant="hero"
-            className="w-full rounded-xl"
+            className="h-12 w-full rounded-full"
             disabled={loading}
           >
             {loading ? "Connexion…" : "Se connecter"}

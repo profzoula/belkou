@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Check, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthField } from "@/components/auth/AuthField";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
 import { seoHead } from "@/lib/seo";
 
@@ -26,8 +25,8 @@ function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -90,8 +89,8 @@ function ResetPasswordPage() {
       <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
         Mot de passe
       </p>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Nouveau mot de passe
+      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        Nouveau mot de passe<span className="text-primary">.</span>
       </h1>
 
       {hasSession === null && (
@@ -117,42 +116,38 @@ function ResetPasswordPage() {
           <p className="mt-3 text-sm text-muted-foreground">
             Définissez un nouveau mot de passe pour votre compte.
           </p>
-          <form onSubmit={submit} className="mt-8 space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="rp-password">Nouveau mot de passe</Label>
-              <div className="relative">
-                <Input
-                  id="rp-password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={6}
-                  placeholder="Au moins 6 caractères"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="rp-confirm">Confirmer le mot de passe</Label>
-              <Input
-                id="rp-confirm"
-                type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
-                placeholder="Répétez le mot de passe"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" variant="hero" disabled={loading}>
+          <form onSubmit={submit} className="mt-8 space-y-4">
+            <AuthField
+              id="rp-password"
+              label="Nouveau mot de passe"
+              type="password"
+              required
+              minLength={6}
+              placeholder="Au moins 6 caractères"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              autoFocus
+            />
+            <AuthField
+              id="rp-confirm"
+              label="Confirmer le mot de passe"
+              type="password"
+              required
+              minLength={6}
+              placeholder="Répétez le mot de passe"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              error={passwordMismatch ? "Les mots de passe ne correspondent pas." : null}
+            />
+            <Button
+              type="submit"
+              className="h-12 w-full rounded-full text-base"
+              size="lg"
+              variant="hero"
+              disabled={loading}
+            >
               {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
             </Button>
           </form>

@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Mail, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthField } from "@/components/auth/AuthField";
 import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { getAuthCallbackUrl } from "@/lib/supabase/auth-actions";
@@ -44,12 +44,17 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [showReferralField, setShowReferralField] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   useEffect(() => {
     const stored = getStoredReferralCode();
-    if (stored) setReferralCode(stored);
+    if (stored) {
+      setReferralCode(stored);
+      setShowReferralField(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -139,15 +144,15 @@ function SignupPage() {
         <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
           Inscription
         </p>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Presque terminé
+        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          Presque terminé<span className="text-primary">.</span>
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Confirmez votre email pour activer votre compte et accéder à vos cours.
         </p>
         <div className="mt-8 space-y-4">
           <EmailConfirmationNotice email={pendingConfirmationEmail} />
-          <Button asChild variant="soft" size="lg" className="h-11 w-full">
+          <Button asChild variant="soft" size="lg" className="h-12 w-full rounded-full">
             <Link
               to="/login"
               search={{
@@ -164,14 +169,11 @@ function SignupPage() {
   }
 
   return (
-    <AuthSplitLayout>
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-        Inscription
-      </p>
-      <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-        Créez votre compte
+    <AuthSplitLayout activeTab="signup" tabRedirect={redirectFromSearch}>
+      <h1 className="font-display text-[26px] font-bold tracking-tight text-foreground sm:text-3xl">
+        Créez votre compte<span className="text-primary">.</span>
       </h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
         Compte gratuit pour votre espace étudiant. Prêt à acheter un cours ?{" "}
         <Link
           to="/courses"
@@ -189,82 +191,91 @@ function SignupPage() {
           <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       ) : (
-        <div className="mt-8 space-y-6">
-          <form onSubmit={submit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Nom complet</Label>
-              <Input
-                id="full_name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Jean Pierre"
-                className="h-11 rounded-xl"
-                required
-              />
-            </div>
+        <div className="mt-6 space-y-5">
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vous@email.com"
-                className="h-11 rounded-xl"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Utilisez la même adresse que lors de votre inscription au cours, si vous avez déjà
-                payé.
-              </p>
-            </div>
+          <AuthDivider />
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-11 rounded-xl"
-                minLength={8}
-                required
-              />
-            </div>
+          <form onSubmit={submit} className="space-y-4">
+            <AuthField
+              id="full_name"
+              label="Nom complet"
+              icon={User}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Jean Pierre"
+              autoComplete="name"
+              autoFocus
+              required
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="referral_code">Code affilié (optionnel)</Label>
-              <Input
+            <AuthField
+              id="email"
+              label="Email"
+              type="email"
+              icon={Mail}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="vous@email.com"
+              autoComplete="email"
+              inputMode="email"
+              hint="Déjà payé un cours ? Utilisez la même adresse pour retrouver vos accès."
+              required
+            />
+
+            <AuthField
+              id="password"
+              label="Mot de passe"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              minLength={8}
+              hint="8 caractères minimum."
+              required
+            />
+
+            <AuthField
+              id="confirm_password"
+              label="Confirmer le mot de passe"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="new-password"
+              minLength={8}
+              error={passwordMismatch ? "Les mots de passe ne correspondent pas." : null}
+              required
+            />
+
+            {showReferralField ? (
+              <AuthField
                 id="referral_code"
+                label="Code affilié (optionnel)"
+                icon={Ticket}
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                 placeholder="Ex. JEAN1A2B"
-                className="h-11 rounded-xl font-mono tracking-wide"
+                className="font-mono tracking-wide"
+                autoComplete="off"
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirm_password">Confirmer le mot de passe</Label>
-              <Input
-                id="confirm_password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-11 rounded-xl"
-                minLength={8}
-                required
-              />
-            </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowReferralField(true)}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                J&apos;ai un code affilié
+              </button>
+            )}
 
             <Button
               type="submit"
               variant="hero"
               size="lg"
               disabled={loading}
-              className="h-11 w-full"
+              className="h-12 w-full rounded-full text-base"
             >
               {loading ? "Création…" : "Créer mon compte"}
             </Button>
@@ -273,20 +284,6 @@ function SignupPage() {
               compte.
             </p>
           </form>
-
-          <AuthDivider />
-
-          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
-
-          <p className="text-center text-sm text-muted-foreground">
-            Déjà un compte ?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-            >
-              Se connecter
-            </Link>
-          </p>
 
           <p className="text-center text-xs leading-relaxed text-muted-foreground">
             En créant un compte, vous acceptez les{" "}

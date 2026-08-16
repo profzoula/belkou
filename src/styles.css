@@ -231,6 +231,18 @@
     letter-spacing: -0.01em;
     line-height: 1.15;
   }
+  /* Chrome paints autofilled fields pale blue, which breaks the form styling. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-foreground);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-card) inset;
+    box-shadow: 0 0 0 1000px var(--color-card) inset;
+    caret-color: var(--color-foreground);
+    transition: background-color 600000s 0s;
+  }
 }
 
 @layer utilities {
