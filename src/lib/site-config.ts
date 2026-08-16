@@ -54,7 +54,7 @@ export const siteConfig = {
       price: 199,
       priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "",
     },
-    vip: { name: "VIP", price: 290, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },
+    vip: { name: "VIP", price: 450, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },
     live: { name: "Accès live", price: 9.99, priceId: "" },
   },
   paymentMethods: ["Stripe (carte bancaire)", "PayPal", "MonCash", "Zelle", "Virement bancaire"],

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, CreditCard, Globe, Lock, ShieldCheck } from "lucide-react";
+import { Check, CreditCard, Gift, Globe, Lock, Radio, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
-import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
+import { LIVE_TICKET_PRICE_USD, STANDALONE_LIVE_SLUG, isStandaloneLiveSlug } from "@/lib/live";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
@@ -36,7 +36,7 @@ type CheckoutPageProps = {
 
 const ORIGINAL_PRICES: Record<PlanId, number> = {
   premium: 399,
-  vip: 490,
+  vip: 450,
 };
 
 function toMoney(value: number): number {
@@ -114,7 +114,8 @@ export function CheckoutPage({
       .catch(() => setCourse(null));
   }, [courseSlug, initialCourse, loadCourseFn]);
 
-  const isLiveTicket = Boolean(liveTicket && courseSlug);
+  const isLiveTicket = Boolean(liveTicket);
+  const isVipMembership = Boolean(initialPlan === "vip" && !isLiveTicket && !courseSlug);
   const plan = planDetails[selectedPlan];
   const coursePrice = course?.price;
   const courseOriginalPrice = course?.originalPrice;
@@ -153,8 +154,20 @@ export function CheckoutPage({
 
     const payload = {
       ...form,
-      plan: isLiveTicket ? "live" : courseSlug && course ? "premium" : selectedPlan,
-      course_slug: courseSlug && course ? courseSlug : undefined,
+      plan: isLiveTicket
+        ? "live"
+        : isVipMembership
+          ? "vip"
+          : courseSlug && course
+            ? "premium"
+            : selectedPlan,
+      course_slug: isLiveTicket
+        ? courseSlug && course && !isStandaloneLiveSlug(courseSlug)
+          ? courseSlug
+          : STANDALONE_LIVE_SLUG
+        : courseSlug && course
+          ? courseSlug
+          : undefined,
       referral_code: form.referral_code || undefined,
     };
 
@@ -209,7 +222,11 @@ export function CheckoutPage({
     }
   };
 
-  const productTitle = course?.title ?? `Formation BelKou ${plan.name} — Formation en ligne`;
+  const productTitle = isVipMembership
+    ? "BelKou VIP — Accès illimité"
+    : isLiveTicket
+      ? course?.title ?? "BelKou Live"
+      : course?.title ?? `Formation BelKou ${plan.name} — Formation en ligne`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
@@ -234,7 +251,7 @@ export function CheckoutPage({
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             {isLiveTicket
-              ? "Déjà inscrit au cours ? Le live est offert. Sinon, payez 9,99 $ pour regarder et commenter."
+              ? "Payez 9,99 $ pour regarder et commenter les lives BelKou. Les membres VIP regardent gratuitement."
               : "Quelques informations, puis paiement sécurisé via Stripe."}
           </p>
         </div>
@@ -253,7 +270,11 @@ export function CheckoutPage({
                     course?.thumbnail.gradient ?? "from-primary/80 to-primary",
                   )}
                 >
-                  {CourseIcon ? (
+                  {isVipMembership ? (
+                    <Gift className="h-8 w-8 text-white" aria-hidden />
+                  ) : isLiveTicket && !CourseIcon ? (
+                    <Radio className="h-8 w-8 text-white" aria-hidden />
+                  ) : CourseIcon ? (
                     <CourseIcon className="h-8 w-8 text-white/80" />
                   ) : (
                     <SiteLogo className="h-10 w-10 rounded" alt="" />
@@ -263,8 +284,12 @@ export function CheckoutPage({
                   <p className="text-sm leading-snug text-foreground">
                     {isLiveTicket ? (
                       <>
-                        Accès live à <strong>{productTitle}</strong> — lives et commentaires, sans
-                        le programme on-demand.
+                        Accès live à <strong>{productTitle}</strong> — lives et commentaires sur
+                        BelKou.
+                      </>
+                    ) : isVipMembership ? (
+                      <>
+                        <strong>VIP</strong> — tous les cours et tous les lives, à vie.
                       </>
                     ) : (
                       <>
@@ -274,8 +299,10 @@ export function CheckoutPage({
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {isLiveTicket
-                      ? "Les étudiants déjà inscrits au cours regardent gratuitement."
-                      : "Paiement unique · accès immédiat après confirmation."}
+                      ? "Les membres VIP regardent tous les lives gratuitement."
+                      : isVipMembership
+                        ? "Paiement unique · tous les cours et lives, à vie."
+                        : "Paiement unique · accès immédiat après confirmation."}
                   </p>
                 </div>
                 <span className="shrink-0 rounded-full bg-success/15 px-2 py-1 text-[11px] font-bold text-success">
@@ -284,12 +311,22 @@ export function CheckoutPage({
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {isLiveTicket && courseSlug && course ? (
+                {isLiveTicket ? (
                   <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
-                    <p className="font-bold text-sm">Accès live — {course.title}</p>
+                    <p className="font-bold text-sm">
+                      Accès live{course?.title ? ` — ${course.title}` : ""}
+                    </p>
                     <p className="mt-1 text-2xl font-bold">{formatUsd(LIVE_TICKET_PRICE_USD)}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Paiement unique · lives et commentaires de ce cours
+                      Paiement unique · lives et commentaires
+                    </p>
+                  </div>
+                ) : isVipMembership ? (
+                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
+                    <p className="font-bold text-sm">VIP — Accès illimité</p>
+                    <p className="mt-1 text-2xl font-bold">{formatUsd(plan.price)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tous les cours et tous les lives · paiement unique
                     </p>
                   </div>
                 ) : courseSlug && course ? (
@@ -339,7 +376,9 @@ export function CheckoutPage({
                               </span>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">
-                              Paiement unique · accès au cours
+                              {planId === "vip"
+                                ? "Paiement unique · tous les cours et lives"
+                                : "Paiement unique · accès au cours"}
                             </p>
                           </div>
                         </div>

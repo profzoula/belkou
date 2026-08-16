@@ -14,7 +14,7 @@ export function Pricing() {
         <SectionHeader
           label="Tarifs"
           title="Des plans simples et transparents"
-          description="Les deux plans incluent la formation complète. Le VIP ajoute un accompagnement personnel sur votre projet."
+          description="Un cours à l'unité, ou l'accès illimité VIP pour tout le catalogue et tous les lives."
           className="max-w-lg"
         />
 

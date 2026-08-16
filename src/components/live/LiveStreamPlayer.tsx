@@ -59,11 +59,18 @@ export function LiveStreamPlayer({
   const frame = fill ? "relative h-full w-full overflow-hidden bg-black" : "relative aspect-video w-full overflow-hidden bg-black";
 
   if (provider === "youtube") {
-    const embed = youtubeUrlToEmbedUrl(url, live);
+    const embed = youtubeUrlToEmbedUrl(url, live, { nativeFullscreen: false });
     if (!embed) {
       return <LivePlayerFallback fill={fill} />;
     }
-    return <YouTubeVideoPlayer embedUrl={embed} title={title} fill={fill} />;
+    return (
+      <YouTubeVideoPlayer
+        embedUrl={embed}
+        title={title}
+        fill={fill}
+        nativeFullscreen={false}
+      />
+    );
   }
 
   if (provider === "vimeo") {
@@ -71,13 +78,13 @@ export function LiveStreamPlayer({
     if (!embed) {
       return <LivePlayerFallback fill={fill} />;
     }
+    const src = `${embed}${live ? "&autoplay=1" : ""}&fullscreen=0`;
     return (
       <div className={frame}>
         <iframe
-          src={`${embed}${live ? "&autoplay=1" : ""}`}
+          src={src}
           title={title}
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
+          allow="autoplay; picture-in-picture"
           className="absolute inset-0 h-full w-full"
         />
       </div>

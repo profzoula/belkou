@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { hasPaidAccessToCourse, pickRegistrationForCourse } from "@/lib/course-access";
+import { avatarUrlFromUser } from "@/lib/user-avatar";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { getDb } from "@/server/env";
 import { listRegistrationsByEmail } from "@/server/db";
@@ -10,6 +11,7 @@ export type ForumActor = {
   userId: string;
   email: string;
   name: string;
+  avatarUrl?: string;
 };
 
 export function displayNameFromUser(user: User): string {
@@ -50,6 +52,7 @@ export async function assertForumAccess(
       userId: user.id,
       email,
       name: displayNameFromUser(user),
+      avatarUrl: avatarUrlFromUser(user),
     },
     courseTitle: course.title,
   };

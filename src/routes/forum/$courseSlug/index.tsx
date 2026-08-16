@@ -28,6 +28,7 @@ type ForumPostItem = {
   kind: "question" | "suggestion";
   authorName: string;
   authorEmail?: string;
+  authorAvatarUrl?: string;
   title: string;
   body: string;
   replyCount: number;

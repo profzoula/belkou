@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { getServerEnvResolved } from "@/server/env";
-import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
-import type { PlanId } from "@/lib/site-config";
+import { LIVE_TICKET_PRICE_USD, isStandaloneLiveSlug } from "@/lib/live";
+import { siteConfig, type PlanId } from "@/lib/site-config";
 
 export async function getStripe(): Promise<Stripe | null> {
   const env = await getServerEnvResolved();
@@ -23,15 +23,18 @@ export async function createCheckoutSession(params: {
   if (!stripe) return null;
 
   const isLiveCheckout = params.plan === "live";
-  const isCourseCheckout = Boolean(params.courseSlug && params.amountUsd != null) && !isLiveCheckout;
+  const isVipMembership = params.plan === "vip";
+  const isCourseCheckout =
+    Boolean(params.courseSlug && params.amountUsd != null) && !isLiveCheckout && !isVipMembership;
 
-  const priceId = isCourseCheckout || isLiveCheckout
+  const priceId = isCourseCheckout || isLiveCheckout || isVipMembership
     ? null
     : params.plan === "premium"
       ? env.STRIPE_PRICE_PREMIUM
       : env.STRIPE_PRICE_VIP;
 
   const liveAmount = Math.round(LIVE_TICKET_PRICE_USD * 100);
+  const vipAmount = Math.round(siteConfig.plans.vip.price * 100);
 
   const lineItem = isLiveCheckout
     ? {
@@ -41,6 +44,18 @@ export async function createCheckoutSession(params: {
           product_data: {
             name: `Accès live — ${params.courseTitle ?? "BelKou"}`,
             description: "Regarder et commenter les lives de ce cours sur BelKou",
+          },
+        },
+        quantity: 1,
+      }
+    : isVipMembership
+    ? {
+        price_data: {
+          currency: "usd" as const,
+          unit_amount: vipAmount,
+          product_data: {
+            name: "BelKou VIP — Accès illimité",
+            description: "Tous les cours et tous les lives BelKou, à vie",
           },
         },
         quantity: 1,
@@ -62,10 +77,13 @@ export async function createCheckoutSession(params: {
       : {
           price_data: {
             currency: "usd",
-            unit_amount: params.plan === "premium" ? 19900 : 29000,
+            unit_amount: params.plan === "premium" ? 19900 : vipAmount,
             product_data: {
               name: `BelKou ${params.plan === "premium" ? "Premium" : "VIP"}`,
-              description: "Formation BelKou — formation en ligne",
+              description:
+                params.plan === "vip"
+                  ? "Tous les cours et tous les lives BelKou, à vie"
+                  : "Formation BelKou — formation en ligne",
             },
           },
           quantity: 1,
@@ -73,19 +91,25 @@ export async function createCheckoutSession(params: {
 
   const expectedAmountCents = isLiveCheckout
     ? liveAmount
+    : isVipMembership
+      ? vipAmount
     : isCourseCheckout
       ? Math.round(params.amountUsd! * 100)
       : priceId
         ? null
         : params.plan === "premium"
           ? 19900
-          : 29000;
+          : vipAmount;
 
-  const cancelUrl = params.courseSlug
-    ? isLiveCheckout
-      ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}&live=1`
-      : `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
-    : `${env.SITE_URL}/checkout?plan=${params.plan}`;
+  const cancelUrl = isVipMembership
+    ? `${env.SITE_URL}/checkout?plan=vip`
+    : isLiveCheckout
+      ? params.courseSlug && !isStandaloneLiveSlug(params.courseSlug)
+        ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}&live=1`
+        : `${env.SITE_URL}/checkout?live=1`
+      : params.courseSlug
+        ? `${env.SITE_URL}/checkout?course=${encodeURIComponent(params.courseSlug)}`
+        : `${env.SITE_URL}/checkout?plan=${params.plan}`;
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

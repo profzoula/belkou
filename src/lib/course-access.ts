@@ -6,6 +6,12 @@ import type { RegistrationRecord } from "@/lib/schemas/registration";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
 
 export const LEGACY_COURSE_SLUG = BASE_COURSE_SLUGS[0];
+/** Registration row for the $450 VIP membership (all courses + all lives). */
+export const VIP_MEMBERSHIP_SLUG = "__vip__";
+
+export function isPaidVipPlan(plan: string | null | undefined): boolean {
+  return plan === "vip";
+}
 
 /** Stable key for DB uniqueness and lookups (null/empty → legacy course). */
 export function registrationCourseKey(courseSlug?: string | null): string {
@@ -25,6 +31,11 @@ export function pickRegistrationForCourse(
   rows: RegistrationRecord[],
   courseSlug: string,
 ): RegistrationRecord | null {
+  const paidVip = rows.find(
+    (row) => row.payment_status === "paid" && isPaidVipPlan(row.plan),
+  );
+  if (paidVip) return paidVip;
+
   const key = registrationCourseKey(courseSlug);
   const matching = rows.filter((row) => registrationCourseKey(row.course_slug) === key);
   const paidMatch = matching.find((row) => row.payment_status === "paid");
@@ -47,6 +58,7 @@ export function hasPaidAccessToCourse(
   courseSlug: string,
 ): boolean {
   if (!registration || registration.payment_status !== "paid") return false;
+  if (isPaidVipPlan(registration.plan)) return true;
   if (isLiveTicketPlan(registration.plan)) return false;
   if (registrationCoversCourse(registration, courseSlug)) return true;
   // Legacy cohort: paid Premium/VIP before course_slug existed
@@ -59,7 +71,7 @@ export function hasPaidAccessToCourse(
   return false;
 }
 
-/** Live watch/comment: full course purchase or a paid $9.99 live ticket for that course. */
+/** Live watch/comment: VIP, full course purchase, or a paid $9.99 live ticket. */
 export function hasLiveAccessToCourse(
   registration: Pick<RegistrationRecord, "payment_status" | "course_slug" | "plan"> | null | undefined,
   courseSlug: string,

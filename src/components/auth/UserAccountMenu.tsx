@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
+import { avatarUrlFromUser } from "@/lib/user-avatar";
 import { cn } from "@/lib/utils";
 
 function displayName(user: NonNullable<ReturnType<typeof useAuth>["user"]>) {
@@ -50,7 +51,7 @@ export function UserAccountMenu({ onNavigate, triggerClassName }: UserAccountMen
 
   const name = displayName(user);
   const email = user.email ?? "";
-  const avatarUrl = user.user_metadata?.avatar_url as string | undefined;
+  const avatarUrl = avatarUrlFromUser(user);
 
   const close = () => onNavigate?.();
 
@@ -72,7 +73,9 @@ export function UserAccountMenu({ onNavigate, triggerClassName }: UserAccountMen
           aria-label="Menu du compte"
         >
           <Avatar className="h-9 w-9 border border-border">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt="" referrerPolicy="no-referrer" />
+            ) : null}
             <AvatarFallback className="bg-foreground text-background text-xs font-semibold">
               {initials(name, email)}
             </AvatarFallback>
@@ -84,7 +87,9 @@ export function UserAccountMenu({ onNavigate, triggerClassName }: UserAccountMen
         <DropdownMenuLabel className="px-4 py-3 font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 border border-border">
-              {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt="" referrerPolicy="no-referrer" />
+              ) : null}
               <AvatarFallback className="bg-foreground text-background text-sm font-semibold">
                 {initials(name, email)}
               </AvatarFallback>

@@ -121,6 +121,7 @@ function ForumThreadPage() {
                   <ForumReplyCard
                     authorName={reply.authorName}
                     authorEmail={reply.authorEmail}
+                    authorAvatarUrl={reply.authorAvatarUrl}
                     body={reply.body}
                     createdAt={reply.createdAt}
                   />

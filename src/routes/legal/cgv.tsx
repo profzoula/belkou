@@ -50,11 +50,11 @@ function CgvPage() {
         2.2 — Plan {siteConfig.plans.vip.name} (${siteConfig.plans.vip.price} USD)
       </h3>
       <p>
-        Le plan {siteConfig.plans.vip.name} comprend tout le contenu du plan{" "}
-        {siteConfig.plans.premium.name}, ainsi qu'un accompagnement personnalisé incluant du
-        mentorat individuel, une revue de projet et un accès prioritaire au formateur. Ce plan est
-        destiné aux personnes souhaitant un suivi rapproché et un retour personnalisé sur leurs
-        réalisations.
+        Le plan {siteConfig.plans.vip.name} donne un accès illimité à l&apos;ensemble des cours
+        BelKou et à tous les lives (directs et replays), y compris les formations ajoutées après
+        l&apos;inscription, pour un paiement unique de ${siteConfig.plans.vip.price} USD. Il
+        comprend également un accompagnement personnalisé (mentorat, revue de projet) et un accès
+        prioritaire au formateur.
       </p>
       <p>
         Les prix sont indiqués en dollars américains (USD) et sont fermes et définitifs au moment de

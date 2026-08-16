@@ -89,7 +89,6 @@ export function AdminLiveTab() {
   const [saving, setSaving] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
 
-  const [courseSlug, setCourseSlug] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [playbackUrl, setPlaybackUrl] = useState("");
@@ -99,8 +98,6 @@ export function AdminLiveTab() {
   const [thumbPreview, setThumbPreview] = useState<string | null>(null);
   const thumbInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedCourse = courses.find((course) => course.slug === courseSlug);
-
   useEffect(() => {
     let cancelled = false;
     Promise.all([listFn(), coursesFn()])
@@ -108,7 +105,6 @@ export function AdminLiveTab() {
         if (cancelled) return;
         setSessions(live.sessions);
         setCourses(catalog.courses);
-        setCourseSlug((current) => current || catalog.courses[0]?.slug || "");
       })
       .catch((error) => {
         toast.error(error instanceof Error ? error.message : "Chargement impossible");
@@ -124,8 +120,8 @@ export function AdminLiveTab() {
   const detected = useMemo(() => detectLiveProvider(playbackUrl), [playbackUrl]);
 
   const create = async () => {
-    if (!courseSlug || !title.trim() || !playbackUrl.trim()) {
-      toast.error("Cours, titre et lien de diffusion sont requis.");
+    if (!title.trim() || !playbackUrl.trim()) {
+      toast.error("Titre et lien de diffusion sont requis.");
       return;
     }
     setSaving(true);
@@ -136,7 +132,6 @@ export function AdminLiveTab() {
       }
       const result = await createFn({
         data: {
-          courseSlug,
           title: title.trim(),
           description: description.trim() || undefined,
           provider,
@@ -229,7 +224,7 @@ export function AdminLiveTab() {
         action === "start"
           ? "Live démarré — les étudiants voient le player"
           : action === "end"
-            ? "Live terminé — replay ajouté au cours"
+            ? "Live terminé — replay disponible sur /live"
             : "Live annulé",
       );
     } catch (error) {
@@ -243,8 +238,8 @@ export function AdminLiveTab() {
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Catalogue"
-        title="Live cours"
-        description="Programmez un direct OBS pour un cours. Les étudiants regardent et commentent sur BelKou. À la fin, un replay est enregistré dans le programme."
+        title="Live"
+        description="Programmez un direct OBS. Les étudiants regardent et commentent sur BelKou. À la fin, le replay reste sur la page live."
       />
 
       <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
@@ -258,22 +253,7 @@ export function AdminLiveTab() {
         </p>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="live-course">Cours</Label>
-            <Select value={courseSlug} onValueChange={setCourseSlug}>
-              <SelectTrigger id="live-course" className="rounded-xl">
-                <SelectValue placeholder="Choisir un cours" />
-              </SelectTrigger>
-              <SelectContent>
-                {courses.map((course) => (
-                  <SelectItem key={course.slug} value={course.slug}>
-                    {course.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 md:col-span-2">
             <Label htmlFor="live-when">Date et heure</Label>
             <Input
               id="live-when"
@@ -297,19 +277,19 @@ export function AdminLiveTab() {
             <Label htmlFor="live-thumb">Thumbnail du live</Label>
             <p className="text-xs text-muted-foreground">
               Image 16:9 affichée sur /live et dans le player tant que le direct n&apos;a pas
-              commencé. Sans image, la miniature du cours est utilisée.
+              commencé.
             </p>
             <CourseThumbnailBanner
               thumbnail={{
-                gradient: selectedCourse?.thumbnail.gradient ?? "from-primary/80 to-primary",
-                label: selectedCourse?.thumbnail.label ?? "LIVE",
-                imageUrl: thumbPreview || selectedCourse?.thumbnail.imageUrl,
+                gradient: "from-primary/80 to-primary",
+                label: "LIVE",
+                imageUrl: thumbPreview || undefined,
               }}
-              slug={courseSlug || undefined}
+              slug="live"
               aspectClass="aspect-video max-w-md"
               className="overflow-hidden rounded-xl border border-border"
               showLabel={false}
-              showIcon={!thumbPreview && !selectedCourse?.thumbnail.imageUrl}
+              showIcon={!thumbPreview}
             />
             <input
               ref={thumbInputRef}
@@ -440,10 +420,14 @@ export function AdminLiveTab() {
                   </div>
                   <p className="mt-2 font-semibold text-foreground">{session.title}</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    {session.courseTitle} · {formatLiveSchedule(session.scheduledAt)}
+                    {session.courseTitle
+                      ? `${session.courseTitle} · ${formatLiveSchedule(session.scheduledAt)}`
+                      : formatLiveSchedule(session.scheduledAt)}
                   </p>
                   {session.recordingLessonId ? (
                     <p className="mt-1 text-xs text-success">Replay ajouté au programme du cours.</p>
+                  ) : session.status === "ended" ? (
+                    <p className="mt-1 text-xs text-success">Replay disponible sur /live.</p>
                   ) : null}
                   </div>
                 </div>

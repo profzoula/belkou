@@ -1,6 +1,7 @@
-import { isCourseContentLive } from "@/lib/course-publish";
+import { isCourseContentLive, isCourseListed } from "@/lib/course-publish";
 import {
   LEGACY_COURSE_SLUG,
+  VIP_MEMBERSHIP_SLUG,
   pickRegistrationForCourse,
   registrationCourseKey,
 } from "@/lib/course-access";
@@ -24,6 +25,7 @@ import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourses } from "@/server/site-content";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
+import { STANDALONE_LIVE_SLUG } from "@/lib/live";
 
 export type StudentEnrollment = {
   id: string;
@@ -68,23 +70,35 @@ export async function loadStudentEnrollments(accessToken: string): Promise<Stude
   const registrations = await listRegistrationsByEmail(db, email);
   if (!registrations.length) return [];
 
-  const courseSlugs = new Set<string>();
-  for (const registration of registrations) {
-    courseSlugs.add(registrationCourseKey(registration.course_slug));
-  }
-  if (registrations.some((r) => r.payment_status === "paid" && !r.course_slug?.trim())) {
-    courseSlugs.add(LEGACY_COURSE_SLUG);
-  }
-
   const [resolvedCourses, progressByCourse] = await Promise.all([
     getResolvedCourses(),
     listAllLessonProgressForEmail(email),
   ]);
   const courseBySlug = new Map(resolvedCourses.map((course) => [course.slug, course]));
 
+  const vipPaid = registrations.some(
+    (row) => row.payment_status === "paid" && row.plan === "vip",
+  );
+  const courseSlugs = new Set<string>();
+  if (vipPaid) {
+    for (const course of resolvedCourses) {
+      if (isCourseListed(course)) courseSlugs.add(course.slug);
+    }
+  } else {
+    for (const registration of registrations) {
+      const key = registrationCourseKey(registration.course_slug);
+      if (key === VIP_MEMBERSHIP_SLUG || key === STANDALONE_LIVE_SLUG) continue;
+      courseSlugs.add(key);
+    }
+    if (registrations.some((r) => r.payment_status === "paid" && !r.course_slug?.trim())) {
+      courseSlugs.add(LEGACY_COURSE_SLUG);
+    }
+  }
+
   const enrollments: StudentEnrollment[] = [];
 
   for (const slug of courseSlugs) {
+    if (slug === VIP_MEMBERSHIP_SLUG || slug === STANDALONE_LIVE_SLUG) continue;
     const registration = pickRegistrationForCourse(registrations, slug);
     if (!registration) continue;
     if (isLiveTicketPlan(registration.plan) && registration.payment_status === "paid") continue;

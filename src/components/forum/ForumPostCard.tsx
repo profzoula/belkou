@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Lightbulb, MessageCircle } from "lucide-react";
+import { StudentAvatar } from "@/components/auth/StudentAvatar";
 import { SiteLogo } from "@/components/site/SiteLogo";
-import { formatForumTimestamp, forumAuthorHandle, forumAuthorInitials } from "@/lib/forum-display";
+import { formatForumTimestamp, forumAuthorHandle } from "@/lib/forum-display";
 import { cn } from "@/lib/utils";
 
 type ForumPostCardData = {
@@ -9,6 +10,7 @@ type ForumPostCardData = {
   kind: "question" | "suggestion";
   authorName: string;
   authorEmail?: string;
+  authorAvatarUrl?: string;
   title: string;
   body: string;
   replyCount: number;
@@ -29,7 +31,6 @@ export function ForumPostCard({
   linkToThread = true,
 }: ForumPostCardProps) {
   const handle = forumAuthorHandle(post.authorName, post.authorEmail);
-  const initials = forumAuthorInitials(post.authorName, post.authorEmail);
 
   const card = (
     <article
@@ -41,12 +42,11 @@ export function ForumPostCard({
     >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-primary/10 text-sm font-semibold text-primary"
-            aria-hidden
-          >
-            {initials}
-          </div>
+          <StudentAvatar
+            name={post.authorName}
+            src={post.authorAvatarUrl}
+            className="size-11 rounded-xl border-border"
+          />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <p className="truncate font-semibold text-foreground">{post.authorName}</p>
@@ -113,6 +113,7 @@ export function ForumPostCard({
 type ForumReplyCardProps = {
   authorName: string;
   authorEmail?: string;
+  authorAvatarUrl?: string;
   body: string;
   createdAt: string;
   className?: string;
@@ -121,12 +122,12 @@ type ForumReplyCardProps = {
 export function ForumReplyCard({
   authorName,
   authorEmail,
+  authorAvatarUrl,
   body,
   createdAt,
   className,
 }: ForumReplyCardProps) {
   const handle = forumAuthorHandle(authorName, authorEmail);
-  const initials = forumAuthorInitials(authorName, authorEmail);
 
   return (
     <article
@@ -136,12 +137,11 @@ export function ForumReplyCard({
       )}
     >
       <div className="mb-3 flex items-start gap-3">
-        <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-xs font-semibold text-primary"
-          aria-hidden
-        >
-          {initials}
-        </div>
+        <StudentAvatar
+          name={authorName}
+          src={authorAvatarUrl}
+          className="size-10 rounded-xl border-border"
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">{authorName}</p>
           <p className="truncate text-xs text-muted-foreground">{handle}</p>

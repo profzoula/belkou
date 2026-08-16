@@ -40,18 +40,27 @@ export function isValidYoutubeUrl(url: string): boolean {
   return parseYoutubeUrl(url) !== null;
 }
 
-export function buildYoutubeEmbedUrl(id: string, live = false): string {
+export function buildYoutubeEmbedUrl(
+  id: string,
+  live = false,
+  options?: { nativeFullscreen?: boolean },
+): string {
   const params = new URLSearchParams({
     autoplay: live ? "1" : "0",
     modestbranding: "1",
     rel: "0",
     playsinline: "1",
   });
+  if (options?.nativeFullscreen === false) params.set("fs", "0");
   return `https://www.youtube.com/embed/${id}?${params.toString()}`;
 }
 
-export function youtubeUrlToEmbedUrl(url: string, live = false): string | null {
+export function youtubeUrlToEmbedUrl(
+  url: string,
+  live = false,
+  options?: { nativeFullscreen?: boolean },
+): string | null {
   const parsed = parseYoutubeUrl(url);
   if (!parsed) return null;
-  return buildYoutubeEmbedUrl(parsed.id, live);
+  return buildYoutubeEmbedUrl(parsed.id, live, options);
 }

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Play, Sparkles, Star, Users, Wrench } from "lucide-react";
+import { ArrowRight, Sparkles, Star, Users, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCount } from "@/lib/courses";
 import { siteConfig } from "@/lib/site-config";
@@ -152,15 +152,11 @@ export function Hero({ studentCount }: HeroProps) {
                   <ArrowRight className="size-4" aria-hidden />
                 </Link>
               </Button>
-              <Link
-                to="/courses"
-                className="inline-flex items-center gap-2.5 text-sm font-semibold text-primary transition-opacity hover:opacity-85"
-              >
-                <span className="grid size-10 place-items-center rounded-full border-2 border-primary/25 bg-card/80">
-                  <Play className="size-4 fill-primary text-primary" aria-hidden />
-                </span>
-                Voir les cours
-              </Link>
+              <Button asChild variant="outline" size="lg" className="h-12 rounded-xl px-6 text-sm">
+                <Link to="/checkout" search={{ plan: "vip" }}>
+                  Accès illimité VIP · ${siteConfig.plans.vip.price}
+                </Link>
+              </Button>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">

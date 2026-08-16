@@ -4,9 +4,15 @@ type YouTubeVideoPlayerProps = {
   embedUrl: string;
   title: string;
   fill?: boolean;
+  nativeFullscreen?: boolean;
 };
 
-export function YouTubeVideoPlayer({ embedUrl, title, fill = false }: YouTubeVideoPlayerProps) {
+export function YouTubeVideoPlayer({
+  embedUrl,
+  title,
+  fill = false,
+  nativeFullscreen = true,
+}: YouTubeVideoPlayerProps) {
   return (
     <div
       className={cn(
@@ -17,8 +23,12 @@ export function YouTubeVideoPlayer({ embedUrl, title, fill = false }: YouTubeVid
       <iframe
         src={embedUrl}
         title={title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        allowFullScreen
+        allow={
+          nativeFullscreen
+            ? "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            : "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        }
+        allowFullScreen={nativeFullscreen}
         className="absolute inset-0 h-full w-full"
       />
     </div>

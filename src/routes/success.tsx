@@ -193,6 +193,14 @@ function SuccessPage() {
                   </strong>{" "}
                   pour regarder le live sur BelKou.
                 </>
+              ) : planId === "vip" ? (
+                <>
+                  Accès illimité VIP confirmé — tous les cours et tous les lives.{" "}
+                  <strong className="font-medium text-foreground">
+                    Connectez-vous avec le même email
+                  </strong>{" "}
+                  pour les voir dans Mes cours.
+                </>
               ) : (
                 <>
                   Votre accès au cours sera disponible selon le calendrier du programme.{" "}
@@ -285,6 +293,18 @@ function SuccessPage() {
                     Voir les lives
                   </Link>
                 </Button>
+              ) : planId === "vip" ? (
+                <>
+                  <Button asChild variant="hero" size="lg" className="touch-target">
+                    <Link to="/dashboard">
+                      <BookOpen className="h-4 w-4" />
+                      Mes cours
+                    </Link>
+                  </Button>
+                  <Button asChild variant="soft" size="lg" className="touch-target">
+                    <Link to="/live">Voir les lives</Link>
+                  </Button>
+                </>
               ) : (
                 <>
                   <Button asChild variant="hero" size="lg" className="touch-target">

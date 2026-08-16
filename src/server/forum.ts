@@ -11,6 +11,7 @@ export type ForumPost = {
   authorUserId: string;
   authorEmail: string;
   authorName: string;
+  authorAvatarUrl?: string;
   title: string;
   body: string;
   replyCount: number;
@@ -25,6 +26,7 @@ export type ForumReply = {
   authorUserId: string;
   authorEmail: string;
   authorName: string;
+  authorAvatarUrl?: string;
   body: string;
   createdAt: string;
 };

@@ -1,4 +1,5 @@
-import { LEGACY_COURSE_SLUG, registrationCourseKey } from "@/lib/course-access";
+import { LEGACY_COURSE_SLUG, VIP_MEMBERSHIP_SLUG, registrationCourseKey } from "@/lib/course-access";
+import { STANDALONE_LIVE_SLUG } from "@/lib/live";
 import { getSupabaseAdmin, supabaseListRegistrations } from "@/server/supabase-registrations";
 
 export async function getPaidEnrollmentCountsByCourse(): Promise<Record<string, number>> {
@@ -7,8 +8,9 @@ export async function getPaidEnrollmentCountsByCourse(): Promise<Record<string, 
 
   for (const row of rows) {
     if (row.payment_status !== "paid") continue;
-    if (row.plan === "live") continue;
+    if (row.plan === "live" || row.plan === "vip") continue;
     const key = registrationCourseKey(row.course_slug);
+    if (key === VIP_MEMBERSHIP_SLUG || key === STANDALONE_LIVE_SLUG) continue;
     counts[key] = (counts[key] ?? 0) + 1;
   }
 

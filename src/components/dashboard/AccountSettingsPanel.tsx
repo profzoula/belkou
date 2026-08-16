@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getSupabase } from "@/lib/supabase/client";
+import { avatarUrlFromUser } from "@/lib/user-avatar";
 
 function displayName(user: User) {
   return (
@@ -54,7 +55,7 @@ export function AccountSettingsPanel({ user }: AccountSettingsPanelProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const email = user.email ?? "";
-  const avatarUrl = user.user_metadata?.avatar_url as string | undefined;
+  const avatarUrl = avatarUrlFromUser(user);
   const name = displayName(user);
   const canChangePassword = usesPasswordAuth(user);
 
@@ -137,7 +138,14 @@ export function AccountSettingsPanel({ user }: AccountSettingsPanelProps) {
 
         <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/30 px-4 py-3">
           <Avatar className="h-12 w-12 border border-border">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt="" className="object-cover" /> : null}
+            {avatarUrl ? (
+              <AvatarImage
+                src={avatarUrl}
+                alt=""
+                className="object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : null}
             <AvatarFallback className="bg-foreground text-background text-sm font-semibold">
               {initials(name, email)}
             </AvatarFallback>

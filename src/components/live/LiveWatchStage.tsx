@@ -13,120 +13,126 @@ function getFullscreenElement() {
   return document.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
 }
 
-async function requestFs(node: HTMLElement) {
-  const el = node as HTMLElement & {
-    webkitRequestFullscreen?: () => Promise<void> | void;
-  };
-  if (node.requestFullscreen) {
-    await node.requestFullscreen();
-    return;
-  }
-  if (el.webkitRequestFullscreen) {
-    await el.webkitRequestFullscreen();
-  }
-}
-
-async function exitFs() {
+async function exitNativeFullscreen() {
   const doc = document as Document & { webkitExitFullscreen?: () => Promise<void> | void };
-  if (document.exitFullscreen) {
+  if (document.exitFullscreen && document.fullscreenElement) {
     await document.exitFullscreen();
     return;
   }
-  if (doc.webkitExitFullscreen) {
+  if (doc.webkitExitFullscreen && doc.webkitFullscreenElement) {
     await doc.webkitExitFullscreen();
   }
 }
 
 export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const [fullscreen, setFullscreen] = useState(false);
+  const [theater, setTheater] = useState(false);
 
-  const sync = useCallback(() => {
-    const node = stageRef.current;
-    setFullscreen(Boolean(node && getFullscreenElement() === node));
+  const enterTheater = useCallback(() => setTheater(true), []);
+  const exitTheater = useCallback(() => setTheater(false), []);
+  const toggle = useCallback(() => {
+    setTheater((open) => !open);
   }, []);
 
   useEffect(() => {
-    document.addEventListener("fullscreenchange", sync);
-    document.addEventListener("webkitfullscreenchange", sync);
+    if (!theater) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("fullscreenchange", sync);
-      document.removeEventListener("webkitfullscreenchange", sync);
+      document.body.style.overflow = previousOverflow;
     };
-  }, [sync]);
+  }, [theater]);
 
-  const toggle = useCallback(() => {
-    const node = stageRef.current;
-    if (!node) return;
-    if (getFullscreenElement() === node) {
-      void exitFs().catch(() => undefined);
-      return;
-    }
-    void requestFs(node).catch(() => {
-      const video = node.querySelector("video") as
-        | (HTMLVideoElement & { webkitEnterFullscreen?: () => void })
-        | null;
-      video?.webkitEnterFullscreen?.();
-    });
-  }, []);
+  useEffect(() => {
+    const onNativeFullscreen = () => {
+      const node = stageRef.current;
+      const fs = getFullscreenElement();
+      if (!fs || !node) return;
+      if (node.contains(fs)) {
+        void exitNativeFullscreen()
+          .catch(() => undefined)
+          .finally(() => enterTheater());
+      }
+    };
+
+    document.addEventListener("fullscreenchange", onNativeFullscreen);
+    document.addEventListener("webkitfullscreenchange", onNativeFullscreen);
+    return () => {
+      document.removeEventListener("fullscreenchange", onNativeFullscreen);
+      document.removeEventListener("webkitfullscreenchange", onNativeFullscreen);
+    };
+  }, [enterTheater]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "f" && event.key !== "F" && event.key !== "Escape") return;
       const target = event.target as HTMLElement | null;
       const tag = target?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
-      if (event.key === "Escape") return;
-      event.preventDefault();
-      toggle();
+
+      if (event.key === "Escape" && theater) {
+        event.preventDefault();
+        exitTheater();
+        return;
+      }
+
+      if (event.key === "f" || event.key === "F") {
+        event.preventDefault();
+        toggle();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [toggle]);
+  }, [exitTheater, theater, toggle]);
 
   return (
     <div
-      ref={stageRef}
       className={cn(
-        "bg-black",
-        fullscreen
-          ? "flex h-full w-full flex-col md:flex-row"
-          : "grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:grid-rows-[auto_auto] lg:items-stretch",
+        theater && "h-[calc(100dvh-var(--site-header-height))]",
       )}
     >
       <div
+        ref={stageRef}
         className={cn(
-          "relative min-h-0 min-w-0 bg-black",
-          fullscreen
-            ? "h-full flex-1"
-            : "aspect-video w-full lg:col-start-1 lg:row-start-1",
+          "bg-black",
+          theater
+            ? "fixed inset-x-0 bottom-0 top-[var(--site-header-height)] z-40 flex flex-col md:flex-row"
+            : "grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:grid-rows-[auto_auto] lg:items-stretch",
         )}
       >
-        {player}
-        <button
-          type="button"
-          onClick={toggle}
-          className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          aria-label={fullscreen ? "Quitter le plein écran" : "Plein écran"}
-          title={fullscreen ? "Quitter le plein écran (F)" : "Plein écran (F)"}
+        <div
+          className={cn(
+            "relative min-h-0 min-w-0 bg-black",
+            theater
+              ? "h-[min(56vw,calc(100dvh-var(--site-header-height)-16rem))] flex-none md:h-full md:min-h-0 md:flex-1"
+              : "aspect-video w-full lg:col-start-1 lg:row-start-1",
+          )}
         >
-          {fullscreen ? <Minimize className="size-5" aria-hidden /> : <Maximize className="size-5" aria-hidden />}
-        </button>
-      </div>
-      {caption && !fullscreen ? (
-        <div className="bg-[#0a0c10] p-3 sm:p-4 lg:col-start-1 lg:row-start-2">
-          {caption}
+          {player}
+          <button
+            type="button"
+            onClick={toggle}
+            className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            aria-label={theater ? "Quitter le plein écran" : "Plein écran"}
+            title={theater ? "Quitter le plein écran (F)" : "Plein écran (F)"}
+          >
+            {theater ? <Minimize className="size-5" aria-hidden /> : <Maximize className="size-5" aria-hidden />}
+          </button>
         </div>
-      ) : null}
-      <div
-        className={cn(
-          "flex min-h-0 min-w-0 flex-col bg-card",
-          fullscreen
-            ? "h-[min(40%,22rem)] w-full md:h-full md:w-[22.5rem] md:shrink-0"
-            : "min-h-[20rem] w-full lg:col-start-2 lg:row-start-1 lg:h-full lg:min-h-0 lg:w-auto",
-        )}
-      >
-        {chat}
+        {caption && !theater ? (
+          <div className="bg-zinc-950 px-4 py-4 sm:px-5 lg:col-start-1 lg:row-start-2">
+            {caption}
+          </div>
+        ) : null}
+        <div
+          className={cn(
+            "flex min-h-0 min-w-0 flex-col bg-zinc-950",
+            theater
+              ? "min-h-0 flex-1 md:h-full md:w-[22.5rem] md:flex-none md:shrink-0"
+              : "h-[min(50vh,24rem)] w-full lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:h-auto lg:min-h-0 lg:w-auto",
+          )}
+        >
+          {chat}
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { BookOpen, BriefcaseBusiness, Home, UserRound } from "lucide-react";
+import { BookOpen, Home, Radio, UserRound } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 function shouldHideBottomNav(pathname: string) {
   if (pathname.startsWith("/admin")) return true;
   if (/\/courses\/[^/]+\/learn/.test(pathname)) return true;
+  if (/^\/live\/[^/]+/.test(pathname)) return true;
   return false;
 }
 
@@ -42,11 +43,11 @@ export function MobileBottomNav() {
       to: "/courses" as const,
     },
     {
-      key: "services",
-      label: "Services",
-      icon: BriefcaseBusiness,
-      active: pathname.startsWith("/services"),
-      to: "/services" as const,
+      key: "live",
+      label: "Live",
+      icon: Radio,
+      active: pathname.startsWith("/live"),
+      to: "/live" as const,
     },
     {
       key: "account",

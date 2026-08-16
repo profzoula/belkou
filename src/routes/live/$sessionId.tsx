@@ -10,6 +10,7 @@ import { LiveRelatedRail } from "@/components/live/LiveRelatedRail";
 import { LiveStreamPlayer } from "@/components/live/LiveStreamPlayer";
 import { LiveWatchStage } from "@/components/live/LiveWatchStage";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useAuth } from "@/hooks/use-auth";
 import type { PublicLiveListItem, PublicLiveSession } from "@/lib/live";
 import { getPublicLiveSession, listPublicLiveSessions } from "@/lib/fns/live";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/live/$sessionId")({
   head: () =>
     seoHead({
       title: "Live — BelKou",
-      description: "Session live BelKou : suivez le cours en direct et commentez avec les étudiants.",
+      description: "Session live BelKou : suivez le direct et commentez avec les étudiants.",
       path: "/live",
     }),
   component: LiveSessionPage,
@@ -66,20 +67,27 @@ function LiveSessionPage() {
       <main id="main-content">
         {error ? (
           <div className="site-container site-page-top pb-16">
-            <div className="mx-auto max-w-lg rounded-2xl border border-border bg-card p-8 text-center">
-              <p className="font-semibold">{error}</p>
-              <Button asChild className="mt-4 rounded-xl">
-                <Link to="/live">Retour aux lives</Link>
-              </Button>
-            </div>
+            <EmptyState
+              title={error}
+              description="Cette session n'est plus disponible, ou le lien est incorrect."
+              action={
+                <Button asChild className="rounded-xl">
+                  <Link to="/live">Retour aux lives</Link>
+                </Button>
+              }
+              className="rounded-2xl border border-border bg-card"
+            />
           </div>
         ) : !live ? (
-          <p className="site-container site-page-top py-16 text-center text-sm text-muted-foreground">
-            Chargement du live…
-          </p>
+          <div className="pt-[var(--site-header-height)]">
+            <div className="grid bg-zinc-950 lg:grid-cols-[minmax(0,1fr)_22.5rem]">
+              <div className="aspect-video w-full animate-pulse bg-zinc-900" />
+              <div className="hidden h-auto min-h-[24rem] border-l border-zinc-800 bg-zinc-950 lg:block" />
+            </div>
+          </div>
         ) : (
           <>
-            <div className="pt-[var(--site-header-height)]">
+            <div className="bg-zinc-950 pt-[var(--site-header-height)]">
               <LiveWatchStage
                 player={
                   showPlayer ? (
@@ -110,14 +118,7 @@ function LiveSessionPage() {
                 }
               />
             </div>
-            <div className="site-container grid gap-8 py-6 pb-16 lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start">
-              {live.description || live.course.description ? (
-                <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-                  {live.description || live.course.description}
-                </p>
-              ) : (
-                <div />
-              )}
+            <div className="site-container space-y-4 py-8 pb-16">
               <LiveRelatedRail sessions={related} currentId={live.id} />
             </div>
           </>

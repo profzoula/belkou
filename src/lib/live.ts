@@ -2,6 +2,13 @@ export const LIVE_PROVIDERS = ["youtube", "vimeo", "hls"] as const;
 export const LIVE_STATUSES = ["scheduled", "live", "ended", "canceled"] as const;
 export const LIVE_TICKET_PRICE_USD = 9.99;
 export const LIVE_RECORDING_SECTION_TITLE = "Sessions live";
+/** Lives that are not attached to a course. */
+export const STANDALONE_LIVE_SLUG = "__live__";
+
+export function isStandaloneLiveSlug(slug?: string | null): boolean {
+  const trimmed = slug?.trim();
+  return !trimmed || trimmed === STANDALONE_LIVE_SLUG;
+}
 
 export type LiveProvider = (typeof LIVE_PROVIDERS)[number];
 export type LiveStatus = (typeof LIVE_STATUSES)[number];
@@ -29,6 +36,7 @@ export type LiveComment = {
   sessionId: string;
   authorUserId: string;
   authorName: string;
+  authorAvatarUrl?: string;
   body: string;
   createdAt: string;
   mine?: boolean;

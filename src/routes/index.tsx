@@ -10,6 +10,7 @@ import { HowItWorks } from "@/components/site/HowItWorks";
 import { Testimonials } from "@/components/site/Testimonials";
 import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
+import { VipUnlimitedCta } from "@/components/site/VipUnlimitedCta";
 import { getStudentCount } from "@/lib/fns/stats";
 import { getPublicCourses } from "@/lib/fns/courses";
 import { getPublicServices } from "@/lib/fns/services";
@@ -56,6 +57,7 @@ function Index() {
       <main id="main-content" className="max-w-full overflow-x-hidden">
         <CareerInvestSection />
         <CoursesSection courses={courses} />
+        <VipUnlimitedCta />
         <TrustStrip />
         <ServicesSection services={serviceItems} />
         <UpcomingCourses courses={upcomingCourses} />

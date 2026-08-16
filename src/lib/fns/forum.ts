@@ -39,7 +39,8 @@ export const listCourseForumPosts = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await assertForumAccess(data.accessToken, data.courseSlug);
     const posts = await listForumPosts(data.courseSlug);
-    return { posts };
+    const { withAuthorAvatars } = await import("@/server/user-avatars");
+    return { posts: await withAuthorAvatars(posts) };
   });
 
 export const getForumThread = createServerFn({ method: "POST" })
@@ -59,7 +60,13 @@ export const getForumThread = createServerFn({ method: "POST" })
       throw new Error("Sujet introuvable.");
     }
     const replies = await listForumReplies(data.postId);
-    return { post, replies, courseTitle };
+    const { withAuthorAvatars } = await import("@/server/user-avatars");
+    const [postWithAvatar] = await withAuthorAvatars([post]);
+    return {
+      post: postWithAvatar ?? post,
+      replies: await withAuthorAvatars(replies),
+      courseTitle,
+    };
   });
 
 export const createCourseForumPost = createServerFn({ method: "POST" })
@@ -93,7 +100,7 @@ export const createCourseForumPost = createServerFn({ method: "POST" })
       title: post.title,
     }).catch(() => undefined);
 
-    return { post };
+    return { post: { ...post, authorAvatarUrl: actor.avatarUrl } };
   });
 
 export const createCourseForumReply = createServerFn({ method: "POST" })
@@ -135,7 +142,7 @@ export const createCourseForumReply = createServerFn({ method: "POST" })
       participantUserIds,
     }).catch(() => undefined);
 
-    return { reply };
+    return { reply: { ...reply, authorAvatarUrl: actor.avatarUrl } };
   });
 
 export const getForumNotifications = createServerFn({ method: "POST" })

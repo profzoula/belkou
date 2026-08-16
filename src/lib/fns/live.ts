@@ -5,7 +5,9 @@ import {
   LIVE_PROVIDERS,
   LIVE_RECORDING_SECTION_TITLE,
   LIVE_TICKET_PRICE_USD,
+  STANDALONE_LIVE_SLUG,
   detectLiveProvider,
+  isStandaloneLiveSlug,
   type LiveCourseInfo,
   type LiveProvider,
   type PublicLiveListItem,
@@ -53,21 +55,25 @@ async function requireAdmin() {
   }
 }
 
+function standaloneLiveCourseInfo(): LiveCourseInfo {
+  return {
+    slug: STANDALONE_LIVE_SLUG,
+    title: "BelKou Live",
+    instructor: "BelKou",
+    price: LIVE_TICKET_PRICE_USD,
+    originalPrice: LIVE_TICKET_PRICE_USD,
+    studentsCount: 0,
+    description: "",
+    thumbnail: { gradient: "from-primary/80 to-primary", label: "LIVE" },
+  };
+}
+
 function toLiveCourseInfo(
   slug: string,
   course: Awaited<ReturnType<typeof import("@/server/site-content").getResolvedCourseBySlug>>,
 ): LiveCourseInfo {
-  if (!course) {
-    return {
-      slug,
-      title: slug,
-      instructor: "",
-      price: 0,
-      originalPrice: 0,
-      studentsCount: 0,
-      description: "",
-      thumbnail: { gradient: "from-primary/80 to-primary", label: "LIVE" },
-    };
+  if (isStandaloneLiveSlug(slug) || !course) {
+    return standaloneLiveCourseInfo();
   }
   return {
     slug: course.slug,
@@ -91,8 +97,11 @@ async function withCourseTitles<T extends { courseSlug: string; courseTitle: str
   const { getResolvedCourseBySlug } = await import("@/server/site-content");
   return Promise.all(
     sessions.map(async (session) => {
+      if (isStandaloneLiveSlug(session.courseSlug)) {
+        return { ...session, courseTitle: "" };
+      }
       const course = await getResolvedCourseBySlug(session.courseSlug);
-      return { ...session, courseTitle: course?.title ?? session.courseSlug };
+      return { ...session, courseTitle: course?.title ?? "" };
     }),
   );
 }
@@ -104,11 +113,15 @@ async function withPublicCourse<T extends { courseSlug: string; courseTitle: str
   const { getDisplayedCourseStudentsCount } = await import("@/lib/courses");
   return Promise.all(
     sessions.map(async (session) => {
+      if (isStandaloneLiveSlug(session.courseSlug)) {
+        const course = standaloneLiveCourseInfo();
+        return { ...session, courseTitle: "", course };
+      }
       const resolved = await getResolvedCourseBySlug(session.courseSlug);
       const course = toLiveCourseInfo(session.courseSlug, resolved);
       return {
         ...session,
-        courseTitle: course.title,
+        courseTitle: isStandaloneLiveSlug(course.slug) ? "" : course.title,
         course: {
           ...course,
           studentsCount: getDisplayedCourseStudentsCount({
@@ -130,24 +143,51 @@ async function resolveLiveAccess(
   hasCourseAccess: boolean;
   actorUserId?: string;
 }> {
-  const { getResolvedCourseBySlug } = await import("@/server/site-content");
   const { hasLiveAccessToCourse, hasPaidAccessToCourse, pickRegistrationForCourse } =
     await import("@/lib/course-access");
-  const { isFreeCourse } = await import("@/lib/courses");
-  const course = await getResolvedCourseBySlug(courseSlug);
-  if (!course) {
-    return { canWatch: false, canComment: false, hasCourseAccess: false };
+  const accessSlug = isStandaloneLiveSlug(courseSlug) ? STANDALONE_LIVE_SLUG : courseSlug;
+
+  if (!isStandaloneLiveSlug(courseSlug)) {
+    const { getResolvedCourseBySlug } = await import("@/server/site-content");
+    const { isFreeCourse } = await import("@/lib/courses");
+    const course = await getResolvedCourseBySlug(courseSlug);
+    if (!course) {
+      return resolveLiveAccess(STANDALONE_LIVE_SLUG, accessToken);
+    }
+    const free = isFreeCourse(course);
+    if (!accessToken?.trim()) {
+      return { canWatch: free, canComment: false, hasCourseAccess: false };
+    }
+    const { getUserFromAccessToken } = await import("@/server/supabase-auth");
+    const user = await getUserFromAccessToken(accessToken);
+    if (!user?.email || !user.id) {
+      return { canWatch: free, canComment: false, hasCourseAccess: false };
+    }
+    const { getDb } = await import("@/server/env");
+    const { listRegistrationsByEmail } = await import("@/server/db");
+    const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
+    const db = await getDb();
+    const email = normalizeRegistrationEmail(user.email);
+    const rows = await listRegistrationsByEmail(db, email);
+    const registration = pickRegistrationForCourse(rows, accessSlug);
+    const hasCourseAccess = hasPaidAccessToCourse(registration, accessSlug) || free;
+    const canWatch = hasLiveAccessToCourse(registration, accessSlug) || free;
+    return {
+      canWatch,
+      canComment: canWatch,
+      hasCourseAccess,
+      actorUserId: user.id,
+    };
   }
 
-  const free = isFreeCourse(course);
   if (!accessToken?.trim()) {
-    return { canWatch: free, canComment: false, hasCourseAccess: false };
+    return { canWatch: false, canComment: false, hasCourseAccess: false };
   }
 
   const { getUserFromAccessToken } = await import("@/server/supabase-auth");
   const user = await getUserFromAccessToken(accessToken);
   if (!user?.email || !user.id) {
-    return { canWatch: free, canComment: false, hasCourseAccess: false };
+    return { canWatch: false, canComment: false, hasCourseAccess: false };
   }
 
   const { getDb } = await import("@/server/env");
@@ -156,14 +196,13 @@ async function resolveLiveAccess(
   const db = await getDb();
   const email = normalizeRegistrationEmail(user.email);
   const rows = await listRegistrationsByEmail(db, email);
-  const registration = pickRegistrationForCourse(rows, courseSlug);
-  const hasCourseAccess = hasPaidAccessToCourse(registration, courseSlug) || free;
-  const canWatch = hasLiveAccessToCourse(registration, courseSlug) || free;
+  const registration = pickRegistrationForCourse(rows, STANDALONE_LIVE_SLUG);
+  const canWatch = hasLiveAccessToCourse(registration, STANDALONE_LIVE_SLUG);
 
   return {
     canWatch,
     canComment: canWatch,
-    hasCourseAccess,
+    hasCourseAccess: false,
     actorUserId: user.id,
   };
 }
@@ -270,8 +309,10 @@ export const listLiveComments = createServerFn({ method: "POST" })
       return { comments: [] as const };
     }
     const comments = await listComments(data.sessionId);
+    const { withAuthorAvatars } = await import("@/server/user-avatars");
+    const withAvatars = await withAuthorAvatars(comments);
     return {
-      comments: comments.map((comment) => ({
+      comments: withAvatars.map((comment) => ({
         ...comment,
         mine: Boolean(access.actorUserId && comment.authorUserId === access.actorUserId),
       })),
@@ -312,6 +353,7 @@ export const postLiveComment = createServerFn({ method: "POST" })
     }
 
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
+    const { avatarUrlFromUser } = await import("@/lib/user-avatar");
     const comment = await createLiveComment({
       sessionId: data.sessionId,
       authorUserId: user.id,
@@ -319,7 +361,13 @@ export const postLiveComment = createServerFn({ method: "POST" })
       authorName: displayNameFromUser(user),
       body: data.body,
     });
-    return { comment: { ...comment, mine: true } };
+    return {
+      comment: {
+        ...comment,
+        authorAvatarUrl: avatarUrlFromUser(user),
+        mine: true,
+      },
+    };
   });
 
 export const adminListLiveSessions = createServerFn({ method: "GET" }).handler(async () => {
@@ -333,7 +381,6 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
       .object({
-        courseSlug: z.string().min(1),
         title: z.string().trim().min(3).max(160),
         description: z.string().trim().max(1000).optional(),
         provider: providerSchema.optional(),
@@ -346,9 +393,6 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { getResolvedCourseBySlug } = await import("@/server/site-content");
-    const course = await getResolvedCourseBySlug(data.courseSlug);
-    if (!course) throw new Error("Cours introuvable.");
 
     const scheduled = new Date(data.scheduledAt);
     if (Number.isNaN(scheduled.getTime())) {
@@ -371,7 +415,7 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
 
     const { createLiveSession, listLiveSessions } = await import("@/server/live");
     await createLiveSession({
-      courseSlug: data.courseSlug,
+      courseSlug: STANDALONE_LIVE_SLUG,
       title: data.title,
       description: data.description,
       provider,
@@ -418,7 +462,7 @@ export const adminEndLiveSession = createServerFn({ method: "POST" })
     const recordingUrl = (data.recordingUrl?.trim() || session.playbackUrl).trim();
     let recordingLessonId = session.recordingLessonId;
 
-    if (!recordingLessonId && session.provider !== "hls") {
+    if (!recordingLessonId && session.provider !== "hls" && !isStandaloneLiveSlug(session.courseSlug)) {
       recordingLessonId = await attachLiveRecordingLesson({
         courseSlug: session.courseSlug,
         title: session.title,

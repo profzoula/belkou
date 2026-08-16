@@ -7,6 +7,7 @@ import { getDb } from "@/server/env";
 import {
   getRegistrationByEmailAndCourse,
   getRegistrationById,
+  listRegistrationsByEmail,
   saveRegistration,
   setStripeSessionId,
   updateRegistrationDetails,
@@ -18,9 +19,9 @@ import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/se
 import type { PlanId } from "@/lib/site-config";
 import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
 import { getResolvedCourseBySlug } from "@/server/site-content";
-import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
+import { LEGACY_COURSE_SLUG, VIP_MEMBERSHIP_SLUG } from "@/lib/course-access";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
-import { LIVE_TICKET_PRICE_USD } from "@/lib/live";
+import { LIVE_TICKET_PRICE_USD, STANDALONE_LIVE_SLUG, isStandaloneLiveSlug } from "@/lib/live";
 import { getWelcomePreviewLesson } from "@/lib/courses";
 
 function manualPaymentHtml() {
@@ -52,19 +53,33 @@ function manualPaymentHtml() {
 }
 
 async function resolveCheckoutPricing(data: RegistrationInput) {
+  if (data.plan === "vip") {
+    return {
+      price: siteConfig.plans.vip.price,
+      label: "Accès illimité VIP",
+      courseSlug: VIP_MEMBERSHIP_SLUG,
+      courseTitle: "BelKou VIP — Accès illimité",
+    };
+  }
+
   if (data.plan === "live") {
-    if (!data.course_slug) {
-      throw new Error("Choisissez le cours du live.");
-    }
-    const course = await getResolvedCourseBySlug(data.course_slug);
-    if (!course) {
-      throw new Error("Cours introuvable.");
+    if (data.course_slug && !isStandaloneLiveSlug(data.course_slug)) {
+      const course = await getResolvedCourseBySlug(data.course_slug);
+      if (!course) {
+        throw new Error("Cours introuvable.");
+      }
+      return {
+        price: LIVE_TICKET_PRICE_USD,
+        label: `Accès live — ${course.title}`,
+        courseSlug: course.slug,
+        courseTitle: course.title,
+      };
     }
     return {
       price: LIVE_TICKET_PRICE_USD,
-      label: `Accès live — ${course.title}`,
-      courseSlug: course.slug,
-      courseTitle: course.title,
+      label: "Accès live BelKou",
+      courseSlug: STANDALONE_LIVE_SLUG,
+      courseTitle: "BelKou Live",
     };
   }
 
@@ -112,7 +127,7 @@ async function startCheckout(
       fullName: record.full_name,
       courseSlug: pricing.courseSlug,
       courseTitle: pricing.courseTitle,
-      amountUsd: pricing.courseSlug ? pricing.price : undefined,
+      amountUsd: intendedPlan === "vip" || pricing.courseSlug ? pricing.price : undefined,
     });
 
     if (session?.url && session.id) {
@@ -136,16 +151,35 @@ async function startCheckout(
 
 export const submitRegistration = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => registrationSchema.parse(data))
-  .handler(async ({ data }) => {
+  .handler(async ({ data: raw }) => {
     const db = await getDb();
 
     const allowed = checkRateLimit(
-      `register:${data.email}`,
+      `register:${raw.email}`,
       RATE_LIMITS.register.limit,
       RATE_LIMITS.register.windowMs,
     );
     if (!allowed) {
       throw new Error("Trop de tentatives. Attendez quelques minutes puis réessayez.");
+    }
+
+    const data = {
+      ...raw,
+      course_slug:
+        raw.plan === "vip"
+          ? VIP_MEMBERSHIP_SLUG
+          : raw.plan === "live"
+            ? (raw.course_slug && !isStandaloneLiveSlug(raw.course_slug)
+              ? raw.course_slug
+              : STANDALONE_LIVE_SLUG)
+            : raw.course_slug,
+    };
+
+    const existingRows = await listRegistrationsByEmail(db, data.email);
+    if (existingRows.some((row) => row.payment_status === "paid" && row.plan === "vip")) {
+      throw new Error(
+        "Vous avez déjà l'accès illimité VIP (tous les cours et lives). Connectez-vous sur /login pour continuer.",
+      );
     }
 
     const existing = await getRegistrationByEmailAndCourse(
@@ -158,6 +192,11 @@ export const submitRegistration = createServerFn({ method: "POST" })
 
     if (existing) {
       if (existing.payment_status === "paid") {
+        if (data.plan === "vip") {
+          throw new Error(
+            "Vous avez déjà l'accès illimité VIP. Connectez-vous sur /login pour continuer.",
+          );
+        }
         if (data.plan === "live") {
           throw new Error(
             "Vous avez déjà accès au live de ce cours. Connectez-vous pour le regarder.",
@@ -172,7 +211,11 @@ export const submitRegistration = createServerFn({ method: "POST" })
         resumed = true;
       } else {
         const updated = await updateRegistrationDetails(db, existing.id, data);
-        record = updated ?? { ...existing, ...data };
+        record = updated ?? {
+          ...existing,
+          ...data,
+          course_slug: data.course_slug ?? existing.course_slug ?? null,
+        };
         resumed = true;
       }
     } else {
@@ -320,13 +363,16 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
       const unlocked = await getRegistrationById(db, granted.registrationId);
       if (unlocked) {
         try {
-          const course = unlocked.course_slug
-            ? await getResolvedCourseBySlug(unlocked.course_slug)
-            : null;
+          const course =
+            unlocked.course_slug && unlocked.course_slug !== VIP_MEMBERSHIP_SLUG
+              ? await getResolvedCourseBySlug(unlocked.course_slug)
+              : null;
           const fallbackAmount =
             unlocked.plan === "live"
               ? LIVE_TICKET_PRICE_USD
-              : (course?.price ?? siteConfig.plans[unlocked.plan].price);
+              : unlocked.plan === "vip"
+                ? siteConfig.plans.vip.price
+                : (course?.price ?? siteConfig.plans[unlocked.plan].price);
           await sendEmail({
             to: unlocked.email,
             subject: "Paiement confirmé — BelKou",
@@ -336,7 +382,10 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
               getWhatsappGroupUrlForCourse(unlocked.course_slug, unlocked.plan),
               {
                 invoiceId: `INV-${unlocked.id.slice(0, 8).toUpperCase()}`,
-                itemLabel: course?.title ?? `Plan ${unlocked.plan.toUpperCase()} BelKou`,
+                itemLabel:
+                  unlocked.plan === "vip"
+                    ? "Accès illimité VIP"
+                    : (course?.title ?? `Plan ${unlocked.plan.toUpperCase()} BelKou`),
                 amountUsd:
                   typeof session.amount_total === "number"
                     ? Math.max(session.amount_total, 0) / 100
@@ -368,6 +417,9 @@ export const getSuccessPageContext = createServerFn({ method: "GET" })
     const db = await getDb();
     const record = await getRegistrationById(db, data.registrationId);
     const slug = record?.course_slug ?? LEGACY_COURSE_SLUG;
+    if (slug === VIP_MEMBERSHIP_SLUG || record?.plan === "vip") {
+      return { courseSlug: LEGACY_COURSE_SLUG, welcomeLessonId: undefined as string | undefined };
+    }
     const course = await getResolvedCourseBySlug(slug);
     const welcome = course ? getWelcomePreviewLesson(course) : undefined;
     return { courseSlug: slug, welcomeLessonId: welcome?.id };
