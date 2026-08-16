@@ -81,7 +81,7 @@ function LiveSessionPage() {
         ) : !live ? (
           <div className="pt-[var(--site-header-height)]">
             <div className="grid bg-zinc-950 lg:grid-cols-[minmax(0,1fr)_22.5rem]">
-              <div className="aspect-video w-full animate-pulse bg-zinc-900" />
+              <div className="aspect-video max-h-[calc(100dvh-var(--site-header-height)-7rem)] w-full animate-pulse bg-zinc-900" />
               <div className="hidden h-auto min-h-[24rem] border-l border-zinc-800 bg-zinc-950 lg:block" />
             </div>
           </div>

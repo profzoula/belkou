@@ -104,7 +104,8 @@ export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
             "relative min-h-0 min-w-0 bg-black",
             theater
               ? "h-[min(56vw,calc(100dvh-var(--site-header-height)-16rem))] flex-none md:h-full md:min-h-0 md:flex-1"
-              : "aspect-video w-full lg:col-start-1 lg:row-start-1",
+              : // Cap the player so the info card below always peeks above the fold.
+                "aspect-video max-h-[calc(100dvh-var(--site-header-height)-7rem)] w-full lg:col-start-1 lg:row-start-1",
           )}
         >
           {player}
