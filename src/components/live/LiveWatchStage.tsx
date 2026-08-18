@@ -93,11 +93,7 @@ export function LiveWatchStage({ player, chat, caption }: LiveWatchStageProps) {
   }, [exitTheater, theater, toggle]);
 
   return (
-    <div
-      className={cn(
-        theater && "h-[calc(100dvh-var(--site-header-height))]",
-      )}
-    >
+    <div className={cn(theater && "h-[calc(100dvh-var(--site-header-height))]")}>
       <div
         ref={stageRef}
         className={cn(

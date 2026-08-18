@@ -229,6 +229,30 @@ export async function supabaseListByEmail(email: string): Promise<RegistrationRe
   return (data ?? []).map((row) => rowToRecord(row as Record<string, unknown>));
 }
 
+/** Paid seats for many slugs at once — one round trip for a whole page of cards. */
+export async function supabaseCountPaidForCourses(
+  courseSlugs: string[],
+): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  const sb = getSupabaseAdmin();
+  if (!sb || courseSlugs.length === 0) return counts;
+
+  const { data, error } = await sb
+    .from("registrations")
+    .select("course_slug")
+    .in("course_slug", courseSlugs)
+    .eq("payment_status", "paid");
+
+  if (error || !data) return counts;
+
+  for (const row of data) {
+    const slug = String((row as { course_slug?: string }).course_slug ?? "");
+    if (!slug) continue;
+    counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export async function supabaseListPaidForCourse(courseSlug: string): Promise<RegistrationRecord[]> {
   const sb = getSupabaseAdmin();
   if (!sb) return [];

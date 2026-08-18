@@ -37,7 +37,7 @@ function LiveSection({
   return (
     <section>
       <h2 className="font-display text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>
-      <div className="mt-4 grid gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {sessions.map((session) => (
           <LiveVideoCard
             key={session.id}
@@ -77,11 +77,6 @@ function LiveIndexPage() {
   const liveNow = sessions.filter((item) => item.status === "live");
   const upcoming = sessions.filter((item) => item.status === "scheduled");
   const replays = sessions.filter((item) => item.status === "ended");
-  // Falls back to the newest replay so the page never looks empty once an event is over.
-  const featured = liveNow[0] ?? upcoming[0] ?? replays[0] ?? null;
-  const moreLive = liveNow.filter((item) => item.id !== featured?.id);
-  const moreUpcoming = upcoming.filter((item) => item.id !== featured?.id);
-  const moreReplays = replays.filter((item) => item.id !== featured?.id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,22 +102,11 @@ function LiveIndexPage() {
             ) : null}
           </header>
 
-          {featured ? (
+          {sessions.length > 0 ? (
             <div className="space-y-10">
-              <div className="max-w-3xl xl:max-w-4xl">
-                <LiveVideoCard
-                  session={featured}
-                  featured
-                  reserved={reservedIds.has(featured.id)}
-                />
-              </div>
-              <LiveSection title="Aussi en direct" sessions={moreLive} reservedIds={reservedIds} />
-              <LiveSection
-                title={featured.status === "live" ? "À venir" : "Autres sessions"}
-                sessions={moreUpcoming}
-                reservedIds={reservedIds}
-              />
-              <LiveSection title="Replays" sessions={moreReplays} reservedIds={reservedIds} />
+              <LiveSection title="En direct" sessions={liveNow} reservedIds={reservedIds} />
+              <LiveSection title="À venir" sessions={upcoming} reservedIds={reservedIds} />
+              <LiveSection title="Replays" sessions={replays} reservedIds={reservedIds} />
             </div>
           ) : (
             <EmptyState

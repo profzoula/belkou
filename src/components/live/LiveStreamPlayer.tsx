@@ -79,10 +79,7 @@ function HlsQualityMenu({
                   }}
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors hover:bg-white/15"
                 >
-                  <Check
-                    className={cn("size-3.5 shrink-0", !active && "invisible")}
-                    aria-hidden
-                  />
+                  <Check className={cn("size-3.5 shrink-0", !active && "invisible")} aria-hidden />
                   {level.index === -1
                     ? autoHeight
                       ? `Auto (${autoHeight}p)`

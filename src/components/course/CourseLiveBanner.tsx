@@ -4,7 +4,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
-import { formatLiveSchedule, liveEventThumbnail, liveStatusLabel, type PublicLiveListItem } from "@/lib/live";
+import {
+  formatLivePrice,
+  formatLiveSchedule,
+  liveEventThumbnail,
+  liveStatusLabel,
+  type PublicLiveListItem,
+} from "@/lib/live";
 import { listPublicLiveSessions } from "@/lib/fns/live";
 
 export function CourseLiveBanner({ courseSlug }: { courseSlug: string }) {
@@ -55,7 +61,9 @@ export function CourseLiveBanner({ courseSlug }: { courseSlug: string }) {
       </div>
       <Button asChild size="sm" className="rounded-full">
         <Link to="/live/$sessionId" params={{ sessionId: item.id }}>
-          Rejoindre le live
+          {item.status === "live"
+            ? "Regarder en direct"
+            : `Réserver — ${formatLivePrice(item.ticketPrice)}`}
         </Link>
       </Button>
     </div>

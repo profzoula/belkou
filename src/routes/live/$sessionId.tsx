@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { LiveChat } from "@/components/live/LiveChat";
-import { LiveEventPoster } from "@/components/live/LiveEventPoster";
+import { LiveEventPage } from "@/components/live/LiveEventPage";
 import { LiveInfoCard } from "@/components/live/LiveInfoCard";
 import { LiveRelatedRail } from "@/components/live/LiveRelatedRail";
 import { LiveStreamPlayer } from "@/components/live/LiveStreamPlayer";
@@ -52,23 +52,23 @@ export const Route = createFileRoute("/live/$sessionId")({
   component: LiveSessionPage,
 });
 
+/** Mirrors the event page, the layout most visitors land on. */
 function LiveStageSkeleton() {
   return (
     <div className="pt-[var(--site-header-height)]">
-      <div className="grid bg-zinc-950 lg:grid-cols-[minmax(0,1fr)_22.5rem]">
-        <div>
-          <div className="aspect-video max-h-[calc(100dvh-var(--site-header-height)-7rem)] w-full animate-pulse bg-zinc-900" />
-          <div className="space-y-3 px-4 py-4 sm:px-5">
-            <div className="h-5 w-24 animate-pulse rounded bg-zinc-900" />
-            <div className="h-6 w-2/3 animate-pulse rounded bg-zinc-900" />
-            <div className="h-4 w-40 animate-pulse rounded bg-zinc-900" />
+      <div className="aspect-[16/6] max-h-72 w-full animate-pulse bg-muted" />
+      <div className="site-container pb-16">
+        <div className="flex gap-4 border-b border-border py-5">
+          <div className="hidden size-14 shrink-0 animate-pulse rounded-xl bg-muted sm:block" />
+          <div className="w-full space-y-2">
+            <div className="h-4 w-44 animate-pulse rounded bg-muted" />
+            <div className="h-7 w-2/3 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-40 animate-pulse rounded bg-muted" />
           </div>
         </div>
-        <div className="hidden min-h-[24rem] space-y-4 border-l border-zinc-800 bg-zinc-950 p-4 lg:block">
-          <div className="h-4 w-28 animate-pulse rounded bg-zinc-900" />
-          <div className="h-4 w-full animate-pulse rounded bg-zinc-900" />
-          <div className="h-4 w-5/6 animate-pulse rounded bg-zinc-900" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-zinc-900" />
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_21rem]">
+          <div className="h-64 animate-pulse rounded-2xl bg-muted" />
+          <div className="h-44 animate-pulse rounded-2xl bg-muted" />
         </div>
       </div>
       <span className="sr-only" role="status">
@@ -179,26 +179,20 @@ function LiveSessionPage() {
               className="rounded-2xl border border-border bg-card"
             />
           </div>
-        ) : (
+        ) : showPlayer ? (
           <>
             <div className="bg-zinc-950 pt-[var(--site-header-height)]">
               <LiveWatchStage
                 player={
-                  showPlayer ? (
-                    <LiveStreamPlayer
-                      provider={live.provider}
-                      url={live.playbackUrl!}
-                      title={live.title}
-                      live={live.status === "live"}
-                      fill
-                    />
-                  ) : (
-                    <LiveEventPoster live={live} />
-                  )
+                  <LiveStreamPlayer
+                    provider={live.provider}
+                    url={live.playbackUrl!}
+                    title={live.title}
+                    live={live.status === "live"}
+                    fill
+                  />
                 }
-                caption={
-                  <LiveInfoCard live={live} loggedIn={Boolean(session)} watching={showPlayer} />
-                }
+                caption={<LiveInfoCard live={live} />}
                 chat={
                   <LiveChat
                     sessionId={live.id}
@@ -210,6 +204,14 @@ function LiveSessionPage() {
               />
             </div>
             <div className="site-container space-y-4 py-8 pb-16">
+              <LiveRelatedRail sessions={related} currentId={live.id} />
+            </div>
+          </>
+        ) : (
+          // No seat, or nothing to play yet: the event page sells the session instead.
+          <>
+            <LiveEventPage live={live} loggedIn={Boolean(session)} />
+            <div className="site-container space-y-4 pb-16">
               <LiveRelatedRail sessions={related} currentId={live.id} />
             </div>
           </>

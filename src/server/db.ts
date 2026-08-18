@@ -3,6 +3,7 @@ import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { registrationCourseKey, pickRegistrationForCourse } from "@/lib/course-access";
 import {
   supabaseCountPaidForCourse,
+  supabaseCountPaidForCourses,
   supabaseListPaidForCourse,
   supabaseGetById,
   supabaseGetByStripeSession,
@@ -501,6 +502,45 @@ export async function listRegistrations(db: D1Database | null): Promise<Registra
   return [...devStore.values()].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+}
+
+/**
+ * Paid seats for many slugs in one pass. The live index needs a count per event, and
+ * asking per card would multiply queries by the number of events on screen.
+ */
+export async function countPaidRegistrationsForCourses(
+  db: D1Database | null,
+  courseSlugs: string[],
+): Promise<Map<string, number>> {
+  const slugs = [...new Set(courseSlugs.filter(Boolean))];
+  const counts = new Map<string, number>();
+  if (slugs.length === 0) return counts;
+
+  if (db) {
+    try {
+      const placeholders = slugs.map(() => "?").join(",");
+      const { results } = await db
+        .prepare(
+          `SELECT course_slug, COUNT(*) AS total FROM registrations
+           WHERE payment_status = 'paid' AND course_slug IN (${placeholders})
+           GROUP BY course_slug`,
+        )
+        .bind(...slugs)
+        .all<{ course_slug: string; total: number }>();
+      for (const row of results ?? []) {
+        counts.set(row.course_slug, Number(row.total) || 0);
+      }
+    } catch {
+      /* D1 unavailable — Supabase still answers below */
+    }
+  }
+
+  // A row can live in one store and not the other yet, so the larger count wins.
+  for (const [slug, total] of await supabaseCountPaidForCourses(slugs)) {
+    counts.set(slug, Math.max(counts.get(slug) ?? 0, total));
+  }
+
+  return counts;
 }
 
 /** Everyone who paid for one slug, de-duplicated across both stores. */

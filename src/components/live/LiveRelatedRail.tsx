@@ -14,7 +14,7 @@ export function LiveRelatedRail({
   return (
     <section>
       <h2 className="font-display text-lg font-semibold tracking-tight">Autres lives</h2>
-      <div className="mt-4 grid gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {related.map((session) => (
           <LiveVideoCard key={session.id} session={session} />
         ))}

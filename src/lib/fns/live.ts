@@ -255,27 +255,52 @@ export const getPublicLiveSummary = createServerFn({ method: "GET" }).handler(as
   };
 });
 
+/** Seats sold for a whole page of events, in one query. Never blocks the page. */
+async function reservedSeatsBySession(sessionIds: string[]): Promise<Map<string, number>> {
+  try {
+    const { getDb } = await import("@/server/env");
+    const { countPaidRegistrationsForCourses } = await import("@/server/db");
+    const { liveTicketSlug } = await import("@/lib/live");
+
+    const bySlug = await countPaidRegistrationsForCourses(
+      await getDb(),
+      sessionIds.map((id) => liveTicketSlug(id)),
+    );
+
+    const bySession = new Map<string, number>();
+    for (const id of sessionIds) {
+      bySession.set(id, bySlug.get(liveTicketSlug(id)) ?? 0);
+    }
+    return bySession;
+  } catch {
+    return new Map();
+  }
+}
+
 async function listPublicSessions(): Promise<PublicLiveListItem[]> {
   const { listLiveSessions } = await import("@/server/live");
-  const sessions = await withPublicCourse(await listLiveSessions());
-  return sessions
-    .filter((session) => session.status !== "canceled")
-    .map((session) => ({
-      id: session.id,
-      courseSlug: session.courseSlug,
-      courseTitle: session.courseTitle,
-      title: session.title,
-      description: session.description,
-      status: session.status,
-      provider: session.provider,
-      scheduledAt: session.scheduledAt,
-      startedAt: session.startedAt,
-      endedAt: session.endedAt,
-      recordingLessonId: session.recordingLessonId,
-      thumbnailUrl: session.thumbnailUrl,
-      ticketPrice: resolveLivePrice(session.priceUsd),
-      course: session.course,
-    }));
+  const sessions = (await withPublicCourse(await listLiveSessions())).filter(
+    (session) => session.status !== "canceled",
+  );
+  const reserved = await reservedSeatsBySession(sessions.map((session) => session.id));
+
+  return sessions.map((session) => ({
+    id: session.id,
+    courseSlug: session.courseSlug,
+    courseTitle: session.courseTitle,
+    title: session.title,
+    description: session.description,
+    status: session.status,
+    provider: session.provider,
+    scheduledAt: session.scheduledAt,
+    startedAt: session.startedAt,
+    endedAt: session.endedAt,
+    recordingLessonId: session.recordingLessonId,
+    thumbnailUrl: session.thumbnailUrl,
+    ticketPrice: resolveLivePrice(session.priceUsd),
+    reservedCount: reserved.get(session.id) ?? 0,
+    course: session.course,
+  }));
 }
 
 export const listPublicLiveSessions = createServerFn({ method: "GET" }).handler(

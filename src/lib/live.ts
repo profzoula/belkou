@@ -102,6 +102,8 @@ export type PublicLiveListItem = {
   recordingLessonId: string | null;
   thumbnailUrl: string | null;
   ticketPrice: number;
+  /** Paid seats sold for this event. */
+  reservedCount: number;
   course: LiveCourseInfo;
 };
 
@@ -187,6 +189,30 @@ export function viewerZoneDiffers(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Day number and short month in Haiti time — feeds the calendar chip on event surfaces. */
+export function liveDateChip(iso: string): { day: string; month: string } {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return { day: "—", month: "" };
+  try {
+    return {
+      day: date.toLocaleDateString("fr-FR", { day: "numeric", timeZone: LIVE_TIME_ZONE }),
+      month: date
+        .toLocaleDateString("fr-FR", { month: "short", timeZone: LIVE_TIME_ZONE })
+        .replace(".", ""),
+    };
+  } catch {
+    return { day: "—", month: "" };
+  }
+}
+
+/** A lone seat is not social proof, so the count stays hidden until a room forms. */
+const SOCIAL_PROOF_MIN_SEATS = 3;
+
+export function liveReservedLabel(count: number): string | null {
+  if (!Number.isFinite(count) || count < SOCIAL_PROOF_MIN_SEATS) return null;
+  return `${count} places réservées`;
 }
 
 /**
