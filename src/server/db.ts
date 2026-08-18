@@ -2,6 +2,8 @@ import type { RegistrationInput, RegistrationRecord } from "@/lib/schemas/regist
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import { registrationCourseKey, pickRegistrationForCourse } from "@/lib/course-access";
 import {
+  supabaseCountPaidForCourse,
+  supabaseListPaidForCourse,
   supabaseGetById,
   supabaseGetByStripeSession,
   supabaseGetCount,
@@ -499,6 +501,69 @@ export async function listRegistrations(db: D1Database | null): Promise<Registra
   return [...devStore.values()].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+}
+
+/** Everyone who paid for one slug, de-duplicated across both stores. */
+export async function listPaidRegistrationsForCourse(
+  db: D1Database | null,
+  courseSlug: string,
+): Promise<RegistrationRecord[]> {
+  const collected: RegistrationRecord[] = [];
+
+  if (db) {
+    try {
+      const { results } = await db
+        .prepare(
+          `SELECT * FROM registrations WHERE course_slug = ? AND payment_status = 'paid' ORDER BY created_at DESC`,
+        )
+        .bind(courseSlug)
+        .all<Record<string, unknown>>();
+      if (results?.length) collected.push(...results.map(rowToRecord));
+    } catch {
+      /* D1 unavailable — Supabase still answers below */
+    }
+  }
+
+  collected.push(...(await supabaseListPaidForCourse(courseSlug)));
+
+  if (!collected.length) {
+    return [...devStore.values()].filter(
+      (record) => record.course_slug === courseSlug && record.payment_status === "paid",
+    );
+  }
+
+  const byEmail = new Map<string, RegistrationRecord>();
+  for (const record of collected) {
+    const key = normalizeRegistrationEmail(record.email);
+    if (!byEmail.has(key)) byEmail.set(key, record);
+  }
+  return [...byEmail.values()];
+}
+
+/**
+ * Paid seats for one slug. Both stores are asked and the larger wins, since a row
+ * can exist in one and not yet in the other.
+ */
+export async function countPaidRegistrationsForCourse(
+  db: D1Database | null,
+  courseSlug: string,
+): Promise<number> {
+  let d1Count = 0;
+  if (db) {
+    try {
+      const row = await db
+        .prepare(
+          `SELECT COUNT(*) as total FROM registrations WHERE course_slug = ? AND payment_status = 'paid'`,
+        )
+        .bind(courseSlug)
+        .first<{ total: number }>();
+      d1Count = row?.total ?? 0;
+    } catch {
+      d1Count = 0;
+    }
+  }
+  const sbCount = await supabaseCountPaidForCourse(courseSlug);
+  return Math.max(d1Count, sbCount);
 }
 
 export async function getRegistrationStats(db: D1Database | null): Promise<RegistrationStats> {

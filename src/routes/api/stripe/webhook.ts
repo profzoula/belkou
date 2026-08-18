@@ -8,6 +8,8 @@ import { earnAffiliateCommission } from "@/server/affiliates";
 import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/stripe-access";
 import { sendOpsAlert } from "@/server/ops-alerts";
 import { getResolvedCourseBySlug } from "@/server/site-content";
+import { getLiveSession } from "@/server/live";
+import { parseLiveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { beginWebhookEvent, finishWebhookEvent } from "@/server/stripe-webhook-idempotency";
 
 function webhookOk() {
@@ -49,8 +51,15 @@ async function handleCheckoutPaid(session: {
   const to = session.customer_email ?? session.customer_details?.email ?? record.email;
   if (to) {
     try {
-      const course = record.course_slug ? await getResolvedCourseBySlug(record.course_slug) : null;
-      const fallbackAmount = course?.price ?? siteConfig.plans[record.plan].price;
+      const liveSessionId = parseLiveTicketSlug(record.course_slug);
+      const liveSession = liveSessionId ? await getLiveSession(liveSessionId) : null;
+      const course =
+        record.course_slug && !liveSessionId
+          ? await getResolvedCourseBySlug(record.course_slug)
+          : null;
+      const fallbackAmount =
+        (liveSession ? resolveLivePrice(liveSession.priceUsd) : course?.price) ??
+        siteConfig.plans[record.plan].price;
       const emailResult = await sendEmail({
         to,
         subject: "Paiement confirmé — BelKou",
@@ -60,7 +69,9 @@ async function handleCheckoutPaid(session: {
           getWhatsappGroupUrlForCourse(record.course_slug, record.plan),
           {
             invoiceId: `INV-${record.id.slice(0, 8).toUpperCase()}`,
-            itemLabel: course?.title ?? `Plan ${record.plan.toUpperCase()} BelKou`,
+            itemLabel: liveSession
+              ? `Place live — ${liveSession.title}`
+              : (course?.title ?? `Plan ${record.plan.toUpperCase()} BelKou`),
             amountUsd:
               typeof session.amount_total === "number"
                 ? Math.max(session.amount_total, 0) / 100
@@ -70,6 +81,13 @@ async function handleCheckoutPaid(session: {
             transactionId: session.id,
             customerEmail: to,
           },
+          liveSession
+            ? {
+                title: liveSession.title,
+                scheduledAt: liveSession.scheduledAt,
+                url: `${siteConfig.siteUrl.replace(/\/$/, "")}/live/${liveSession.id}`,
+              }
+            : undefined,
         ),
       });
       if (!emailResult.ok) {

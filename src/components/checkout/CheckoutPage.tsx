@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { formatLivePrice, formatLiveSchedule, liveTicketSlug, resolveLivePrice } from "@/lib/live";
+import { formatUsd, toMoney } from "@/lib/money";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
@@ -43,19 +44,6 @@ const ORIGINAL_PRICES: Record<PlanId, number> = {
   premium: 399,
   vip: 450,
 };
-
-function toMoney(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-function formatUsd(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(toMoney(value));
-}
 
 function discountPercent(price: number, original: number) {
   if (original <= price) return 0;

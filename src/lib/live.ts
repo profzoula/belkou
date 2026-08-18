@@ -1,3 +1,5 @@
+import { formatUsd } from "@/lib/money";
+
 export const LIVE_PROVIDERS = ["youtube", "vimeo", "hls"] as const;
 export const LIVE_STATUSES = ["scheduled", "live", "ended", "canceled"] as const;
 export const LIVE_TICKET_PRICE_USD = 9.99;
@@ -34,7 +36,7 @@ export function resolveLivePrice(priceUsd?: number | null): number {
 export function formatLivePrice(priceUsd?: number | null): string {
   const price = resolveLivePrice(priceUsd);
   if (price <= 0) return "Gratuit";
-  return `${price.toFixed(2).replace(".", ",")} $`;
+  return formatUsd(price);
 }
 
 export type LiveProvider = (typeof LIVE_PROVIDERS)[number];
@@ -108,6 +110,8 @@ export type PublicLiveSession = Omit<LiveSession, "playbackUrl"> & {
   canWatch: boolean;
   canComment: boolean;
   liveTicketPrice: number;
+  /** Paid seats sold for this event. */
+  reservedCount: number;
   course: LiveCourseInfo;
 };
 
@@ -135,18 +139,83 @@ export function liveProviderLabel(provider: LiveProvider): string {
   }
 }
 
-export function formatLiveSchedule(iso: string): string {
+/**
+ * Every announced hour is Haiti time. Pinning the zone keeps the server and the
+ * browser on the same string, and the zone label stops a student abroad from
+ * reading the hour as their own.
+ */
+export const LIVE_TIME_ZONE = "America/Port-au-Prince";
+
+const LIVE_DATE_PARTS = {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+} as const;
+
+function formatInZone(iso: string, timeZone: string | undefined, withZoneName: boolean): string {
   try {
     return new Date(iso).toLocaleString("fr-FR", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
+      ...LIVE_DATE_PARTS,
+      ...(timeZone ? { timeZone } : {}),
+      ...(withZoneName ? ({ timeZoneName: "short" } as const) : {}),
     });
   } catch {
     return iso;
   }
+}
+
+export function formatLiveSchedule(iso: string): string {
+  return formatInZone(iso, LIVE_TIME_ZONE, true);
+}
+
+/** Same moment without the zone label — for sentences that already name it. */
+export function formatLiveScheduleShort(iso: string): string {
+  return formatInZone(iso, LIVE_TIME_ZONE, false);
+}
+
+/** The same moment in the reader's own zone. Client-side only. */
+export function formatLiveScheduleLocal(iso: string): string {
+  return formatInZone(iso, undefined, true);
+}
+
+/** True when the reader is not on Haiti time and needs the translated hour. */
+export function viewerZoneDiffers(): boolean {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone !== LIVE_TIME_ZONE;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Relative time to the start, or null once the event should have begun.
+ * Keeps the wait concrete when the absolute date is days away.
+ */
+export function liveCountdownLabel(iso: string, now: number = Date.now()): string | null {
+  const start = new Date(iso).getTime();
+  if (!Number.isFinite(start)) return null;
+  const ms = start - now;
+  if (ms <= 0) return null;
+
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 1) return "dans moins d'une minute";
+  if (minutes < 60) return `dans ${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    const restMinutes = minutes % 60;
+    return restMinutes > 0 ? `dans ${hours} h ${restMinutes} min` : `dans ${hours} h`;
+  }
+
+  const days = Math.floor(hours / 24);
+  if (days < 7) {
+    const restHours = hours % 24;
+    return restHours > 0 ? `dans ${days} j ${restHours} h` : `dans ${days} j`;
+  }
+  const weeks = Math.round(days / 7);
+  return `dans ${weeks} semaine${weeks > 1 ? "s" : ""}`;
 }
 
 export function detectLiveProvider(url: string): LiveProvider {

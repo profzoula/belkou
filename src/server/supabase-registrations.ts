@@ -229,6 +229,41 @@ export async function supabaseListByEmail(email: string): Promise<RegistrationRe
   return (data ?? []).map((row) => rowToRecord(row as Record<string, unknown>));
 }
 
+export async function supabaseListPaidForCourse(courseSlug: string): Promise<RegistrationRecord[]> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return [];
+
+  const { data, error } = await sb
+    .from("registrations")
+    .select("*")
+    .eq("course_slug", courseSlug)
+    .eq("payment_status", "paid");
+
+  if (error) {
+    console.error("[BelKou] Supabase list paid for course:", error.message);
+    return [];
+  }
+  return (data ?? []).map((row) => rowToRecord(row as Record<string, unknown>));
+}
+
+/** Paid seats for one product slug — used for the live attendance count. */
+export async function supabaseCountPaidForCourse(courseSlug: string): Promise<number> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return 0;
+
+  const { count, error } = await sb
+    .from("registrations")
+    .select("id", { count: "exact", head: true })
+    .eq("course_slug", courseSlug)
+    .eq("payment_status", "paid");
+
+  if (error) {
+    console.error("[BelKou] Supabase count paid for course:", error.message);
+    return 0;
+  }
+  return count ?? 0;
+}
+
 export async function supabaseGetByEmailAndCourse(
   email: string,
   courseSlug?: string | null,

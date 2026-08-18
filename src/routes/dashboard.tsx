@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { BookOpen, MessagesSquare, Settings2, Sparkles } from "lucide-react";
+import { BookOpen, MessagesSquare, Radio, Settings2, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { FadeIn } from "@/components/motion/FadeIn";
@@ -12,6 +12,7 @@ import { seoHead } from "@/lib/seo";
 import { AffiliatePanel } from "@/components/affiliate/AffiliatePanel";
 import { AccountSettingsPanel } from "@/components/dashboard/AccountSettingsPanel";
 import { MyCoursesSection } from "@/components/dashboard/MyCoursesSection";
+import { MyLivesSection } from "@/components/dashboard/MyLivesSection";
 import { PaymentAccountLinkBanner } from "@/components/dashboard/PaymentAccountLinkBanner";
 import { VipUnlimitedCta } from "@/components/site/VipUnlimitedCta";
 import { claimSignupReferral } from "@/lib/fns/affiliate";
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/dashboard")({
 
 const quickLinks = [
   { href: "#courses", label: "Mes cours", icon: BookOpen },
+  { href: "#lives", label: "Mes lives", icon: Radio },
   { href: "/forum", label: "Forum", icon: MessagesSquare, route: true },
   { href: "#account", label: "Compte", icon: Settings2 },
   { href: "#affiliate", label: "Affiliation", icon: Sparkles },
@@ -211,6 +213,12 @@ function DashboardPage() {
           <div id="courses" className="scroll-mt-24">
             <MyCoursesSection enrollments={enrollments} />
           </div>
+
+          {session?.access_token ? (
+            <div id="lives" className="scroll-mt-24">
+              <MyLivesSection accessToken={session.access_token} />
+            </div>
+          ) : null}
 
           {enrollments && !isVip ? <VipUnlimitedCta embedded /> : null}
 

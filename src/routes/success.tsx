@@ -23,6 +23,7 @@ import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from 
 import { seoHead } from "@/lib/seo";
 import { useAuth } from "@/hooks/use-auth";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
+import { parseLiveTicketSlug } from "@/lib/live";
 import {
   clearRegistrationHandoff,
   emailsMatch,
@@ -135,6 +136,9 @@ function SuccessPage() {
   const courseSlug = status?.course_slug ?? loaderData.courseSlug ?? LEGACY_COURSE_SLUG;
   const welcomeLessonId = loaderData.welcomeLessonId;
   const planId = (status?.plan ?? plan)?.toLowerCase();
+  // A live ticket carries its session in the slug, so the confirmation can point
+  // back to the exact event instead of the catalogue.
+  const liveSessionId = parseLiveTicketSlug(status?.course_slug);
   const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
   const handoff = typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
@@ -184,33 +188,33 @@ function SuccessPage() {
           {loading ? "Vérification..." : isPaid ? "Paiement confirmé !" : "Inscription enregistrée"}
         </h1>
         <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-            {isPaid ? (
-              planId === "live" ? (
-                <>
-                  Place réservée pour ce live.{" "}
-                  <strong className="font-medium text-foreground">
-                    Connectez-vous avec le même email
-                  </strong>{" "}
-                  le jour du direct — le replay reste disponible ensuite.
-                </>
-              ) : planId === "vip" ? (
-                <>
-                  Accès illimité VIP confirmé — tous les cours et tous les lives.{" "}
-                  <strong className="font-medium text-foreground">
-                    Connectez-vous avec le même email
-                  </strong>{" "}
-                  pour les voir dans Mes cours.
-                </>
-              ) : (
-                <>
-                  Votre accès au cours sera disponible selon le calendrier du programme.{" "}
-                  <strong className="font-medium text-foreground">
-                    Créez votre compte avec le même email que l&apos;inscription
-                  </strong>{" "}
-                  — sans cela, vos cours n&apos;apparaîtront pas dans Mes cours.
-                </>
-              )
+          {isPaid ? (
+            planId === "live" ? (
+              <>
+                Place réservée pour ce live.{" "}
+                <strong className="font-medium text-foreground">
+                  Connectez-vous avec le même email
+                </strong>{" "}
+                le jour du direct — le replay reste disponible ensuite.
+              </>
+            ) : planId === "vip" ? (
+              <>
+                Accès illimité VIP confirmé — tous les cours et tous les lives.{" "}
+                <strong className="font-medium text-foreground">
+                  Connectez-vous avec le même email
+                </strong>{" "}
+                pour les voir dans Mes cours.
+              </>
             ) : (
+              <>
+                Votre accès au cours sera disponible selon le calendrier du programme.{" "}
+                <strong className="font-medium text-foreground">
+                  Créez votre compte avec le même email que l&apos;inscription
+                </strong>{" "}
+                — sans cela, vos cours n&apos;apparaîtront pas dans Mes cours.
+              </>
+            )
+          ) : (
             "Consultez votre email pour les instructions de paiement."
           )}
         </p>
@@ -288,10 +292,17 @@ function SuccessPage() {
             <>
               {planId === "live" ? (
                 <Button asChild variant="hero" size="lg" className="touch-target">
-                  <Link to="/live">
-                    <BookOpen className="h-4 w-4" />
-                    Voir les lives
-                  </Link>
+                  {liveSessionId ? (
+                    <Link to="/live/$sessionId" params={{ sessionId: liveSessionId }}>
+                      <BookOpen className="h-4 w-4" />
+                      Voir mon live
+                    </Link>
+                  ) : (
+                    <Link to="/live">
+                      <BookOpen className="h-4 w-4" />
+                      Voir les lives
+                    </Link>
+                  )}
                 </Button>
               ) : planId === "vip" ? (
                 <>

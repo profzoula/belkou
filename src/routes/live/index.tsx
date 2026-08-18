@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Radio } from "lucide-react";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { LiveVideoCard } from "@/components/live/LiveVideoCard";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useAuth } from "@/hooks/use-auth";
 import type { PublicLiveListItem } from "@/lib/live";
-import { listPublicLiveSessions } from "@/lib/fns/live";
+import { listMyLiveSessions, listPublicLiveSessions } from "@/lib/fns/live";
 import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/live/")({
@@ -24,9 +27,11 @@ export const Route = createFileRoute("/live/")({
 function LiveSection({
   title,
   sessions,
+  reservedIds,
 }: {
   title: string;
   sessions: PublicLiveListItem[];
+  reservedIds: Set<string>;
 }) {
   if (sessions.length === 0) return null;
   return (
@@ -34,7 +39,11 @@ function LiveSection({
       <h2 className="font-display text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>
       <div className="mt-4 grid gap-x-4 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
         {sessions.map((session) => (
-          <LiveVideoCard key={session.id} session={session} />
+          <LiveVideoCard
+            key={session.id}
+            session={session}
+            reserved={reservedIds.has(session.id)}
+          />
         ))}
       </div>
     </section>
@@ -43,12 +52,36 @@ function LiveSection({
 
 function LiveIndexPage() {
   const sessions = Route.useLoaderData() as PublicLiveListItem[];
-  const liveNow = sessions.filter((session) => session.status === "live");
-  const upcoming = sessions.filter((session) => session.status === "scheduled");
-  const replays = sessions.filter((session) => session.status === "ended");
-  const featured = liveNow[0] ?? upcoming[0] ?? null;
-  const moreLive = liveNow.filter((session) => session.id !== featured?.id);
-  const moreUpcoming = upcoming.filter((session) => session.id !== featured?.id);
+  const { session } = useAuth();
+  const myLivesFn = useServerFn(listMyLiveSessions);
+  const [reservedIds, setReservedIds] = useState<Set<string>>(new Set());
+
+  const accessToken = session?.access_token;
+
+  useEffect(() => {
+    if (!accessToken) {
+      setReservedIds(new Set());
+      return;
+    }
+    let cancelled = false;
+    myLivesFn({ data: { accessToken } })
+      .then((result) => {
+        if (!cancelled) setReservedIds(new Set(result.sessions.map((item) => item.id)));
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, myLivesFn]);
+
+  const liveNow = sessions.filter((item) => item.status === "live");
+  const upcoming = sessions.filter((item) => item.status === "scheduled");
+  const replays = sessions.filter((item) => item.status === "ended");
+  // Falls back to the newest replay so the page never looks empty once an event is over.
+  const featured = liveNow[0] ?? upcoming[0] ?? replays[0] ?? null;
+  const moreLive = liveNow.filter((item) => item.id !== featured?.id);
+  const moreUpcoming = upcoming.filter((item) => item.id !== featured?.id);
+  const moreReplays = replays.filter((item) => item.id !== featured?.id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -58,7 +91,9 @@ function LiveIndexPage() {
           <header className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="section-label mb-2">BelKou</p>
-              <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">Live</h1>
+              <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+                Live
+              </h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
                 Directs, questions en live, puis replay — le tout sur BelKou. Chaque live a son prix
                 : réservez votre place dès l&apos;annonce, avant le début.
@@ -75,14 +110,19 @@ function LiveIndexPage() {
           {featured ? (
             <div className="space-y-10">
               <div className="max-w-3xl xl:max-w-4xl">
-                <LiveVideoCard session={featured} featured />
+                <LiveVideoCard
+                  session={featured}
+                  featured
+                  reserved={reservedIds.has(featured.id)}
+                />
               </div>
-              <LiveSection title="Aussi en direct" sessions={moreLive} />
+              <LiveSection title="Aussi en direct" sessions={moreLive} reservedIds={reservedIds} />
               <LiveSection
                 title={featured.status === "live" ? "À venir" : "Autres sessions"}
                 sessions={moreUpcoming}
+                reservedIds={reservedIds}
               />
-              <LiveSection title="Replays" sessions={replays} />
+              <LiveSection title="Replays" sessions={moreReplays} reservedIds={reservedIds} />
             </div>
           ) : (
             <EmptyState

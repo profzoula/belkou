@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Play } from "lucide-react";
+import { Check, Play } from "lucide-react";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { LiveNowBadge } from "@/components/live/LiveNowBadge";
 import { SiteLogo } from "@/components/site/SiteLogo";
+import { useLiveCountdown } from "@/hooks/use-live-countdown";
 import {
   formatLivePrice,
   formatLiveSchedule,
@@ -16,6 +17,8 @@ import { cn } from "@/lib/utils";
 type LiveVideoCardProps = {
   session: PublicLiveListItem;
   featured?: boolean;
+  /** True once the student holds a ticket (or VIP) for this event. */
+  reserved?: boolean;
 };
 
 function ChannelAvatar({
@@ -43,25 +46,56 @@ function ChannelAvatar({
   );
 }
 
-export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps) {
+/** Top-right corner tag: what this event costs, or that the seat is already held. */
+function CornerTag({
+  reserved,
+  price,
+  compact,
+}: {
+  reserved: boolean;
+  price: string;
+  compact?: boolean;
+}) {
+  return (
+    <span
+      className={cn(
+        "absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-md text-[11px] font-bold text-white",
+        compact ? "px-1.5 py-0.5" : "px-2 py-1",
+        reserved ? "bg-emerald-600" : "bg-black/70",
+      )}
+    >
+      {reserved ? <Check className="size-3" aria-hidden /> : null}
+      {reserved ? "Réservé" : price}
+    </span>
+  );
+}
+
+export function LiveVideoCard({ session, featured = false, reserved = false }: LiveVideoCardProps) {
   const standalone = isStandaloneLiveSlug(session.course.slug);
   const channel = standalone ? "BelKou" : session.courseTitle;
   const meta =
-    session.status === "live" ? liveStatusLabel(session.status) : formatLiveSchedule(session.scheduledAt);
+    session.status === "live"
+      ? liveStatusLabel(session.status)
+      : formatLiveSchedule(session.scheduledAt);
+  const countdown = useLiveCountdown(session.scheduledAt, session.status === "scheduled");
   const priceLabel = formatLivePrice(session.ticketPrice);
   const ctaLabel =
     session.status === "live"
-      ? "Regarder en direct"
+      ? reserved
+        ? "Entrer dans le live"
+        : "Regarder en direct"
       : session.status === "ended"
         ? "Voir le replay"
-        : `Réserver ma place — ${priceLabel}`;
+        : reserved
+          ? "Ma place est réservée"
+          : `Réserver ma place — ${priceLabel}`;
 
   if (featured) {
     return (
       <Link
         to="/live/$sessionId"
         params={{ sessionId: session.id }}
-        className="group block outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <div className="relative overflow-hidden rounded-2xl">
           <CourseThumbnailBanner
@@ -74,13 +108,11 @@ export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps)
           >
             <LiveNowBadge
               status={session.status}
-              className="absolute left-3 top-3 z-10 rounded-md px-2 py-1"
+              className="absolute left-2 top-2 z-10 px-2 py-1"
             />
-            <span className="absolute right-3 top-3 z-10 rounded-md bg-black/70 px-2 py-1 text-[11px] font-bold text-white">
-              {priceLabel}
-            </span>
+            <CornerTag reserved={reserved} price={priceLabel} />
             <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-              <span className="grid size-14 place-items-center rounded-full bg-white/95 text-zinc-950 shadow-lg">
+              <span className="grid size-14 place-items-center rounded-full bg-white/95 text-zinc-950">
                 <Play className="size-6 fill-current" aria-hidden />
               </span>
             </div>
@@ -102,6 +134,9 @@ export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps)
                 {meta}
               </span>
             </p>
+            {countdown ? (
+              <p className="mt-0.5 text-sm font-medium text-primary">Commence {countdown}</p>
+            ) : null}
             <span className="mt-3 inline-flex h-10 items-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               {ctaLabel}
             </span>
@@ -115,7 +150,7 @@ export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps)
     <Link
       to="/live/$sessionId"
       params={{ sessionId: session.id }}
-      className="group block outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <div className="relative overflow-hidden rounded-xl">
         <CourseThumbnailBanner
@@ -126,10 +161,8 @@ export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps)
           showLabel={false}
           showIcon={false}
         >
-          <LiveNowBadge status={session.status} className="absolute bottom-2 right-2 z-10" />
-          <span className="absolute right-2 top-2 z-10 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-bold text-white">
-            {priceLabel}
-          </span>
+          <LiveNowBadge status={session.status} className="absolute left-2 top-2 z-10" />
+          <CornerTag reserved={reserved} price={priceLabel} compact />
           <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
             <span className="grid size-11 place-items-center rounded-full bg-black/70 text-white">
               <Play className="size-4 fill-current" aria-hidden />
@@ -146,11 +179,19 @@ export function LiveVideoCard({ session, featured = false }: LiveVideoCardProps)
           {channel ? (
             <p className="mt-1 truncate text-sm text-muted-foreground">{channel}</p>
           ) : null}
-          <p className={cn("mt-0.5 text-sm text-muted-foreground", session.status === "live" && "font-medium text-red-600 dark:text-red-400")}>
+          <p
+            className={cn(
+              "mt-0.5 text-sm text-muted-foreground",
+              session.status === "live" && "font-medium text-red-600 dark:text-red-400",
+            )}
+          >
             {meta}
           </p>
           {session.status === "scheduled" ? (
-            <p className="mt-0.5 text-xs font-medium text-primary">Réservation ouverte</p>
+            <p className="mt-0.5 text-xs font-medium text-primary">
+              {reserved ? "Place réservée" : "Réservation ouverte"}
+              {countdown ? ` · ${countdown}` : null}
+            </p>
           ) : null}
         </div>
       </div>

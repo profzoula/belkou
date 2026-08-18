@@ -28,8 +28,9 @@ export const Route = createFileRoute("/checkout")({
     const params = new URLSearchParams(location.search);
     const sessionId = params.get("session")?.trim();
     if (sessionId) {
-      const live = await getPublicLiveSession({ data: { sessionId } }).catch(() => null);
-      return { course: null, live };
+      const found = await getPublicLiveSession({ data: { sessionId } }).catch(() => null);
+      // A canceled event still resolves, but no seat may be sold for it.
+      return { course: null, live: found?.status === "canceled" ? null : found };
     }
     const courseSlug = params.get("course") ?? undefined;
     if (!courseSlug) return { course: null, live: null };

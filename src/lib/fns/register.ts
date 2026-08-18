@@ -77,6 +77,11 @@ async function resolveCheckoutPricing(data: RegistrationInput) {
       label: `Accès live — ${session.title}`,
       courseSlug: liveTicketSlug(sessionId),
       courseTitle: session.title,
+      liveEvent: {
+        title: session.title,
+        scheduledAt: session.scheduledAt,
+        url: `${siteConfig.siteUrl.replace(/\/$/, "")}/live/${session.id}`,
+      },
     };
   }
 
@@ -255,7 +260,13 @@ export const submitRegistration = createServerFn({ method: "POST" })
           ? `Reprise inscription BelKou — ${pricing.label}`
           : `Inscription BelKou — ${pricing.label}`,
       html: free
-        ? paymentConfirmedEmail(data.full_name, data.plan, "")
+        ? paymentConfirmedEmail(
+            data.full_name,
+            data.plan,
+            "",
+            undefined,
+            "liveEvent" in pricing ? pricing.liveEvent : undefined,
+          )
         : registrationPendingEmail({
             name: data.full_name,
             plan: data.plan,
@@ -408,6 +419,13 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
                 transactionId: session.id,
                 customerEmail: unlocked.email,
               },
+              liveSession
+                ? {
+                    title: liveSession.title,
+                    scheduledAt: liveSession.scheduledAt,
+                    url: `${siteConfig.siteUrl.replace(/\/$/, "")}/live/${liveSession.id}`,
+                  }
+                : undefined,
             ),
           });
         } catch (error) {

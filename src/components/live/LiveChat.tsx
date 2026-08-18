@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Send } from "lucide-react";
+import { ArrowDown, Send } from "lucide-react";
 import { toast } from "sonner";
 import { StudentAvatar } from "@/components/auth/StudentAvatar";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,28 @@ type LiveChatProps = {
   sessionId: string;
   canComment: boolean;
   live: boolean;
+  loggedIn?: boolean;
   className?: string;
 };
 
-export function LiveChat({ sessionId, canComment, live, className }: LiveChatProps) {
+/** Distance from the bottom under which we consider the reader "following" the chat. */
+const FOLLOW_THRESHOLD_PX = 48;
+
+function commentTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
+
+export function LiveChat({
+  sessionId,
+  canComment,
+  live,
+  loggedIn = false,
+  className,
+}: LiveChatProps) {
   const { session, user } = useAuth();
   const myAvatarUrl = avatarUrlFromUser(user);
   const listFn = useServerFn(listLiveComments);
@@ -26,7 +45,10 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
   const [comments, setComments] = useState<LiveComment[]>([]);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [pinnedToBottom, setPinnedToBottom] = useState(true);
+  const [unread, setUnread] = useState(0);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const seenCountRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,11 +72,37 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
     };
   }, [listFn, session?.access_token, sessionId, live]);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     const node = scrollerRef.current;
     if (!node) return;
     node.scrollTop = node.scrollHeight;
-  }, [comments.length]);
+    setPinnedToBottom(true);
+    setUnread(0);
+  }, []);
+
+  // Only follow the stream when the reader is already at the bottom — scrolling up
+  // to read something during a live must not be undone every 2.5 s.
+  useEffect(() => {
+    const arrived = comments.length - seenCountRef.current;
+    seenCountRef.current = comments.length;
+    if (arrived <= 0) return;
+
+    if (pinnedToBottom) {
+      const node = scrollerRef.current;
+      if (node) node.scrollTop = node.scrollHeight;
+      setUnread(0);
+    } else {
+      setUnread((count) => count + arrived);
+    }
+  }, [comments.length, pinnedToBottom]);
+
+  const onScroll = () => {
+    const node = scrollerRef.current;
+    if (!node) return;
+    const atBottom = node.scrollHeight - node.scrollTop - node.clientHeight <= FOLLOW_THRESHOLD_PX;
+    setPinnedToBottom(atBottom);
+    if (atBottom) setUnread(0);
+  };
 
   const submit = async () => {
     const text = body.trim();
@@ -66,6 +114,7 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
       });
       setComments((current) => [...current, result.comment]);
       setBody("");
+      scrollToBottom();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Commentaire impossible");
     } finally {
@@ -87,34 +136,61 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
         </p>
       </div>
 
-      <div ref={scrollerRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3">
-        {live ? (
-          <p className="rounded-lg bg-zinc-900 px-3 py-2 text-xs leading-relaxed text-zinc-400">
-            Restez respectueux. Les commentaires sont visibles par les autres étudiants.
-          </p>
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollerRef}
+          onScroll={onScroll}
+          role="log"
+          aria-live="polite"
+          aria-label="Messages du live"
+          className="h-full space-y-3 overflow-y-auto px-3 py-3"
+        >
+          {live ? (
+            <p className="rounded-lg bg-zinc-900 px-3 py-2 text-xs leading-relaxed text-zinc-400">
+              Restez respectueux. Les commentaires sont visibles par les autres étudiants.
+            </p>
+          ) : null}
+          {comments.length === 0 ? (
+            <p className="py-10 text-center text-sm text-zinc-500">
+              {live ? "Soyez le premier à commenter." : "Aucun commentaire pendant ce live."}
+            </p>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.id} className="flex gap-2.5">
+                <StudentAvatar
+                  name={comment.authorName}
+                  src={comment.authorAvatarUrl ?? (comment.mine ? myAvatarUrl : undefined)}
+                  className="mt-0.5 border-zinc-700"
+                />
+                <p className="min-w-0 text-sm leading-snug">
+                  <span className="font-semibold text-zinc-100">
+                    {comment.authorName}
+                    {comment.mine ? (
+                      <span className="ml-1 font-medium text-sky-400">(vous)</span>
+                    ) : null}
+                  </span>
+                  <span className="ml-1.5 text-[11px] font-normal tabular-nums text-zinc-600">
+                    {commentTime(comment.createdAt)}
+                  </span>{" "}
+                  <span className="whitespace-pre-wrap break-words text-zinc-400">
+                    {comment.body}
+                  </span>
+                </p>
+              </div>
+            ))
+          )}
+        </div>
+
+        {unread > 0 ? (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            className="absolute inset-x-0 bottom-2 mx-auto flex w-fit items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-zinc-950 transition-colors hover:bg-zinc-200"
+          >
+            <ArrowDown className="size-3.5" aria-hidden />
+            {unread} nouveau{unread > 1 ? "x" : ""} message{unread > 1 ? "s" : ""}
+          </button>
         ) : null}
-        {comments.length === 0 ? (
-          <p className="py-10 text-center text-sm text-zinc-500">
-            {live ? "Soyez le premier à commenter." : "Aucun commentaire pendant ce live."}
-          </p>
-        ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="flex gap-2.5">
-              <StudentAvatar
-                name={comment.authorName}
-                src={comment.authorAvatarUrl ?? (comment.mine ? myAvatarUrl : undefined)}
-                className="mt-0.5 border-zinc-700"
-              />
-              <p className="min-w-0 text-sm leading-snug">
-                <span className="font-semibold text-zinc-100">
-                  {comment.authorName}
-                  {comment.mine ? <span className="ml-1 font-medium text-sky-400">(vous)</span> : null}
-                </span>{" "}
-                <span className="whitespace-pre-wrap break-words text-zinc-400">{comment.body}</span>
-              </p>
-            </div>
-          ))
-        )}
       </div>
 
       {canComment && live ? (
@@ -145,11 +221,24 @@ export function LiveChat({ sessionId, canComment, live, className }: LiveChatPro
           </Button>
         </form>
       ) : live ? (
-        <p className="border-t border-zinc-800 px-4 py-3 text-xs text-zinc-500">
-          Réservez votre place pour commenter.
-        </p>
+        <div className="flex items-center justify-between gap-3 border-t border-zinc-800 px-4 py-3">
+          <p className="text-xs text-zinc-400">Réservez votre place pour commenter.</p>
+          <Button asChild size="sm" className="h-8 shrink-0 rounded-full px-3 text-xs">
+            {loggedIn ? (
+              <Link to="/checkout" search={{ plan: "live", session: sessionId }}>
+                Réserver
+              </Link>
+            ) : (
+              <Link to="/login" search={{ redirect: `/live/${sessionId}` }}>
+                Réserver
+              </Link>
+            )}
+          </Button>
+        </div>
       ) : (
-        <p className="border-t border-zinc-800 px-4 py-3 text-xs text-zinc-500">Le chat est fermé.</p>
+        <p className="border-t border-zinc-800 px-4 py-3 text-xs text-zinc-500">
+          Le chat est fermé.
+        </p>
       )}
     </div>
   );

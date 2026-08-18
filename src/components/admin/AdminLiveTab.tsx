@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { CalendarClock, ImagePlus, Loader2, Radio, Square, Trash2, Upload } from "lucide-react";
+import {
+  Bell,
+  CalendarClock,
+  ImagePlus,
+  Loader2,
+  Radio,
+  Square,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
@@ -23,6 +32,7 @@ import {
   adminEndLiveSession,
   adminListLiveSessions,
   adminRemoveLiveThumbnail,
+  adminSendLiveReminder,
   adminSetLiveSessionPrice,
   adminStartLiveSession,
   adminUploadLiveThumbnail,
@@ -95,6 +105,7 @@ export function AdminLiveTab() {
   const uploadThumbFn = useServerFn(adminUploadLiveThumbnail);
   const removeThumbFn = useServerFn(adminRemoveLiveThumbnail);
   const setPriceFn = useServerFn(adminSetLiveSessionPrice);
+  const reminderFn = useServerFn(adminSendLiveReminder);
   const coursesFn = useServerFn(getAdminCourses);
 
   const [sessions, setSessions] = useState<LiveSession[]>([]);
@@ -245,6 +256,31 @@ export function AdminLiveTab() {
     }
   };
 
+  const sendReminder = async (session: LiveSession) => {
+    const note = window.prompt(
+      `Rappel pour « ${session.title} » — message à ajouter (optionnel) :`,
+      "",
+    );
+    // `null` means the admin closed the prompt, so nothing is sent.
+    if (note === null) return;
+
+    setActingId(session.id);
+    try {
+      const result = await reminderFn({
+        data: { sessionId: session.id, ...(note.trim() ? { note: note.trim() } : {}) },
+      });
+      toast.success(
+        result.failed > 0
+          ? `Rappel envoyé à ${result.sent}/${result.recipients} — ${result.failed} échec(s)`
+          : `Rappel envoyé à ${result.sent} personne${result.sent > 1 ? "s" : ""}`,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Rappel non envoyé");
+    } finally {
+      setActingId(null);
+    }
+  };
+
   const runAction = async (id: string, action: "start" | "end" | "cancel") => {
     setActingId(id);
     try {
@@ -388,10 +424,7 @@ export function AdminLiveTab() {
           </div>
           <div className="space-y-1.5">
             <Label>Source OBS</Label>
-            <Select
-              value={provider}
-              onValueChange={(value) => setProvider(value as LiveProvider)}
-            >
+            <Select value={provider} onValueChange={(value) => setProvider(value as LiveProvider)}>
               <SelectTrigger className="rounded-xl">
                 <SelectValue />
               </SelectTrigger>
@@ -429,7 +462,11 @@ export function AdminLiveTab() {
           </div>
         </div>
 
-        <Button className="mt-5 rounded-xl" onClick={() => void create()} disabled={saving || loading}>
+        <Button
+          className="mt-5 rounded-xl"
+          onClick={() => void create()}
+          disabled={saving || loading}
+        >
           {saving ? "Enregistrement…" : "Programmer le live"}
         </Button>
       </section>
@@ -517,16 +554,29 @@ export function AdminLiveTab() {
                     )
                   ) : null}
                   {session.status === "scheduled" || session.status === "live" ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl"
-                      disabled={actingId === session.id}
-                      onClick={() => void runAction(session.id, "cancel")}
-                    >
-                      <Trash2 className="size-3.5" aria-hidden />
-                      Annuler
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        disabled={actingId === session.id}
+                        onClick={() => void sendReminder(session)}
+                        title="Envoyer un e-mail à toutes les personnes qui ont réservé"
+                      >
+                        <Bell className="size-3.5" aria-hidden />
+                        Rappel
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl"
+                        disabled={actingId === session.id}
+                        onClick={() => void runAction(session.id, "cancel")}
+                      >
+                        <Trash2 className="size-3.5" aria-hidden />
+                        Annuler
+                      </Button>
+                    </>
                   ) : null}
                 </div>
               </li>
@@ -651,7 +701,11 @@ function AdminLiveSessionThumb({
           disabled={busy}
           onClick={() => inputRef.current?.click()}
         >
-          {busy ? <Loader2 className="size-3 animate-spin" aria-hidden /> : <Upload className="size-3" aria-hidden />}
+          {busy ? (
+            <Loader2 className="size-3 animate-spin" aria-hidden />
+          ) : (
+            <Upload className="size-3" aria-hidden />
+          )}
           {session.thumbnailUrl ? "Changer" : "Image"}
         </Button>
         {session.thumbnailUrl ? (

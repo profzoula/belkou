@@ -28,7 +28,9 @@ const livePriceSchema = z
 function validatePlaybackUrl(provider: LiveProvider, url: string) {
   const trimmed = url.trim();
   if (provider === "youtube" && !isValidYoutubeUrl(trimmed)) {
-    throw new Error("URL YouTube invalide — collez le lien de la diffusion (youtube.com/live/… ou watch?v=).");
+    throw new Error(
+      "URL YouTube invalide — collez le lien de la diffusion (youtube.com/live/… ou watch?v=).",
+    );
   }
   if (provider === "vimeo" && !isValidVimeoUrl(trimmed)) {
     throw new Error("URL Vimeo invalide — ex. https://vimeo.com/123456789");
@@ -140,6 +142,46 @@ async function withPublicCourse<T extends { courseSlug: string; courseTitle: str
   );
 }
 
+type LiveTicketContext = {
+  userId: string;
+  rows: Awaited<ReturnType<typeof import("@/server/db").listRegistrationsByEmail>>;
+  isVip: boolean;
+};
+
+/** Everything needed to answer "which lives may this student open", fetched once. */
+async function loadLiveTicketContext(accessToken?: string): Promise<LiveTicketContext | null> {
+  if (!accessToken?.trim()) return null;
+
+  const { getUserFromAccessToken } = await import("@/server/supabase-auth");
+  const user = await getUserFromAccessToken(accessToken);
+  if (!user?.email || !user.id) return null;
+
+  const { isPaidVipPlan } = await import("@/lib/course-access");
+  const { getDb } = await import("@/server/env");
+  const { listRegistrationsByEmail } = await import("@/server/db");
+  const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
+
+  const db = await getDb();
+  const rows = await listRegistrationsByEmail(db, normalizeRegistrationEmail(user.email));
+
+  return {
+    userId: user.id,
+    rows,
+    isVip: rows.some((row) => row.payment_status === "paid" && isPaidVipPlan(row.plan)),
+  };
+}
+
+async function ticketOpensSession(
+  context: LiveTicketContext,
+  courseSlug: string,
+  sessionId: string,
+): Promise<boolean> {
+  if (context.isVip) return true;
+  const { hasLiveTicketForSession } = await import("@/lib/course-access");
+  const accessSlug = isStandaloneLiveSlug(courseSlug) ? STANDALONE_LIVE_SLUG : courseSlug;
+  return hasLiveTicketForSession(context.rows, sessionId, accessSlug);
+}
+
 /**
  * A live is its own product: only VIP membership or a ticket for that exact event opens it.
  * Owning the course a live belongs to is not enough — the student still enrolls in the live.
@@ -153,29 +195,14 @@ async function resolveLiveAccess(
   canComment: boolean;
   actorUserId?: string;
 }> {
-  const denied = { canWatch: false, canComment: false };
-  if (!accessToken?.trim()) return denied;
+  const context = await loadLiveTicketContext(accessToken);
+  if (!context) return { canWatch: false, canComment: false };
 
-  const { getUserFromAccessToken } = await import("@/server/supabase-auth");
-  const user = await getUserFromAccessToken(accessToken);
-  if (!user?.email || !user.id) return denied;
-
-  const { hasLiveTicketForSession, isPaidVipPlan } = await import("@/lib/course-access");
-  const { getDb } = await import("@/server/env");
-  const { listRegistrationsByEmail } = await import("@/server/db");
-  const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");
-
-  const db = await getDb();
-  const rows = await listRegistrationsByEmail(db, normalizeRegistrationEmail(user.email));
-
-  const accessSlug = isStandaloneLiveSlug(courseSlug) ? STANDALONE_LIVE_SLUG : courseSlug;
-  const isVip = rows.some((row) => row.payment_status === "paid" && isPaidVipPlan(row.plan));
-  const canWatch = isVip || hasLiveTicketForSession(rows, sessionId, accessSlug);
-
+  const canWatch = await ticketOpensSession(context, courseSlug, sessionId);
   return {
     canWatch,
     canComment: canWatch,
-    actorUserId: user.id,
+    actorUserId: context.userId,
   };
 }
 
@@ -184,12 +211,12 @@ function toPublicSession(
     course: LiveCourseInfo;
   },
   access: { canWatch: boolean; canComment: boolean },
+  reservedCount: number,
 ): PublicLiveSession {
   if (!session) {
     throw new Error("Live introuvable.");
   }
-  const canSeeStream =
-    access.canWatch && (session.status === "live" || session.status === "ended");
+  const canSeeStream = access.canWatch && (session.status === "live" || session.status === "ended");
   return {
     ...session,
     playbackUrl: canSeeStream
@@ -200,8 +227,20 @@ function toPublicSession(
     canWatch: access.canWatch,
     canComment: access.canComment && session.status === "live",
     liveTicketPrice: resolveLivePrice(session.priceUsd),
+    reservedCount,
     course: session.course,
   };
+}
+
+async function countReservedSeats(sessionId: string): Promise<number> {
+  try {
+    const { getDb } = await import("@/server/env");
+    const { countPaidRegistrationsForCourse } = await import("@/server/db");
+    const { liveTicketSlug } = await import("@/lib/live");
+    return await countPaidRegistrationsForCourse(await getDb(), liveTicketSlug(sessionId));
+  } catch {
+    return 0;
+  }
 }
 
 export const getPublicLiveSummary = createServerFn({ method: "GET" }).handler(async () => {
@@ -216,30 +255,55 @@ export const getPublicLiveSummary = createServerFn({ method: "GET" }).handler(as
   };
 });
 
+async function listPublicSessions(): Promise<PublicLiveListItem[]> {
+  const { listLiveSessions } = await import("@/server/live");
+  const sessions = await withPublicCourse(await listLiveSessions());
+  return sessions
+    .filter((session) => session.status !== "canceled")
+    .map((session) => ({
+      id: session.id,
+      courseSlug: session.courseSlug,
+      courseTitle: session.courseTitle,
+      title: session.title,
+      description: session.description,
+      status: session.status,
+      provider: session.provider,
+      scheduledAt: session.scheduledAt,
+      startedAt: session.startedAt,
+      endedAt: session.endedAt,
+      recordingLessonId: session.recordingLessonId,
+      thumbnailUrl: session.thumbnailUrl,
+      ticketPrice: resolveLivePrice(session.priceUsd),
+      course: session.course,
+    }));
+}
+
 export const listPublicLiveSessions = createServerFn({ method: "GET" }).handler(
-  async (): Promise<PublicLiveListItem[]> => {
-    const { listLiveSessions } = await import("@/server/live");
-    const sessions = await withPublicCourse(await listLiveSessions());
-    return sessions
-      .filter((session) => session.status !== "canceled")
-      .map((session) => ({
-        id: session.id,
-        courseSlug: session.courseSlug,
-        courseTitle: session.courseTitle,
-        title: session.title,
-        description: session.description,
-        status: session.status,
-        provider: session.provider,
-        scheduledAt: session.scheduledAt,
-        startedAt: session.startedAt,
-        endedAt: session.endedAt,
-        recordingLessonId: session.recordingLessonId,
-        thumbnailUrl: session.thumbnailUrl,
-        ticketPrice: resolveLivePrice(session.priceUsd),
-        course: session.course,
-      }));
-  },
+  async (): Promise<PublicLiveListItem[]> => listPublicSessions(),
 );
+
+/**
+ * The lives this student already holds — powers the "Réservé" state on cards and the
+ * "Mes lives" block, so a paid seat is visible outside the session page itself.
+ */
+export const listMyLiveSessions = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ accessToken: z.string().min(1) }).parse(data))
+  .handler(async ({ data }): Promise<{ vip: boolean; sessions: PublicLiveListItem[] }> => {
+    const context = await loadLiveTicketContext(data.accessToken);
+    if (!context) return { vip: false, sessions: [] };
+
+    const sessions = await listPublicSessions();
+    const owned = await Promise.all(
+      sessions.map(async (session) =>
+        (await ticketOpensSession(context, session.courseSlug, session.id)) ? session : null,
+      ),
+    );
+
+    return {
+      vip: context.isVip,
+      sessions: owned.filter((session): session is PublicLiveListItem => session !== null),
+    };
+  });
 
 export const getPublicLiveSession = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
@@ -253,12 +317,16 @@ export const getPublicLiveSession = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { getLiveSession } = await import("@/server/live");
     const session = await getLiveSession(data.sessionId);
-    if (!session || session.status === "canceled") {
+    // A canceled live still resolves: ticket holders deserve to be told, not 404'd.
+    if (!session) {
       throw new Error("Live introuvable.");
     }
     const [withCourse] = await withPublicCourse([session]);
-    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
-    return toPublicSession(withCourse, access);
+    const [access, reservedCount] = await Promise.all([
+      resolveLiveAccess(session.courseSlug, session.id, data.accessToken),
+      countReservedSeats(session.id),
+    ]);
+    return toPublicSession(withCourse, access, reservedCount);
   });
 
 export const listLiveComments = createServerFn({ method: "POST" })
@@ -302,8 +370,15 @@ export const postLiveComment = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data }) => {
-    const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for") ?? "local";
-    if (!checkRateLimit(`live-comment:${ip}`, RATE_LIMITS.liveComment.limit, RATE_LIMITS.liveComment.windowMs)) {
+    const ip =
+      getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for") ?? "local";
+    if (
+      !checkRateLimit(
+        `live-comment:${ip}`,
+        RATE_LIMITS.liveComment.limit,
+        RATE_LIMITS.liveComment.windowMs,
+      )
+    ) {
       throw new Error("Trop de commentaires — patientez un instant.");
     }
 
@@ -418,6 +493,58 @@ export const adminSetLiveSessionPrice = createServerFn({ method: "POST" })
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 
+/**
+ * Manual reminder blast to everyone holding a seat. Manual on purpose: the app has no
+ * scheduler, so an admin fires it the day before or an hour before the event.
+ */
+export const adminSendLiveReminder = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        note: z.string().trim().max(600).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }): Promise<{ sent: number; failed: number; recipients: number }> => {
+    await requireAdmin();
+
+    const { getLiveSession } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    if (session.status === "canceled") {
+      throw new Error("Ce live est annulé — aucun rappel n'est envoyé.");
+    }
+
+    const { getDb } = await import("@/server/env");
+    const { listPaidRegistrationsForCourse } = await import("@/server/db");
+    const { liveTicketSlug } = await import("@/lib/live");
+    const holders = await listPaidRegistrationsForCourse(await getDb(), liveTicketSlug(session.id));
+    if (holders.length === 0) {
+      throw new Error("Personne n'a encore réservé ce live.");
+    }
+
+    const { liveReminderEmail, sendEmailBatch } = await import("@/server/email");
+    const { siteConfig } = await import("@/lib/site-config");
+    const url = `${siteConfig.siteUrl.replace(/\/$/, "")}/live/${session.id}`;
+
+    const { sent, failed } = await sendEmailBatch(
+      holders.map((holder) => ({
+        to: holder.email,
+        subject: `Rappel — ${session.title}`,
+        html: liveReminderEmail({
+          name: holder.full_name,
+          title: session.title,
+          scheduledAt: session.scheduledAt,
+          url,
+          ...(data.note ? { note: data.note } : {}),
+        }),
+      })),
+    );
+
+    return { sent, failed, recipients: holders.length };
+  });
+
 export const adminStartLiveSession = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => z.object({ sessionId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
@@ -454,7 +581,11 @@ export const adminEndLiveSession = createServerFn({ method: "POST" })
     const recordingUrl = (data.recordingUrl?.trim() || session.playbackUrl).trim();
     let recordingLessonId = session.recordingLessonId;
 
-    if (!recordingLessonId && session.provider !== "hls" && !isStandaloneLiveSlug(session.courseSlug)) {
+    if (
+      !recordingLessonId &&
+      session.provider !== "hls" &&
+      !isStandaloneLiveSlug(session.courseSlug)
+    ) {
       recordingLessonId = await attachLiveRecordingLesson({
         courseSlug: session.courseSlug,
         title: session.title,
