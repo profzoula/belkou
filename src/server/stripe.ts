@@ -145,5 +145,7 @@ export async function verifyWebhook(body: string, signature: string) {
   if (!stripe || !env.STRIPE_WEBHOOK_SECRET) {
     throw new Error("Stripe webhook not configured");
   }
-  return stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET);
+  // Async variant on purpose: the bundled SDK resolves to the Web Crypto provider,
+  // which refuses to run the synchronous constructEvent.
+  return stripe.webhooks.constructEventAsync(body, signature, env.STRIPE_WEBHOOK_SECRET);
 }

@@ -6,7 +6,7 @@
   "main": "src/server.ts",
   "vars": {
     "SITE_URL": "https://belkou.online",
-    "EMAIL_FROM": "BelKou <noreply@belkou.fr>"
+    "EMAIL_FROM": "BelKou <noreply@belkou.online>"
   },
   "d1_databases": [
     {

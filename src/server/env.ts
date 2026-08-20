@@ -4,7 +4,7 @@ const envSchema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default("BelKou <noreply@belkou.fr>"),
+  EMAIL_FROM: z.string().default("BelKou <noreply@belkou.online>"),
   SITE_URL: z.string().default("https://belkou.online"),
   STRIPE_PRICE_PREMIUM: z.string().optional(),
   STRIPE_PRICE_VIP: z.string().optional(),
