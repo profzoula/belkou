@@ -4,7 +4,7 @@ import { Check, Radio, Settings } from "lucide-react";
 import { YouTubeVideoPlayer } from "@/components/course/YouTubeVideoPlayer";
 import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
 import type { LiveProvider } from "@/lib/live";
-import { siteConfig } from "@/lib/site-config";
+import { SiteLogoMark } from "@/components/site/SiteLogoMark";
 import { cn } from "@/lib/utils";
 import { vimeoUrlToEmbedUrl } from "@/lib/vimeo";
 import { youtubeUrlToEmbedUrl } from "@/lib/youtube";
@@ -183,11 +183,7 @@ function LivePlayerWatermark() {
       aria-hidden
       className="pointer-events-none absolute right-3 top-3 z-10 select-none opacity-70 transition-opacity duration-200 group-hover:opacity-0 sm:right-4 sm:top-4"
     >
-      <img
-        src={siteConfig.logo}
-        alt=""
-        className="h-7 w-7 drop-shadow-[0_1px_4px_rgb(0_0_0_/_0.7)] sm:h-9 sm:w-9"
-      />
+      <SiteLogoMark className="h-7 w-7 drop-shadow-[0_1px_4px_rgb(0_0_0_/_0.7)] sm:h-9 sm:w-9 text-white" />
     </div>
   );
 }

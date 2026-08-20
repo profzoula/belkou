@@ -23,7 +23,7 @@ export function SiteWordmark({
 
   return (
     <span className={cn("inline-flex min-w-0 items-center gap-2.5", className)}>
-      {showIcon ? <SiteLogo className={iconClass} alt="" /> : null}
+      {showIcon ? <SiteLogo className={iconClass} alt="" inverted={inverted} /> : null}
       <span className="flex min-w-0 flex-col leading-none">
         <span
           className={cn(
