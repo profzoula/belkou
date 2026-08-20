@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
-import { formatLivePrice, formatLiveSchedule, liveTicketSlug, resolveLivePrice } from "@/lib/live";
+import { formatLiveSchedule, liveCtaLabel, liveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { formatUsd, toMoney } from "@/lib/money";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
@@ -256,7 +256,7 @@ export function CheckoutPage({
           <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
           <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {isLiveTicket
-              ? `Réservez votre place — ${formatLivePrice(liveTicketPrice)}`
+              ? liveCtaLabel("Réservez votre place", liveTicketPrice)
               : "Finalisez votre inscription"}
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -711,7 +711,7 @@ export function CheckoutPage({
                 {loading
                   ? "Redirection…"
                   : isLiveTicket
-                    ? `Réserver ma place — ${formatLivePrice(liveTicketPrice)}`
+                    ? liveCtaLabel("Réserver ma place", liveTicketPrice)
                     : "Payer et commencer"}
               </Button>
               <p

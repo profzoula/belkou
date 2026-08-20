@@ -39,6 +39,15 @@ export function formatLivePrice(priceUsd?: number | null): string {
   return formatUsd(price);
 }
 
+/**
+ * Button label that reads as one phrase — "Réserver pour $19.99" — instead of an
+ * action and a price stapled together by a dash.
+ */
+export function liveCtaLabel(action: string, priceUsd?: number | null): string {
+  const price = resolveLivePrice(priceUsd);
+  return price <= 0 ? `${action} gratuitement` : `${action} pour ${formatUsd(price)}`;
+}
+
 export type LiveProvider = (typeof LIVE_PROVIDERS)[number];
 export type LiveStatus = (typeof LIVE_STATUSES)[number];
 

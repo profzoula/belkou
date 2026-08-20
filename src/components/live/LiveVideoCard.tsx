@@ -7,6 +7,7 @@ import {
   formatLivePrice,
   formatLiveScheduleShort,
   isStandaloneLiveSlug,
+  liveCtaLabel,
   liveEventThumbnail,
   liveReservedLabel,
   type PublicLiveListItem,
@@ -46,7 +47,7 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
       ? "Voir le replay"
       : reserved
         ? "Place réservée"
-        : `Réserver — ${priceLabel}`;
+        : liveCtaLabel("Réserver", session.ticketPrice);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">

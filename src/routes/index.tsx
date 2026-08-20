@@ -4,6 +4,7 @@ import { Hero } from "@/components/site/Hero";
 import { CareerInvestSection } from "@/components/site/CareerInvestSection";
 import { TrustStrip } from "@/components/site/TrustStrip";
 import { CoursesSection } from "@/components/site/CoursesSection";
+import { LiveEventsSection } from "@/components/site/LiveEventsSection";
 import { ServicesSection } from "@/components/site/ServicesSection";
 import { UpcomingCourses } from "@/components/site/UpcomingCourses";
 import { HowItWorks } from "@/components/site/HowItWorks";
@@ -14,6 +15,7 @@ import { VipUnlimitedCta } from "@/components/site/VipUnlimitedCta";
 import { getStudentCount } from "@/lib/fns/stats";
 import { getPublicCourses } from "@/lib/fns/courses";
 import { getPublicServices } from "@/lib/fns/services";
+import { listPublicLiveSessions } from "@/lib/fns/live";
 import { serializableToServiceItem } from "@/lib/service-storage";
 import { isScheduledInFuture } from "@/lib/course-publish";
 import { seoHead, defaultTitle, defaultDescription, organizationJsonLd } from "@/lib/seo";
@@ -27,22 +29,25 @@ export const Route = createFileRoute("/")({
       path: "/",
     }),
   loader: async () => {
-    const [studentCount, publicCourses, publicServices] = await Promise.all([
+    const [studentCount, publicCourses, publicServices, liveSessions] = await Promise.all([
       getStudentCount(),
       getPublicCourses(),
       getPublicServices(),
+      // The landing page must render even if the live system is having a bad day.
+      listPublicLiveSessions().catch(() => []),
     ]);
     return {
       studentCount,
       courses: publicCourses,
       services: publicServices,
+      liveSessions,
     };
   },
   component: Index,
 });
 
 function Index() {
-  const { studentCount, courses, services } = Route.useLoaderData();
+  const { studentCount, courses, services, liveSessions } = Route.useLoaderData();
 
   const upcomingCourses = courses.filter((course) => isScheduledInFuture(course));
   const serviceItems = services.map(serializableToServiceItem);
@@ -57,6 +62,7 @@ function Index() {
       <main id="main-content" className="max-w-full overflow-x-hidden">
         <CareerInvestSection />
         <CoursesSection courses={courses} />
+        <LiveEventsSection sessions={liveSessions} />
         <VipUnlimitedCta />
         <TrustStrip />
         <ServicesSection services={serviceItems} />

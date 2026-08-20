@@ -430,7 +430,9 @@ function CourseVideoArea({
             <Button asChild size="lg" className="mt-2 rounded-full">
               <Link to="/checkout" search={{ course: course.slug }}>
                 {reason === "schedule"
-                  ? `S'inscrire — accès le ${startLabel ?? "bientôt"}`
+                  ? startLabel
+                    ? `S'inscrire pour l'accès du ${startLabel}`
+                    : "S'inscrire dès maintenant"
                   : "S'inscrire pour débloquer"}
               </Link>
             </Button>

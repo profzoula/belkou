@@ -5,8 +5,8 @@ import { Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import {
-  formatLivePrice,
   formatLiveSchedule,
+  liveCtaLabel,
   liveEventThumbnail,
   liveStatusLabel,
   type PublicLiveListItem,
@@ -63,7 +63,7 @@ export function CourseLiveBanner({ courseSlug }: { courseSlug: string }) {
         <Link to="/live/$sessionId" params={{ sessionId: item.id }}>
           {item.status === "live"
             ? "Regarder en direct"
-            : `Réserver — ${formatLivePrice(item.ticketPrice)}`}
+            : liveCtaLabel("Réserver", item.ticketPrice)}
         </Link>
       </Button>
     </div>

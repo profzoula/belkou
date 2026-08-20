@@ -21,6 +21,7 @@ import {
   formatLiveScheduleLocal,
   formatLiveScheduleShort,
   isStandaloneLiveSlug,
+  liveCtaLabel,
   liveDateChip,
   liveEventThumbnail,
   liveReservedLabel,
@@ -132,12 +133,10 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
       : formatLiveSchedule(live.scheduledAt);
 
   const ctaLabel = isLive
-    ? `Rejoindre le live — ${priceLabel}`
+    ? liveCtaLabel("Rejoindre le live", live.liveTicketPrice)
     : isReplay
-      ? `Voir le replay — ${priceLabel}`
-      : free
-        ? "Réserver ma place — gratuit"
-        : `Réserver ma place — ${priceLabel}`;
+      ? liveCtaLabel("Voir le replay", live.liveTicketPrice)
+      : liveCtaLabel("Réserver ma place", live.liveTicketPrice);
 
   const addToCalendar = () =>
     downloadIcs({
