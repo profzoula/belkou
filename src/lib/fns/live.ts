@@ -219,9 +219,12 @@ function toPublicSession(
   const canSeeStream = access.canWatch && (session.status === "live" || session.status === "ended");
   return {
     ...session,
+    // An ended event plays its recording or nothing at all. Falling back to the live URL
+    // handed viewers a stream that had already stopped — an HLS manifest dies with the
+    // broadcast, so the player opened onto a black screen.
     playbackUrl: canSeeStream
       ? session.status === "ended"
-        ? (session.recordingUrl ?? session.playbackUrl)
+        ? session.recordingUrl?.trim() || undefined
         : session.playbackUrl
       : undefined,
     canWatch: access.canWatch,
@@ -279,9 +282,13 @@ async function reservedSeatsBySession(sessionIds: string[]): Promise<Map<string,
 
 async function listPublicSessions(): Promise<PublicLiveListItem[]> {
   const { listLiveSessions } = await import("@/server/live");
-  const sessions = (await withPublicCourse(await listLiveSessions())).filter(
-    (session) => session.status !== "canceled",
-  );
+  const sessions = (await withPublicCourse(await listLiveSessions())).filter((session) => {
+    if (session.status === "canceled") return false;
+    // An ended event with no recording has nothing to sell or show, so listing it would
+    // only offer a "Voir le replay" button that leads to an empty player.
+    if (session.status === "ended" && !session.recordingUrl?.trim()) return false;
+    return true;
+  });
   const reserved = await reservedSeatsBySession(sessions.map((session) => session.id));
 
   return sessions.map((session) => ({
@@ -603,18 +610,29 @@ export const adminEndLiveSession = createServerFn({ method: "POST" })
     if (!session) throw new Error("Live introuvable.");
     if (session.status === "canceled") throw new Error("Live annulé.");
 
-    const recordingUrl = (data.recordingUrl?.trim() || session.playbackUrl).trim();
+    // An HLS manifest stops existing when the broadcast stops, so reusing the live URL as
+    // the recording only produces a dead player. YouTube and Vimeo keep the same address
+    // for the replay, so there the old behaviour still holds.
+    const provider = data.recordingUrl?.trim()
+      ? detectLiveProvider(data.recordingUrl)
+      : session.provider;
+    const recordingUrl = data.recordingUrl?.trim()
+      ? validatePlaybackUrl(provider, data.recordingUrl)
+      : session.provider === "hls"
+        ? null
+        : session.playbackUrl.trim();
     let recordingLessonId = session.recordingLessonId;
 
     if (
+      recordingUrl &&
       !recordingLessonId &&
-      session.provider !== "hls" &&
+      provider !== "hls" &&
       !isStandaloneLiveSlug(session.courseSlug)
     ) {
       recordingLessonId = await attachLiveRecordingLesson({
         courseSlug: session.courseSlug,
         title: session.title,
-        provider: session.provider,
+        provider,
         recordingUrl,
       });
     }
@@ -622,9 +640,55 @@ export const adminEndLiveSession = createServerFn({ method: "POST" })
     await updateLiveSession(data.sessionId, {
       status: "ended",
       endedAt: new Date().toISOString(),
+      provider,
       recordingUrl,
       recordingLessonId,
     });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
+/**
+ * Replace what an ended event plays. A live broadcast rarely leaves a usable address
+ * behind, so the replay is published separately once the admin has it hosted somewhere.
+ */
+export const adminSetLiveRecording = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        recordingUrl: z.string().trim().min(8),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    if (session.status !== "ended") {
+      throw new Error("Terminez le live avant de publier son replay.");
+    }
+
+    // The replay can live on a different platform than the broadcast did, and the player
+    // picks its engine from the provider, so both move together.
+    const provider = detectLiveProvider(data.recordingUrl);
+    const recordingUrl = validatePlaybackUrl(provider, data.recordingUrl);
+
+    await updateLiveSession(data.sessionId, { provider, recordingUrl });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
+/** Take the replay offline once the admin has the recording elsewhere. */
+export const adminRemoveLiveRecording = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => z.object({ sessionId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    if (!session.recordingUrl?.trim()) throw new Error("Ce live n'a aucun replay publié.");
+
+    await updateLiveSession(data.sessionId, { recordingUrl: null });
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 

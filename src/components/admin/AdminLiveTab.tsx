@@ -31,8 +31,10 @@ import {
   adminCreateLiveSession,
   adminEndLiveSession,
   adminListLiveSessions,
+  adminRemoveLiveRecording,
   adminRemoveLiveThumbnail,
   adminSendLiveReminder,
+  adminSetLiveRecording,
   adminSetLiveSessionPrice,
   adminStartLiveSession,
   adminUploadLiveThumbnail,
@@ -105,6 +107,8 @@ export function AdminLiveTab() {
   const uploadThumbFn = useServerFn(adminUploadLiveThumbnail);
   const removeThumbFn = useServerFn(adminRemoveLiveThumbnail);
   const setPriceFn = useServerFn(adminSetLiveSessionPrice);
+  const setRecordingFn = useServerFn(adminSetLiveRecording);
+  const removeRecordingFn = useServerFn(adminRemoveLiveRecording);
   const reminderFn = useServerFn(adminSendLiveReminder);
   const coursesFn = useServerFn(getAdminCourses);
 
@@ -281,22 +285,76 @@ export function AdminLiveTab() {
     }
   };
 
-  const runAction = async (id: string, action: "start" | "end" | "cancel") => {
+  const saveRecording = async (sessionId: string, recordingUrl: string) => {
+    setActingId(sessionId);
+    try {
+      const result = await setRecordingFn({ data: { sessionId, recordingUrl } });
+      setSessions(result.sessions);
+      toast.success("Replay publié — visible sur /live");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Replay non enregistré");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const removeRecording = async (session: LiveSession) => {
+    const confirmed = window.confirm(
+      `Retirer le replay de « ${session.title} » ?\n\nL'événement disparaît de la page Live. Les places vendues et les commentaires sont conservés, et vous pourrez publier un nouveau lien plus tard.`,
+    );
+    if (!confirmed) return;
+
+    setActingId(session.id);
+    try {
+      const result = await removeRecordingFn({ data: { sessionId: session.id } });
+      setSessions(result.sessions);
+      toast.success("Replay retiré");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const endSession = async (session: LiveSession) => {
+    const recordingUrl = window.prompt(
+      `Terminer « ${session.title} ».\n\nLien du replay (optionnel) — YouTube, Vimeo ou .m3u8.\nLaissez vide si vous publierez le replay plus tard.`,
+      "",
+    );
+    // `null` means the admin closed the prompt, so the live keeps running.
+    if (recordingUrl === null) return;
+
+    setActingId(session.id);
+    try {
+      const result = await endFn({
+        data: {
+          sessionId: session.id,
+          ...(recordingUrl.trim() ? { recordingUrl: recordingUrl.trim() } : {}),
+        },
+      });
+      setSessions(result.sessions);
+      toast.success(
+        recordingUrl.trim()
+          ? "Live terminé — replay publié sur /live"
+          : "Live terminé — publiez le lien du replay quand vous l'aurez",
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Action impossible");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const runAction = async (id: string, action: "start" | "cancel") => {
     setActingId(id);
     try {
       const result =
         action === "start"
           ? await startFn({ data: { sessionId: id } })
-          : action === "end"
-            ? await endFn({ data: { sessionId: id } })
-            : await cancelFn({ data: { sessionId: id } });
+          : await cancelFn({ data: { sessionId: id } });
       setSessions(result.sessions);
       toast.success(
-        action === "start"
-          ? "Live démarré — les étudiants voient le player"
-          : action === "end"
-            ? "Live terminé — replay disponible sur /live"
-            : "Live annulé",
+        action === "start" ? "Live démarré — les étudiants voient le player" : "Live annulé",
       );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Action impossible");
@@ -518,14 +576,20 @@ export function AdminLiveTab() {
                       <p className="mt-1 text-xs text-success">
                         Replay ajouté au programme du cours.
                       </p>
-                    ) : session.status === "ended" ? (
-                      <p className="mt-1 text-xs text-success">Replay disponible sur /live.</p>
                     ) : null}
                     <AdminLivePriceField
                       session={session}
                       busy={actingId === session.id}
                       onSave={(priceUsd) => savePrice(session.id, priceUsd)}
                     />
+                    {session.status === "ended" ? (
+                      <AdminLiveRecordingField
+                        session={session}
+                        busy={actingId === session.id}
+                        onSave={(recordingUrl) => saveRecording(session.id, recordingUrl)}
+                        onRemove={() => void removeRecording(session)}
+                      />
+                    ) : null}
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 sm:mt-0 sm:shrink-0">
@@ -546,10 +610,10 @@ export function AdminLiveTab() {
                         variant="destructive"
                         className="rounded-xl"
                         disabled={actingId === session.id}
-                        onClick={() => void runAction(session.id, "end")}
+                        onClick={() => void endSession(session)}
                       >
                         <Square className="size-3.5" aria-hidden />
-                        Terminer + record
+                        Terminer
                       </Button>
                     )
                   ) : null}
@@ -646,6 +710,74 @@ function AdminLivePriceField({
       ) : saved <= 0 ? (
         <span className="text-[11px] font-medium text-success">Gratuit sur réservation</span>
       ) : null}
+    </div>
+  );
+}
+
+function AdminLiveRecordingField({
+  session,
+  busy,
+  onSave,
+  onRemove,
+}: {
+  session: LiveSession;
+  busy: boolean;
+  onSave: (recordingUrl: string) => void;
+  onRemove: () => void;
+}) {
+  const saved = session.recordingUrl?.trim() ?? "";
+  const [value, setValue] = useState(saved);
+
+  useEffect(() => {
+    setValue(session.recordingUrl?.trim() ?? "");
+  }, [session.recordingUrl]);
+
+  const trimmed = value.trim();
+  const dirty = trimmed.length >= 8 && trimmed !== saved;
+
+  return (
+    <div className="mt-2 space-y-1.5 rounded-xl border border-border/70 bg-muted/30 p-2.5">
+      <Label htmlFor={`live-replay-${session.id}`} className="text-xs text-muted-foreground">
+        Lien du replay
+      </Label>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          id={`live-replay-${session.id}`}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={busy}
+          placeholder="https://vimeo.com/123456789"
+          className="h-8 min-w-0 flex-1 rounded-lg text-xs"
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-8 rounded-lg px-2.5 text-[11px]"
+          disabled={busy || !dirty}
+          onClick={() => onSave(trimmed)}
+        >
+          Publier
+        </Button>
+        {saved ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-lg px-2.5 text-[11px]"
+            disabled={busy}
+            onClick={onRemove}
+          >
+            <Trash2 className="size-3.5" aria-hidden />
+            Retirer
+          </Button>
+        ) : null}
+      </div>
+      <p className="text-[11px] text-muted-foreground">
+        {saved
+          ? "Replay en ligne sur /live."
+          : "Aucun replay — l'événement n'apparaît pas sur /live tant que ce lien est vide."}
+      </p>
     </div>
   );
 }
