@@ -50,7 +50,7 @@ export function LiveEventsSection({ sessions }: LiveEventsSectionProps) {
           };
 
   return (
-    <section id="lives" className="site-section-anchor section-alt py-16 sm:py-20 md:py-24">
+    <section id="lives" className="site-section-anchor bg-gradient-mesh py-16 sm:py-20 md:py-24">
       <div className="site-container">
         <SectionHeader
           label={heading.label}

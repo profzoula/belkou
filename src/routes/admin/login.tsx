@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AuthField } from "@/components/auth/AuthField";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { adminLogin } from "@/lib/fns/admin";
 import { setAdminSessionToken } from "@/lib/admin-session";
 import { siteConfig } from "@/lib/site-config";
@@ -64,8 +64,7 @@ function AdminLoginPage() {
       <main id="main-content" className="relative w-full max-w-[420px] py-10">
         <div className="mb-8 text-center">
           <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-border/80 bg-card/80 px-3 py-1.5 shadow-sm backdrop-blur">
-            <SiteLogo className="size-6 rounded-md" alt="" />
-            <span className="font-display text-sm font-semibold">{siteConfig.name}</span>
+            <SiteWordmark size="sm" showIcon={false} />
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase">
               Admin
             </span>

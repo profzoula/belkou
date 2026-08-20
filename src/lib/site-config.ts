@@ -1,7 +1,11 @@
 import { envString } from "@/lib/env-string";
 
 export const siteConfig = {
-  name: "BelKou",
+  name: "BelKou ACADEMIC",
+  brand: {
+    title: "BelKou",
+    subtitle: "ACADEMIC",
+  },
   siteUrl: envString(import.meta.env.VITE_SITE_URL, "https://belkou.online"),
   logo: "/favicon/logo.svg",
   tagline: "Plateforme de formation en ligne en Creole",

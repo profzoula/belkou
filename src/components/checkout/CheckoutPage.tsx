@@ -19,6 +19,7 @@ import { formatUsd, toMoney } from "@/lib/money";
 import { registrationSchema } from "@/lib/schemas/registration";
 import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
@@ -240,9 +241,8 @@ export function CheckoutPage({
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
       <header className="border-b border-border bg-card/90 backdrop-blur-xl">
         <div className="site-container flex h-14 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-display text-sm font-bold">
-            <SiteLogo className="h-8 w-8" alt="" />
-            {siteConfig.name}
+          <Link to="/" className="inline-flex">
+            <SiteWordmark size="sm" />
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="h-3.5 w-3.5 text-primary" />

@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { SiteLogo } from "@/components/site/SiteLogo";
-import { siteConfig } from "@/lib/site-config";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { cn } from "@/lib/utils";
 
 export type AdminSection =
@@ -78,18 +77,12 @@ export function AdminLayout({
         <aside className="sticky top-0 z-30 flex flex-col border-b border-border/80 bg-card/90 backdrop-blur-xl lg:h-dvh lg:border-b-0 lg:border-r">
           <div className="border-b border-border/70 px-5 py-5">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
-                <SiteLogo className="size-7 rounded-lg" alt="" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-display text-[15px] font-semibold tracking-tight">
-                  {siteConfig.name}
-                </p>
-                <p className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Console admin
-                </p>
-              </div>
+              <SiteWordmark size="sm" />
+              <p className="sr-only">Console admin</p>
             </div>
+            <p className="mt-3 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              Console admin
+            </p>
           </div>
 
           <nav

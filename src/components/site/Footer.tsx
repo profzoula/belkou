@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Mail } from "lucide-react";
-import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { siteConfig, formatWhatsAppPhone, getWhatsAppChatUrl } from "@/lib/site-config";
 
 type FooterLink = {
@@ -202,15 +202,12 @@ export function Footer() {
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col gap-16 pb-12 lg:flex-row">
           <div className="max-w-full flex-1 lg:max-w-[400px]">
-            <Link to="/" className="mb-6 inline-flex items-center gap-3">
-              <SiteLogo className="h-10 w-10" alt={siteConfig.name} />
-              <span className="font-display text-lg font-bold text-foreground">
-                {siteConfig.name}
-              </span>
+            <Link to="/" className="mb-6 inline-flex">
+              <SiteWordmark size="sm" />
             </Link>
             <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
-              {siteConfig.tagline}. Une variété de cours vidéo en Creole — tech, business,
-              création et plus — pour Haïti, la diaspora et le monde entier.
+              {siteConfig.tagline}. Une variété de cours vidéo en Creole — tech, business, création
+              et plus — pour Haïti, la diaspora et le monde entier.
             </p>
             <div className="flex gap-3">
               <a

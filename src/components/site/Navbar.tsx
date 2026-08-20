@@ -230,11 +230,8 @@ export function Navbar({ theme = "default" }: { theme?: "default" | "dark" | "he
         }
       >
         <div className="site-container flex h-14 sm:h-16 items-center gap-2 sm:gap-3">
-          <Link
-            to="/"
-            className={cn("flex min-w-0 shrink-0 items-center", isDark && "text-white")}
-          >
-            <SiteWordmark className={cn(isDark && "text-white")} />
+          <Link to="/" className={cn("flex min-w-0 shrink-0 items-center", isDark && "text-white")}>
+            <SiteWordmark inverted={isDark} />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Navigation principale">

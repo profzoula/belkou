@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { SiteLogo } from "@/components/site/SiteLogo";
+import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -38,13 +38,8 @@ export function AuthSplitLayout({ children, activeTab, tabRedirect }: AuthSplitL
 
       <div className="relative w-full max-w-[1060px] rounded-[28px] border border-border/70 bg-card shadow-[0_28px_90px_rgb(15_23_42_/_0.14)] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:p-3">
         <div className="flex flex-col px-5 py-8 sm:px-10 sm:py-10 lg:px-11 lg:py-12">
-          <Link to="/" className="mx-auto inline-flex flex-col items-center gap-1.5 text-center">
-            <span className="inline-flex items-center gap-2.5">
-              <SiteLogo className="size-8" alt="" />
-              <span className="font-display text-xl font-bold tracking-tight text-foreground">
-                {siteConfig.name}
-              </span>
-            </span>
+          <Link to="/" className="mx-auto inline-flex flex-col items-center gap-2 text-center">
+            <SiteWordmark size="sm" />
             <span className="text-[11px] tracking-wide text-muted-foreground">
               {siteConfig.tagline}
             </span>

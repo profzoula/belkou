@@ -2,7 +2,7 @@ import { siteConfig } from "@/lib/site-config";
 
 export const siteUrl = siteConfig.siteUrl.replace(/\/$/, "");
 
-export const defaultTitle = "BelKou — Formation en ligne en Creole";
+export const defaultTitle = "BelKou ACADEMIC — Formation en ligne en Creole";
 
 export const defaultDescription =
   "Plateforme de formation en ligne en Creole : une variété de cours, preview gratuite, paiement flexible et communauté active.";
@@ -56,7 +56,7 @@ export function courseJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Course",
-    name: "Formation BelKou — Formation en ligne",
+    name: `${siteConfig.brand.title} — Formation en ligne`,
     description: defaultDescription,
     provider: {
       "@type": "Organization",
