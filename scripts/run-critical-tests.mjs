@@ -11,6 +11,7 @@ function expectIncludes(source, snippet, context) {
 
 async function run() {
   const adminAuth = await import("../src/lib/admin-auth.ts");
+  const { hasExpectedStripePricingForSession } = await import("../src/lib/stripe-pricing.ts");
 
   // Runtime assertions (behavior) for auth/session primitives.
   // Other critical guards are validated structurally below.
@@ -22,6 +23,32 @@ async function run() {
   assert.match(cookieHeader, /HttpOnly/);
   assert.match(cookieHeader, /SameSite=Lax/);
   assert.match(cookieHeader, /Secure/);
+
+  // A checkout may only unlock access for the exact price we quoted, or for that price
+  // minus a discount Stripe itself reports. Anything else is someone paying less.
+  const quoted = {
+    mode: "payment",
+    amount_total: 19900,
+    currency: "usd",
+    metadata: { expectedAmountCents: "19900", expectedCurrency: "USD" },
+  };
+  assert.equal(hasExpectedStripePricingForSession(quoted), true);
+  assert.equal(hasExpectedStripePricingForSession({ ...quoted, amount_total: 29900 }), false);
+  assert.equal(hasExpectedStripePricingForSession({ ...quoted, currency: "eur" }), false);
+  assert.equal(hasExpectedStripePricingForSession({ ...quoted, mode: "subscription" }), false);
+
+  const credited = { ...quoted, amount_total: 18901, total_details: { amount_discount: 999 } };
+  assert.equal(hasExpectedStripePricingForSession(credited), true);
+  assert.equal(
+    hasExpectedStripePricingForSession({ ...credited, total_details: { amount_discount: 0 } }),
+    false,
+    "a shortfall with no Stripe discount must never unlock access",
+  );
+  assert.equal(
+    hasExpectedStripePricingForSession({ ...credited, total_details: { amount_discount: 500 } }),
+    false,
+    "a discount that does not reconcile must never unlock access",
+  );
 
   // Static structural guards (defense-in-depth)
   const webhook = read("src/routes/api/stripe/webhook.ts");

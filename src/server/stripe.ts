@@ -117,6 +117,7 @@ export async function createCheckoutSession(params: {
     client_reference_id: params.registrationId,
     customer_email: params.email,
     payment_method_types: ["card"],
+    allow_promotion_codes: true,
     line_items: [lineItem],
     success_url: `${env.SITE_URL}/success?registrationId=${params.registrationId}&plan=${params.plan}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancelUrl,

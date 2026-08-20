@@ -163,7 +163,7 @@ function LiveSessionPage() {
           <div className="site-container site-page-top pb-16">
             <EmptyState
               title={`${liveStatusLabel(live.status)} — ${live.title}`}
-              description="Cette session a été annulée. Si vous aviez réservé votre place, écrivez-nous : nous vous replaçons sur une prochaine date ou nous vous remboursons."
+              description="Cette session a été annulée. Si vous aviez réservé votre place, écrivez-nous : nous créditons le montant payé sur n'importe quel autre cours ou live. Conformément à nos CGV, aucun remboursement n'est effectué."
               action={
                 <div className="flex flex-wrap justify-center gap-2">
                   <Button asChild className="rounded-xl">

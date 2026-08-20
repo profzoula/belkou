@@ -31,12 +31,12 @@ function CgvPage() {
         Les présentes CGV ont pour objet de définir les conditions dans lesquelles {siteName}{" "}
         propose ses services de formation en ligne spécialisée dans le développement d'applications
         utilisant l'intelligence artificielle (IA) et les technologies SaaS (Software as a Service).
-        Les formations sont dispensées en Creole, sous forme de cours en ligne à la carte, avec
-        des programmes structurés et un accès à vie au contenu acheté.
+        Les formations sont dispensées en Creole, sous forme de cours en ligne à la carte, avec des
+        programmes structurés et un accès à vie au contenu acheté.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">Article 2 — Plans et tarifs</h2>
-      <p>{siteName} propose deux formules d'inscription :</p>
+      <p>{siteName} propose trois formules d'inscription :</p>
       <h3 className="text-sm font-semibold text-foreground pt-2">
         2.1 — Plan {siteConfig.plans.premium.name} (${siteConfig.plans.premium.price} USD)
       </h3>
@@ -55,6 +55,16 @@ function CgvPage() {
         l&apos;inscription, pour un paiement unique de ${siteConfig.plans.vip.price} USD. Il
         comprend également un accompagnement personnalisé (mentorat, revue de projet) et un accès
         prioritaire au formateur.
+      </p>
+      <h3 className="text-sm font-semibold text-foreground pt-2">
+        2.3 — {siteConfig.plans.live.name} (à la session)
+      </h3>
+      <p>
+        Chaque session live est vendue séparément sous forme de place réservée, au prix affiché sur
+        la page de la session concernée. La place donne accès à la diffusion en direct et au replay
+        de cette session uniquement ; elle est personnelle et non transférable. Les Clients ayant
+        souscrit au plan {siteConfig.plans.vip.name} accèdent à l&apos;ensemble des lives sans achat
+        supplémentaire.
       </p>
       <p>
         Les prix sont indiqués en dollars américains (USD) et sont fermes et définitifs au moment de
@@ -101,6 +111,14 @@ function CgvPage() {
         contenu de la formation, le Client reconnaît renoncer expressément à son droit de
         rétractation conformément aux dispositions applicables. Le Client est invité à vérifier
         soigneusement le plan choisi avant de procéder au paiement.
+      </p>
+      <p>
+        Cette règle s&apos;applique également aux places réservées pour une session live. Lorsque{" "}
+        {siteName} annule une session live, le Client conserve la valeur intégrale de sa place sous
+        forme d&apos;avoir, utilisable sur n&apos;importe quel autre cours ou session live du
+        catalogue ; aucun remboursement en numéraire n&apos;est effectué. Le report d&apos;une
+        session à une date ultérieure n&apos;ouvre droit ni à un avoir ni à un remboursement, la
+        place demeurant valable pour la nouvelle date.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">Article 6 — Mentorat VIP</h2>

@@ -9,6 +9,9 @@ import {
   updateRegistrationPayment,
 } from "@/server/db";
 import { getCheckoutSession } from "@/server/stripe";
+import { hasExpectedStripePricingForSession } from "@/lib/stripe-pricing";
+
+export { hasExpectedStripePricingForSession };
 
 type CheckoutLike = {
   id: string;
@@ -18,6 +21,7 @@ type CheckoutLike = {
   currency?: string | null;
   customer_email?: string | null;
   customer_details?: { email?: string | null } | null;
+  total_details?: { amount_discount?: number | null } | null;
   metadata?: Record<string, string> | null;
 };
 
@@ -63,28 +67,6 @@ export async function resolveRegistrationForCheckout(
   }
 
   return null;
-}
-
-export function hasExpectedStripePricingForSession(session: CheckoutLike): boolean {
-  const expectedAmountRaw = session.metadata?.expectedAmountCents?.trim();
-  const expectedCurrency = session.metadata?.expectedCurrency?.trim()?.toLowerCase();
-
-  if (!expectedAmountRaw && !expectedCurrency) return true;
-  if (session.mode && session.mode !== "payment") return false;
-
-  if (expectedCurrency) {
-    const actualCurrency = session.currency?.toLowerCase();
-    if (!actualCurrency || actualCurrency !== expectedCurrency) return false;
-  }
-
-  if (expectedAmountRaw) {
-    const expectedAmount = Number.parseInt(expectedAmountRaw, 10);
-    if (!Number.isFinite(expectedAmount)) return false;
-    if (typeof session.amount_total !== "number") return false;
-    if (session.amount_total !== expectedAmount) return false;
-  }
-
-  return true;
 }
 
 /**

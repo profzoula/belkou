@@ -27,6 +27,7 @@ async function handleCheckoutPaid(session: {
   currency?: string | null;
   customer_email?: string | null;
   customer_details?: { email?: string | null } | null;
+  total_details?: { amount_discount?: number | null } | null;
   metadata?: Record<string, string> | null;
 }) {
   if (!isCheckoutPaid(session)) {
