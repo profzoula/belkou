@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Info, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthFormHeading, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthField } from "@/components/auth/AuthField";
 import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
@@ -100,40 +99,38 @@ function LoginPage() {
     window.location.href = redirect;
   };
 
+  const signupSearch = {
+    ...(email ? { email } : {}),
+    ...(redirectFromSearch ? { redirect: redirectFromSearch } : {}),
+  };
+
   return (
     <AuthSplitLayout activeTab="login" tabRedirect={redirectFromSearch}>
-      <h1 className="font-display text-[26px] font-bold tracking-tight text-foreground sm:text-3xl">
-        Accédez à votre espace<span className="text-primary">.</span>
-      </h1>
-      <p className="mt-2 flex gap-2.5 rounded-xl border border-border bg-muted/40 px-3.5 py-3 text-[13px] leading-relaxed text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
-        <span>
-          Déjà payé un cours ? Connectez-vous avec{" "}
-          <strong className="font-semibold text-foreground">le même email</strong> que votre
-          inscription pour retrouver Mes cours.
-        </span>
-      </p>
+      <AuthFormHeading
+        title="Accédez à vos cours."
+        subtitle="Entrez votre email pour vous connecter à BelKou ACADEMIC."
+      />
 
       {!isSupabaseConfigured ? (
-        <p className="mt-6 text-sm text-muted-foreground">
+        <p className="mt-8 text-center text-sm text-white/50">
           Supabase n&apos;est pas configuré. Ajoutez{" "}
-          <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
-          <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
+          <code className="text-white/80">VITE_SUPABASE_URL</code> et{" "}
+          <code className="text-white/80">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       ) : (
-        <div className="mt-6 space-y-5">
+        <div className="mt-8 space-y-5">
           {pendingEmail ? <EmailConfirmationNotice email={pendingEmail} /> : null}
 
           {oauthError || formError ? (
             <p
               role="alert"
-              className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+              className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-red-300"
             >
               {oauthError ?? formError}
             </p>
           ) : null}
 
-          <GoogleAuthButton label="Continuer avec Google" disabled={loading} />
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
 
           <AuthDivider />
 
@@ -142,7 +139,6 @@ function LoginPage() {
               id="email"
               label="Email"
               type="email"
-              icon={Mail}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="vous@email.com"
@@ -152,54 +148,62 @@ function LoginPage() {
               required
             />
 
-            <div className="space-y-2">
-              <AuthField
-                id="password"
-                label="Mot de passe"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-              />
-              <p className="text-right">
+            <AuthField
+              id="password"
+              label="Mot de passe"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              labelAction={
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                  className="text-xs font-medium text-white/45 transition-colors hover:text-white"
                 >
                   Mot de passe oublié ?
                 </Link>
-              </p>
-            </div>
+              }
+            />
 
             <Button
               type="submit"
-              variant="hero"
               size="lg"
               disabled={loading}
-              className="h-12 w-full rounded-full text-base"
+              className="h-12 w-full rounded-xl border-0 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] text-base text-white shadow-[0_10px_28px_rgb(37_99_235_/_0.35)] hover:brightness-110"
             >
               {loading ? "Connexion…" : "Se connecter"}
             </Button>
           </form>
 
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="text-center text-xs leading-relaxed text-white/40">
             En vous connectant, vous acceptez les{" "}
             <Link
               to="/legal/terms"
-              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+              className="text-white/70 underline underline-offset-2 hover:text-white"
             >
-              Conditions d&apos;utilisation
+              Conditions
             </Link>{" "}
             et la{" "}
             <Link
               to="/legal/privacy"
-              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+              className="text-white/70 underline underline-offset-2 hover:text-white"
             >
-              Politique de confidentialité
+              Confidentialité
             </Link>
             .
+          </p>
+
+          <p className="pt-1 text-center text-sm text-white/45">
+            Pas encore de compte ?{" "}
+            <Link
+              to="/signup"
+              search={signupSearch}
+              className="font-semibold text-white transition-colors hover:text-blue-300"
+            >
+              S&apos;inscrire
+            </Link>
           </p>
         </div>
       )}

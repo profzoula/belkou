@@ -1,109 +1,150 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
 import { SiteWordmark } from "@/components/site/SiteWordmark";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 type AuthSplitLayoutProps = {
   children: React.ReactNode;
-  /** Renders the Inscription / Connexion switch when set. */
+  /** Kept for callers; register/login switching lives in page copy now. */
   activeTab?: "login" | "signup";
-  /** Kept across the tab switch so the post-auth destination survives. */
   tabRedirect?: string;
 };
 
-const tabClass = (active: boolean) =>
-  cn(
-    "inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors",
-    active
-      ? "bg-primary text-primary-foreground shadow-primary"
-      : "border border-border bg-card text-muted-foreground hover:text-foreground",
-  );
+const navLinks = [
+  { to: "/courses" as const, label: "Cours" },
+  { to: "/live" as const, label: "Live" },
+  { to: "/services" as const, label: "Services" },
+  { to: "/about" as const, label: "À propos" },
+];
 
-export function AuthSplitLayout({ children, activeTab, tabRedirect }: AuthSplitLayoutProps) {
-  const tabSearch = tabRedirect ? { redirect: tabRedirect } : {};
+const footerColumns = [
+  {
+    title: "Naviguer",
+    items: [
+      { name: "Cours", href: "/courses" },
+      { name: "Live", href: "/live" },
+      { name: "Services", href: "/services" },
+      { name: "À propos", href: "/about" },
+    ],
+  },
+  {
+    title: "Compte",
+    items: [
+      { name: "Connexion", href: "/login" },
+      { name: "Inscription", href: "/signup" },
+      { name: "Mes cours", href: "/dashboard" },
+      { name: "FAQ", href: "/faq" },
+    ],
+  },
+  {
+    title: "Légal",
+    items: [
+      { name: "Conditions", href: "/legal/terms" },
+      { name: "Confidentialité", href: "/legal/privacy" },
+      { name: "CGV", href: "/legal/cgv" },
+      { name: "Contact", href: `mailto:${siteConfig.contactEmail}` },
+    ],
+  },
+];
 
+/**
+ * Dark, centered auth chrome (login / signup / password flows).
+ * Scene-style: full-bleed dark canvas, slim top nav, floating form, light footer.
+ */
+export function AuthSplitLayout({ children }: AuthSplitLayoutProps) {
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-10">
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-mesh" />
+    <div className="dark relative flex min-h-[100dvh] flex-col bg-[#050505] text-foreground">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgb(0_70_213_/_0.10),transparent_60%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_-10%,rgb(0_70_213_/_0.22),transparent_55%)]"
       />
 
-      <div className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="relative w-full max-w-[1060px] rounded-[28px] border border-border/70 bg-card shadow-[0_28px_90px_rgb(15_23_42_/_0.14)] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] lg:p-3">
-        <div className="flex flex-col px-5 py-8 sm:px-10 sm:py-10 lg:px-11 lg:py-12">
-          <Link to="/" className="mx-auto inline-flex flex-col items-center gap-2 text-center">
-            <SiteWordmark size="sm" />
-            <span className="text-[11px] tracking-wide text-muted-foreground">
-              {siteConfig.tagline}
-            </span>
+      <header className="relative z-10 border-b border-white/5">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:h-[4.25rem] sm:px-6">
+          <Link to="/" className="shrink-0" aria-label={`${siteConfig.name} — accueil`}>
+            <SiteWordmark size="sm" inverted />
           </Link>
 
-          {activeTab ? (
-            <div className="mx-auto mt-7 grid w-full max-w-[300px] grid-cols-2 gap-2">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-7 md:flex">
+            {navLinks.map((link) => (
               <Link
-                to="/signup"
-                search={tabSearch}
-                className={tabClass(activeTab === "signup")}
-                aria-current={activeTab === "signup" ? "page" : undefined}
+                key={link.to}
+                to={link.to}
+                className="text-sm text-white/55 transition-colors hover:text-white"
               >
-                Inscription
+                {link.label}
               </Link>
-              <Link
-                to="/login"
-                search={tabSearch}
-                className={tabClass(activeTab === "login")}
-                aria-current={activeTab === "login" ? "page" : undefined}
-              >
-                Connexion
-              </Link>
-            </div>
-          ) : null}
-
-          <main id="main-content" className="mx-auto mt-8 w-full max-w-[380px]">
-            {children}
-          </main>
-        </div>
-
-        <div className="relative hidden flex-col overflow-hidden rounded-[22px] border border-border/60 bg-gradient-mesh p-8 lg:flex">
-          <div
-            aria-hidden
-            className="absolute -top-16 -right-10 size-56 rounded-full bg-primary/10 blur-3xl"
-          />
-
-          <div className="relative">
-            <h2 className="font-display text-2xl font-bold leading-snug tracking-tight text-foreground text-balance">
-              Apprenez la tech, en kreyòl et en français
-            </h2>
-            <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
-              Cours pratiques, lives avec questions-réponses, et un espace étudiant qui garde votre
-              progression.
-            </p>
-          </div>
-
-          <img
-            src="/images/auth-illustration.webp"
-            alt=""
-            className="relative mx-auto my-5 w-full max-w-[330px] flex-1 object-contain"
-            loading="eager"
-            decoding="async"
-          />
+            ))}
+          </nav>
 
           <Link
             to="/courses"
-            className="relative inline-flex h-10 w-fit items-center gap-1.5 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+            className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-white/20 px-3.5 text-sm font-semibold text-white transition-colors hover:border-white/40 hover:bg-white/5 sm:px-4"
           >
-            Découvrir les cours
-            <ArrowRight className="size-4" aria-hidden />
+            Voir les cours
           </Link>
         </div>
-      </div>
+      </header>
+
+      <main
+        id="main-content"
+        className="relative z-10 flex flex-1 flex-col items-center justify-center px-4 py-12 sm:py-16"
+      >
+        <div className="w-full max-w-[420px] animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {children}
+        </div>
+      </main>
+
+      <footer className="relative z-10 mt-auto border-t border-white/5">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))] md:gap-8 md:py-14">
+          <div>
+            <SiteWordmark size="sm" inverted />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/45">
+              {siteConfig.tagline}
+            </p>
+            <p className="mt-6 text-xs text-white/35">
+              © {new Date().getFullYear()} {siteConfig.brand.title}. Tous droits réservés.
+            </p>
+          </div>
+
+          {footerColumns.map((column) => (
+            <div key={column.title}>
+              <p className="text-sm font-semibold text-white/80">{column.title}</p>
+              <ul className="mt-4 space-y-2.5">
+                {column.items.map((item) => (
+                  <li key={item.href + item.name}>
+                    <a
+                      href={item.href}
+                      className="text-sm text-white/40 transition-colors hover:text-white"
+                    >
+                      {item.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+export function AuthFormHeading({
+  title,
+  subtitle,
+  className,
+}: {
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("text-center", className)}>
+      <h1 className="font-display text-[1.75rem] font-bold tracking-tight text-white text-balance sm:text-[2rem]">
+        {title}
+      </h1>
+      {subtitle ? <p className="mt-2.5 text-sm leading-relaxed text-white/50">{subtitle}</p> : null}
     </div>
   );
 }

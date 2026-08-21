@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthFormHeading, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthField } from "@/components/auth/AuthField";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -52,29 +52,24 @@ function ForgotPasswordPage() {
     <AuthSplitLayout>
       <Link
         to="/login"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/45 transition-colors hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         Retour à la connexion
       </Link>
 
+      <AuthFormHeading
+        className="text-left"
+        title="Mot de passe oublié."
+        subtitle="Entrez votre email et nous vous enverrons un lien de réinitialisation."
+      />
+
       {!isSupabaseConfigured ? (
-        <p className="rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-brand-accent-foreground">
+        <p className="mt-6 rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-brand-accent-foreground">
           Authentification non configurée. Définissez les variables Supabase pour activer cette
           fonctionnalité.
         </p>
       ) : null}
-
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-        Mot de passe
-      </p>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Mot de passe oublié<span className="text-primary">.</span>
-      </h1>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Entrez votre adresse email et nous vous enverrons un lien pour réinitialiser votre mot de
-        passe.
-      </p>
 
       {sent ? (
         <div className="mt-8">
@@ -83,7 +78,10 @@ function ForgotPasswordPage() {
             title="Email envoyé !"
             description={`Si un compte existe avec l'adresse ${email}, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.`}
             action={
-              <Button asChild variant="outline">
+              <Button
+                asChild
+                className="rounded-xl border border-white/15 bg-white/5 text-white hover:bg-white/10"
+              >
                 <Link to="/login">
                   <ArrowLeft className="h-4 w-4" />
                   Retour à la connexion
@@ -109,9 +107,8 @@ function ForgotPasswordPage() {
           />
           <Button
             type="submit"
-            className="h-12 w-full rounded-full text-base"
+            className="h-12 w-full rounded-xl border-0 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] text-base text-white shadow-[0_10px_28px_rgb(37_99_235_/_0.35)] hover:brightness-110"
             size="lg"
-            variant="hero"
             disabled={loading || !isSupabaseConfigured}
           >
             {loading ? "Envoi en cours…" : "Envoyer le lien"}

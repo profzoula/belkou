@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
-import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthFormHeading, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthField } from "@/components/auth/AuthField";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -86,23 +86,23 @@ function ResetPasswordPage() {
         </p>
       ) : null}
 
-      <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-        Mot de passe
-      </p>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        Nouveau mot de passe<span className="text-primary">.</span>
-      </h1>
+      <AuthFormHeading
+        className="text-left"
+        title="Nouveau mot de passe."
+        subtitle={hasSession ? "Définissez un nouveau mot de passe pour votre compte." : undefined}
+      />
 
-      {hasSession === null && (
-        <p className="mt-6 text-sm text-muted-foreground">Vérification en cours…</p>
-      )}
+      {hasSession === null && <p className="mt-6 text-sm text-white/50">Vérification en cours…</p>}
 
       {hasSession === false && (
         <div className="mt-8 space-y-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-white/50">
             Ce lien est invalide ou a expiré. Veuillez faire une nouvelle demande.
           </p>
-          <Button asChild variant="outline">
+          <Button
+            asChild
+            className="rounded-xl border border-white/15 bg-white/5 text-white hover:bg-white/10"
+          >
             <Link to="/forgot-password">
               <ArrowLeft className="h-4 w-4" />
               Demander un nouveau lien
@@ -112,46 +112,40 @@ function ResetPasswordPage() {
       )}
 
       {hasSession && !done && (
-        <>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Définissez un nouveau mot de passe pour votre compte.
-          </p>
-          <form onSubmit={submit} className="mt-8 space-y-4">
-            <AuthField
-              id="rp-password"
-              label="Nouveau mot de passe"
-              type="password"
-              required
-              minLength={6}
-              placeholder="Au moins 6 caractères"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              autoFocus
-            />
-            <AuthField
-              id="rp-confirm"
-              label="Confirmer le mot de passe"
-              type="password"
-              required
-              minLength={6}
-              placeholder="Répétez le mot de passe"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              autoComplete="new-password"
-              error={passwordMismatch ? "Les mots de passe ne correspondent pas." : null}
-            />
-            <Button
-              type="submit"
-              className="h-12 w-full rounded-full text-base"
-              size="lg"
-              variant="hero"
-              disabled={loading}
-            >
-              {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
-            </Button>
-          </form>
-        </>
+        <form onSubmit={submit} className="mt-8 space-y-4">
+          <AuthField
+            id="rp-password"
+            label="Nouveau mot de passe"
+            type="password"
+            required
+            minLength={6}
+            placeholder="Au moins 6 caractères"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            autoFocus
+          />
+          <AuthField
+            id="rp-confirm"
+            label="Confirmer le mot de passe"
+            type="password"
+            required
+            minLength={6}
+            placeholder="Répétez le mot de passe"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+            error={passwordMismatch ? "Les mots de passe ne correspondent pas." : null}
+          />
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-xl border-0 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] text-base text-white shadow-[0_10px_28px_rgb(37_99_235_/_0.35)] hover:brightness-110"
+            size="lg"
+            disabled={loading}
+          >
+            {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
+          </Button>
+        </form>
       )}
 
       {done && (
@@ -161,7 +155,10 @@ function ResetPasswordPage() {
             title="Mot de passe mis à jour !"
             description="Votre mot de passe a été changé avec succès."
             action={
-              <Button asChild variant="hero">
+              <Button
+                asChild
+                className="rounded-xl border-0 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] text-white hover:brightness-110"
+              >
                 <Link to="/dashboard">Accéder à mon espace</Link>
               </Button>
             }

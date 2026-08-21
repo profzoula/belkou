@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Mail, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
+import { AuthFormHeading, AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 import { AuthField } from "@/components/auth/AuthField";
 import { EmailConfirmationNotice } from "@/components/auth/EmailConfirmationNotice";
 import { AuthDivider, GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
@@ -138,21 +138,25 @@ function SignupPage() {
     window.location.href = redirect;
   };
 
+  const loginSearch = {
+    ...(email ? { email } : {}),
+    ...(redirectFromSearch ? { redirect: redirectFromSearch } : {}),
+  };
+
   if (pendingConfirmationEmail) {
     return (
       <AuthSplitLayout>
-        <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-          Inscription
-        </p>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Presque terminé<span className="text-primary">.</span>
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Confirmez votre email pour activer votre compte et accéder à vos cours.
-        </p>
+        <AuthFormHeading
+          title="Presque terminé."
+          subtitle="Confirmez votre email pour activer votre compte et accéder à vos cours."
+        />
         <div className="mt-8 space-y-4">
           <EmailConfirmationNotice email={pendingConfirmationEmail} />
-          <Button asChild variant="soft" size="lg" className="h-12 w-full rounded-full">
+          <Button
+            asChild
+            size="lg"
+            className="h-12 w-full rounded-xl border border-white/15 bg-white/5 text-white hover:bg-white/10"
+          >
             <Link
               to="/login"
               search={{
@@ -170,29 +174,30 @@ function SignupPage() {
 
   return (
     <AuthSplitLayout activeTab="signup" tabRedirect={redirectFromSearch}>
-      <h1 className="font-display text-[26px] font-bold tracking-tight text-foreground sm:text-3xl">
-        Créez votre compte<span className="text-primary">.</span>
-      </h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Compte gratuit pour votre espace étudiant. Prêt à acheter un cours ?{" "}
-        <Link
-          to="/courses"
-          className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
-        >
-          Parcourir les cours
-        </Link>
-        .
-      </p>
+      <AuthFormHeading
+        title="Créez votre compte."
+        subtitle={
+          <>
+            Compte gratuit pour votre espace étudiant.{" "}
+            <Link
+              to="/courses"
+              className="text-white/80 underline underline-offset-2 hover:text-white"
+            >
+              Parcourir les cours
+            </Link>
+          </>
+        }
+      />
 
       {!isSupabaseConfigured ? (
-        <p className="mt-6 text-sm text-muted-foreground">
+        <p className="mt-8 text-center text-sm text-white/50">
           Supabase n&apos;est pas configuré. Ajoutez{" "}
-          <code className="text-foreground">VITE_SUPABASE_URL</code> et{" "}
-          <code className="text-foreground">VITE_SUPABASE_ANON_KEY</code>.
+          <code className="text-white/80">VITE_SUPABASE_URL</code> et{" "}
+          <code className="text-white/80">VITE_SUPABASE_ANON_KEY</code>.
         </p>
       ) : (
-        <div className="mt-6 space-y-5">
-          <GoogleAuthButton label="Continuer avec Google" disabled={loading} />
+        <div className="mt-8 space-y-5">
+          <GoogleAuthButton label="Continuer avec Google" disabled={loading} variant="dark" />
 
           <AuthDivider />
 
@@ -264,7 +269,7 @@ function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowReferralField(true)}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+                className="text-sm font-medium text-white/45 transition-colors hover:text-white"
               >
                 J&apos;ai un code affilié
               </button>
@@ -272,35 +277,45 @@ function SignupPage() {
 
             <Button
               type="submit"
-              variant="hero"
               size="lg"
               disabled={loading}
-              className="h-12 w-full rounded-full text-base"
+              className="h-12 w-full rounded-xl border-0 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] text-base text-white shadow-[0_10px_28px_rgb(37_99_235_/_0.35)] hover:brightness-110"
             >
               {loading ? "Création…" : "Créer mon compte"}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Après l&apos;inscription, vérifiez votre <strong>Gmail</strong> pour confirmer votre
-              compte.
+            <p className="text-center text-xs text-white/40">
+              Après l&apos;inscription, vérifiez votre{" "}
+              <strong className="text-white/70">Gmail</strong> pour confirmer votre compte.
             </p>
           </form>
 
-          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          <p className="text-center text-xs leading-relaxed text-white/40">
             En créant un compte, vous acceptez les{" "}
             <Link
               to="/legal/terms"
-              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+              className="text-white/70 underline underline-offset-2 hover:text-white"
             >
-              Conditions d&apos;utilisation
+              Conditions
             </Link>{" "}
             et la{" "}
             <Link
               to="/legal/privacy"
-              className="text-primary/80 underline underline-offset-2 hover:text-primary"
+              className="text-white/70 underline underline-offset-2 hover:text-white"
             >
-              Politique de confidentialité
+              Confidentialité
             </Link>
             .
+          </p>
+
+          <p className="pt-1 text-center text-sm text-white/45">
+            Déjà un compte ?{" "}
+            <Link
+              to="/login"
+              search={loginSearch}
+              className="font-semibold text-white transition-colors hover:text-blue-300"
+            >
+              Se connecter
+            </Link>
           </p>
         </div>
       )}
