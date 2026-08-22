@@ -83,6 +83,15 @@ async function run() {
   expectIncludes(checkout, "verifyStripeSession", "checkout verify flow");
   expectIncludes(checkout, "grantAccessFromCheckoutSession", "checkout grant flow");
 
+  const railway = read("scripts/railway.mjs");
+  expectIncludes(railway, "Strict-Transport-Security", "railway HSTS");
+  expectIncludes(railway, "Content-Security-Policy", "railway CSP");
+  expectIncludes(railway, "applySecurityHeaders", "railway security header apply");
+
+  const securityHeaders = read("src/lib/security-headers.ts");
+  expectIncludes(securityHeaders, "X-Frame-Options", "app frame options");
+  expectIncludes(securityHeaders, "Permissions-Policy", "app permissions policy");
+
   console.log("[BelKou] Critical runtime tests passed.");
 }
 
