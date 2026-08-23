@@ -60,7 +60,6 @@ function Index() {
         <Hero studentCount={studentCount} />
       </div>
       <main id="main-content" className="max-w-full overflow-x-hidden">
-        <CareerInvestSection />
         <CoursesSection courses={courses} />
         <LiveEventsSection sessions={liveSessions} />
         <VipUnlimitedCta />
@@ -70,6 +69,7 @@ function Index() {
         <HowItWorks />
         <Testimonials />
         <CTA />
+        <CareerInvestSection />
       </main>
       <Footer />
     </div>

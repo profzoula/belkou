@@ -26,7 +26,7 @@ export function CareerInvestSection() {
   return (
     <section
       aria-labelledby="career-invest-heading"
-      className="border-b border-border/50 bg-[#f5f8fc] py-8 sm:py-10 dark:bg-muted/30"
+      className="border-t border-border/50 bg-[#f5f8fc] py-10 sm:py-12 dark:bg-muted/30"
     >
       <div className="site-container px-4">
         <FadeIn>
