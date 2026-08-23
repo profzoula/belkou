@@ -6,7 +6,7 @@ const pillars = [
     icon: Target,
     title: "Explorez de nouvelles compétences",
     description:
-      "Accédez à des formations en IA, Vibe Coding, web et mobile — choisissez le cours qui correspond à votre objectif.",
+      "Accédez à des formations en IA, Vibe Coding, web et mobile. Choisissez le cours qui correspond à votre objectif.",
   },
   {
     icon: Award,
@@ -26,13 +26,13 @@ export function CareerInvestSection() {
   return (
     <section
       aria-labelledby="career-invest-heading"
-      className="border-t border-border/50 bg-[#f5f8fc] py-10 sm:py-12 dark:bg-muted/30"
+      className="border-t border-border/50 bg-[#f5f8fc] py-12 sm:py-16 dark:bg-muted/30"
     >
       <div className="site-container px-4">
         <FadeIn>
           <h2
             id="career-invest-heading"
-            className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+            className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem]"
           >
             Investissez dans votre carrière
           </h2>

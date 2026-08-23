@@ -41,7 +41,7 @@ const testimonials: Testimonial[] = [
     image: avatar("sherline-volcy"),
     name: "Sherline Volcy",
     handle: "@sherline509 · Gonaïves",
-    text: "Fòmasyon klè, kominote aktif — mwen finalman konprann kijan pou m monetize konpetans tech mwen yo.",
+    text: "Fòmasyon klè, kominote aktif. Mwen finalman konprann kijan pou m monetize konpetans tech mwen yo.",
   },
   {
     image: avatar("roodly-alce"),
@@ -148,7 +148,7 @@ export function Testimonials() {
         <SectionHeader
           label="Témoignages"
           title="Ce que disent nos étudiants"
-          description="Des parcours réels — Pòtoprens, Cap-Haïtien, diaspora."
+          description="Des parcours réels: Pòtoprens, Cap-Haïtien, diaspora."
           className="max-w-lg"
         />
         <button

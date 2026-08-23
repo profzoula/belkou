@@ -40,7 +40,7 @@ export function LiveEventsSection({ sessions }: LiveEventsSectionProps) {
             label: "Live",
             title: "Prochains lives",
             description:
-              "Chaque live a son prix et sa place réservée. Inscrivez-vous dès l'annonce, bien avant le début — le replay reste à vous.",
+              "Chaque live a son prix et sa place réservée. Inscrivez-vous dès l'annonce, bien avant le début. Le replay reste à vous.",
           }
         : {
             label: "Live",

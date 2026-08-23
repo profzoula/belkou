@@ -507,6 +507,33 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 
+export const adminSetLiveSessionSchedule = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        scheduledAt: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const scheduled = new Date(data.scheduledAt);
+    if (Number.isNaN(scheduled.getTime())) {
+      throw new Error("Date de programmation invalide.");
+    }
+
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    if (session.status === "ended" || session.status === "canceled") {
+      throw new Error("Impossible de déplacer un live terminé ou annulé.");
+    }
+
+    await updateLiveSession(data.sessionId, { scheduledAt: scheduled.toISOString() });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
 export const adminSetLiveSessionPrice = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

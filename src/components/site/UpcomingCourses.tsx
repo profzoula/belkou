@@ -77,7 +77,7 @@ export function UpcomingCourses({ courses }: UpcomingCoursesProps) {
         <SectionHeader
           label="À venir"
           title="Prochains lancements"
-          description={`${formatCount(courses.length)} formation${courses.length > 1 ? "s" : ""} ouverte${courses.length > 1 ? "s" : ""} à l'inscription — preview gratuite dès maintenant, contenu complet à la date indiquée.`}
+          description={`${formatCount(courses.length)} formation${courses.length > 1 ? "s" : ""} ouverte${courses.length > 1 ? "s" : ""} à l'inscription. Preview gratuite dès maintenant, contenu complet à la date indiquée.`}
           align="left"
           className="mb-8 max-w-2xl"
         />

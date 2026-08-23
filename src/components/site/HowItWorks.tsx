@@ -17,7 +17,7 @@ const steps = [
   {
     icon: CreditCard,
     title: "Inscrivez-vous au cours",
-    description: "Paiement sécurisé — accès par email, preview immédiate si disponible.",
+    description: "Paiement sécurisé. Accès par email, preview immédiate si disponible.",
   },
   {
     icon: PlayCircle,
@@ -76,9 +76,7 @@ export function HowItWorks() {
           {/* Mobile / tablet stacked fallback */}
           <div className="lg:hidden">
             <div className="bg-primary px-6 py-10 text-primary-foreground sm:px-10 sm:py-12">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary-foreground/65">
-                Comment ça marche
-              </p>
+              <p className="text-sm font-semibold text-primary-foreground/70">Comment ça marche</p>
               <span className="mt-3 block h-px w-12 bg-brand-accent" aria-hidden />
               <h2 className="mt-6 font-display text-[1.75rem] font-bold leading-[1.1] tracking-tight sm:text-4xl">
                 <span className="text-primary-foreground">Votre parcours.</span>
@@ -91,7 +89,7 @@ export function HowItWorks() {
                 <span className="h-px flex-1 bg-primary-foreground/25" />
               </div>
               <p className="max-w-md text-sm leading-relaxed text-primary-foreground/80 sm:text-base">
-                Une variété de cours en Creole — comme Udemy ou Coursera, pensé pour Haïti et la
+                Une variété de cours en Creole, comme Udemy ou Coursera, pensé pour Haïti et la
                 diaspora.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -140,9 +138,7 @@ export function HowItWorks() {
             <div className="relative z-10 grid h-full min-h-[34rem] grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
               {/* Left copy */}
               <div className="flex flex-col justify-center px-12 py-14 pr-20 xl:px-16 xl:pr-28">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-primary-foreground/70">
-                  Comment ça marche
-                </p>
+                <p className="text-sm font-semibold text-primary-foreground/70">Comment ça marche</p>
                 <span className="mt-3 block h-px w-14 bg-brand-accent" aria-hidden />
 
                 <h2 className="mt-7 max-w-lg font-display text-4xl font-bold leading-[1.08] tracking-tight xl:text-[2.75rem]">
@@ -158,8 +154,8 @@ export function HowItWorks() {
                 </div>
 
                 <p className="max-w-md text-base leading-relaxed text-primary-foreground/80">
-                  Une variété de cours en Creole — comme Udemy ou Coursera, pensé pour Haïti et la
-                diaspora.
+                  Une variété de cours en Creole, comme Udemy ou Coursera, pensé pour Haïti et la
+                  diaspora.
                 </p>
 
                 <div className="mt-9 flex items-center gap-3">

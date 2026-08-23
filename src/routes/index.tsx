@@ -62,9 +62,9 @@ function Index() {
       <main id="main-content" className="max-w-full overflow-x-hidden">
         <CoursesSection courses={courses} />
         <LiveEventsSection sessions={liveSessions} />
-        <VipUnlimitedCta />
         <TrustStrip />
         <ServicesSection services={serviceItems} />
+        <VipUnlimitedCta />
         <UpcomingCourses courses={upcomingCourses} />
         <HowItWorks />
         <Testimonials />

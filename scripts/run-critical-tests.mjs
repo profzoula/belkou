@@ -92,6 +92,10 @@ async function run() {
   expectIncludes(securityHeaders, "X-Frame-Options", "app frame options");
   expectIncludes(securityHeaders, "Permissions-Policy", "app permissions policy");
 
+  const liveAdmin = read("src/lib/fns/live.ts");
+  expectIncludes(liveAdmin, "adminSetLiveSessionSchedule", "admin live reschedule");
+  expectIncludes(liveAdmin, "scheduledAt: scheduled.toISOString()", "admin live reschedule persist");
+
   console.log("[BelKou] Critical runtime tests passed.");
 }
 

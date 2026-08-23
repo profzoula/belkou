@@ -26,7 +26,7 @@ export function ServicesSection({ services, maxVisible = 3 }: ServicesSectionPro
             Nos <span className="text-primary">services</span>
           </h2>
           <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-            LLC, développement, marketing et plus — BelKou vous accompagne au-delà des cours.
+            LLC, développement, marketing et plus. BelKou vous accompagne au-delà des cours.
           </p>
         </FadeIn>
 

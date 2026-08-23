@@ -30,9 +30,7 @@ export function VipUnlimitedCta({ embedded = false, className }: VipUnlimitedCta
       />
       <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_16rem] lg:gap-12">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">
-            Abonnement VIP
-          </p>
+          <p className="text-sm font-semibold text-primary">Abonnement VIP</p>
           <h2
             className={cn(
               "mt-3 font-display text-2xl font-bold tracking-tight text-foreground text-balance",
@@ -42,8 +40,8 @@ export function VipUnlimitedCta({ embedded = false, className }: VipUnlimitedCta
             Accès illimité à tous les cours et lives
           </h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Un seul paiement. Tous les cours BelKou, tous les directs, et les nouveaux programmes
-            — réservé aux membres VIP.
+            Un seul paiement. Tous les cours BelKou, tous les directs, et les nouveaux programmes.
+            Réservé aux membres VIP.
           </p>
           <ul className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
             {VIP_PERKS.map((perk) => (

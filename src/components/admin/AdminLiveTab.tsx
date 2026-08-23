@@ -36,9 +36,11 @@ import {
   adminSendLiveReminder,
   adminSetLiveRecording,
   adminSetLiveSessionPrice,
+  adminSetLiveSessionSchedule,
   adminStartLiveSession,
   adminUploadLiveThumbnail,
 } from "@/lib/fns/live";
+import { toDatetimeLocalValue } from "@/lib/course-publish";
 import {
   LIVE_TICKET_PRICE_USD,
   detectLiveProvider,
@@ -107,6 +109,7 @@ export function AdminLiveTab() {
   const uploadThumbFn = useServerFn(adminUploadLiveThumbnail);
   const removeThumbFn = useServerFn(adminRemoveLiveThumbnail);
   const setPriceFn = useServerFn(adminSetLiveSessionPrice);
+  const setScheduleFn = useServerFn(adminSetLiveSessionSchedule);
   const setRecordingFn = useServerFn(adminSetLiveRecording);
   const removeRecordingFn = useServerFn(adminRemoveLiveRecording);
   const reminderFn = useServerFn(adminSendLiveReminder);
@@ -242,6 +245,19 @@ export function AdminLiveTab() {
       toast.success("Thumbnail retirée");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const saveSchedule = async (sessionId: string, scheduledAt: string) => {
+    setActingId(sessionId);
+    try {
+      const result = await setScheduleFn({ data: { sessionId, scheduledAt } });
+      setSessions(result.sessions);
+      toast.success("Date du live mise à jour");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Date non enregistrée");
     } finally {
       setActingId(null);
     }
@@ -577,6 +593,13 @@ export function AdminLiveTab() {
                         Replay ajouté au programme du cours.
                       </p>
                     ) : null}
+                    {session.status === "scheduled" || session.status === "live" ? (
+                      <AdminLiveScheduleField
+                        session={session}
+                        busy={actingId === session.id}
+                        onSave={(scheduledAt) => saveSchedule(session.id, scheduledAt)}
+                      />
+                    ) : null}
                     <AdminLivePriceField
                       session={session}
                       busy={actingId === session.id}
@@ -648,6 +671,52 @@ export function AdminLiveTab() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+function AdminLiveScheduleField({
+  session,
+  busy,
+  onSave,
+}: {
+  session: LiveSession;
+  busy: boolean;
+  onSave: (scheduledAt: string) => void;
+}) {
+  const saved = toDatetimeLocalValue(session.scheduledAt);
+  const [value, setValue] = useState(saved);
+
+  useEffect(() => {
+    setValue(toDatetimeLocalValue(session.scheduledAt));
+  }, [session.scheduledAt]);
+
+  const parsed = new Date(value);
+  const dirty = value !== saved && !Number.isNaN(parsed.getTime());
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2">
+      <Label htmlFor={`live-when-${session.id}`} className="text-xs text-muted-foreground">
+        Date
+      </Label>
+      <Input
+        id={`live-when-${session.id}`}
+        type="datetime-local"
+        value={value}
+        disabled={busy}
+        onChange={(event) => setValue(event.target.value)}
+        className="h-8 w-[13.5rem] rounded-lg text-xs"
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="h-8 rounded-lg px-2.5 text-[11px]"
+        disabled={busy || !dirty}
+        onClick={() => onSave(parsed.toISOString())}
+      >
+        Enregistrer
+      </Button>
     </div>
   );
 }

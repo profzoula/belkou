@@ -206,8 +206,8 @@ export function Footer() {
               <SiteWordmark size="sm" />
             </Link>
             <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
-              {siteConfig.tagline}. Une variété de cours vidéo en Creole — tech, business, création
-              et plus — pour Haïti, la diaspora et le monde entier.
+              {siteConfig.tagline}. Une variété de cours vidéo en Creole: tech, business, création
+              et plus, pour Haïti, la diaspora et le monde entier.
             </p>
             <div className="flex gap-3">
               <a

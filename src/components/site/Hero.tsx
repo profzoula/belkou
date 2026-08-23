@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Sparkles, Star, Users, Wrench } from "lucide-react";
+import { ArrowRight, Star, Users, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCount } from "@/lib/courses";
 import { siteConfig } from "@/lib/site-config";
@@ -118,19 +118,14 @@ export function Hero({ studentCount }: HeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease }}
           >
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary sm:text-xs">
-              Formation en ligne
-            </p>
-
-            <h1 className="mt-4 max-w-xl font-display text-[1.65rem] font-bold leading-[1.08] tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.75rem] lg:text-5xl">
+            <h1 className="max-w-xl font-display text-[1.8rem] font-bold leading-[1.1] tracking-tight text-foreground text-balance sm:text-4xl md:text-[2.85rem] lg:text-5xl">
               Apprenez. Appliquez.
               <br />
               <span className="text-primary">Progressez à votre rythme.</span>
             </h1>
 
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-              Accédez à une variété de cours en Creole — tech, business, création et plus — avec
-              mentors, projets concrets et une communauté active.
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
+              Cours en Creole: tech, business, création. Mentors, projets, communauté.
             </p>
           </motion.div>
 
@@ -209,7 +204,7 @@ export function Hero({ studentCount }: HeroProps) {
 
               <img
                 src="/about/Mackenson.png"
-                alt={`${siteConfig.founder.name} — fondateur BelKou`}
+                alt={`${siteConfig.founder.name}, fondateur BelKou`}
                 className="relative z-[1] block h-auto max-h-[min(52vh,380px)] w-auto max-w-[min(100%,13.5rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-screen sm:max-h-[min(60vh,460px)] sm:max-w-[18rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
                 width={900}
                 height={1200}
@@ -230,11 +225,6 @@ export function Hero({ studentCount }: HeroProps) {
                   </motion.div>
                 ))}
 
-                <Sparkles
-                  aria-hidden
-                  className="ml-auto size-5 text-foreground/80 sm:size-7"
-                  strokeWidth={1.75}
-                />
               </div>
             </div>
           </div>

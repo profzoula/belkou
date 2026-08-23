@@ -1,9 +1,9 @@
-import { BadgeCheck, Headphones, ShieldCheck, Sparkles } from "lucide-react";
+import { BadgeCheck, CircleDollarSign, Headphones, ShieldCheck } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
 
 const items = [
   { label: "Formateurs\nvérifiés", icon: BadgeCheck },
-  { label: "Prix\ntransparents", icon: Sparkles },
+  { label: "Prix\ntransparents", icon: CircleDollarSign },
   { label: "Accès\nà vie", icon: ShieldCheck },
   { label: "Support\ninclus", icon: Headphones },
 ] as const;

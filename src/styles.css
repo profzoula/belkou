@@ -311,8 +311,7 @@
     gap: 0.5rem;
     font-size: 0.8125rem;
     font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
     color: var(--primary);
   }
   .section-divider {
