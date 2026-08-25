@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, CreditCard, Gift, Globe, Lock, Radio, ShieldCheck } from "lucide-react";
@@ -24,6 +24,7 @@ import { SiteLogo } from "@/components/site/SiteLogo";
 import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
 import { saveRegistrationHandoff } from "@/lib/registration-handoff";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { getCourseIcon } from "@/lib/course-icons";
@@ -83,6 +84,7 @@ export function CheckoutPage({
     level: "beginner",
     referral_code: "",
   });
+  const checkoutTracked = useRef<string | null>(null);
 
   useEffect(() => {
     if (refCode) saveReferralCode(refCode);
@@ -236,6 +238,20 @@ export function CheckoutPage({
   const liveScheduleLabel = liveSessionScheduledAt
     ? formatLiveSchedule(liveSessionScheduledAt)
     : null;
+
+  useEffect(() => {
+    if (courseSlug && !course) return;
+    const id = isLiveTicket ? (liveSessionId ?? "live") : (courseSlug ?? selectedPlan);
+    if (checkoutTracked.current === id) return;
+    checkoutTracked.current = id;
+    trackMetaEvent("InitiateCheckout", {
+      content_name: productTitle,
+      content_ids: [id],
+      content_type: "product",
+      value: displayPrice,
+      currency: "USD",
+    });
+  }, [course, courseSlug, displayPrice, isLiveTicket, liveSessionId, productTitle, selectedPlan]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">

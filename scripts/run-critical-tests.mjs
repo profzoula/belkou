@@ -96,6 +96,11 @@ async function run() {
   expectIncludes(liveAdmin, "adminSetLiveSessionSchedule", "admin live reschedule");
   expectIncludes(liveAdmin, "scheduledAt: scheduled.toISOString()", "admin live reschedule persist");
 
+  const pixel = read("src/lib/meta-pixel.ts");
+  expectIncludes(pixel, "connect.facebook.net", "meta pixel script");
+  const siteCfg = read("src/lib/site-config.ts");
+  expectIncludes(siteCfg, "998362493224687", "meta pixel id");
+
   console.log("[BelKou] Critical runtime tests passed.");
 }
 

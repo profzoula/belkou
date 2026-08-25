@@ -45,6 +45,7 @@ import { getCourseProgress } from "@/lib/fns/progress";
 import { Navbar } from "@/components/site/Navbar";
 import { useAuth } from "@/hooks/use-auth";
 import { siteConfig } from "@/lib/site-config";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 type CourseLandingPageProps = {
   course: PublicCourse;
@@ -117,6 +118,16 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     progressPercent: number;
     lastLessonId?: string | null;
   } | null>(null);
+
+  useEffect(() => {
+    trackMetaEvent("ViewContent", {
+      content_name: course.title,
+      content_ids: [course.slug],
+      content_type: "product",
+      value: course.price,
+      currency: "USD",
+    });
+  }, [course.price, course.slug, course.title]);
 
   useEffect(() => {
     if (authLoading) return;

@@ -9,6 +9,7 @@ export const siteConfig = {
   siteUrl: envString(import.meta.env.VITE_SITE_URL, "https://belkou.online"),
   logo: "/favicon/logo.svg",
   tagline: "Plateforme de formation en ligne en Creole",
+  metaPixelId: envString(import.meta.env.VITE_META_PIXEL_ID, "998362493224687"),
   contactEmail: envString(import.meta.env.VITE_CONTACT_EMAIL, "profzoula@gmail.com"),
   contactWhatsApp: envString(import.meta.env.VITE_WHATSAPP_PHONE, "9413010414"),
   whatsappGroups: {

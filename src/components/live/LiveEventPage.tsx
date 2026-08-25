@@ -31,6 +31,7 @@ import {
 import { downloadIcs } from "@/lib/live-calendar";
 import { absoluteUrl } from "@/lib/seo";
 import { shareLink } from "@/lib/share";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 import { cn } from "@/lib/utils";
 
 type LiveEventPageProps = {
@@ -125,6 +126,16 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
   useEffect(() => {
     setLocalTime(viewerZoneDiffers() ? formatLiveScheduleLocal(live.scheduledAt) : null);
   }, [live.scheduledAt]);
+
+  useEffect(() => {
+    trackMetaEvent("ViewContent", {
+      content_name: live.title,
+      content_ids: [live.id],
+      content_type: "product",
+      value: live.liveTicketPrice,
+      currency: "USD",
+    });
+  }, [live.id, live.liveTicketPrice, live.title]);
 
   const whenLine = isLive
     ? "En direct maintenant"

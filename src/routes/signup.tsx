@@ -16,6 +16,7 @@ import {
   normalizeReferralCode,
 } from "@/lib/referral-storage";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase/client";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 import { z } from "zod";
 import { seoHead } from "@/lib/seo";
 
@@ -131,6 +132,7 @@ function SignupPage() {
     }
 
     toast.success("Compte créé avec succès.");
+    trackMetaEvent("CompleteRegistration");
     const redirect =
       redirectFromSearch?.startsWith("/") && !redirectFromSearch.startsWith("//")
         ? redirectFromSearch

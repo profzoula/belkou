@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ReferralCapture } from "@/components/affiliate/ReferralCapture";
+import { MetaPixel } from "@/components/site/MetaPixel";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { MobileBottomNav } from "@/components/site/MobileBottomNav";
 import { defaultDescription, defaultTitle, absoluteUrl } from "@/lib/seo";
@@ -165,6 +166,7 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <ReferralCapture />
+          <MetaPixel />
           <Outlet />
           <MobileBottomNav />
           <Toaster />

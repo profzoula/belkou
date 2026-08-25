@@ -121,16 +121,21 @@ function PrivacyPage() {
 
       <h2 className="text-base font-semibold text-foreground pt-4">Article 6 — Cookies</h2>
       <p>
-        Le site {siteName} utilise uniquement des <strong>cookies techniques</strong> nécessaires au
-        fonctionnement du service :
+        Le site {siteName} utilise des <strong>cookies techniques</strong> nécessaires au
+        fonctionnement du service, ainsi qu&apos;un outil de mesure publicitaire :
       </p>
       <ul className="list-disc list-inside space-y-1">
-        <li>Cookies d'authentification (session administrateur)</li>
+        <li>Cookies d&apos;authentification (session administrateur et compte étudiant)</li>
         <li>Cookies de préférences (thème clair/sombre)</li>
+        <li>
+          <strong>Meta Pixel</strong> (Facebook / Instagram) : mesure des visites, des inscriptions
+          au checkout et des paiements, afin d&apos;améliorer les publicités Meta. Cet outil dépose
+          des cookies tiers gérés par Meta Platforms.
+        </li>
       </ul>
       <p>
-        Nous n'utilisons aucun cookie de suivi, de publicité ou d'analyse comportementale. Aucun
-        cookie tiers n'est déposé à des fins de marketing.
+        Vous pouvez limiter le suivi via les paramètres de votre navigateur ou les contrôles
+        publicitaires de Meta. Pour exercer vos droits, écrivez à {email}.
       </p>
 
       <h2 className="text-base font-semibold text-foreground pt-4">Article 7 — Vos droits</h2>

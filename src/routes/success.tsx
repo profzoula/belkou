@@ -23,7 +23,8 @@ import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from 
 import { seoHead } from "@/lib/seo";
 import { useAuth } from "@/hooks/use-auth";
 import { LEGACY_COURSE_SLUG } from "@/lib/course-access";
-import { parseLiveTicketSlug } from "@/lib/live";
+import { LIVE_TICKET_PRICE_USD, parseLiveTicketSlug } from "@/lib/live";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 import {
   clearRegistrationHandoff,
   emailsMatch,
@@ -172,6 +173,29 @@ function SuccessPage() {
       clearRegistrationHandoff();
     }
   }, [emailMatchesUser, user]);
+
+  useEffect(() => {
+    if (!isPaid) return;
+    const key = `belkou-meta-purchase:${registrationId ?? session_id ?? "paid"}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {
+      /* private browsing */
+    }
+    const value =
+      planId === "vip"
+        ? siteConfig.plans.vip.price
+        : planId === "live"
+          ? LIVE_TICKET_PRICE_USD
+          : siteConfig.plans.premium.price;
+    trackMetaEvent("Purchase", {
+      content_name: planId ?? "belkou",
+      content_type: "product",
+      value,
+      currency: "USD",
+    });
+  }, [isPaid, planId, registrationId, session_id]);
 
   return (
     <div className="min-h-screen bg-background">
