@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Clock3, Star, Users } from "lucide-react";
-import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CourseCatalogCard } from "@/components/course/CourseCatalogCard";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { COURSE_CATEGORIES } from "@/lib/course-categories";
-import { formatCount, isFreeCourse } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { cn } from "@/lib/utils";
 
@@ -12,69 +11,6 @@ type CoursesSectionProps = {
   courses: PublicCourse[];
   maxVisible?: number;
 };
-
-function HomeCourseCard({ course }: { course: PublicCourse }) {
-  const free = isFreeCourse(course);
-
-  return (
-    <Link
-      to="/courses/$slug"
-      params={{ slug: course.slug }}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
-    >
-      <CourseThumbnailBanner
-        thumbnail={course.thumbnail}
-        slug={course.slug}
-        aspectClass="aspect-[16/10]"
-        className="rounded-none border-0"
-        showLabel={false}
-        showIcon={!course.thumbnail.imageUrl}
-      />
-
-      <div className="flex flex-1 flex-col p-3.5 sm:p-4">
-        <p className="truncate text-xs text-muted-foreground">{course.instructor}</p>
-
-        <h3 className="mt-2 line-clamp-2 min-h-[2.5rem] font-display text-sm font-semibold leading-snug text-foreground group-hover:text-primary sm:text-base">
-          {course.title}
-        </h3>
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Clock3 className="size-3.5" aria-hidden />
-            {course.totalDuration}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Users className="size-3.5" aria-hidden />
-            {formatCount(course.studentsCount)} étudiants
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-auto flex items-center justify-between gap-2 border-t border-primary/10 bg-primary/[0.04] px-3.5 py-3 sm:px-4">
-        <div className="min-w-0">
-          {free ? (
-            <span className="text-base font-bold text-success">Gratuit</span>
-          ) : (
-            <div className="flex flex-wrap items-baseline gap-1.5">
-              <span className="text-base font-bold text-primary">
-                ${Number.isInteger(course.price) ? course.price : course.price.toFixed(2)}
-              </span>
-              {course.originalPrice > course.price ? (
-                <span className="text-xs text-muted-foreground line-through">
-                  ${course.originalPrice}
-                </span>
-              ) : null}
-            </div>
-          )}
-        </div>
-        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-foreground">
-          {course.rating.toFixed(1)}
-          <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
-        </span>
-      </div>
-    </Link>
-  );
-}
 
 export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps) {
   const [category, setCategory] = useState<string>("all");
@@ -191,7 +127,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
           >
             {filtered.map((course, index) => (
               <FadeIn key={course.slug} delay={Math.min(index * 0.04, 0.2)}>
-                <HomeCourseCard course={course} />
+                <CourseCatalogCard course={course} />
               </FadeIn>
             ))}
           </div>
