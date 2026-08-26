@@ -85,7 +85,7 @@ function AdminDashboardPage() {
         (overview ? (
           <AdminOverviewTab data={overview} onNavigate={setSection} />
         ) : (
-          <div className="rounded-[20px] border border-border/80 bg-card p-12 text-center text-sm text-muted-foreground shadow-[0_8px_24px_rgb(15_23_42_/_0.04)]">
+          <div className="rounded-[24px] border border-black/5 bg-white p-12 text-center text-sm text-muted-foreground shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] dark:border-border dark:bg-card">
             Chargement du dashboard…
           </div>
         ))}

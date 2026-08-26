@@ -203,9 +203,9 @@ export function Hero({ studentCount }: HeroProps) {
               <HeroSquiggle className="absolute -left-5 top-[18%] z-10 hidden w-20 sm:block lg:-left-8 lg:w-28" />
 
               <img
-                src="/about/Mackenson.png"
+                src="/hero/mackenson-lundi.png"
                 alt={`${siteConfig.founder.name}, fondateur BelKou`}
-                className="relative z-[1] block h-auto max-h-[min(52vh,380px)] w-auto max-w-[min(100%,13.5rem)] object-contain object-bottom mix-blend-multiply dark:mix-blend-screen sm:max-h-[min(60vh,460px)] sm:max-w-[18rem] lg:max-h-[min(78vh,640px)] lg:max-w-[26rem] xl:max-w-[28rem]"
+                className="relative z-[1] block h-auto max-h-[min(52vh,400px)] w-auto max-w-[min(100%,15rem)] object-contain object-bottom sm:max-h-[min(60vh,480px)] sm:max-w-[19rem] lg:max-h-[min(78vh,660px)] lg:max-w-[27rem] xl:max-w-[29rem]"
                 width={900}
                 height={1200}
                 fetchPriority="high"

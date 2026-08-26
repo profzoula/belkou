@@ -35,7 +35,7 @@ const navItems: {
   icon: typeof Users;
   group: "ops" | "catalog" | "finance";
 }[] = [
-  { id: "overview", label: "Dashboard", icon: LayoutDashboard, group: "ops" },
+  { id: "overview", label: "Overview", icon: LayoutDashboard, group: "ops" },
   { id: "inscriptions", label: "Inscriptions", icon: Users, group: "ops" },
   { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
   { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
@@ -72,24 +72,18 @@ export function AdminLayout({
   const activeLabel = navItems.find((item) => item.id === active)?.label ?? "Admin";
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <div className="lg:grid lg:grid-cols-[272px_minmax(0,1fr)]">
-        <aside className="sticky top-0 z-30 flex flex-col border-b border-border/80 bg-card/90 backdrop-blur-xl lg:h-dvh lg:border-b-0 lg:border-r">
-          <div className="border-b border-border/70 px-5 py-5">
-            <div className="flex items-center gap-3">
-              <SiteWordmark size="sm" />
-              <p className="sr-only">Console admin</p>
-            </div>
-            <p className="mt-3 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-              Console admin
-            </p>
+    <div className="min-h-dvh bg-[#eef1f6] text-foreground dark:bg-background">
+      <div className="lg:grid lg:grid-cols-[248px_minmax(0,1fr)]">
+        <aside className="sticky top-0 z-30 flex flex-col border-b border-black/5 bg-white dark:border-border dark:bg-card lg:h-dvh lg:border-b-0 lg:border-r lg:border-black/5">
+          <div className="px-5 py-5">
+            <SiteWordmark size="sm" />
+            <p className="mt-2 text-[11px] font-medium text-muted-foreground">Console admin</p>
           </div>
 
           <nav
-            className="flex gap-1.5 overflow-x-auto p-3 lg:flex-1 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:px-3 lg:py-4"
+            className="flex gap-1.5 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:gap-5 lg:overflow-y-auto lg:pb-4"
             aria-label="Navigation admin"
           >
-            {/* Mobile: flat chips */}
             <div className="flex gap-1.5 lg:hidden">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -101,10 +95,10 @@ export function AdminLayout({
                     onClick={() => onNavigate(item.id)}
                     aria-current={activeState ? "page" : undefined}
                     className={cn(
-                      "flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+                      "flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
                       activeState
-                        ? "bg-primary text-primary-foreground shadow-primary"
-                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+                        ? "bg-foreground text-background"
+                        : "bg-[#f3f5f9] text-muted-foreground hover:bg-[#e8ecf3] hover:text-foreground dark:bg-muted dark:hover:bg-muted/80",
                     )}
                   >
                     <Icon className="size-4 shrink-0" aria-hidden />
@@ -114,11 +108,10 @@ export function AdminLayout({
               })}
             </div>
 
-            {/* Desktop: grouped nav */}
-            <div className="hidden lg:flex lg:flex-col lg:gap-5">
+            <div className="hidden lg:flex lg:flex-col lg:gap-6">
               {groups.map((group) => (
                 <div key={group.id} className="space-y-1">
-                  <p className="px-3 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                  <p className="px-3 text-[10px] font-semibold tracking-[0.14em] text-muted-foreground/80 uppercase">
                     {group.label}
                   </p>
                   <div className="space-y-0.5">
@@ -134,19 +127,22 @@ export function AdminLayout({
                             onClick={() => onNavigate(item.id)}
                             aria-current={activeState ? "page" : undefined}
                             className={cn(
-                              "group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                              "group flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                               activeState
-                                ? "bg-primary text-primary-foreground shadow-[0_8px_20px_rgb(0_70_213_/_0.28)]"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                                ? "bg-[#eef2ff] text-primary dark:bg-primary/15 dark:text-primary"
+                                : "text-muted-foreground hover:bg-[#f3f5f9] hover:text-foreground dark:hover:bg-muted",
                             )}
                           >
-                            <Icon
+                            <span
                               className={cn(
-                                "size-4 shrink-0 transition-transform duration-200",
-                                !activeState && "group-hover:scale-105",
+                                "grid size-8 place-items-center rounded-lg transition-colors",
+                                activeState
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-[#f3f5f9] text-muted-foreground group-hover:bg-white group-hover:text-foreground dark:bg-muted",
                               )}
-                              aria-hidden
-                            />
+                            >
+                              <Icon className="size-4" aria-hidden />
+                            </span>
                             <span className="truncate">{item.label}</span>
                           </button>
                         );
@@ -157,16 +153,16 @@ export function AdminLayout({
             </div>
           </nav>
 
-          <div className="mt-auto hidden space-y-2 border-t border-border/70 p-4 lg:block">
-            <div className="flex items-center justify-between rounded-xl border border-border/80 bg-muted/40 px-2.5 py-2">
-              <span className="px-1 text-xs font-medium text-muted-foreground">Thème</span>
+          <div className="mt-auto hidden space-y-2 border-t border-black/5 p-4 dark:border-border lg:block">
+            <div className="flex items-center justify-between rounded-2xl bg-[#f3f5f9] px-3 py-2.5 dark:bg-muted/50">
+              <span className="text-xs font-medium text-muted-foreground">Thème</span>
               <ThemeToggle />
             </div>
             {onRefresh ? (
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full justify-start rounded-xl"
+                className="w-full justify-start rounded-xl border-black/8 bg-white dark:border-border"
                 onClick={onRefresh}
                 disabled={refreshing}
               >
@@ -194,15 +190,15 @@ export function AdminLayout({
         </aside>
 
         <div className="min-w-0">
-          <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur-xl">
-            <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-20 border-b border-black/5 bg-[#eef1f6]/90 backdrop-blur-xl dark:border-border dark:bg-background/85">
+            <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold tracking-tight">{activeLabel}</p>
-                <p className="hidden text-[11px] text-muted-foreground sm:block">
-                  Console BelKou · opérations
+                <p className="text-[11px] text-muted-foreground">
+                  BelKou <span className="mx-1 text-border">/</span> {activeLabel}
                 </p>
+                <p className="truncate text-base font-semibold tracking-tight">{activeLabel}</p>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2">
                 <div className="lg:hidden">
                   <ThemeToggle />
                 </div>
@@ -210,7 +206,7 @@ export function AdminLayout({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl"
+                    className="rounded-full border-black/8 bg-white dark:border-border dark:bg-card"
                     onClick={onRefresh}
                     disabled={refreshing}
                     aria-label="Actualiser"
@@ -222,7 +218,7 @@ export function AdminLayout({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="rounded-xl lg:hidden"
+                  className="rounded-full lg:hidden"
                   onClick={onLogout}
                   aria-label="Déconnexion"
                 >
@@ -230,9 +226,8 @@ export function AdminLayout({
                 </Button>
                 <Button
                   asChild
-                  variant="soft"
                   size="sm"
-                  className="hidden rounded-xl sm:inline-flex"
+                  className="hidden rounded-full bg-primary px-4 text-primary-foreground shadow-[0_8px_20px_rgb(0_70_213_/_0.28)] hover:bg-primary/90 sm:inline-flex"
                 >
                   <Link to="/">Voir le site</Link>
                 </Button>

@@ -18,15 +18,13 @@ export function AdminPageHeader({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 border-b border-border/70 pb-6 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-4 pb-2 sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >
       <div className="min-w-0 space-y-1.5">
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-primary uppercase">
-          {eyebrow}
-        </p>
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
+        <p className="text-sm text-muted-foreground">{eyebrow}</p>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-[1.85rem]">
           {title}
         </h1>
         {description ? (

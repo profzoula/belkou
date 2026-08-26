@@ -147,13 +147,11 @@ function DashboardPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main id="main-content">
-        <section className="relative overflow-hidden border-b border-border bg-gradient-mesh">
+        <section className="relative overflow-hidden border-b border-black/5 bg-[#eef1f6] dark:border-border dark:bg-background">
           <div className="site-container site-page-top pb-10 pt-8 sm:pb-12">
             <FadeIn>
-              <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-                Espace étudiant
-              </p>
-              <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              <p className="text-sm text-muted-foreground">Espace étudiant</p>
+              <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 Bonjour, {name}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
@@ -163,7 +161,7 @@ function DashboardPage() {
               {quickLinks.map((item) => {
                 const Icon = item.icon;
                 const className =
-                  "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card/90 px-3.5 py-2 text-sm font-semibold text-foreground shadow-sm transition-colors hover:border-primary/30 hover:bg-accent";
+                  "inline-flex cursor-pointer items-center gap-2 rounded-full border border-black/5 bg-white px-3.5 py-2 text-sm font-semibold text-foreground shadow-[0_4px_14px_rgb(15_23_42_/_0.04)] transition-colors hover:bg-[#f8fafc] dark:border-border dark:bg-card dark:hover:bg-muted";
                 if ("route" in item && item.route) {
                   return (
                     <Link key={item.href} to={item.href} className={className}>
@@ -183,18 +181,36 @@ function DashboardPage() {
 
             <FadeIn delay={0.1} className="mt-8 grid gap-3 sm:grid-cols-3">
               {[
-                { label: "Cours inscrits", value: stats?.total ?? "—" },
-                { label: "Accès actifs", value: stats?.active ?? "—" },
-                { label: "Progression moy.", value: stats ? `${stats.avgProgress}%` : "—" },
+                {
+                  label: "Cours inscrits",
+                  value: stats?.total ?? "—",
+                  featured: true,
+                },
+                { label: "Accès actifs", value: stats?.active ?? "—", featured: false },
+                {
+                  label: "Progression moy.",
+                  value: stats ? `${stats.avgProgress}%` : "—",
+                  featured: false,
+                },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-border/80 bg-card/80 px-4 py-4 shadow-sm backdrop-blur"
+                  className={cn(
+                    "rounded-[22px] px-4 py-4 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)]",
+                    item.featured
+                      ? "bg-primary text-primary-foreground shadow-[0_16px_36px_rgb(0_70_213_/_0.28)]"
+                      : "border border-black/5 bg-white dark:border-border dark:bg-card",
+                  )}
                 >
-                  <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
-                  <p className="mt-1 font-display text-2xl font-semibold text-foreground">
-                    {item.value}
+                  <p
+                    className={cn(
+                      "text-xs font-medium",
+                      item.featured ? "text-primary-foreground/75" : "text-muted-foreground",
+                    )}
+                  >
+                    {item.label}
                   </p>
+                  <p className="mt-1 font-display text-2xl font-semibold">{item.value}</p>
                 </div>
               ))}
             </FadeIn>
