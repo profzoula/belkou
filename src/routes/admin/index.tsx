@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AdminCommissionsTab } from "@/components/admin/AdminCommissionsTab";
@@ -19,6 +19,7 @@ import {
   setAdminSessionToken,
 } from "@/lib/admin-session";
 import { seoHead } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/")({
   head: () =>
@@ -36,10 +37,14 @@ function AdminDashboardPage() {
   const overviewFn = useServerFn(getAdminOverview);
   const refreshSessionFn = useServerFn(refreshAdminSession);
   const [section, setSection] = useState<AdminSection>("overview");
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [mounted, setMounted] = useState<Partial<Record<AdminSection, true>>>({
+    overview: true,
+  });
+  const [tabEpoch, setTabEpoch] = useState<Partial<Record<AdminSection, number>>>({});
   const [overview, setOverview] = useState<Awaited<ReturnType<typeof getAdminOverview>> | null>(
     null,
   );
+  const [overviewEpoch, setOverviewEpoch] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,12 +62,27 @@ function AdminDashboardPage() {
   }, [refreshSessionFn]);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     overviewFn()
-      .then(setOverview)
-      .catch(() => navigate({ to: "/admin/login" }))
-      .finally(() => setLoading(false));
-  }, [refreshKey]);
+      .then((data) => {
+        if (!cancelled) setOverview(data);
+      })
+      .catch(() => {
+        if (!cancelled) navigate({ to: "/admin/login" });
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [overviewEpoch, overviewFn, navigate]);
+
+  const goTo = useCallback((next: AdminSection) => {
+    setSection(next);
+    setMounted((current) => (current[next] ? current : { ...current, [next]: true }));
+  }, []);
 
   const logout = async () => {
     clearAdminSessionToken();
@@ -71,47 +91,66 @@ function AdminDashboardPage() {
     navigate({ to: "/admin/login" });
   };
 
-  const refresh = () => setRefreshKey((k) => k + 1);
+  const refresh = () => {
+    if (section === "overview") {
+      setOverviewEpoch((value) => value + 1);
+      return;
+    }
+    setTabEpoch((current) => ({
+      ...current,
+      [section]: (current[section] ?? 0) + 1,
+    }));
+  };
+
+  const panel = (id: AdminSection, node: React.ReactNode) => {
+    if (!mounted[id]) return null;
+    return (
+      <div
+        className={cn(section !== id && "hidden")}
+        aria-hidden={section !== id}
+        inert={section !== id ? true : undefined}
+      >
+        {node}
+      </div>
+    );
+  };
 
   return (
     <AdminLayout
       active={section}
-      onNavigate={setSection}
+      onNavigate={goTo}
       onRefresh={refresh}
-      refreshing={loading}
+      refreshing={loading && section === "overview"}
       onLogout={logout}
     >
-      {section === "overview" &&
-        (overview ? (
-          <AdminOverviewTab data={overview} onNavigate={setSection} />
+      {panel(
+        "overview",
+        overview ? (
+          <AdminOverviewTab data={overview} onNavigate={goTo} />
         ) : (
           <div className="rounded-[24px] border border-black/5 bg-white p-12 text-center text-sm text-muted-foreground shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] dark:border-border dark:bg-card">
             Chargement du dashboard…
           </div>
-        ))}
+        ),
+      )}
 
-      {section === "inscriptions" && (
+      {panel(
+        "inscriptions",
         <AdminRegistrationsTab
-          key={refreshKey}
+          key={tabEpoch.inscriptions ?? 0}
           onStatsLoaded={(stats) =>
             setOverview((current) => (current ? { ...current, stats } : current))
           }
-        />
+        />,
       )}
 
-      {section === "courses" && <AdminCoursesTab key={refreshKey} />}
-
-      {section === "live" && <AdminLiveTab key={refreshKey} />}
-
-      {section === "videos" && <AdminVideosTab key={refreshKey} />}
-
-      {section === "services" && <AdminServicesTab key={refreshKey} />}
-
-      {section === "students" && <AdminStudentsTab key={refreshKey} />}
-
-      {section === "commissions" && <AdminCommissionsTab key={refreshKey} />}
-
-      {section === "settings" && <AdminSettingsTab key={refreshKey} />}
+      {panel("courses", <AdminCoursesTab key={tabEpoch.courses ?? 0} />)}
+      {panel("live", <AdminLiveTab key={tabEpoch.live ?? 0} />)}
+      {panel("videos", <AdminVideosTab key={tabEpoch.videos ?? 0} />)}
+      {panel("services", <AdminServicesTab key={tabEpoch.services ?? 0} />)}
+      {panel("students", <AdminStudentsTab key={tabEpoch.students ?? 0} />)}
+      {panel("commissions", <AdminCommissionsTab key={tabEpoch.commissions ?? 0} />)}
+      {panel("settings", <AdminSettingsTab key={tabEpoch.settings ?? 0} />)}
     </AdminLayout>
   );
 }

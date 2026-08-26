@@ -980,6 +980,30 @@ export type AffiliateAdminRow = {
   withdrawalPendingUsd: number;
 };
 
+/** Lightweight counts for the admin overview — avoids loading every affiliate's stats. */
+export async function getAdminAffiliateSummary(): Promise<{
+  affiliateCount: number;
+  pendingWithdrawals: number;
+}> {
+  const sb = getSupabaseAdmin();
+  if (!sb || !(await checkAffiliateTables(sb))) {
+    return { affiliateCount: 0, pendingWithdrawals: 0 };
+  }
+
+  const [affiliatesRes, pendingRes] = await Promise.all([
+    sb.from("affiliates").select("id", { count: "exact", head: true }),
+    sb
+      .from("affiliate_withdrawals")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
+  ]);
+
+  return {
+    affiliateCount: affiliatesRes.count ?? 0,
+    pendingWithdrawals: pendingRes.error ? 0 : (pendingRes.count ?? 0),
+  };
+}
+
 export async function getAdminAffiliateOverview(): Promise<{
   affiliates: AffiliateAdminRow[];
   withdrawals: WithdrawalRecord[];
@@ -1006,56 +1030,26 @@ export async function getAdminAffiliateOverview(): Promise<{
     }
   }
 
-  if (sb) {
-    const { data: regs } = await sb
-      .from("registrations")
-      .select("referral_code")
-      .not("referral_code", "is", null);
-
-    const codes = new Set<string>();
-    for (const row of regs ?? []) {
-      if (row.referral_code) codes.add(normalizeCode(String(row.referral_code)));
-    }
-
-    for (const code of codes) {
-      if (byCode.has(code)) continue;
-      const affiliate = await getAffiliateByCode(code);
-      byCode.set(code, {
-        userId: affiliate?.user_id ?? "",
-        email: affiliate?.email ?? "—",
-        fullName: affiliate?.full_name ?? "—",
-        code,
-        referrals: 0,
-        pending: 0,
-        earned: 0,
-        balanceUsd: 0,
-        withdrawalPaidUsd: 0,
-        withdrawalPendingUsd: 0,
-      });
-    }
-  }
-
-  const affiliates: AffiliateAdminRow[] = [];
-
-  for (const row of byCode.values()) {
-    const affiliateRecord = row.userId ? await getAffiliateByUserId(row.userId) : null;
-    const statsId = affiliateRecord?.id ?? row.userId ?? row.code;
-    const stats = await getAffiliateStats(statsId, row.code, row.userId || undefined);
-
-    affiliates.push({
-      ...row,
-      referrals: stats.referrals,
-      pending: stats.pending,
-      earned: stats.earned,
-      balanceUsd: stats.balanceUsd,
-      withdrawalPaidUsd: stats.withdrawalPaidUsd,
-      withdrawalPendingUsd: stats.withdrawalPendingUsd,
-    });
-  }
+  // Stats + withdrawals in parallel (was a sequential N+1 per affiliate).
+  const [affiliates, withdrawals] = await Promise.all([
+    Promise.all(
+      [...byCode.values()].map(async (row) => {
+        const stats = await getAffiliateStats(row.userId || row.code, row.code, row.userId || undefined);
+        return {
+          ...row,
+          referrals: stats.referrals,
+          pending: stats.pending,
+          earned: stats.earned,
+          balanceUsd: stats.balanceUsd,
+          withdrawalPaidUsd: stats.withdrawalPaidUsd,
+          withdrawalPendingUsd: stats.withdrawalPendingUsd,
+        } satisfies AffiliateAdminRow;
+      }),
+    ),
+    listAllWithdrawals(),
+  ]);
 
   affiliates.sort((a, b) => b.earned - a.earned || b.referrals - a.referrals);
-
-  const withdrawals = await listAllWithdrawals();
 
   return { affiliates, withdrawals };
 }

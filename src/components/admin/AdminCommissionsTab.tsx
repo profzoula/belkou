@@ -12,6 +12,7 @@ import {
   AFFILIATE_SIGNUP_COMMISSION_USD,
   formatAffiliateUsd,
 } from "@/lib/affiliate-config";
+import { cn } from "@/lib/utils";
 
 type Overview = Awaited<ReturnType<typeof getAdminAffiliateOverview>>;
 
@@ -22,8 +23,8 @@ export function AdminCommissionsTab() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [data, setData] = useState<Overview | null>(null);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const result = await overviewFn();
       setData(result);
@@ -35,7 +36,7 @@ export function AdminCommissionsTab() {
   };
 
   useEffect(() => {
-    load();
+    void load();
   }, []);
 
   const processWithdrawal = async (
@@ -49,7 +50,7 @@ export function AdminCommissionsTab() {
     try {
       await processFn({ data: { withdrawalId, action } });
       toast.success(action === "paid" ? "Retrait marqué comme payé" : "Demande rejetée");
-      await load();
+      await load(true);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Action impossible");
     } finally {
@@ -57,10 +58,18 @@ export function AdminCommissionsTab() {
     }
   };
 
-  if (loading || !data) {
+  if (loading && !data) {
     return (
-      <div className="surface rounded-2xl p-10 text-center text-sm text-muted-foreground">
+      <div className="rounded-[24px] border border-black/5 bg-white p-10 text-center text-sm text-muted-foreground shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] dark:border-border dark:bg-card">
         Chargement des commissions...
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-[24px] border border-black/5 bg-white p-10 text-center text-sm text-muted-foreground shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] dark:border-border dark:bg-card">
+        Impossible de charger les commissions.
       </div>
     );
   }
@@ -78,8 +87,14 @@ export function AdminCommissionsTab() {
         title="Revenus affiliés"
         description={`$${AFFILIATE_SIGNUP_COMMISSION_USD} / compte · $${AFFILIATE_COMMISSION_USD} / inscription payée · retrait min. $${AFFILIATE_MIN_WITHDRAWAL_USD}`}
         actions={
-          <Button variant="outline" size="sm" className="rounded-xl" onClick={load}>
-            <RefreshCw className="h-4 w-4" /> Actualiser
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            onClick={() => void load(true)}
+            disabled={loading}
+          >
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> Actualiser
           </Button>
         }
       />

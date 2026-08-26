@@ -155,11 +155,14 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
   const db = await getDb();
   const { getResolvedCourses, getServiceBookings } = await import("@/server/site-content");
   const { lessonHasVideo } = await import("@/lib/courses");
-  const [registrations, stats, courses, serviceBookings] = await Promise.all([
+  const [registrations, stats, courses, serviceBookings, affiliateSummary] = await Promise.all([
     listRegistrations(db),
     getRegistrationStats(db),
     getResolvedCourses(),
     getServiceBookings(),
+    import("@/server/affiliates")
+      .then((mod) => mod.getAdminAffiliateSummary())
+      .catch(() => ({ affiliateCount: 0, pendingWithdrawals: 0 })),
   ]);
 
   let totalLessons = 0;
@@ -188,16 +191,8 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
     };
   });
 
-  let affiliateCount = 0;
-  let pendingWithdrawals = 0;
-  try {
-    const { getAdminAffiliateOverview } = await import("@/server/affiliates");
-    const affiliateData = await getAdminAffiliateOverview();
-    affiliateCount = affiliateData.affiliates.length;
-    pendingWithdrawals = affiliateData.withdrawals.filter((w) => w.status === "pending").length;
-  } catch {
-    // Affiliate tables optional
-  }
+  const affiliateCount = affiliateSummary.affiliateCount;
+  const pendingWithdrawals = affiliateSummary.pendingWithdrawals;
 
   return {
     stats,
