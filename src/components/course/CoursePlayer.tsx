@@ -28,6 +28,8 @@ import {
 } from "@/lib/courses";
 import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseIcon } from "@/lib/course-icons";
+import { isExamEbookLesson } from "@/lib/exam-ebooks";
+import { ExamEbookViewer } from "@/components/course/ExamEbookViewer";
 import {
   courseStartsAtLabel,
   formatScheduledPublishLabel,
@@ -218,6 +220,17 @@ function CourseVideoArea({
 
   if (lesson.type === "article") {
     if (!locked) {
+      if (isExamEbookLesson(course.slug, lesson.id)) {
+        return (
+          <ExamEbookViewer
+            courseSlug={course.slug}
+            title={lesson.title}
+            variant="embedded"
+            className="min-h-[70vh] border-b border-border"
+          />
+        );
+      }
+
       const articleContent = lesson.content?.trim() || "Contenu en cours de rédaction.";
       const sessions = parseArticleSessions(articleContent);
 

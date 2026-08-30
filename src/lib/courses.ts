@@ -1,5 +1,6 @@
-import { Bot, type LucideIcon } from "lucide-react";
+import { Award, Bot, type LucideIcon } from "lucide-react";
 import type { CourseResource } from "@/lib/course-resources";
+import { EXAM_EBOOK_LESSON_ID } from "@/lib/exam-ebooks";
 import { siteConfig } from "@/lib/site-config";
 
 export type CourseLesson = {
@@ -79,6 +80,7 @@ export function getCourseDisplayLanguage(language?: string): string {
 
 const COURSE_STUDENT_DISPLAY_BASE: Record<string, number> = {
   "apps-ia-cursor-claude": 1247,
+  "comptia-a-plus-core-1": 312,
   "koman-byen-metrize-obs-studio": 831,
   "koman-enstale-e-aktive-microsoft-office-365": 417,
 };
@@ -102,7 +104,7 @@ export function getDisplayedCourseStudentsCount(
 }
 
 /** Slugs hardcodés — les autres cours se créent via l'admin. */
-export const BASE_COURSE_SLUGS = ["apps-ia-cursor-claude"] as const;
+export const BASE_COURSE_SLUGS = ["apps-ia-cursor-claude", "comptia-a-plus-core-1"] as const;
 
 export function isBaseCourseSlug(slug: string): boolean {
   return (BASE_COURSE_SLUGS as readonly string[]).includes(slug);
@@ -214,6 +216,83 @@ export const courses: Course[] = [
             type: "article",
             content:
               "## Checklist de lancement\n\nAvant de mettre votre app en ligne, vérifiez chaque point ci-dessous.\n\n### Domaine & HTTPS\nConfigurez votre nom de domaine et activez HTTPS (Cloudflare ou hébergeur).\n\n### Variables d'environnement\nVérifiez que toutes les clés API sont définies en production — jamais dans le code source.\n\n### Paiement & emails\nTestez un achat réel ou en mode test, et confirmez la réception des emails transactionnels.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "comptia-a-plus-core-1",
+    title: "CompTIA A+ Core 1 (220-1101) — Banque de questions",
+    instructor: "BelKou, Mackenson Lundi",
+    rating: 4.9,
+    ratingsCount: 12,
+    studentsCount: 312,
+    totalDuration: "700+ questions",
+    lastUpdated: "août 2026",
+    language: DEFAULT_COURSE_LANGUAGE,
+    captions: false,
+    skillLevel: "Intermédiaire",
+    price: 25,
+    originalPrice: 49,
+    bestseller: false,
+    plan: "premium",
+    description:
+      "Préparez l'examen CompTIA A+ Core 1 (220-1101) avec une banque de 700+ questions structurées, réponses et explications. Travaillez par domaine : matériel, réseaux, mobile, virtualisation et cas réels.",
+    whatYouLearn: [
+      "Réviser les domaines Core 1 (220-1101) avec des QCM ciblés",
+      "Masquer / afficher les réponses pour s'entraîner comme à l'examen",
+      "Comprendre chaque réponse grâce aux explications détaillées",
+      "Chercher une notion et imprimer / exporter en PDF",
+    ],
+    categories: ["certification", "ebook"],
+    published: true,
+    thumbnail: {
+      gradient: "from-slate-900 via-blue-900 to-red-900",
+      icon: Award,
+      label: "CompTIA A+ Core 1",
+    },
+    sections: [
+      {
+        id: "intro",
+        title: "Introduction",
+        lessons: [
+          {
+            id: "intro-welcome",
+            title: "Comment utiliser cette banque",
+            duration: "5min",
+            type: "article",
+            preview: true,
+            content: `## Bienvenue
+
+Cette banque de questions vous aide à préparer **CompTIA A+ Core 1 (220-1101)**.
+
+### Contenu
+- **700+ questions** à choix multiple
+- Réponses et explications
+- 7 parties : matériel, dépannage, réseaux, mobile, cloud, scénarios avancés, synthèse
+
+### Comment étudier
+1. Ouvrez la leçon **Banque de questions**
+2. Travaillez une partie à la fois
+3. Masquez les réponses, puis vérifiez l'explication
+4. Utilisez la recherche pour réviser une notion précise
+
+Après achat, l'accès est à vie depuis votre dashboard.`,
+          },
+        ],
+      },
+      {
+        id: "exam-bank",
+        title: "Entraînement",
+        lessons: [
+          {
+            id: EXAM_EBOOK_LESSON_ID,
+            title: "Banque de questions A+ Core 1",
+            duration: "illimité",
+            type: "article",
+            content:
+              "Ouvrez la banque interactive pour réviser les 700+ questions CompTIA A+ Core 1.",
           },
         ],
       },

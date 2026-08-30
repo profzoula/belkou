@@ -15,6 +15,7 @@ export const DEFAULT_COURSE_CATEGORIES: CourseCategory[] = [
   { id: "facebook-ads", label: "Facebook Ads" },
   { id: "powershell-cmd", label: "Powershell & CMD" },
   { id: "ebook", label: "Ebook" },
+  { id: "certification", label: "Certification" },
 ];
 
 /** @deprecated Prefer getResolvedCourseCategories() / DEFAULT_COURSE_CATEGORIES */

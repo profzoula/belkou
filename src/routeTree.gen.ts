@@ -36,6 +36,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ForumCourseSlugIndexRouteImport } from './routes/forum/$courseSlug/index'
 import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$courseSlug/$postId'
 import { Route as CoursesSlugLearnRouteImport } from './routes/courses/$slug/learn'
+import { Route as CoursesSlugEbookRouteImport } from './routes/courses/$slug/ebook'
 import { Route as ApiSquareWebhookRouteImport } from './routes/api/square/webhook'
 import { Route as ApiAdminUploadVideoRouteImport } from './routes/api/admin/upload-video'
 
@@ -174,6 +175,11 @@ const CoursesSlugLearnRoute = CoursesSlugLearnRouteImport.update({
   path: '/learn',
   getParentRoute: () => CoursesSlugRoute,
 } as any)
+const CoursesSlugEbookRoute = CoursesSlugEbookRouteImport.update({
+  id: '/ebook',
+  path: '/ebook',
+  getParentRoute: () => CoursesSlugRoute,
+} as any)
 const ApiSquareWebhookRoute = ApiSquareWebhookRouteImport.update({
   id: '/api/square/webhook',
   path: '/api/square/webhook',
@@ -212,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
+  '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
+  '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug': typeof ForumCourseSlugIndexRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
+  '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
@@ -308,6 +317,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/api/admin/upload-video'
     | '/api/square/webhook'
+    | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug/'
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/api/admin/upload-video'
     | '/api/square/webhook'
+    | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/api/admin/upload-video'
     | '/api/square/webhook'
+    | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug/'
@@ -597,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugLearnRouteImport
       parentRoute: typeof CoursesSlugRoute
     }
+    '/courses/$slug/ebook': {
+      id: '/courses/$slug/ebook'
+      path: '/ebook'
+      fullPath: '/courses/$slug/ebook'
+      preLoaderRoute: typeof CoursesSlugEbookRouteImport
+      parentRoute: typeof CoursesSlugRoute
+    }
     '/api/square/webhook': {
       id: '/api/square/webhook'
       path: '/api/square/webhook'
@@ -615,10 +634,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface CoursesSlugRouteChildren {
+  CoursesSlugEbookRoute: typeof CoursesSlugEbookRoute
   CoursesSlugLearnRoute: typeof CoursesSlugLearnRoute
 }
 
 const CoursesSlugRouteChildren: CoursesSlugRouteChildren = {
+  CoursesSlugEbookRoute: CoursesSlugEbookRoute,
   CoursesSlugLearnRoute: CoursesSlugLearnRoute,
 }
 
