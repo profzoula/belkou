@@ -29,7 +29,9 @@ import {
 import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseIcon } from "@/lib/course-icons";
 import { isExamEbookLesson } from "@/lib/exam-ebooks";
+import { siteConfig } from "@/lib/site-config";
 import { ExamEbookViewer } from "@/components/course/ExamEbookViewer";
+import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import {
   courseStartsAtLabel,
   formatScheduledPublishLabel,
@@ -683,14 +685,35 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
   );
 
   const getLockState = useCallback(
-    (lesson: CourseLesson) =>
-      getLessonLockState({
+    (lesson: CourseLesson) => {
+      // Paid (or founder) users get the question bank immediately — no sequential gate.
+      if (isExamEbookLesson(course.slug, lesson.id)) {
+        const email = session?.user?.email
+          ? normalizeRegistrationEmail(session.user.email)
+          : "";
+        const isFounder =
+          Boolean(email) && email === siteConfig.contactEmail.trim().toLowerCase();
+        if (hasPaidAccess || isFounder) {
+          return { locked: false, reason: "none" as const };
+        }
+      }
+
+      return getLessonLockState({
         lesson,
         course: activeCourse,
         hasPaidAccess,
         ...(hasPaidAccess && contentLive ? { completedLessonIds, orderedLessonIds } : {}),
-      }),
-    [activeCourse, completedLessonIds, contentLive, hasPaidAccess, orderedLessonIds],
+      });
+    },
+    [
+      activeCourse,
+      completedLessonIds,
+      contentLive,
+      course.slug,
+      hasPaidAccess,
+      orderedLessonIds,
+      session?.user?.email,
+    ],
   );
 
   const resolveLessonId = (lessonId?: string) => {

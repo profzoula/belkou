@@ -44,27 +44,23 @@ function CourseEbookPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#0e2744]">
-      <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2 sm:px-4">
-        <Button
-          asChild
-          size="sm"
-          variant="ghost"
-          className="text-white hover:bg-white/10 hover:text-white"
-        >
-          <Link to="/courses/$slug/learn" params={{ slug }} search={{ lesson: "banque-questions" }}>
-            <ArrowLeft className="size-4" aria-hidden />
-            Leçons
-          </Link>
-        </Button>
-        <p className="truncate text-sm text-white/80">{course.title}</p>
+    <div className="min-h-dvh bg-[#f4f6f9]">
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5 sm:px-6 lg:px-8">
+          <Button asChild size="sm" variant="ghost" className="rounded-xl">
+            <Link
+              to="/courses/$slug/learn"
+              params={{ slug }}
+              search={{ lesson: "banque-questions" }}
+            >
+              <ArrowLeft className="size-4" aria-hidden />
+              Leçons
+            </Link>
+          </Button>
+          <p className="truncate text-sm text-muted-foreground">{course.title}</p>
+        </div>
       </div>
-      <ExamEbookViewer
-        courseSlug={slug}
-        title={ebook.title}
-        variant="page"
-        className="min-h-0 flex-1"
-      />
+      <ExamEbookViewer courseSlug={slug} title={ebook.title} variant="page" />
     </div>
   );
 }

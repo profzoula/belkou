@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { BookOpenCheck, Loader2, Maximize2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { ExamPracticeQuiz } from "@/components/course/ExamPracticeQuiz";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { getExamEbookHtml } from "@/lib/fns/exam-ebook";
+import type { ExamBankPayload } from "@/lib/exam-ebooks";
+import { getExamEbookAccess } from "@/lib/fns/exam-ebook";
 import { cn } from "@/lib/utils";
 
 type ExamEbookViewerProps = {
   courseSlug: string;
   title?: string;
-  /** Fill the learn player pane vs a dedicated page */
   variant?: "embedded" | "page";
   className?: string;
 };
@@ -22,8 +23,8 @@ export function ExamEbookViewer({
   className,
 }: ExamEbookViewerProps) {
   const { session, loading: authLoading } = useAuth();
-  const loadFn = useServerFn(getExamEbookHtml);
-  const [html, setHtml] = useState<string | null>(null);
+  const loadFn = useServerFn(getExamEbookAccess);
+  const [bank, setBank] = useState<ExamBankPayload | null>(null);
   const [ebookTitle, setEbookTitle] = useState(title ?? "Banque de questions");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,15 +44,26 @@ export function ExamEbookViewer({
       setLoading(true);
       setError(null);
       try {
-        const result = await loadFn({
+        const access = await loadFn({
           data: { courseSlug, accessToken: token },
         });
         if (cancelled) return;
-        setHtml(result.html);
-        setEbookTitle(result.title);
+        setEbookTitle(access.title);
+
+        const res = await fetch(access.url, { credentials: "same-origin" });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(body?.error ?? "Chargement des questions impossible");
+        }
+        const data = (await res.json()) as ExamBankPayload;
+        if (cancelled) return;
+        if (!data?.questions?.length) {
+          throw new Error("Aucune question disponible");
+        }
+        setBank(data);
       } catch (err) {
         if (cancelled) return;
-        setHtml(null);
+        setBank(null);
         setError(err instanceof Error ? err.message : "Chargement impossible");
       } finally {
         if (!cancelled) setLoading(false);
@@ -68,22 +80,22 @@ export function ExamEbookViewer({
     return (
       <div
         className={cn(
-          "flex min-h-[360px] flex-col items-center justify-center gap-3 bg-muted/20 text-muted-foreground",
+          "flex min-h-[360px] flex-col items-center justify-center gap-3 bg-[#f4f6f9] text-muted-foreground",
           variant === "page" && "min-h-[70vh]",
           className,
         )}
       >
         <Loader2 className="size-8 animate-spin" aria-hidden />
-        <p className="text-sm">Chargement de la banque de questions…</p>
+        <p className="text-sm">Chargement des questions…</p>
       </div>
     );
   }
 
-  if (error || !html) {
+  if (error || !bank) {
     return (
       <div
         className={cn(
-          "flex min-h-[360px] flex-col items-center justify-center gap-4 px-6 text-center",
+          "flex min-h-[360px] flex-col items-center justify-center gap-4 bg-[#f4f6f9] px-6 text-center",
           variant === "page" && "min-h-[70vh]",
           className,
         )}
@@ -91,9 +103,7 @@ export function ExamEbookViewer({
         <BookOpenCheck className="size-10 text-muted-foreground" aria-hidden />
         <div className="max-w-md space-y-2">
           <p className="font-semibold text-foreground">{ebookTitle}</p>
-          <p className="text-sm text-muted-foreground">
-            {error ?? "Contenu indisponible."}
-          </p>
+          <p className="text-sm text-muted-foreground">{error ?? "Contenu indisponible."}</p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           {!session ? (
@@ -119,47 +129,18 @@ export function ExamEbookViewer({
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 flex-col bg-[#0e2744]", className)}>
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 px-3 py-2 text-white sm:px-4">
-        <p className="truncate text-sm font-medium">{ebookTitle}</p>
-        {variant === "embedded" ? (
-          <Button
-            asChild
-            size="sm"
-            variant="ghost"
-            className="shrink-0 text-white hover:bg-white/10 hover:text-white"
-          >
+    <div className={cn("flex min-h-0 flex-col", className)}>
+      {variant === "embedded" ? (
+        <div className="flex shrink-0 items-center justify-end border-b border-border bg-white px-3 py-2">
+          <Button asChild size="sm" variant="outline" className="rounded-xl">
             <Link to="/courses/$slug/ebook" params={{ slug: courseSlug }}>
               <Maximize2 className="size-4" aria-hidden />
               Plein écran
             </Link>
           </Button>
-        ) : (
-          <Button
-            asChild
-            size="sm"
-            variant="ghost"
-            className="shrink-0 text-white hover:bg-white/10 hover:text-white"
-          >
-            <Link
-              to="/courses/$slug/learn"
-              params={{ slug: courseSlug }}
-              search={{ lesson: "banque-questions" }}
-            >
-              Retour aux leçons
-            </Link>
-          </Button>
-        )}
-      </div>
-      <iframe
-        title={ebookTitle}
-        srcDoc={html}
-        className={cn(
-          "w-full flex-1 border-0 bg-[#f6f1e8]",
-          variant === "page" ? "min-h-[calc(100dvh-3.25rem)]" : "min-h-[70vh]",
-        )}
-        sandbox="allow-scripts allow-same-origin allow-modals allow-popups"
-      />
+        </div>
+      ) : null}
+      <ExamPracticeQuiz bank={bank} className="min-h-0 flex-1" />
     </div>
   );
 }

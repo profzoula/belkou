@@ -38,6 +38,7 @@ import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$cours
 import { Route as CoursesSlugLearnRouteImport } from './routes/courses/$slug/learn'
 import { Route as CoursesSlugEbookRouteImport } from './routes/courses/$slug/ebook'
 import { Route as ApiSquareWebhookRouteImport } from './routes/api/square/webhook'
+import { Route as ApiExamsSlugRouteImport } from './routes/api/exams/$slug'
 import { Route as ApiAdminUploadVideoRouteImport } from './routes/api/admin/upload-video'
 
 const SuccessRoute = SuccessRouteImport.update({
@@ -185,6 +186,11 @@ const ApiSquareWebhookRoute = ApiSquareWebhookRouteImport.update({
   path: '/api/square/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiExamsSlugRoute = ApiExamsSlugRouteImport.update({
+  id: '/api/exams/$slug',
+  path: '/api/exams/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminUploadVideoRoute = ApiAdminUploadVideoRouteImport.update({
   id: '/api/admin/upload-video',
   path: '/api/admin/upload-video',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/live/': typeof LiveIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
+  '/api/exams/$slug': typeof ApiExamsSlugRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/live': typeof LiveIndexRoute
   '/services': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
+  '/api/exams/$slug': typeof ApiExamsSlugRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/live/': typeof LiveIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
+  '/api/exams/$slug': typeof ApiExamsSlugRoute
   '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/ebook': typeof CoursesSlugEbookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/live/'
     | '/services/'
     | '/api/admin/upload-video'
+    | '/api/exams/$slug'
     | '/api/square/webhook'
     | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/live'
     | '/services'
     | '/api/admin/upload-video'
+    | '/api/exams/$slug'
     | '/api/square/webhook'
     | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/live/'
     | '/services/'
     | '/api/admin/upload-video'
+    | '/api/exams/$slug'
     | '/api/square/webhook'
     | '/courses/$slug/ebook'
     | '/courses/$slug/learn'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   LiveIndexRoute: typeof LiveIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   ApiAdminUploadVideoRoute: typeof ApiAdminUploadVideoRoute
+  ApiExamsSlugRoute: typeof ApiExamsSlugRoute
   ApiSquareWebhookRoute: typeof ApiSquareWebhookRoute
   ForumCourseSlugPostIdRoute: typeof ForumCourseSlugPostIdRoute
   ForumCourseSlugIndexRoute: typeof ForumCourseSlugIndexRoute
@@ -623,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSquareWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/exams/$slug': {
+      id: '/api/exams/$slug'
+      path: '/api/exams/$slug'
+      fullPath: '/api/exams/$slug'
+      preLoaderRoute: typeof ApiExamsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/upload-video': {
       id: '/api/admin/upload-video'
       path: '/api/admin/upload-video'
@@ -673,6 +693,7 @@ const rootRouteChildren: RootRouteChildren = {
   LiveIndexRoute: LiveIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   ApiAdminUploadVideoRoute: ApiAdminUploadVideoRoute,
+  ApiExamsSlugRoute: ApiExamsSlugRoute,
   ApiSquareWebhookRoute: ApiSquareWebhookRoute,
   ForumCourseSlugPostIdRoute: ForumCourseSlugPostIdRoute,
   ForumCourseSlugIndexRoute: ForumCourseSlugIndexRoute,
