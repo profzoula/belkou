@@ -98,6 +98,11 @@ export async function loadStudentEnrollmentsWithPlan(
     }
   } else {
     for (const registration of registrations) {
+      // Unpaid checkouts stay visible as "En attente", but only paid / VIP
+      // rows should appear once the student actually owns the course.
+      if (registration.payment_status !== "paid" && registration.payment_status !== "pending" && registration.payment_status !== "manual_pending") {
+        continue;
+      }
       const key = registrationCourseKey(registration.course_slug);
       if (key === VIP_MEMBERSHIP_SLUG || key === STANDALONE_LIVE_SLUG) continue;
       courseSlugs.add(key);

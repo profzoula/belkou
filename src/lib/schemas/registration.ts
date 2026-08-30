@@ -8,8 +8,9 @@ export const registrationSchema = z.object({
   full_name: z.string().trim().min(2, "Nom trop court").max(100),
   email: z.string().trim().email("Email invalide").max(255).transform(normalizeRegistrationEmail),
   whatsapp: z.string().trim().min(6, "Numéro invalide").max(30),
-  country: z.string().min(1, "Choisissez un pays"),
-  level: z.string().min(1, "Choisissez un niveau"),
+  /** Kept for DB compatibility; checkout no longer asks the student. */
+  country: z.string().trim().min(1).default("HT"),
+  level: z.string().trim().min(1).default("beginner"),
   plan: z.enum(["premium", "vip", "live"]),
   course_slug: z.string().trim().min(1).optional(),
   referral_code: z

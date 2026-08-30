@@ -260,11 +260,9 @@ function orderToCheckoutSession(
     order.total_money?.currency ??
     "USD";
 
-  const paid =
-    opts?.paid === true ||
-    opts?.payment?.status === "COMPLETED" ||
-    order.state === "COMPLETED" ||
-    (order.tenders?.length ?? 0) > 0;
+  // Only COMPLETED Square payments unlock access. Never treat open orders,
+  // tenders alone, or non-completed payment statuses as paid.
+  const paid = opts?.paid === true || opts?.payment?.status === "COMPLETED";
 
   return {
     id: order.id ?? "",
@@ -307,9 +305,7 @@ export async function getCheckoutSession(orderId: string): Promise<SquareCheckou
       },
     );
     payment =
-      paymentsRes.payments?.find((p) => p.status === "COMPLETED") ??
-      paymentsRes.payments?.[0] ??
-      null;
+      paymentsRes.payments?.find((p) => p.status === "COMPLETED") ?? null;
   } catch {
     /* order alone may already show tenders */
   }

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import {
   BookOpen,
   Briefcase,
+  Crown,
   DollarSign,
   ExternalLink,
   Film,
@@ -26,6 +27,7 @@ export type AdminSection =
   | "services"
   | "students"
   | "inscriptions"
+  | "vip"
   | "commissions"
   | "settings";
 
@@ -37,6 +39,7 @@ const navItems: {
 }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, group: "ops" },
   { id: "inscriptions", label: "Inscriptions", icon: Users, group: "ops" },
+  { id: "vip", label: "VIP", icon: Crown, group: "ops" },
   { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
   { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
   { id: "live", label: "Live", icon: Radio, group: "catalog" },

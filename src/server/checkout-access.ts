@@ -154,7 +154,11 @@ export async function reconcilePendingCheckoutPaymentsForEmail(
       const session = await getCheckoutSession(row.stripe_session_id);
       if (!session || !isCheckoutPaid(session)) continue;
 
-      const result = await grantAccessFromCheckoutSession(db, session);
+      const result = await grantAccessFromCheckoutSession(db, session, {
+        requireRegistrationMetadata: true,
+        allowEmailCourseFallback: false,
+        requireAmountAndCurrencyMatch: true,
+      });
       if (result && !result.alreadyPaid) healed += 1;
     } catch (error) {
       console.warn("[BelKou] Checkout reconcile failed for", row.id, error);

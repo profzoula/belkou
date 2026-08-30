@@ -1,10 +1,43 @@
 import { getServerEnvResolved } from "@/server/env";
+import { isVibeCodingCourseSlug, siteConfig } from "@/lib/site-config";
 
 type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
 };
+
+/** Absolute PNG — SVG is unreliable in Gmail/Outlook. */
+function emailLogoUrl(): string {
+  const base = siteConfig.siteUrl.replace(/\/$/, "");
+  return `${base}/favicon/android-chrome-192x192.png`;
+}
+
+/** Shared branded shell for all BelKou transactional emails. */
+function emailShell(bodyHtml: string): string {
+  const home = siteConfig.siteUrl.replace(/\/$/, "");
+  const logo = emailLogoUrl();
+  return `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0f172a;line-height:1.5;">
+      <div style="margin:0 0 28px;padding-bottom:20px;border-bottom:1px solid #e2e8f0;">
+        <a href="${home}" style="text-decoration:none;display:inline-block;">
+          <img
+            src="${logo}"
+            alt="BelKou"
+            width="48"
+            height="48"
+            style="display:block;border:0;border-radius:12px;outline:none;"
+          />
+        </a>
+      </div>
+      ${bodyHtml}
+      <p style="margin:32px 0 0;padding-top:20px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;line-height:1.45;">
+        BelKou ·
+        <a href="${home}" style="color:#0046d5;text-decoration:none;">belkou.online</a>
+      </p>
+    </div>
+  `;
+}
 
 export type PaymentInvoiceDetails = {
   invoiceId: string;
@@ -124,20 +157,27 @@ export function registrationPendingEmail(params: {
   registrationId: string;
   checkoutUrl?: string | null;
   manualPaymentHtml: string;
+  courseSlug?: string | null;
+  /** Product label shown in the email (course title, VIP, live…). */
+  label?: string;
 }) {
+  const productLabel = (params.label?.trim() || params.plan).trim();
+  const priceLabel = Number(params.price).toFixed(2).replace(/\.00$/, "");
   const paymentBlock = params.checkoutUrl
-    ? `<p><a href="${params.checkoutUrl}" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Payer maintenant — $${params.price}</a></p>`
-    : `<div style="background:#f4f4f5;padding:16px;border-radius:8px;margin:16px 0;">${params.manualPaymentHtml}</div>`;
+    ? `<p style="margin:24px 0;"><a href="${params.checkoutUrl}" style="display:inline-block;background:#0046d5;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Payer avec Square — $${priceLabel}</a></p>`
+    : `<div style="background:#f8fafc;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;">${params.manualPaymentHtml}</div>`;
 
-  return `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
-      <h1 style="font-size:22px;">Bienvenue sur BelKou, ${params.name} !</h1>
-      <p>Nous avons bien reçu votre inscription pour le plan <strong>${params.plan.toUpperCase()}</strong> ($${params.price} USD).</p>
+  const whatsappHint = isVibeCodingCourseSlug(params.courseSlug)
+    ? `<p style="margin:0 0 12px;">Après le paiement, vous recevrez le lien du groupe WhatsApp et les détails sur la formation.</p>`
+    : `<p style="margin:0 0 12px;">Après le paiement, connectez-vous avec le même email pour accéder à votre cours dans BelKou.</p>`;
+
+  return emailShell(`
+      <h1 style="font-size:22px;font-weight:600;margin:0 0 12px;letter-spacing:-0.02em;">Bienvenue sur BelKou, ${params.name} !</h1>
+      <p style="margin:0 0 12px;">Nous avons bien reçu votre inscription pour <strong>${productLabel}</strong> ($${priceLabel} USD).</p>
       ${paymentBlock}
-      <p>Après le paiement, vous recevrez le lien du groupe WhatsApp et les détails sur la formation.</p>
-      <p style="color:#666;font-size:13px;">ID d'inscription : ${params.registrationId}</p>
-    </div>
-  `;
+      ${whatsappHint}
+      <p style="color:#64748b;font-size:13px;margin:0;">ID d'inscription : ${params.registrationId}</p>
+  `);
 }
 
 function formatCurrency(amount: number, currency = "USD"): string {
@@ -221,10 +261,9 @@ export function paymentConfirmedEmail(
     `
     : "";
 
-  return `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
-      <h1 style="font-size:22px;">Paiement confirmé — merci ${name} !</h1>
-      <p>${
+  return emailShell(`
+      <h1 style="font-size:22px;font-weight:600;margin:0 0 12px;letter-spacing:-0.02em;">Paiement confirmé — merci ${name} !</h1>
+      <p style="margin:0 0 12px;">${
         plan === "live"
           ? "Votre place est réservée. Connectez-vous sur BelKou avec ce même email le jour du direct — le replay reste disponible après la session."
           : `Votre plan <strong>${plan.toUpperCase()}</strong> est activé. Accédez à vos cours depuis votre espace BelKou.`
@@ -233,11 +272,10 @@ export function paymentConfirmedEmail(
       ${invoiceBlock}
       ${
         whatsappUrl
-          ? `<p><a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre ${groupLabel} sur WhatsApp</a></p>`
-          : "<p>Nous vous enverrons le lien WhatsApp très bientôt.</p>"
+          ? `<p style="margin:20px 0 0;"><a href="${whatsappUrl}" style="display:inline-block;background:#25D366;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre ${groupLabel} sur WhatsApp</a></p>`
+          : ""
       }
-    </div>
-  `;
+  `);
 }
 
 /** Manual reminder an admin fires before an event, to everyone holding a seat. */
@@ -249,19 +287,17 @@ export function liveReminderEmail(params: {
   note?: string;
 }) {
   const firstName = params.name.trim().split(/\s+/)[0] || "";
-  return `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
-      <h1 style="font-size:20px;">Rappel — ${params.title}</h1>
-      <p>${firstName ? `Bonjour ${firstName}, v` : "V"}otre place est réservée.</p>
-      <div style="margin:18px 0;border:1px solid #e4e4e7;border-radius:10px;padding:14px 16px;">
+  return emailShell(`
+      <h1 style="font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:-0.02em;">Rappel — ${params.title}</h1>
+      <p style="margin:0 0 12px;">${firstName ? `Bonjour ${firstName}, v` : "V"}otre place est réservée.</p>
+      <div style="margin:18px 0;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;">
         <p style="margin:0 0 4px;font-size:15px;"><strong>${formatLiveEmailDate(params.scheduledAt)}</strong></p>
-        <p style="margin:0 0 12px;font-size:13px;color:#52525b;">Heure d'Haïti. Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
-        <p style="margin:0;"><a href="${params.url}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre le live</a></p>
+        <p style="margin:0 0 12px;font-size:13px;color:#64748b;">Heure d'Haïti. Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
+        <p style="margin:0;"><a href="${params.url}" style="display:inline-block;background:#0f172a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre le live</a></p>
       </div>
       ${params.note?.trim() ? `<p style="white-space:pre-line;">${params.note.trim()}</p>` : ""}
-      <p style="font-size:13px;color:#52525b;">Si vous ne pouvez pas suivre en direct, le replay reste disponible sur la même page.</p>
-    </div>
-  `;
+      <p style="font-size:13px;color:#64748b;margin:0;">Si vous ne pouvez pas suivre en direct, le replay reste disponible sur la même page.</p>
+  `);
 }
 
 export function serviceBookingEmail(params: {
@@ -273,11 +309,10 @@ export function serviceBookingEmail(params: {
   preferredTime: string;
   message?: string;
 }) {
-  return `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
-      <h1 style="font-size:20px;">Nouvelle demande de rendez-vous</h1>
-      <p><strong>Service :</strong> ${params.serviceTitle}</p>
-      <ul style="line-height:1.6;padding-left:18px;">
+  return emailShell(`
+      <h1 style="font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:-0.02em;">Nouvelle demande de rendez-vous</h1>
+      <p style="margin:0 0 12px;"><strong>Service :</strong> ${params.serviceTitle}</p>
+      <ul style="line-height:1.6;padding-left:18px;margin:0;">
         <li><strong>Nom :</strong> ${params.name}</li>
         <li><strong>Email :</strong> ${params.email}</li>
         <li><strong>Téléphone :</strong> ${params.phone}</li>
@@ -286,9 +321,8 @@ export function serviceBookingEmail(params: {
       </ul>
       ${
         params.message?.trim()
-          ? `<p><strong>Message :</strong><br/>${params.message.replace(/\n/g, "<br/>")}</p>`
+          ? `<p style="margin:16px 0 0;"><strong>Message :</strong><br/>${params.message.replace(/\n/g, "<br/>")}</p>`
           : ""
       }
-    </div>
-  `;
+  `);
 }

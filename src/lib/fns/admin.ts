@@ -312,6 +312,34 @@ export const adminMarkCashPaid = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/** Revoke access — set paid registration back to pending (e.g. false unlock / unpaid). */
+export const adminSetPaymentPending = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registrationId: z.string().min(1),
+        status: z.enum(["pending", "manual_pending"]).default("pending"),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const db = await getDb();
+    const record = await getRegistrationById(db, data.registrationId);
+
+    if (!record) {
+      throw new Error("Inscription introuvable");
+    }
+
+    if (record.payment_status === data.status) {
+      return { ok: true as const, unchanged: true as const };
+    }
+
+    await updateRegistrationPayment(db, record.id, { payment_status: data.status });
+
+    return { ok: true as const, unchanged: false as const };
+  });
+
 export const adminGrantFreeVip = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

@@ -144,6 +144,11 @@ function AdminDashboardPage() {
         />,
       )}
 
+      {panel(
+        "vip",
+        <AdminRegistrationsTab key={`vip-${tabEpoch.vip ?? 0}`} mode="vip" />,
+      )}
+
       {panel("courses", <AdminCoursesTab key={tabEpoch.courses ?? 0} />)}
       {panel("live", <AdminLiveTab key={tabEpoch.live ?? 0} />)}
       {panel("videos", <AdminVideosTab key={tabEpoch.videos ?? 0} />)}

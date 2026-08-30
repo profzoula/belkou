@@ -1,18 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, CreditCard, Gift, Globe, Lock, Radio, ShieldCheck } from "lucide-react";
+import { Check, CreditCard, Gift, Lock, Radio, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { planDetails, type PlanId } from "@/lib/plans";
 import { formatLiveSchedule, liveCtaLabel, liveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { formatUsd, toMoney } from "@/lib/money";
@@ -21,7 +14,6 @@ import { submitRegistration } from "@/lib/fns/register";
 import { getPublicCourse, type PublicCourse } from "@/lib/fns/courses";
 import { SiteWordmark } from "@/components/site/SiteWordmark";
 import { SiteLogo } from "@/components/site/SiteLogo";
-import { siteConfig } from "@/lib/site-config";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
 import { saveRegistrationHandoff } from "@/lib/registration-handoff";
 import { trackMetaEvent } from "@/lib/meta-pixel";
@@ -33,7 +25,6 @@ type CheckoutPageProps = {
   plan?: PlanId;
   courseSlug?: string;
   liveTicket?: boolean;
-  /** Live tickets are sold per event, so a ticket checkout always names its session. */
   liveSessionId?: string;
   liveSessionTitle?: string;
   liveSessionScheduledAt?: string;
@@ -46,6 +37,9 @@ const ORIGINAL_PRICES: Record<PlanId, number> = {
   premium: 399,
   vip: 450,
 };
+
+const DEFAULT_COUNTRY = "HT";
+const DEFAULT_LEVEL = "beginner";
 
 function discountPercent(price: number, original: number) {
   if (original <= price) return 0;
@@ -80,8 +74,6 @@ export function CheckoutPage({
     full_name: "",
     email: "",
     whatsapp: "",
-    country: "HT",
-    level: "beginner",
     referral_code: "",
   });
   const checkoutTracked = useRef<string | null>(null);
@@ -160,6 +152,8 @@ export function CheckoutPage({
 
     const payload = {
       ...form,
+      country: DEFAULT_COUNTRY,
+      level: DEFAULT_LEVEL,
       plan: isLiveTicket
         ? "live"
         : isVipMembership
@@ -240,6 +234,16 @@ export function CheckoutPage({
     ? formatLiveSchedule(liveSessionScheduledAt)
     : null;
 
+  const includedFeatures = isLiveTicket
+    ? [
+        "Place réservée pour ce live",
+        "Direct + commentaires sur BelKou",
+        "Replay après la session",
+      ]
+    : courseSlug && course
+      ? ["Accès complet au cours", "Vidéos et ressources à vie", "Support communauté BelKou"]
+      : plan.features.slice(0, 4);
+
   useEffect(() => {
     if (courseSlug && !course) return;
     const id = isLiveTicket ? (liveSessionId ?? "live") : (courseSlug ?? selectedPlan);
@@ -255,36 +259,35 @@ export function CheckoutPage({
   }, [course, courseSlug, displayPrice, isLiveTicket, liveSessionId, productTitle, selectedPlan]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/25">
-      <header className="border-b border-border bg-card/90 backdrop-blur-xl">
-        <div className="site-container flex h-14 items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border/60">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="inline-flex">
             <SiteWordmark size="sm" />
           </Link>
           <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5 text-primary" />
+            <Lock className="h-3.5 w-3.5" aria-hidden />
             Paiement sécurisé
           </span>
         </div>
       </header>
 
-      <main id="main-content" className="site-container px-4 py-6 sm:px-0 sm:py-8 lg:py-10">
-        <div className="mb-6 sm:mb-8">
-          <p className="text-sm font-semibold tracking-[0.16em] text-primary uppercase">Checkout</p>
-          <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+      <main id="main-content" className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
+        <div className="mb-10 max-w-xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground sm:text-[2rem]">
             {isLiveTicket
               ? liveCtaLabel("Réservez votre place", liveTicketPrice)
               : "Finalisez votre inscription"}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-[0.9375rem]">
             {isLiveTicket
               ? liveSessionId
-                ? `Votre place pour ce live${liveScheduleLabel ? ` du ${liveScheduleLabel}` : ""} : le direct, les commentaires et le replay. Les membres VIP y ont déjà accès.`
-                : "Ce live n'est plus disponible. Choisissez une session sur la page Live pour réserver votre place."
-              : "Quelques informations, puis paiement sécurisé via Square."}
+                ? `Votre place pour ce live${liveScheduleLabel ? ` du ${liveScheduleLabel}` : ""} — direct, commentaires et replay.`
+                : "Ce live n'est plus disponible. Choisissez une session sur la page Live."
+              : "Trois champs, puis paiement sécurisé via Square."}
           </p>
           {isLiveTicket && !liveSessionId ? (
-            <Button asChild variant="hero" size="lg" className="mt-4 touch-target">
+            <Button asChild variant="hero" size="lg" className="mt-6 touch-target">
               <Link to="/live">Voir les lives</Link>
             </Button>
           ) : null}
@@ -292,107 +295,70 @@ export function CheckoutPage({
 
         <form
           onSubmit={submit}
-          className="lg:grid lg:grid-cols-[minmax(0,1fr)_370px] lg:items-start lg:gap-8 xl:gap-10"
+          className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-16"
         >
-          <div className="min-w-0 space-y-6">
+          <div className="min-w-0 space-y-10">
             {/* Product */}
-            <section className="rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
+            <section className="space-y-6">
               <div className="flex items-start gap-4">
                 <div
                   className={cn(
-                    "flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br",
-                    course?.thumbnail.gradient ?? "from-primary/80 to-primary",
+                    "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br",
+                    course?.thumbnail.gradient ?? "from-primary to-primary/80",
                   )}
                 >
                   {isVipMembership ? (
-                    <Gift className="h-8 w-8 text-white" aria-hidden />
+                    <Gift className="h-6 w-6 text-white" aria-hidden />
                   ) : isLiveTicket && !CourseIcon ? (
-                    <Radio className="h-8 w-8 text-white" aria-hidden />
+                    <Radio className="h-6 w-6 text-white" aria-hidden />
                   ) : CourseIcon ? (
-                    <CourseIcon className="h-8 w-8 text-white/80" />
+                    <CourseIcon className="h-6 w-6 text-white/90" />
                   ) : (
-                    <SiteLogo className="h-10 w-10 rounded" alt="" />
+                    <SiteLogo className="h-8 w-8 rounded" alt="" />
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm leading-snug text-foreground">
-                    {isLiveTicket ? (
-                      <>
-                        Place réservée pour <strong>{productTitle}</strong> — direct, commentaires
-                        et replay.
-                      </>
-                    ) : isVipMembership ? (
-                      <>
-                        <strong>VIP</strong> — tous les cours et tous les lives, à vie.
-                      </>
-                    ) : (
-                      <>
-                        Accès complet à <strong>{productTitle}</strong>.
-                      </>
-                    )}
+                <div className="min-w-0 flex-1 pt-0.5">
+                  <p className="text-[0.9375rem] font-medium leading-snug text-foreground">
+                    {productTitle}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     {isLiveTicket
-                      ? "Une place par live · les membres VIP ont déjà tous les lives."
+                      ? "Une place · ce live uniquement"
                       : isVipMembership
-                        ? "Paiement unique · tous les cours et lives, à vie."
-                        : "Paiement unique · accès immédiat après confirmation."}
+                        ? "Tous les cours et lives · paiement unique"
+                        : "Accès au cours · paiement unique"}
                   </p>
+                  <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="text-2xl font-semibold tracking-tight tabular-nums">
+                      {displayPrice > 0 ? formatUsd(displayPrice) : "Gratuit"}
+                    </span>
+                    {pctOff > 0 ? (
+                      <>
+                        <span className="text-sm text-muted-foreground line-through tabular-nums">
+                          {formatUsd(displayOriginal)}
+                        </span>
+                        <span className="text-xs font-medium text-success">
+                          −{formatUsd(savings)}
+                        </span>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-                <span className="shrink-0 rounded-full bg-success/15 px-2 py-1 text-[11px] font-bold text-success">
-                  Inclus
-                </span>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                {isLiveTicket ? (
-                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
-                    <p className="font-bold text-sm">{productTitle}</p>
-                    <p className="mt-1 text-2xl font-bold">
-                      {liveTicketPrice > 0 ? formatUsd(liveTicketPrice) : "Gratuit"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {liveScheduleLabel
-                        ? `Direct ${liveScheduleLabel} · replay inclus`
-                        : "Paiement unique · direct et replay"}
-                    </p>
-                  </div>
-                ) : isVipMembership ? (
-                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
-                    <p className="font-bold text-sm">VIP — Accès illimité</p>
-                    <p className="mt-1 text-2xl font-bold">{formatUsd(plan.price)}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Tous les cours et tous les lives · paiement unique
-                    </p>
-                  </div>
-                ) : courseSlug && course ? (
-                  <div className="sm:col-span-2 rounded-2xl border border-primary/40 bg-primary/[0.06] p-4">
-                    <p className="font-bold text-sm">{course.title}</p>
-                    <p className="mt-1 text-2xl font-bold">{formatUsd(course.price)}</p>
-                    {course.originalPrice > course.price && (
-                      <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                        Économisez {formatUsd(course.originalPrice - course.price)}
-                      </span>
-                    )}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Paiement unique · accès au cours
-                    </p>
-                  </div>
-                ) : (
-                  (["premium", "vip"] as const).map((planId) => {
+              {!isLiveTicket && !isVipMembership && !courseSlug ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {(["premium", "vip"] as const).map((planId) => {
                     const option = planDetails[planId];
                     const active = selectedPlan === planId;
-                    const orig = ORIGINAL_PRICES[planId];
-                    const save = orig - option.price;
-
                     return (
                       <label
                         key={planId}
                         className={cn(
-                          "cursor-pointer rounded-xl border p-4 transition-colors",
+                          "cursor-pointer rounded-2xl border px-4 py-4 transition-colors",
                           active
-                            ? "border-primary bg-primary/5 ring-1 ring-primary/40"
-                            : "border-border hover:border-primary/50",
+                            ? "border-primary bg-primary/[0.04]"
+                            : "border-border/80 hover:border-foreground/20",
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -403,292 +369,189 @@ export function CheckoutPage({
                             onChange={() => setSelectedPlan(planId)}
                             className="mt-1 accent-primary"
                           />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-bold text-sm">{option.name}</p>
-                            <p className="mt-1 text-xl font-bold">{formatUsd(option.price)}</p>
-                            {save > 0 && (
-                              <span className="mt-1 inline-block rounded-md bg-success/15 px-1.5 py-0.5 text-[11px] font-bold text-success">
-                                Économisez {formatUsd(save)}
-                              </span>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {planId === "vip"
-                                ? "Paiement unique · tous les cours et lives"
-                                : "Paiement unique · accès au cours"}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium">{option.name}</p>
+                            <p className="mt-1 text-lg font-semibold tabular-nums">
+                              {formatUsd(option.price)}
                             </p>
                           </div>
                         </div>
                       </label>
                     );
-                  })
-                )}
-              </div>
+                  })}
+                </div>
+              ) : null}
 
-              <div className="mt-5 border-t border-border pt-5">
-                <p className="text-sm font-bold mb-3">Ce qui est inclus :</p>
-                <ul className="space-y-2">
-                  {(isLiveTicket
-                    ? [
-                        "Votre place réservée dès maintenant",
-                        "Regarder ce live en direct sur BelKou",
-                        "Commenter pendant le direct",
-                        "Replay de ce live après la session",
-                        "Valable pour ce live uniquement",
-                      ]
-                    : courseSlug && course
-                      ? [
-                          "Accès complet au cours",
-                          "Vidéos et ressources à vie",
-                          "Support communauté BelKou",
-                        ]
-                      : plan.features
-                  ).map((feature) => (
-                    <li key={feature} className="flex gap-2 text-sm">
-                      <Check className="h-4 w-4 shrink-0 text-primary" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-2.5 border-t border-border/60 pt-6">
+                {includedFeatures.map((feature) => (
+                  <li key={feature} className="flex gap-2.5 text-sm text-muted-foreground">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
 
             {/* Personal info */}
-            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-              <h2 className="font-display text-lg font-semibold text-foreground">
-                Vos informations
-              </h2>
-              <div className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                <strong className="font-semibold text-foreground">
-                  Cet email = votre accès aux cours.
-                </strong>{" "}
-                Utilisez la même adresse pour créer votre compte BelKou après le paiement.
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nom complet</Label>
-                <Input
-                  id="full_name"
-                  value={form.full_name}
-                  onChange={(e) => update("full_name", e.target.value)}
-                  className="h-11 rounded-xl"
-                  aria-invalid={Boolean(fieldErrors.full_name)}
-                  aria-describedby={fieldErrors.full_name ? "checkout-full-name-error" : undefined}
-                  required
-                />
-                {fieldErrors.full_name ? (
-                  <p
-                    id="checkout-full-name-error"
-                    className="text-xs text-destructive"
-                    role="alert"
-                  >
-                    {fieldErrors.full_name}
-                  </p>
-                ) : null}
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
-                    className="h-11 rounded-xl"
-                    aria-invalid={Boolean(fieldErrors.email)}
-                    aria-describedby="checkout-email-hint checkout-email-error"
-                    required
-                  />
-                  <p id="checkout-email-hint" className="text-xs text-muted-foreground">
-                    Conservez cet email — il sera demandé à la connexion pour accéder à vos cours.
-                  </p>
-                  {fieldErrors.email ? (
-                    <p id="checkout-email-error" className="text-xs text-destructive" role="alert">
-                      {fieldErrors.email}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp">WhatsApp</Label>
-                  <Input
-                    id="whatsapp"
-                    value={form.whatsapp}
-                    onChange={(e) => update("whatsapp", e.target.value)}
-                    className="h-11 rounded-xl"
-                    aria-invalid={Boolean(fieldErrors.whatsapp)}
-                    aria-describedby={fieldErrors.whatsapp ? "checkout-whatsapp-error" : undefined}
-                    required
-                  />
-                  {fieldErrors.whatsapp ? (
-                    <p
-                      id="checkout-whatsapp-error"
-                      className="text-xs text-destructive"
-                      role="alert"
-                    >
-                      {fieldErrors.whatsapp}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="level">Niveau</Label>
-                <Select value={form.level} onValueChange={(v) => update("level", v)}>
-                  <SelectTrigger
-                    id="level"
-                    className="h-11 rounded-xl"
-                    aria-invalid={Boolean(fieldErrors.level)}
-                    aria-describedby={fieldErrors.level ? "checkout-level-error" : undefined}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Débutant</SelectItem>
-                    <SelectItem value="intermediate">Intermédiaire</SelectItem>
-                    <SelectItem value="advanced">Avancé</SelectItem>
-                  </SelectContent>
-                </Select>
-                {fieldErrors.level ? (
-                  <p id="checkout-level-error" className="text-xs text-destructive" role="alert">
-                    {fieldErrors.level}
-                  </p>
-                ) : null}
-              </div>
-            </section>
-
-            {/* Billing */}
-            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-              <h2 className="font-display text-lg font-semibold text-foreground">
-                Adresse de facturation
-              </h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="country">Pays</Label>
-                  <Select value={form.country} onValueChange={(v) => update("country", v)}>
-                    <SelectTrigger
-                      id="country"
-                      className="h-11 rounded-xl"
-                      aria-invalid={Boolean(fieldErrors.country)}
-                      aria-describedby={fieldErrors.country ? "checkout-country-error" : undefined}
-                    >
-                      <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="HT">Haïti</SelectItem>
-                      <SelectItem value="US">États-Unis</SelectItem>
-                      <SelectItem value="CA">Canada</SelectItem>
-                      <SelectItem value="DO">République dominicaine</SelectItem>
-                      <SelectItem value="FR">France</SelectItem>
-                      <SelectItem value="BE">Belgique</SelectItem>
-                      <SelectItem value="CH">Suisse</SelectItem>
-                      <SelectItem value="OTHER">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {fieldErrors.country ? (
-                    <p
-                      id="checkout-country-error"
-                      className="text-xs text-destructive"
-                      role="alert"
-                    >
-                      {fieldErrors.country}
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-            </section>
-
-            {/* Payment */}
-            <section className="space-y-4 rounded-3xl border border-border/80 bg-card p-5 shadow-sm sm:p-6">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-lg font-semibold text-foreground">
-                  Moyen de paiement
+            <section className="space-y-5 border-t border-border/60 pt-10">
+              <div>
+                <h2 className="font-display text-lg font-semibold tracking-tight">
+                  Vos informations
                 </h2>
+                <p className="mt-1.5 text-sm text-muted-foreground">
+                  Utilisez le même email pour créer votre compte après le paiement.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="full_name">Nom complet</Label>
+                  <Input
+                    id="full_name"
+                    value={form.full_name}
+                    onChange={(e) => update("full_name", e.target.value)}
+                    className="h-11 rounded-xl border-border/80 bg-card"
+                    aria-invalid={Boolean(fieldErrors.full_name)}
+                    aria-describedby={fieldErrors.full_name ? "checkout-full-name-error" : undefined}
+                    autoComplete="name"
+                    required
+                  />
+                  {fieldErrors.full_name ? (
+                    <p
+                      id="checkout-full-name-error"
+                      className="text-xs text-destructive"
+                      role="alert"
+                    >
+                      {fieldErrors.full_name}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={form.email}
+                      onChange={(e) => update("email", e.target.value)}
+                      className="h-11 rounded-xl border-border/80 bg-card"
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={
+                        fieldErrors.email ? "checkout-email-error" : "checkout-email-hint"
+                      }
+                      autoComplete="email"
+                      required
+                    />
+                    {fieldErrors.email ? (
+                      <p id="checkout-email-error" className="text-xs text-destructive" role="alert">
+                        {fieldErrors.email}
+                      </p>
+                    ) : (
+                      <p id="checkout-email-hint" className="text-xs text-muted-foreground">
+                        Requis pour accéder à vos cours
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="whatsapp">WhatsApp</Label>
+                    <Input
+                      id="whatsapp"
+                      value={form.whatsapp}
+                      onChange={(e) => update("whatsapp", e.target.value)}
+                      className="h-11 rounded-xl border-border/80 bg-card"
+                      aria-invalid={Boolean(fieldErrors.whatsapp)}
+                      aria-describedby={
+                        fieldErrors.whatsapp ? "checkout-whatsapp-error" : undefined
+                      }
+                      autoComplete="tel"
+                      required
+                    />
+                    {fieldErrors.whatsapp ? (
+                      <p
+                        id="checkout-whatsapp-error"
+                        className="text-xs text-destructive"
+                        role="alert"
+                      >
+                        {fieldErrors.whatsapp}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Payment note */}
+            <section className="space-y-3 border-t border-border/60 pt-10">
+              <div className="flex items-center gap-2">
+                <h2 className="font-display text-lg font-semibold tracking-tight">Paiement</h2>
                 <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                  Sécurisé & chiffré
+                  <ShieldCheck className="h-3.5 w-3.5 text-success" aria-hidden />
+                  Square
                 </span>
               </div>
-
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-primary/70 bg-primary/5 p-4">
-                <input type="radio" name="pay" checked readOnly className="accent-primary" />
-                <CreditCard className="h-5 w-5" />
-                <div>
-                  <p className="font-semibold text-sm">Carte bancaire</p>
+              <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-card px-4 py-3.5">
+                <CreditCard className="h-5 w-5 shrink-0 text-foreground/70" aria-hidden />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">Carte bancaire</p>
                   <p className="text-xs text-muted-foreground">
-                    Visa · Mastercard · Amex — via Square
+                    Visa · Mastercard · Amex — redirection sécurisée
                   </p>
                 </div>
-              </label>
-
-              <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
-                Après validation, vous serez redirigé vers <strong>Square Checkout</strong> pour
-                saisir votre carte en toute sécurité. BelKou ne stocke jamais vos données bancaires.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Autres options : MonCash, Zelle, PayPal, virement — instructions par email si Square
-                est indisponible.
+              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                BelKou ne stocke jamais vos données bancaires. Si Square est indisponible :
+                MonCash, Zelle ou PayPal par email.
               </p>
             </section>
           </div>
 
-          {/* Summary sidebar */}
-          <aside className="mt-8 lg:sticky lg:top-6 lg:mt-0">
-            <div className="rounded-3xl border border-border/80 bg-card p-5 shadow-md sm:p-6">
-              <h2 className="mb-4 font-display text-lg font-semibold">Récapitulatif</h2>
+          {/* Summary */}
+          <aside className="lg:sticky lg:top-8">
+            <div className="rounded-2xl border border-border/80 bg-card p-6">
+              <h2 className="text-sm font-medium text-muted-foreground">Total</h2>
+              <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
+                {formatUsd(displayPrice)}
+              </p>
+              <p className="mt-1 truncate text-sm text-muted-foreground">
+                {isLiveTicket
+                  ? `Place live — ${productTitle}`
+                  : courseSlug && course
+                    ? course.title
+                    : `Plan ${plan.name}`}
+              </p>
 
-              <dl className="space-y-2 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">
-                    {isLiveTicket
-                      ? `Place live — ${productTitle}`
-                      : courseSlug && course
-                        ? course.title
-                        : `Plan ${plan.name}`}
-                  </dt>
-                  <dd className="font-medium">
-                    {formatUsd(pctOff > 0 ? displayOriginal : displayPrice)}
-                  </dd>
-                </div>
-                {pctOff > 0 && (
-                  <div className="flex justify-between gap-4 text-success">
-                    <dt>Promo (−{pctOff}%)</dt>
-                    <dd>−{formatUsd(savings)}</dd>
-                  </div>
-                )}
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Taxes estimées</dt>
-                  <dd>{formatUsd(0)}</dd>
-                </div>
-                <div className="flex justify-between gap-4 border-t border-border pt-3 text-base font-bold">
-                  <dt>Total</dt>
-                  <dd>{formatUsd(displayPrice)}</dd>
-                </div>
-              </dl>
+              {pctOff > 0 ? (
+                <p className="mt-3 text-xs font-medium text-success">
+                  Promo −{pctOff}% (−{formatUsd(savings)})
+                </p>
+              ) : null}
 
-              <div className="mt-4">
+              <div className="mt-6 border-t border-border/60 pt-5">
                 {!couponOpen ? (
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary/5"
+                    className="text-sm text-primary underline-offset-4 hover:underline"
                     onClick={() => setCouponOpen(true)}
                   >
                     Code parrainage
-                  </Button>
+                  </button>
                 ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="referral_code">Code affilié / promo</Label>
+                    <Label htmlFor="referral_code">Code affilié</Label>
                     <Input
                       id="referral_code"
                       value={form.referral_code}
                       onChange={(e) => update("referral_code", e.target.value.toUpperCase())}
                       placeholder="CODE"
-                      className="rounded-md font-mono uppercase"
+                      className="rounded-xl font-mono uppercase"
                     />
                   </div>
                 )}
               </div>
 
               <label
-                className="mt-5 flex cursor-pointer gap-2 text-xs text-muted-foreground"
+                className="mt-6 flex cursor-pointer gap-2.5 text-xs leading-relaxed text-muted-foreground"
                 htmlFor="accept-terms"
               >
                 <input
@@ -705,7 +568,7 @@ export function CheckoutPage({
                 />
                 <span>
                   J&apos;accepte les{" "}
-                  <Link to="/legal/cgv" className="text-primary underline">
+                  <Link to="/legal/cgv" className="text-foreground underline underline-offset-2">
                     conditions générales
                   </Link>
                   . Pas de remboursement après paiement.
@@ -721,26 +584,28 @@ export function CheckoutPage({
                 type="submit"
                 disabled={loading || !acceptedTerms}
                 size="xl"
-                className="mt-5 h-12 w-full"
+                className="mt-5 h-12 w-full rounded-xl"
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
-                <Lock className="mr-1 h-4 w-4" />
+                <Lock className="mr-1.5 h-4 w-4" aria-hidden />
                 {loading
                   ? "Redirection…"
                   : isLiveTicket
                     ? liveCtaLabel("Réserver ma place", liveTicketPrice)
                     : "Payer et commencer"}
               </Button>
-              <p
-                id="checkout-submit-help"
-                className="mt-2 text-center text-[11px] text-muted-foreground"
-              >
-                Activez la case des conditions pour débloquer le paiement.
-              </p>
-
-              <p className="mt-3 text-center text-[11px] text-muted-foreground">
-                Paiement sécurisé · accès personnel au cours acheté
-              </p>
+              {!acceptedTerms ? (
+                <p
+                  id="checkout-submit-help"
+                  className="mt-2 text-center text-[11px] text-muted-foreground"
+                >
+                  Acceptez les conditions pour continuer
+                </p>
+              ) : (
+                <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                  Accès personnel après confirmation
+                </p>
+              )}
             </div>
           </aside>
         </form>

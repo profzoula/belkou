@@ -87,7 +87,8 @@ async function resolveCheckoutPricing(data: RegistrationInput) {
   }
 
   if (data.course_slug) {
-    const course = await getResolvedCourseBySlug(data.course_slug);
+    // Always read the latest admin price for checkout + confirmation emails.
+    const course = await getResolvedCourseBySlug(data.course_slug, { fresh: true });
     if (!course) {
       throw new Error("Cours introuvable.");
     }
@@ -114,7 +115,17 @@ async function startCheckout(
   pricing: Awaited<ReturnType<typeof resolveCheckoutPricing>>,
   intendedPlan: RegistrationRecord["plan"],
 ) {
+  // Free checkout only when the quote is free AND there is no open paid checkout
+  // session on this registration (avoids unlocking after a failed Square attempt
+  // if the admin briefly flips the course to $0).
   if (pricing.price <= 0) {
+    if (record.stripe_session_id?.trim() && record.payment_status !== "paid") {
+      console.warn("[BelKou] Refusing free unlock on registration with open checkout", {
+        registrationId: record.id,
+        payment_status: record.payment_status,
+      });
+      return null;
+    }
     await updateRegistrationPayment(db, record.id, { payment_status: "paid" });
     return null;
   }
@@ -272,9 +283,11 @@ export const submitRegistration = createServerFn({ method: "POST" })
             name: data.full_name,
             plan: data.plan,
             price: pricing.price,
+            label: pricing.label,
             registrationId: record.id,
             checkoutUrl,
             manualPaymentHtml: manualHtml,
+            courseSlug: data.course_slug,
           }),
     })
       .then((emailResult) => {

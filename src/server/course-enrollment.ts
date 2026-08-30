@@ -2,11 +2,7 @@ import { pickRegistrationForCourse } from "@/lib/course-access";
 import { isFreeCourse } from "@/lib/courses";
 import { normalizeRegistrationEmail } from "@/lib/schemas/registration";
 import type { RegistrationRecord } from "@/lib/schemas/registration";
-import {
-  listRegistrationsByEmail,
-  saveRegistration,
-  updateRegistrationCourseAccess,
-} from "@/server/db";
+import { listRegistrationsByEmail, saveRegistration } from "@/server/db";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 
 function displayNameFromEmail(email: string, fullName?: string): string {
@@ -19,7 +15,7 @@ export async function ensureFreeCourseEnrollment(
   db: Awaited<ReturnType<typeof import("@/server/env").getDb>>,
   params: { email: string; courseSlug: string; fullName?: string },
 ): Promise<RegistrationRecord | null> {
-  const course = await getResolvedCourseBySlug(params.courseSlug);
+  const course = await getResolvedCourseBySlug(params.courseSlug, { fresh: true });
   if (!course || !isFreeCourse(course)) return null;
 
   const email = normalizeRegistrationEmail(params.email);
@@ -30,12 +26,10 @@ export async function ensureFreeCourseEnrollment(
     return existing;
   }
 
+  // Never upgrade a pending/manual checkout to free access — those rows mean a
+  // paid purchase was started. Free enrollments are created as new rows only.
   if (existing) {
-    const updated = await updateRegistrationCourseAccess(db, existing.id, {
-      course_slug: params.courseSlug,
-      payment_status: "paid",
-    });
-    return updated ?? existing;
+    return existing;
   }
 
   return saveRegistration(

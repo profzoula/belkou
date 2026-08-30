@@ -104,7 +104,7 @@ export function AdminOverviewTab({ data, onNavigate }: OverviewProps) {
           label="VIP"
           value={stats.vip}
           icon={Crown}
-          onManage={() => onNavigate("inscriptions")}
+          onManage={() => onNavigate("vip")}
         />
         <AdminStatCard
           label="Demandes services"

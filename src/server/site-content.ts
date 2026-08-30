@@ -334,8 +334,14 @@ export async function getPublishedCourseCount(): Promise<number> {
   return courses.length;
 }
 
-export async function getResolvedCourseBySlug(slug: string): Promise<Course | undefined> {
-  const all = await getResolvedCourses();
+export async function getResolvedCourseBySlug(
+  slug: string,
+  options?: { fresh?: boolean },
+): Promise<Course | undefined> {
+  if (options?.fresh) {
+    invalidateResolvedCoursesCache();
+  }
+  const all = options?.fresh ? await resolveCourseListFresh() : await getResolvedCourses();
   const course = all.find((item) => item.slug === slug);
   if (!course) return undefined;
 

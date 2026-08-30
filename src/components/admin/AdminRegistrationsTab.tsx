@@ -18,15 +18,10 @@ import {
   adminAddCashRegistration,
   adminGrantFreeVip,
   adminMarkCashPaid,
+  adminSetPaymentPending,
   getAdminDashboard,
 } from "@/lib/fns/admin";
 import { siteConfig } from "@/lib/site-config";
-
-const statusLabel: Record<string, string> = {
-  paid: "Payé",
-  pending: "En attente",
-  manual_pending: "Paiement manuel",
-};
 
 const emptyForm = {
   full_name: "",
@@ -34,7 +29,7 @@ const emptyForm = {
   whatsapp: "",
   country: "HT",
   level: "beginner",
-  plan: "premium" as "premium" | "vip",
+  plan: "premium" as "premium" | "vip" | "live",
 };
 
 const ROWS_PER_PAGE = 20;
@@ -66,22 +61,32 @@ function exportCSV(registrations: Array<Record<string, unknown>>) {
 
 type AdminRegistrationsTabProps = {
   onStatsLoaded?: (stats: Awaited<ReturnType<typeof getAdminDashboard>>["stats"]) => void;
+  /** VIP sidebar: only $450 VIP memberships. */
+  mode?: "all" | "vip";
 };
 
-export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabProps) {
+export function AdminRegistrationsTab({
+  onStatsLoaded,
+  mode = "all",
+}: AdminRegistrationsTabProps) {
+  const isVipMode = mode === "vip";
   const dashboardFn = useServerFn(getAdminDashboard);
   const addCashFn = useServerFn(adminAddCashRegistration);
   const markPaidFn = useServerFn(adminMarkCashPaid);
+  const setPendingFn = useServerFn(adminSetPaymentPending);
   const grantVipFn = useServerFn(adminGrantFreeVip);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [adding, setAdding] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState({
+    ...emptyForm,
+    plan: (isVipMode ? "vip" : "premium") as "premium" | "vip" | "live",
+  });
   const [sendEmailOnAdd, setSendEmailOnAdd] = useState(true);
   const [data, setData] = useState<Awaited<ReturnType<typeof getAdminDashboard>> | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [planFilter, setPlanFilter] = useState("all");
+  const [planFilter, setPlanFilter] = useState(isVipMode ? "vip" : "all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -115,9 +120,17 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
     e.preventDefault();
     setAdding(true);
     try {
-      await addCashFn({ data: { registration: form, sendEmail: sendEmailOnAdd } });
+      await addCashFn({
+        data: {
+          registration: { ...form, plan: isVipMode ? "vip" : form.plan },
+          sendEmail: sendEmailOnAdd,
+        },
+      });
       toast.success(`Inscription cash ajoutée — ${form.full_name}`);
-      setForm(emptyForm);
+      setForm({
+        ...emptyForm,
+        plan: (isVipMode ? "vip" : "premium") as "premium" | "vip" | "live",
+      });
       setShowAddForm(false);
       await load();
     } catch (error) {
@@ -133,6 +146,26 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
     try {
       await markPaidFn({ data: { registrationId, sendEmail: true } });
       toast.success(`Paiement cash confirmé — ${name}`);
+      await load();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Action impossible");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const setPending = async (registrationId: string, name: string) => {
+    if (
+      !confirm(
+        `Remettre ${name} en attente (pending) ? L'accès au cours sera retiré jusqu'au paiement.`,
+      )
+    ) {
+      return;
+    }
+    setActionId(registrationId);
+    try {
+      await setPendingFn({ data: { registrationId, status: "pending" } });
+      toast.success(`Statut remis en attente — ${name}`);
       await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Action impossible");
@@ -158,17 +191,19 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
   const filteredRegistrations = useMemo(() => {
     if (!data) return [];
     return data.registrations.filter((r) => {
+      if (isVipMode && r.plan !== "vip") return false;
+      if (!isVipMode && r.plan === "vip") return false;
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         if (!r.full_name.toLowerCase().includes(query) && !r.email.toLowerCase().includes(query)) {
           return false;
         }
       }
-      if (planFilter !== "all" && r.plan !== planFilter) return false;
+      if (!isVipMode && planFilter !== "all" && r.plan !== planFilter) return false;
       if (statusFilter !== "all" && r.payment_status !== statusFilter) return false;
       return true;
     });
-  }, [data, searchQuery, planFilter, statusFilter]);
+  }, [data, searchQuery, planFilter, statusFilter, isVipMode]);
 
   const totalPages = Math.max(1, Math.ceil(filteredRegistrations.length / ROWS_PER_PAGE));
   const paginatedRegistrations = useMemo(() => {
@@ -179,20 +214,28 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
   if (loading || !data) {
     return (
       <div className="surface rounded-2xl p-10 text-center text-sm text-muted-foreground">
-        Chargement des inscriptions...
+        Chargement {isVipMode ? "VIP" : "des inscriptions"}...
       </div>
     );
   }
 
   const { stats, registrations } = data;
   const publicStudents = siteConfig.stats.studentsBase + stats.total;
+  const vipRows = registrations.filter((r) => r.plan === "vip");
+  const vipPaid = vipRows.filter((r) => r.payment_status === "paid").length;
+  const pendingCount = filteredRegistrations.filter((r) => r.payment_status !== "paid").length;
+  const paidCount = filteredRegistrations.filter((r) => r.payment_status === "paid").length;
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         eyebrow="Ops"
-        title="Inscriptions"
-        description="Paiements cash, VIP gratuit et export CSV."
+        title={isVipMode ? "VIP" : "Inscriptions"}
+        description={
+          isVipMode
+            ? "Membres accès illimité VIP ($450) — tous les cours et lives."
+            : "Cours et lives — paiements cash, statut et export CSV."
+        }
         actions={
           <>
             <Button
@@ -208,7 +251,15 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
               variant="outline"
               size="sm"
               className="rounded-xl"
-              onClick={() => exportCSV(registrations as unknown as Array<Record<string, unknown>>)}
+              onClick={() =>
+                exportCSV(
+                  (isVipMode
+                    ? vipRows
+                    : registrations.filter((r) => r.plan !== "vip")) as unknown as Array<
+                    Record<string, unknown>
+                  >,
+                )
+              }
             >
               <Download className="mr-2 h-4 w-4" />
               CSV
@@ -219,8 +270,12 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
 
       {showAddForm && (
         <div className="surface rounded-2xl p-5 sm:p-6">
-          <h2 className="font-semibold text-sm mb-1">Ajouter une inscription — paiement cash</h2>
-          <form onSubmit={submitCashRegistration} className="grid sm:grid-cols-2 gap-4 mt-4">
+          <h2 className="mb-1 text-sm font-semibold">
+            {isVipMode
+              ? "Ajouter un membre VIP — paiement cash"
+              : "Ajouter une inscription — paiement cash"}
+          </h2>
+          <form onSubmit={submitCashRegistration} className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="admin_name">Nom complet</Label>
               <Input
@@ -268,35 +323,47 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label>Plan payé</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {(["premium", "vip"] as const).map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => updateForm("plan", p)}
-                    className={`rounded-xl border p-2 text-sm font-semibold ${
-                      form.plan === p
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border"
-                    }`}
-                  >
-                    {p.toUpperCase()}
-                  </button>
-                ))}
+            {!isVipMode ? (
+              <div className="space-y-2">
+                <Label>Plan payé</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["premium", "live"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => updateForm("plan", p)}
+                      className={`rounded-xl border p-2 text-sm font-semibold ${
+                        form.plan === p
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                          : "border-border"
+                      }`}
+                    >
+                      {p.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Pour le plan VIP $450, utilisez la section VIP dans le menu.
+                </p>
               </div>
-            </div>
-            <label className="sm:col-span-2 flex items-center gap-2 text-sm cursor-pointer">
+            ) : (
+              <div className="space-y-2">
+                <Label>Plan</Label>
+                <div className="rounded-xl border border-primary/40 bg-primary/5 p-3 text-sm font-semibold">
+                  VIP — $450 · accès illimité
+                </div>
+              </div>
+            )}
+            <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
               <input
                 type="checkbox"
                 checked={sendEmailOnAdd}
                 onChange={(e) => setSendEmailOnAdd(e.target.checked)}
                 className="rounded border-border"
               />
-              Envoyer l&apos;email de confirmation WhatsApp
+              Envoyer l&apos;email de confirmation
             </label>
-            <div className="sm:col-span-2 flex gap-2">
+            <div className="flex gap-2 sm:col-span-2">
               <Button type="submit" variant="hero" size="sm" disabled={adding}>
                 {adding ? "Ajout..." : "Ajouter"}
               </Button>
@@ -308,13 +375,19 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
         </div>
       )}
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total", value: stats.total },
-          { label: "Payées", value: stats.paid },
-          { label: "Premium", value: stats.premium },
-          { label: "VIP", value: stats.vip },
-        ].map((s) => (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {(isVipMode
+          ? [
+              { label: "Membres VIP", value: vipRows.length },
+              { label: "VIP payés", value: vipPaid },
+              { label: "En attente", value: vipRows.length - vipPaid },
+            ]
+          : [
+              { label: "Total", value: filteredRegistrations.length },
+              { label: "Payées", value: paidCount },
+              { label: "En attente", value: pendingCount },
+            ]
+        ).map((s) => (
           <div key={s.label} className="surface rounded-xl p-4">
             <div className="text-xs text-muted-foreground">{s.label}</div>
             <div className="text-2xl font-semibold">{s.value}</div>
@@ -322,30 +395,34 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
         ))}
       </div>
 
-      <div className="surface rounded-xl p-4 text-sm text-muted-foreground">
-        Compteur public : <strong className="text-foreground">{publicStudents}</strong> étudiants
-      </div>
+      {!isVipMode ? (
+        <div className="surface rounded-xl p-4 text-sm text-muted-foreground">
+          Compteur public : <strong className="text-foreground">{publicStudents}</strong> étudiants
+        </div>
+      ) : null}
 
-      <div className="surface rounded-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border flex flex-wrap gap-3">
+      <div className="surface overflow-hidden rounded-2xl">
+        <div className="flex flex-wrap gap-3 border-b border-border px-5 py-4">
           <Input
             placeholder="Rechercher nom ou email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-lg max-w-xs"
+            className="max-w-xs rounded-lg"
           />
-          <Select value={planFilter} onValueChange={setPlanFilter}>
-            <SelectTrigger className="rounded-lg w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous plans</SelectItem>
-              <SelectItem value="premium">Premium</SelectItem>
-              <SelectItem value="vip">VIP</SelectItem>
-            </SelectContent>
-          </Select>
+          {!isVipMode ? (
+            <Select value={planFilter} onValueChange={setPlanFilter}>
+              <SelectTrigger className="w-[140px] rounded-lg">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous plans</SelectItem>
+                <SelectItem value="premium">Premium</SelectItem>
+                <SelectItem value="live">Live</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : null}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="rounded-lg w-[160px]">
+            <SelectTrigger className="w-[160px] rounded-lg">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -358,13 +435,13 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
         </div>
 
         <div className="table-scroll">
-          <table className="w-full text-sm min-w-[640px]">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted-foreground">
                 <th className="px-5 py-3">Date</th>
                 <th className="px-5 py-3">Nom</th>
                 <th className="px-5 py-3">Email</th>
-                <th className="px-5 py-3">Plan</th>
+                {!isVipMode ? <th className="px-5 py-3">Plan</th> : null}
                 <th className="px-5 py-3">Statut</th>
                 <th className="px-5 py-3">Actions</th>
               </tr>
@@ -377,13 +454,15 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                   </td>
                   <td className="px-5 py-3 font-medium">{r.full_name}</td>
                   <td className="px-5 py-3">{r.email}</td>
-                  <td className="px-5 py-3 uppercase text-xs font-semibold">{r.plan}</td>
+                  {!isVipMode ? (
+                    <td className="px-5 py-3 text-xs font-semibold uppercase">{r.plan}</td>
+                  ) : null}
                   <td className="px-5 py-3">
                     <PaymentStatusBadge status={r.payment_status} className="text-[11px]" />
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex flex-wrap gap-1.5">
-                      {r.payment_status !== "paid" && (
+                      {r.payment_status !== "paid" ? (
                         <Button
                           variant="hero"
                           size="sm"
@@ -393,8 +472,18 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                         >
                           Marquer payé
                         </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs"
+                          disabled={actionId === r.id}
+                          onClick={() => setPending(r.id, r.full_name)}
+                        >
+                          Remettre pending
+                        </Button>
                       )}
-                      {r.plan !== "vip" && (
+                      {!isVipMode && r.plan !== "vip" ? (
                         <Button
                           variant="outline"
                           size="sm"
@@ -404,7 +493,7 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
                         >
                           VIP gratuit
                         </Button>
-                      )}
+                      ) : null}
                     </div>
                   </td>
                 </tr>
@@ -413,8 +502,14 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
           </table>
         </div>
 
-        {filteredRegistrations.length > ROWS_PER_PAGE && (
-          <div className="px-5 py-3 border-t flex justify-between items-center text-sm">
+        {filteredRegistrations.length === 0 ? (
+          <div className="px-5 py-10 text-center text-sm text-muted-foreground">
+            Aucune inscription {isVipMode ? "VIP" : ""} pour ces filtres.
+          </div>
+        ) : null}
+
+        {filteredRegistrations.length > ROWS_PER_PAGE ? (
+          <div className="flex items-center justify-between border-t px-5 py-3 text-sm">
             <span className="text-xs text-muted-foreground">
               Page {currentPage} / {totalPages}
             </span>
@@ -437,7 +532,7 @@ export function AdminRegistrationsTab({ onStatsLoaded }: AdminRegistrationsTabPr
               </Button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
