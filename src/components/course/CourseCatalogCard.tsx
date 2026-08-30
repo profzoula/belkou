@@ -53,7 +53,6 @@ function AuthorMark() {
 }
 
 export function CourseCatalogCard({ course, layout = "grid", className }: CourseCatalogCardProps) {
-  const free = isFreeCourse(course);
   const instructor = displayInstructor(course.instructor);
   const category = courseCategoryLabel(course);
 
@@ -134,11 +133,6 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         >
           <CourseScheduleBadge scheduledPublishAt={course.scheduledPublishAt} variant="overlay" />
         </CourseThumbnailBanner>
-        {free ? (
-          <span className="absolute left-3 top-3 z-10 rounded-full bg-success px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-success-foreground shadow-sm">
-            Gratuit
-          </span>
-        ) : null}
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">

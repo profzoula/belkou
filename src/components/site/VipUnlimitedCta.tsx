@@ -61,18 +61,16 @@ export function VipUnlimitedCta({ embedded = false, className }: VipUnlimitedCta
             <p className="text-xs text-muted-foreground">Paiement unique · accès à vie</p>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-[13rem] max-lg:-order-1 sm:max-w-[15rem] lg:max-w-none">
-          <div className="overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgb(15_23_42_/_0.18)] ring-1 ring-black/10">
-            <img
-              src="/hero/student-original.png"
-              alt="Diplômée BelKou avec son laptop — accès VIP"
-              className="block aspect-[4/5] h-auto w-full object-cover object-[center_18%]"
-              width={768}
-              height={960}
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+        <div className="mx-auto w-full max-w-[14rem] max-lg:-order-1 sm:max-w-[16rem] lg:max-w-none">
+          <img
+            src="/hero/student-original.png"
+            alt="Diplômée BelKou avec son laptop — accès VIP"
+            className="mx-auto block h-auto w-full object-contain drop-shadow-[0_18px_36px_rgb(15_23_42_/_0.18)]"
+            width={1536}
+            height={1024}
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       </div>
     </div>
