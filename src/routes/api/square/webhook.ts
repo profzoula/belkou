@@ -1,16 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getDb } from "@/server/env";
+import { getDb, getServerEnvResolved } from "@/server/env";
 import { getRegistrationById } from "@/server/db";
-import { verifyWebhook } from "@/server/stripe";
+import {
+  checkoutSessionFromPayment,
+  verifyWebhook,
+} from "@/server/square";
 import { paymentConfirmedEmail, sendEmail } from "@/server/email";
 import { getWhatsappGroupUrlForCourse, siteConfig } from "@/lib/site-config";
 import { earnAffiliateCommission } from "@/server/affiliates";
-import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/stripe-access";
+import { grantAccessFromCheckoutSession, isCheckoutPaid } from "@/server/checkout-access";
 import { sendOpsAlert } from "@/server/ops-alerts";
 import { getResolvedCourseBySlug } from "@/server/site-content";
 import { getLiveSession } from "@/server/live";
 import { parseLiveTicketSlug, resolveLivePrice } from "@/lib/live";
-import { beginWebhookEvent, finishWebhookEvent } from "@/server/stripe-webhook-idempotency";
+import { beginWebhookEvent, finishWebhookEvent } from "@/server/checkout-webhook-idempotency";
 
 function webhookOk() {
   return new Response(JSON.stringify({ received: true }), {
@@ -106,63 +109,67 @@ async function handleCheckoutPaid(session: {
   }
 }
 
-export const Route = createFileRoute("/api/stripe/webhook")({
+export const Route = createFileRoute("/api/square/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const db = await getDb();
-        const signature = request.headers.get("stripe-signature");
+        const signature = request.headers.get("x-square-hmacsha256-signature");
         if (!signature) {
           return new Response("Missing signature", { status: 400 });
         }
 
         const body = await request.text();
+        const env = await getServerEnvResolved();
+        const notificationUrl = `${env.SITE_URL.replace(/\/$/, "")}/api/square/webhook`;
 
         let event;
         try {
-          event = await verifyWebhook(body, signature);
+          event = await verifyWebhook(body, signature, notificationUrl);
         } catch (error) {
-          console.error("[BelKou] Stripe webhook signature failed:", error);
+          console.error("[BelKou] Square webhook signature failed:", error);
           void sendOpsAlert({
-            key: "stripe-webhook-signature-failed",
-            title: "Stripe webhook signature failed",
-            message: "Invalid Stripe signature received by webhook endpoint.",
+            key: "square-webhook-signature-failed",
+            title: "Square webhook signature failed",
+            message: "Invalid Square signature received by webhook endpoint.",
             level: "warning",
           });
           return new Response("Invalid signature", { status: 400 });
         }
 
+        const eventId = String(event.event_id || `${event.type}-${Date.now()}`);
+
         try {
-          if ((await beginWebhookEvent(db, String(event.id))) === "duplicate") {
+          if ((await beginWebhookEvent(db, eventId)) === "duplicate") {
             return webhookOk();
           }
         } catch (error) {
-          console.error("[BelKou] Stripe webhook idempotency init failed:", error);
+          console.error("[BelKou] Square webhook idempotency init failed:", error);
           void sendOpsAlert({
-            key: "stripe-webhook-idempotency-init",
-            title: "Stripe webhook idempotency failed",
+            key: "square-webhook-idempotency-init",
+            title: "Square webhook idempotency failed",
             message: "BelKou failed to initialize webhook idempotency tracking.",
-            meta: { eventId: String(event.id) },
+            meta: { eventId },
           });
           return new Response("Webhook idempotency failed", { status: 500 });
         }
 
         try {
-          if (
-            event.type === "checkout.session.completed" ||
-            event.type === "checkout.session.async_payment_succeeded"
-          ) {
-            await handleCheckoutPaid(event.data.object);
+          if (event.type === "payment.updated" || event.type === "payment.created") {
+            const payment = event.data?.object?.payment;
+            if (payment?.status === "COMPLETED" && payment.order_id) {
+              const session = await checkoutSessionFromPayment(payment);
+              if (session) await handleCheckoutPaid(session);
+            }
           }
-          await finishWebhookEvent(db, String(event.id));
+          await finishWebhookEvent(db, eventId);
         } catch (error) {
-          // Retryable: Stripe will redeliver until access is granted.
-          console.error("[BelKou] Stripe webhook handler error:", error);
+          console.error("[BelKou] Square webhook handler error:", error);
           void sendOpsAlert({
-            key: "stripe-webhook-handler-error",
-            title: "Stripe webhook handler error",
-            message: "BelKou webhook handler returned 500 and Stripe will retry.",
-            meta: { eventId: String(event.id), type: String(event.type) },
+            key: "square-webhook-handler-error",
+            title: "Square webhook handler error",
+            message: "BelKou webhook handler returned 500 and Square will retry.",
+            meta: { eventId, type: String(event.type) },
           });
           return new Response("Webhook handler failed", { status: 500 });
         }

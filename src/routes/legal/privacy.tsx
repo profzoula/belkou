@@ -88,7 +88,7 @@ function PrivacyPage() {
       </p>
       <ul className="list-disc list-inside space-y-1">
         <li>
-          <strong>Stripe</strong> : processeur de paiement par carte bancaire (données de paiement
+          <strong>Square</strong> : processeur de paiement par carte bancaire (données de paiement
           uniquement)
         </li>
         <li>
@@ -187,7 +187,7 @@ function PrivacyPage() {
       <p>
         Vos données sont hébergées sur des infrastructures cloud sécurisées pouvant être situées en
         dehors de votre pays de résidence (notamment aux États-Unis et en Europe). Nos prestataires
-        (Supabase, Cloudflare, Stripe, Resend) garantissent un niveau de protection adéquat
+        (Supabase, Cloudflare, Square, Resend) garantissent un niveau de protection adéquat
         conformément aux standards internationaux en matière de protection des données.
       </p>
 

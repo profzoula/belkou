@@ -16,16 +16,18 @@ This runbook defines the minimum safe process to release and rollback BelKou.
    - `SITE_URL` (or `VITE_SITE_URL`)
    - `SUPABASE_URL` (or `VITE_SUPABASE_URL`)
    - `SUPABASE_SERVICE_ROLE_KEY`
-   - `STRIPE_SECRET_KEY`
-   - `STRIPE_WEBHOOK_SECRET`
+   - `SQUARE_ACCESS_TOKEN`
+   - `SQUARE_LOCATION_ID`
+   - `SQUARE_WEBHOOK_SIGNATURE_KEY`
+   - `SQUARE_ENVIRONMENT` (`sandbox` or `production`)
 3. Apply pending Supabase SQL migrations (if any), including:
-   - `migrations/supabase_stripe_webhook_events.sql` (Stripe webhook idempotency)
+   - `migrations/supabase_checkout_webhook_events.sql` (Square webhook idempotency)
    - `migrations/supabase_course_resources_private.sql` (private course-resources bucket)
    - Or re-run `supabase/course_resources_storage.sql` for new installs
 4. Deploy to production (GitHub Actions `Deploy` workflow on `main`, or manual Railway deploy).
-4. Post-deploy checks:
+5. Post-deploy checks:
    - `GET /healthz` returns `200` and `status: "ok"`
-   - Stripe webhook endpoint receives events without errors
+   - Square webhook endpoint (`/api/square/webhook`) receives events without errors
    - Checkout -> payment -> access flow works for a test account
 
 ## Rollback Triggers
@@ -33,30 +35,19 @@ This runbook defines the minimum safe process to release and rollback BelKou.
 Rollback immediately if any of the following occur:
 
 - `GET /healthz` returns `503` after deployment
-- Stripe payments are confirmed but students do not receive access
+- Square payments are confirmed but students do not receive access
 - Login/admin access is broken for legitimate users
 - Elevated 5xx errors persist for more than 5 minutes
 
 ## Rollback Procedure
 
-1. Re-deploy the previous known-good commit.
-2. Set `ENABLE_VIDEO_WORKER=false` temporarily if worker instability impacts web traffic.
-3. Validate:
-   - `GET /healthz` returns `200`
-   - Checkout flow is restored
-   - Existing students can open paid course lessons
-4. If DB schema was changed in the failed deploy:
-   - Stop additional migrations
-   - Apply manual corrective SQL only after backup confirmation
-   - Document exact SQL and incident timeline
+1. Redeploy the previous known-good Railway deployment / Git commit on `main`.
+2. Re-verify `GET /healthz`.
+3. Re-test login and one paid checkout path (or sandbox checkout).
+4. Confirm Square Developer Dashboard webhook deliveries are green.
+5. Announce status to ops/support once recovered.
 
-## Incident Notes Template
+## Notes
 
-Record these details in every release incident:
-
-- Deploy commit SHA
-- First detected failure time
-- User-facing impact
-- Root cause summary
-- Rollback completion time
-- Follow-up fix owner and deadline
+- Prefer forward fixes for small issues; use full rollback for access-breaking payment failures.
+- Keep Railway env vars and Square webhook URL (`https://belkou.online/api/square/webhook`) in sync after every release.

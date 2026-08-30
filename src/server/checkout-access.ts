@@ -8,10 +8,10 @@ import {
   updateRegistrationGrant,
   updateRegistrationPayment,
 } from "@/server/db";
-import { getCheckoutSession } from "@/server/stripe";
-import { hasExpectedStripePricingForSession } from "@/lib/stripe-pricing";
+import { getCheckoutSession } from "@/server/square";
+import { hasExpectedCheckoutPricing } from "@/lib/checkout-pricing";
 
-export { hasExpectedStripePricingForSession };
+export { hasExpectedCheckoutPricing, hasExpectedCheckoutPricing as hasExpectedStripePricingForSession };
 
 type CheckoutLike = {
   id: string;
@@ -38,7 +38,7 @@ export function isCheckoutPaid(session: CheckoutLike): boolean {
   return session.payment_status === "paid" || session.payment_status === "no_payment_required";
 }
 
-/** Resolve the registration row Stripe should unlock for this checkout session. */
+/** Resolve the registration row Square should unlock for this checkout order. */
 export async function resolveRegistrationForCheckout(
   db: D1Database | null,
   session: CheckoutLike,
@@ -70,7 +70,7 @@ export async function resolveRegistrationForCheckout(
 }
 
 /**
- * Mark registration paid from a confirmed Stripe Checkout session.
+ * Mark registration paid from a confirmed Square order/payment.
  * Returns the registration id that received access, or null if nothing was updated.
  */
 export async function grantAccessFromCheckoutSession(
@@ -80,8 +80,8 @@ export async function grantAccessFromCheckoutSession(
 ): Promise<{ registrationId: string; alreadyPaid: boolean } | null> {
   if (!isCheckoutPaid(session)) return null;
 
-  if (options.requireAmountAndCurrencyMatch && !hasExpectedStripePricingForSession(session)) {
-    console.error("[BelKou] Stripe pricing verification failed", {
+  if (options.requireAmountAndCurrencyMatch && !hasExpectedCheckoutPricing(session)) {
+    console.error("[BelKou] Checkout pricing verification failed", {
       sessionId: session.id,
       expectedAmountCents: session.metadata?.expectedAmountCents,
       amountTotal: session.amount_total,
@@ -93,7 +93,7 @@ export async function grantAccessFromCheckoutSession(
 
   const record = await resolveRegistrationForCheckout(db, session, options);
   if (!record) {
-    console.error("[BelKou] Stripe paid but no registration found for session", {
+    console.error("[BelKou] Checkout paid but no registration found for order", {
       sessionId: session.id,
       registrationId: session.metadata?.registrationId,
       email: maskEmail(session.customer_email ?? session.customer_details?.email ?? ""),
@@ -138,8 +138,8 @@ function maskEmail(value: string): string {
   return `${safeName}@${domain}`;
 }
 
-/** Heal pending enrollments that Stripe already marked paid (webhook miss / D1 lag). */
-export async function reconcilePendingStripePaymentsForEmail(
+/** Heal pending enrollments that Square already completed (webhook miss / lag). */
+export async function reconcilePendingCheckoutPaymentsForEmail(
   db: D1Database | null,
   email: string,
 ): Promise<number> {
@@ -157,9 +157,12 @@ export async function reconcilePendingStripePaymentsForEmail(
       const result = await grantAccessFromCheckoutSession(db, session);
       if (result && !result.alreadyPaid) healed += 1;
     } catch (error) {
-      console.warn("[BelKou] Stripe reconcile failed for", row.id, error);
+      console.warn("[BelKou] Checkout reconcile failed for", row.id, error);
     }
   }
 
   return healed;
 }
+
+/** @deprecated Use reconcilePendingCheckoutPaymentsForEmail */
+export const reconcilePendingStripePaymentsForEmail = reconcilePendingCheckoutPaymentsForEmail;

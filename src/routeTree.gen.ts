@@ -36,7 +36,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ForumCourseSlugIndexRouteImport } from './routes/forum/$courseSlug/index'
 import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$courseSlug/$postId'
 import { Route as CoursesSlugLearnRouteImport } from './routes/courses/$slug/learn'
-import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as ApiSquareWebhookRouteImport } from './routes/api/square/webhook'
 import { Route as ApiAdminUploadVideoRouteImport } from './routes/api/admin/upload-video'
 
 const SuccessRoute = SuccessRouteImport.update({
@@ -174,9 +174,9 @@ const CoursesSlugLearnRoute = CoursesSlugLearnRouteImport.update({
   path: '/learn',
   getParentRoute: () => CoursesSlugRoute,
 } as any)
-const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
-  id: '/api/stripe/webhook',
-  path: '/api/stripe/webhook',
+const ApiSquareWebhookRoute = ApiSquareWebhookRouteImport.update({
+  id: '/api/square/webhook',
+  path: '/api/square/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminUploadVideoRoute = ApiAdminUploadVideoRouteImport.update({
@@ -211,7 +211,7 @@ export interface FileRoutesByFullPath {
   '/live/': typeof LiveIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
-  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
@@ -242,7 +242,7 @@ export interface FileRoutesByTo {
   '/live': typeof LiveIndexRoute
   '/services': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
-  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug': typeof ForumCourseSlugIndexRoute
@@ -274,7 +274,7 @@ export interface FileRoutesById {
   '/live/': typeof LiveIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/api/admin/upload-video': typeof ApiAdminUploadVideoRoute
-  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/api/square/webhook': typeof ApiSquareWebhookRoute
   '/courses/$slug/learn': typeof CoursesSlugLearnRoute
   '/forum/$courseSlug/$postId': typeof ForumCourseSlugPostIdRoute
   '/forum/$courseSlug/': typeof ForumCourseSlugIndexRoute
@@ -307,7 +307,7 @@ export interface FileRouteTypes {
     | '/live/'
     | '/services/'
     | '/api/admin/upload-video'
-    | '/api/stripe/webhook'
+    | '/api/square/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug/'
@@ -338,7 +338,7 @@ export interface FileRouteTypes {
     | '/live'
     | '/services'
     | '/api/admin/upload-video'
-    | '/api/stripe/webhook'
+    | '/api/square/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug'
@@ -369,7 +369,7 @@ export interface FileRouteTypes {
     | '/live/'
     | '/services/'
     | '/api/admin/upload-video'
-    | '/api/stripe/webhook'
+    | '/api/square/webhook'
     | '/courses/$slug/learn'
     | '/forum/$courseSlug/$postId'
     | '/forum/$courseSlug/'
@@ -401,7 +401,7 @@ export interface RootRouteChildren {
   LiveIndexRoute: typeof LiveIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   ApiAdminUploadVideoRoute: typeof ApiAdminUploadVideoRoute
-  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiSquareWebhookRoute: typeof ApiSquareWebhookRoute
   ForumCourseSlugPostIdRoute: typeof ForumCourseSlugPostIdRoute
   ForumCourseSlugIndexRoute: typeof ForumCourseSlugIndexRoute
 }
@@ -597,11 +597,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugLearnRouteImport
       parentRoute: typeof CoursesSlugRoute
     }
-    '/api/stripe/webhook': {
-      id: '/api/stripe/webhook'
-      path: '/api/stripe/webhook'
-      fullPath: '/api/stripe/webhook'
-      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+    '/api/square/webhook': {
+      id: '/api/square/webhook'
+      path: '/api/square/webhook'
+      fullPath: '/api/square/webhook'
+      preLoaderRoute: typeof ApiSquareWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/upload-video': {
@@ -652,7 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   LiveIndexRoute: LiveIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   ApiAdminUploadVideoRoute: ApiAdminUploadVideoRoute,
-  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiSquareWebhookRoute: ApiSquareWebhookRoute,
   ForumCourseSlugPostIdRoute: ForumCourseSlugPostIdRoute,
   ForumCourseSlugIndexRoute: ForumCourseSlugIndexRoute,
 }

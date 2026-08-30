@@ -14,7 +14,7 @@ import {
   updateRegistrationPayment,
 } from "@/server/db";
 import { checkRateLimit, RATE_LIMITS } from "@/server/rate-limit";
-import { createCheckoutSession } from "@/server/stripe";
+import { createPaymentLink } from "@/server/square";
 import { paymentConfirmedEmail, registrationPendingEmail, sendEmail } from "@/server/email";
 import type { PlanId } from "@/lib/site-config";
 import { attributeReferral, earnAffiliateCommission } from "@/server/affiliates";
@@ -23,6 +23,7 @@ import { LEGACY_COURSE_SLUG, VIP_MEMBERSHIP_SLUG } from "@/lib/course-access";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
 import { liveTicketSlug, parseLiveTicketSlug, resolveLivePrice } from "@/lib/live";
 import { getWelcomePreviewLesson } from "@/lib/courses";
+import { hasCheckoutOrderProof } from "@/lib/registration-status-access";
 
 function manualPaymentHtml() {
   const lines: string[] = ["<p><strong>Paiement manuel :</strong></p><ul>"];
@@ -122,7 +123,7 @@ async function startCheckout(
   const alreadyPaid = record.payment_status === "paid";
 
   try {
-    const session = await createCheckoutSession({
+    const session = await createPaymentLink({
       registrationId: record.id,
       plan: intendedPlan,
       email: record.email,
@@ -142,7 +143,7 @@ async function startCheckout(
       await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
     }
   } catch (error) {
-    console.error("Stripe checkout error:", error);
+    console.error("Square checkout error:", error);
     if (!alreadyPaid) {
       await updateRegistrationPayment(db, record.id, { payment_status: "manual_pending" });
     }
@@ -300,6 +301,7 @@ export const getRegistrationStatus = createServerFn({ method: "GET" })
     z
       .object({
         registrationId: z.string().min(1),
+        /** Square order id (URL orderId / legacy session_id). Required for any status. */
         sessionId: z.string().optional(),
       })
       .parse(data),
@@ -310,45 +312,41 @@ export const getRegistrationStatus = createServerFn({ method: "GET" })
     const record = await getRegistrationById(db, data.registrationId);
     if (!record) return null;
 
-    const base = {
+    // No checkout order proof → no plan/payment/PII (UUID alone is not authorization).
+    if (!hasCheckoutOrderProof(record.stripe_session_id, data.sessionId)) {
+      return null;
+    }
+
+    return {
       id: record.id,
       plan: record.plan,
       payment_status: record.payment_status,
       course_slug: record.course_slug,
-    };
-
-    const sessionId = data.sessionId?.trim();
-    if (!sessionId || !record.stripe_session_id || record.stripe_session_id !== sessionId) {
-      return base;
-    }
-
-    return {
-      ...base,
       full_name: record.full_name,
       email: record.email,
     };
   });
 
-export const verifyStripeSession = createServerFn({ method: "GET" })
+export const verifyCheckoutSession = createServerFn({ method: "GET" })
   .inputValidator((data: { sessionId: string; registrationId: string }) => data)
   .handler(async ({ data }) => {
-    const { getCheckoutSession } = await import("@/server/stripe");
+    const { getCheckoutSession } = await import("@/server/square");
     const { grantAccessFromCheckoutSession, isCheckoutPaid } =
-      await import("@/server/stripe-access");
+      await import("@/server/checkout-access");
     const db = await getDb();
     const record = await getRegistrationById(db, data.registrationId);
     if (record?.stripe_session_id && record.stripe_session_id !== data.sessionId) {
-      console.error("[BelKou] Stripe session mismatch for registration", {
+      console.error("[BelKou] Checkout order mismatch for registration", {
         expectedSessionId: record.stripe_session_id,
         receivedSessionId: data.sessionId,
         registrationId: data.registrationId,
       });
-      return { paid: false as const, plan: record?.plan };
+      return { paid: false as const };
     }
     const session = await getCheckoutSession(data.sessionId);
 
     if (!session || !isCheckoutPaid(session)) {
-      return { paid: false as const, plan: record?.plan };
+      return { paid: false as const };
     }
 
     const plan = (session.metadata?.plan ?? record?.plan) as PlanId | undefined;
@@ -358,7 +356,7 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
         ...session,
         metadata: {
           ...(session.metadata ?? {}),
-          // Prefer the registration from the success URL when Stripe metadata is missing.
+          // Prefer the registration from the success URL when order metadata is missing.
           registrationId: session.metadata?.registrationId || data.registrationId,
         },
       },
@@ -370,11 +368,11 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
     );
 
     if (!granted) {
-      console.error("[BelKou] Stripe session paid but access not granted", {
+      console.error("[BelKou] Checkout paid but access not granted", {
         sessionId: session.id,
         registrationId: data.registrationId,
       });
-      return { paid: false as const, plan: plan ?? record?.plan };
+      return { paid: false as const };
     }
 
     if (!granted.alreadyPaid) {
@@ -438,19 +436,43 @@ export const verifyStripeSession = createServerFn({ method: "GET" })
     return { paid: true as const, plan: plan ?? record?.plan };
   });
 
+/** @deprecated Use verifyCheckoutSession */
+export const verifyStripeSession = verifyCheckoutSession;
+
 export const getSuccessPageContext = createServerFn({ method: "GET" })
-  .inputValidator((data: { registrationId?: string }) => data)
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        registrationId: z.string().optional(),
+        sessionId: z.string().optional(),
+        /** Client-known slug (free/manual success) — public course metadata only. */
+        courseSlug: z.string().optional(),
+      })
+      .parse(data),
+  )
   .handler(async ({ data }) => {
-    if (!data.registrationId) {
-      return { courseSlug: LEGACY_COURSE_SLUG, welcomeLessonId: undefined as string | undefined };
+    const empty = {
+      courseSlug: LEGACY_COURSE_SLUG,
+      welcomeLessonId: undefined as string | undefined,
+    };
+
+    let slug = data.courseSlug?.trim() || undefined;
+
+    if (data.registrationId?.trim() && data.sessionId?.trim()) {
+      const db = await getDb();
+      const record = await getRegistrationById(db, data.registrationId);
+      if (record && hasCheckoutOrderProof(record.stripe_session_id, data.sessionId)) {
+        slug = record.course_slug ?? slug;
+        if (slug === VIP_MEMBERSHIP_SLUG || record.plan === "vip") {
+          return empty;
+        }
+      }
     }
 
-    const db = await getDb();
-    const record = await getRegistrationById(db, data.registrationId);
-    const slug = record?.course_slug ?? LEGACY_COURSE_SLUG;
-    if (slug === VIP_MEMBERSHIP_SLUG || record?.plan === "vip") {
-      return { courseSlug: LEGACY_COURSE_SLUG, welcomeLessonId: undefined as string | undefined };
+    if (!slug || slug === VIP_MEMBERSHIP_SLUG) {
+      return empty;
     }
+
     const course = await getResolvedCourseBySlug(slug);
     const welcome = course ? getWelcomePreviewLesson(course) : undefined;
     return { courseSlug: slug, welcomeLessonId: welcome?.id };

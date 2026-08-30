@@ -36,7 +36,7 @@ const commitments = [
   "Preview gratuite avant achat sur chaque cours du catalogue",
   "Accès à vie au contenu acheté, avec progression sauvegardée",
   "Outils IA modernes : Cursor, Claude, déploiement et bonnes pratiques",
-  "Paiements flexibles : Stripe, PayPal, MonCash, Zelle et virement",
+  "Paiements flexibles : Square, PayPal, MonCash, Zelle et virement",
 ] as const;
 
 export const Route = createFileRoute("/about")({

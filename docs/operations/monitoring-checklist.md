@@ -11,8 +11,8 @@ Detect production failures within minutes, not from user complaints.
    - Alert when status is not `200` for 3 consecutive checks.
 
 2. **Checkout and webhook reliability**
-   - Alert on repeated `"[BelKou] Stripe webhook handler error"` logs.
-   - Alert on repeated `"[BelKou] Stripe pricing verification failed"` logs.
+   - Alert on repeated `"[BelKou] Square webhook handler error"` logs.
+   - Alert on repeated `"[BelKou] Checkout pricing verification failed"` logs.
    - Configure `OPS_ALERT_WEBHOOK_URL` to receive throttled webhook alerts from the app.
 
 3. **Error rate**
@@ -34,4 +34,4 @@ Detect production failures within minutes, not from user complaints.
 - Primary owner: platform maintainer
 - Backup owner: designated admin/support teammate
 
-Both owners should have access to hosting logs and Stripe dashboard alerts.
+Both owners should have access to hosting logs and Square dashboard alerts.

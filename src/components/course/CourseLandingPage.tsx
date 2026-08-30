@@ -603,7 +603,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                       : "Le contenu vidéo sera débloqué automatiquement à la date prévue. En attendant, la vidéo de bienvenue reste accessible."
                     : scheduledSoon
                       ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
-                      : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Stripe, PayPal, MonCash ou cash."}
+                      : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Square, PayPal, MonCash ou cash."}
                 </p>
               </div>
             </section>

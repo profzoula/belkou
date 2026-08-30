@@ -27,8 +27,8 @@ export const getCourseResourceDownloadUrl = createServerFn({ method: "POST" })
 
     const db = await getDb();
     const email = normalizeRegistrationEmail(user.email);
-    const { reconcilePendingStripePaymentsForEmail } = await import("@/server/stripe-access");
-    await reconcilePendingStripePaymentsForEmail(db, email).catch(() => undefined);
+    const { reconcilePendingCheckoutPaymentsForEmail } = await import("@/server/checkout-access");
+    await reconcilePendingCheckoutPaymentsForEmail(db, email).catch(() => undefined);
 
     const rows = await listRegistrationsByEmail(db, email);
     const registration = pickRegistrationForCourse(rows, data.courseSlug);

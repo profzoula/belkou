@@ -27,13 +27,13 @@ expect(
   failures,
 );
 expect(
-  existsSync(join(root, "tests", "stripe-access.test.ts")),
-  "Missing critical test: stripe access",
+  existsSync(join(root, "tests", "checkout-access.test.ts")),
+  "Missing critical test: checkout access",
   failures,
 );
 
-const webhookSource = readText("src/routes/api/stripe/webhook.ts");
-const idempotencySource = readText("src/server/stripe-webhook-idempotency.ts");
+const webhookSource = readText("src/routes/api/square/webhook.ts");
+const idempotencySource = readText("src/server/checkout-webhook-idempotency.ts");
 const supabaseRegistrationsSource = readText("src/server/supabase-registrations.ts");
 expect(
   webhookSource.includes("requireRegistrationMetadata: true"),
@@ -46,12 +46,12 @@ expect(
   failures,
 );
 expect(
-  webhookSource.includes("stripe-webhook-idempotency"),
+  webhookSource.includes("checkout-webhook-idempotency"),
   "Webhook must use shared idempotency module",
   failures,
 );
 expect(
-  idempotencySource.includes("stripe_webhook_events"),
+  idempotencySource.includes("checkout_webhook_events"),
   "Supabase webhook idempotency table integration missing",
   failures,
 );

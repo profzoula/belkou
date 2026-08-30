@@ -21,7 +21,7 @@ import {
   listDistinctCourseSlugsForEmail,
   pickLastAccessedLessonId,
 } from "@/server/lesson-progress";
-import { reconcilePendingStripePaymentsForEmail } from "@/server/stripe-access";
+import { reconcilePendingCheckoutPaymentsForEmail } from "@/server/checkout-access";
 import { getUserFromAccessToken } from "@/server/supabase-auth";
 import { getResolvedCourses } from "@/server/site-content";
 import { isLiveTicketPlan } from "@/lib/schemas/registration";
@@ -73,10 +73,10 @@ export async function loadStudentEnrollmentsWithPlan(
     );
   }
 
-  // Do not block dashboard rendering on Stripe API calls.
+  // Do not block dashboard rendering on Square API calls.
   // Reconciliation still happens in webhook/success verification and can run in the background here.
-  void reconcilePendingStripePaymentsForEmail(db, email).catch((error) => {
-    console.warn("[BelKou] enrollment Stripe reconcile:", error);
+  void reconcilePendingCheckoutPaymentsForEmail(db, email).catch((error) => {
+    console.warn("[BelKou] enrollment Square reconcile:", error);
   });
 
   const registrations = await listRegistrationsByEmail(db, email);

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import {
   getRegistrationStatus,
-  verifyStripeSession,
+  verifyCheckoutSession,
   getSuccessPageContext,
 } from "@/lib/fns/register";
 import { siteConfig, getWhatsappGroupLabel, getWhatsappGroupUrlForCourse } from "@/lib/site-config";
@@ -36,6 +36,10 @@ const searchSchema = z.object({
   registrationId: z.string().optional(),
   plan: z.string().optional(),
   manual: z.string().optional(),
+  /** Known from checkout (free/manual) — public course metadata only. */
+  course: z.string().optional(),
+  /** Square appends orderId on redirect; session_id kept as legacy alias. */
+  orderId: z.string().optional(),
   session_id: z.string().optional(),
 });
 
@@ -51,7 +55,9 @@ export const Route = createFileRoute("/success")({
   loader: async ({ location }) => {
     const params = new URLSearchParams(location.search);
     const registrationId = params.get("registrationId") ?? undefined;
-    return getSuccessPageContext({ data: { registrationId } });
+    const sessionId = params.get("orderId") ?? params.get("session_id") ?? undefined;
+    const courseSlug = params.get("course") ?? undefined;
+    return getSuccessPageContext({ data: { registrationId, sessionId, courseSlug } });
   },
   component: SuccessPage,
 });
@@ -94,33 +100,43 @@ function ManualPaymentInfo() {
 }
 
 function SuccessPage() {
-  const { registrationId, plan, manual, session_id } = Route.useSearch();
+  const { registrationId, plan, manual, session_id, orderId, course } = Route.useSearch();
   const loaderData = Route.useLoaderData();
   const { user, loading: authLoading } = useAuth();
   const statusFn = useServerFn(getRegistrationStatus);
-  const verifyFn = useServerFn(verifyStripeSession);
+  const verifyFn = useServerFn(verifyCheckoutSession);
   const [status, setStatus] = useState<RegistrationStatus | null>(null);
   const [verifiedPaid, setVerifiedPaid] = useState(false);
   const [loading, setLoading] = useState(Boolean(registrationId));
+  const checkoutOrderId = orderId ?? session_id;
 
   useEffect(() => {
-    if (!registrationId) return;
+    if (!registrationId) {
+      setLoading(false);
+      return;
+    }
+
+    // Without a Square order id there is nothing status API is allowed to reveal.
+    if (!checkoutOrderId) {
+      setLoading(false);
+      return;
+    }
 
     void (async () => {
-      if (session_id) {
-        try {
-          const v = await verifyFn({ data: { sessionId: session_id, registrationId } });
-          if (v.paid) setVerifiedPaid(true);
-        } catch (error) {
-          console.error(error);
-        }
+      try {
+        const v = await verifyFn({
+          data: { sessionId: checkoutOrderId, registrationId },
+        });
+        if (v.paid) setVerifiedPaid(true);
+      } catch (error) {
+        console.error(error);
       }
 
       try {
         const r = await statusFn({
           data: {
             registrationId,
-            sessionId: session_id,
+            sessionId: checkoutOrderId,
           },
         });
         setStatus(r);
@@ -130,22 +146,27 @@ function SuccessPage() {
         setLoading(false);
       }
     })();
-  }, [registrationId, session_id, statusFn, verifyFn]);
+  }, [registrationId, checkoutOrderId, statusFn, verifyFn]);
 
-  const isPaid = verifiedPaid || status?.payment_status === "paid";
+  const handoff = typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
+  const handoffMatches =
+    Boolean(handoff?.registrationId) && handoff?.registrationId === registrationId;
+  const isPaid =
+    verifiedPaid ||
+    status?.payment_status === "paid" ||
+    (handoffMatches && handoff?.paid === true);
   const showManual = manual === "1" || status?.payment_status === "manual_pending";
-  const courseSlug = status?.course_slug ?? loaderData.courseSlug ?? LEGACY_COURSE_SLUG;
+  const courseSlug =
+    status?.course_slug ?? loaderData.courseSlug ?? course ?? LEGACY_COURSE_SLUG;
   const welcomeLessonId = loaderData.welcomeLessonId;
   const planId = (status?.plan ?? plan)?.toLowerCase();
   // A live ticket carries its session in the slug, so the confirmation can point
   // back to the exact event instead of the catalogue.
-  const liveSessionId = parseLiveTicketSlug(status?.course_slug);
+  const liveSessionId = parseLiveTicketSlug(status?.course_slug ?? course);
   const whatsappUrl = isPaid ? getWhatsappGroupUrlForCourse(courseSlug, planId) : "";
   const whatsappLabel = getWhatsappGroupLabel(planId);
-  const handoff = typeof window !== "undefined" && registrationId ? getRegistrationHandoff() : null;
   const registrationEmail =
-    status?.email ??
-    (handoff && handoff.registrationId === registrationId ? handoff.email : undefined);
+    status?.email ?? (handoffMatches ? handoff?.email : undefined);
   const emailMatchesUser = emailsMatch(user?.email, registrationEmail);
 
   useEffect(() => {

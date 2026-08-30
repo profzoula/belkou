@@ -8,8 +8,6 @@ interface ImportMetaEnv {
   readonly VITE_WHATSAPP_GROUP_URL?: string;
   readonly VITE_COHORT_START_DATE?: string;
   readonly VITE_STATS_STUDENTS_BASE?: string;
-  readonly VITE_STRIPE_PRICE_PREMIUM?: string;
-  readonly VITE_STRIPE_PRICE_VIP?: string;
   readonly VITE_MONCASH_NUMBER?: string;
   readonly VITE_ZELLE_EMAIL?: string;
   readonly VITE_PAYPAL_EMAIL?: string;
@@ -27,6 +25,7 @@ interface ImportMetaEnv {
   readonly VITE_SITE_URL?: string;
   readonly VITE_SUPABASE_URL?: string;
   readonly VITE_SUPABASE_ANON_KEY?: string;
+  readonly VITE_META_PIXEL_ID?: string;
 }
 
 interface ImportMeta {
@@ -58,13 +57,13 @@ interface D1Database {
 
 interface CloudflareEnv {
   DB?: D1Database;
-  STRIPE_SECRET_KEY?: string;
-  STRIPE_WEBHOOK_SECRET?: string;
+  SQUARE_ACCESS_TOKEN?: string;
+  SQUARE_LOCATION_ID?: string;
+  SQUARE_ENVIRONMENT?: string;
+  SQUARE_WEBHOOK_SIGNATURE_KEY?: string;
   RESEND_API_KEY?: string;
   EMAIL_FROM?: string;
   SITE_URL?: string;
-  STRIPE_PRICE_PREMIUM?: string;
-  STRIPE_PRICE_VIP?: string;
   ADMIN_USERNAME?: string;
   ADMIN_PASSWORD?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;

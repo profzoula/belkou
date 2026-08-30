@@ -1,6 +1,6 @@
 /**
  * Browser security headers applied to every public response.
- * Tuned for Stripe redirects, Google/Supabase OAuth, YouTube/Vimeo embeds,
+ * Tuned for Square redirects, Google/Supabase OAuth, YouTube/Vimeo embeds,
  * HLS playback, and Google Fonts — without opening framing or MIME sniffing.
  */
 export const SECURITY_HEADERS: Record<string, string> = {
@@ -13,7 +13,7 @@ export const SECURITY_HEADERS: Record<string, string> = {
   "Content-Security-Policy": [
     "default-src 'self'",
     "base-uri 'self'",
-    "form-action 'self' https://accounts.google.com https://checkout.stripe.com",
+    "form-action 'self' https://accounts.google.com https://squareup.com https://*.squareup.com https://square.link",
     "frame-ancestors 'self'",
     "object-src 'none'",
     "script-src 'self' 'unsafe-inline' https://connect.facebook.net",
@@ -22,8 +22,8 @@ export const SECURITY_HEADERS: Record<string, string> = {
     "img-src 'self' data: blob: https:",
     "media-src 'self' blob: https:",
     "worker-src 'self' blob:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://www.facebook.com https://connect.facebook.net https://*.facebook.com",
-    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://checkout.stripe.com https://www.facebook.com https://connect.facebook.net",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://www.facebook.com https://connect.facebook.net https://*.facebook.com https://connect.squareup.com https://connect.squareupsandbox.com",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://squareup.com https://*.squareup.com https://square.link https://www.facebook.com https://connect.facebook.net",
     "upgrade-insecure-requests",
   ].join("; "),
 };

@@ -213,13 +213,14 @@ export function CheckoutPage({
       toast[result.free ? "success" : "info"](
         result.free
           ? "Place réservée — rendez-vous le jour du live."
-          : "Stripe indisponible — suivez les instructions de paiement manuel.",
+          : "Square indisponible — suivez les instructions de paiement manuel.",
       );
       navigate({
         to: "/success",
         search: {
           registrationId: result.registrationId,
           plan: result.plan,
+          course: parsed.data.course_slug || undefined,
           manual: result.manualPayment ? "1" : undefined,
         },
       });
@@ -280,7 +281,7 @@ export function CheckoutPage({
               ? liveSessionId
                 ? `Votre place pour ce live${liveScheduleLabel ? ` du ${liveScheduleLabel}` : ""} : le direct, les commentaires et le replay. Les membres VIP y ont déjà accès.`
                 : "Ce live n'est plus disponible. Choisissez une session sur la page Live pour réserver votre place."
-              : "Quelques informations, puis paiement sécurisé via Stripe."}
+              : "Quelques informations, puis paiement sécurisé via Square."}
           </p>
           {isLiveTicket && !liveSessionId ? (
             <Button asChild variant="hero" size="lg" className="mt-4 touch-target">
@@ -612,17 +613,17 @@ export function CheckoutPage({
                 <div>
                   <p className="font-semibold text-sm">Carte bancaire</p>
                   <p className="text-xs text-muted-foreground">
-                    Visa · Mastercard · Amex — via Stripe
+                    Visa · Mastercard · Amex — via Square
                   </p>
                 </div>
               </label>
 
               <p className="rounded-md bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground">
-                Après validation, vous serez redirigé vers <strong>Stripe Checkout</strong> pour
+                Après validation, vous serez redirigé vers <strong>Square Checkout</strong> pour
                 saisir votre carte en toute sécurité. BelKou ne stocke jamais vos données bancaires.
               </p>
               <p className="text-xs text-muted-foreground">
-                Autres options : MonCash, Zelle, PayPal, virement — instructions par email si Stripe
+                Autres options : MonCash, Zelle, PayPal, virement — instructions par email si Square
                 est indisponible.
               </p>
             </section>

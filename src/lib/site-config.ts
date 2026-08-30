@@ -57,12 +57,12 @@ export const siteConfig = {
     premium: {
       name: "Premium",
       price: 199,
-      priceId: import.meta.env.VITE_STRIPE_PRICE_PREMIUM ?? "",
+      priceId: "",
     },
-    vip: { name: "VIP", price: 450, priceId: import.meta.env.VITE_STRIPE_PRICE_VIP ?? "" },
+    vip: { name: "VIP", price: 450, priceId: "" },
     live: { name: "Accès live", price: 9.99, priceId: "" },
   },
-  paymentMethods: ["Stripe (carte bancaire)", "PayPal", "MonCash", "Zelle", "Virement bancaire"],
+  paymentMethods: ["Square (carte bancaire)", "PayPal", "MonCash", "Zelle", "Virement bancaire"],
   manualPayment: {
     moncash: envString(import.meta.env.VITE_MONCASH_NUMBER, ""),
     zelle: envString(import.meta.env.VITE_ZELLE_EMAIL, ""),
