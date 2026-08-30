@@ -3,16 +3,17 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CourseCatalogCard } from "@/components/course/CourseCatalogCard";
 import { FadeIn } from "@/components/motion/FadeIn";
-import { COURSE_CATEGORIES } from "@/lib/course-categories";
+import type { CourseCategory } from "@/lib/course-categories";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { cn } from "@/lib/utils";
 
 type CoursesSectionProps = {
   courses: PublicCourse[];
+  categories: CourseCategory[];
   maxVisible?: number;
 };
 
-export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps) {
+export function CoursesSection({ courses, categories, maxVisible = 6 }: CoursesSectionProps) {
   const [category, setCategory] = useState<string>("all");
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -82,7 +83,7 @@ export function CoursesSection({ courses, maxVisible = 6 }: CoursesSectionProps)
               >
                 Tous
               </button>
-              {COURSE_CATEGORIES.map((item) => (
+              {categories.map((item) => (
                 <button
                   key={item.id}
                   type="button"

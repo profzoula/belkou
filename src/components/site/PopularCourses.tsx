@@ -11,9 +11,9 @@ import {
   Terminal,
 } from "lucide-react";
 import { FadeIn } from "@/components/motion/FadeIn";
-import { COURSE_CATEGORIES, type CourseCategoryId } from "@/lib/course-categories";
+import type { CourseCategory } from "@/lib/course-categories";
 
-const categoryIcons: Record<CourseCategoryId, typeof Package> = {
+const categoryIcons: Record<string, typeof Package> = {
   dropshipping: Package,
   "developpement-app": AppWindow,
   "marketing-digital": Megaphone,
@@ -23,7 +23,11 @@ const categoryIcons: Record<CourseCategoryId, typeof Package> = {
   ebook: BookOpen,
 };
 
-export function PopularCourses() {
+type PopularCoursesProps = {
+  categories: CourseCategory[];
+};
+
+export function PopularCourses({ categories }: PopularCoursesProps) {
   return (
     <section className="py-6 sm:py-12 md:py-16">
       <div className="site-container">
@@ -41,8 +45,8 @@ export function PopularCourses() {
         </FadeIn>
 
         <div className="mt-4 grid grid-cols-4 gap-2.5 sm:mt-8 sm:gap-4 md:gap-5">
-          {COURSE_CATEGORIES.map((category, index) => {
-            const Icon = categoryIcons[category.id];
+          {categories.map((category, index) => {
+            const Icon = categoryIcons[category.id] ?? LayoutGrid;
             return (
               <FadeIn key={category.id} delay={Math.min(index * 0.03, 0.18)}>
                 <Link

@@ -44,7 +44,7 @@ import {
   getCourseDisplayDuration,
   isFreeCourse,
 } from "@/lib/courses";
-import { COURSE_CATEGORIES, normalizeCourseCategories } from "@/lib/course-categories";
+import { normalizeCourseCategories, type CourseCategory } from "@/lib/course-categories";
 import { siteConfig } from "@/lib/site-config";
 import {
   adminAddLesson,
@@ -59,6 +59,7 @@ import {
   adminSetCoursePublished,
   adminUpdateCourse,
   adminUpdateLesson,
+  getAdminCourseCategories,
   getAdminCourses,
   refreshAdminSession,
 } from "@/lib/fns/admin";
@@ -172,6 +173,7 @@ function courseTypeBadge(isBase: boolean) {
 export function AdminCoursesTab() {
   const navigate = useNavigate();
   const loadFn = useServerFn(getAdminCourses);
+  const categoriesFn = useServerFn(getAdminCourseCategories);
   const refreshSessionFn = useServerFn(refreshAdminSession);
   const saveLessonFn = useServerFn(adminUpdateLesson);
   const saveCourseFn = useServerFn(adminUpdateCourse);
@@ -188,6 +190,7 @@ export function AdminCoursesTab() {
   const deleteFn = useServerFn(adminDeleteCourse);
 
   const [courses, setCourses] = useState<AdminCourse[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<CourseCategory[]>([]);
   const [view, setView] = useState<"catalog" | "edit">("catalog");
   const [activeTab, setActiveTab] = useState<AdminCourseTab>("published");
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
@@ -258,8 +261,9 @@ export function AdminCoursesTab() {
     setLoading(true);
     try {
       if (!(await ensureAdminSession())) return;
-      const result = await loadFn();
+      const [result, categoryResult] = await Promise.all([loadFn(), categoriesFn()]);
       setCourses(result.courses);
+      setCategoryOptions(categoryResult.categories);
       syncDrafts(result.courses);
     } catch (error) {
       handleAdminError(error, "Chargement impossible");
@@ -872,7 +876,7 @@ export function AdminCoursesTab() {
             <div className="space-y-1.5 sm:col-span-2">
               <Label>Catégories</Label>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {COURSE_CATEGORIES.map((category) => {
+                {categoryOptions.map((category) => {
                   const checked = metaDraft.categories.includes(category.id);
                   return (
                     <label
@@ -900,6 +904,11 @@ export function AdminCoursesTab() {
                     </label>
                   );
                 })}
+                {categoryOptions.length === 0 ? (
+                  <p className="text-xs text-muted-foreground sm:col-span-2">
+                    Aucune catégorie — créez-en dans le menu Category.
+                  </p>
+                ) : null}
               </div>
               <p className="text-xs text-muted-foreground">
                 Ces catégories apparaissent dans « Cours populaires » sur l&apos;accueil.

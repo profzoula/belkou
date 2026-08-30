@@ -13,7 +13,7 @@ import { CTA } from "@/components/site/CTA";
 import { Footer } from "@/components/site/Footer";
 import { VipUnlimitedCta } from "@/components/site/VipUnlimitedCta";
 import { getStudentCount } from "@/lib/fns/stats";
-import { getPublicCourses } from "@/lib/fns/courses";
+import { getPublicCourseCategories, getPublicCourses } from "@/lib/fns/courses";
 import { getPublicServices } from "@/lib/fns/services";
 import { listPublicLiveSessions } from "@/lib/fns/live";
 import { serializableToServiceItem } from "@/lib/service-storage";
@@ -29,16 +29,19 @@ export const Route = createFileRoute("/")({
       path: "/",
     }),
   loader: async () => {
-    const [studentCount, publicCourses, publicServices, liveSessions] = await Promise.all([
-      getStudentCount(),
-      getPublicCourses(),
-      getPublicServices(),
-      // The landing page must render even if the live system is having a bad day.
-      listPublicLiveSessions().catch(() => []),
-    ]);
+    const [studentCount, publicCourses, categories, publicServices, liveSessions] =
+      await Promise.all([
+        getStudentCount(),
+        getPublicCourses(),
+        getPublicCourseCategories(),
+        getPublicServices(),
+        // The landing page must render even if the live system is having a bad day.
+        listPublicLiveSessions().catch(() => []),
+      ]);
     return {
       studentCount,
       courses: publicCourses,
+      categories,
       services: publicServices,
       liveSessions,
     };
@@ -47,7 +50,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { studentCount, courses, services, liveSessions } = Route.useLoaderData();
+  const { studentCount, courses, categories, services, liveSessions } = Route.useLoaderData();
 
   const upcomingCourses = courses.filter((course) => isScheduledInFuture(course));
   const serviceItems = services.map(serializableToServiceItem);
@@ -60,7 +63,7 @@ function Index() {
         <Hero studentCount={studentCount} />
       </div>
       <main id="main-content" className="max-w-full overflow-x-hidden">
-        <CoursesSection courses={courses} />
+        <CoursesSection courses={courses} categories={categories} />
         <LiveEventsSection sessions={liveSessions} />
         <TrustStrip />
         <ServicesSection services={serviceItems} />

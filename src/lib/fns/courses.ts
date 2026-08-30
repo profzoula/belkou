@@ -73,6 +73,11 @@ export const getPublicCourses = createServerFn({ method: "GET" }).handler(async 
   });
 });
 
+export const getPublicCourseCategories = createServerFn({ method: "GET" }).handler(async () => {
+  const { getResolvedCourseCategories } = await import("@/server/site-content");
+  return getResolvedCourseCategories();
+});
+
 export const getEnrolledCourse = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

@@ -63,6 +63,7 @@ const COURSE_OVERRIDES_KEY = "course_overrides";
 const ADMIN_COURSES_KEY = "admin_courses";
 const ADMIN_SERVICES_KEY = "admin_services";
 const SITE_SETTINGS_KEY = "site_settings";
+const COURSE_CATEGORIES_KEY = "course_categories";
 
 function isMissingTable(message: string): boolean {
   return (
@@ -377,6 +378,29 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
 export async function saveSiteSettings(settings: SiteSettings) {
   return writeJson(SITE_SETTINGS_KEY, settings);
+}
+
+export async function getResolvedCourseCategories() {
+  const { DEFAULT_COURSE_CATEGORIES, sanitizeCategoryList } =
+    await import("@/lib/course-categories");
+  const stored = await readJson<unknown>(COURSE_CATEGORIES_KEY, null);
+  const custom = sanitizeCategoryList(stored);
+  return custom.length > 0 ? custom : [...DEFAULT_COURSE_CATEGORIES];
+}
+
+export async function saveCourseCategories(
+  categories: Array<{ id: string; label: string }>,
+) {
+  const { sanitizeCategoryList } = await import("@/lib/course-categories");
+  const cleaned = sanitizeCategoryList(categories);
+  if (cleaned.length === 0) {
+    return { ok: false as const, reason: "Ajoutez au moins une catégorie" };
+  }
+  const result = await writeJson(COURSE_CATEGORIES_KEY, cleaned);
+  if (!result.ok) {
+    return { ok: false as const, reason: result.reason ?? "Sauvegarde impossible" };
+  }
+  return { ok: true as const, categories: cleaned };
 }
 
 export async function updateLessonOverride(params: {

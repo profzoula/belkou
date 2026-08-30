@@ -153,72 +153,63 @@ export const getAdminDashboard = createServerFn({ method: "GET" }).handler(async
 export const getAdminOverview = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
   const db = await getDb();
-  const { getResolvedCourses, getServiceBookings } = await import("@/server/site-content");
-  const { lessonHasVideo } = await import("@/lib/courses");
-  const [registrations, stats, courses, serviceBookings, affiliateSummary] = await Promise.all([
+  const { getResolvedCourses } = await import("@/server/site-content");
+  const { siteConfig } = await import("@/lib/site-config");
+  const [registrations, stats, courses, affiliateSummary] = await Promise.all([
     listRegistrations(db),
     getRegistrationStats(db),
     getResolvedCourses(),
-    getServiceBookings(),
     import("@/server/affiliates")
       .then((mod) => mod.getAdminAffiliateSummary())
-      .catch(() => ({ affiliateCount: 0, pendingWithdrawals: 0 })),
+      .catch(() => ({
+        affiliateCount: 0,
+        pendingWithdrawals: 0,
+        totalCommissionUsd: 0,
+      })),
   ]);
 
-  let totalLessons = 0;
-  let videoLessons = 0;
-  let lessonsWithoutVideo = 0;
-  let previewLessons = 0;
+  const coursePriceBySlug = new Map(
+    courses.map((course) => [course.slug, Math.max(0, Number(course.price) || 0)] as const),
+  );
 
-  const courseSummaries = courses.map((course) => {
-    const lessons = course.sections.flatMap((section) => section.lessons);
-    const videos = lessons.filter((lesson) => lesson.type === "video");
-    const missingVideo = videos.filter((lesson) => !lessonHasVideo(lesson)).length;
-    const previews = lessons.filter((lesson) => lesson.preview).length;
+  const estimatePaidAmount = (reg: (typeof registrations)[number]): number => {
+    if (reg.payment_status !== "paid") return 0;
+    if (reg.plan === "vip") return siteConfig.plans.vip.price;
+    if (reg.plan === "live") return siteConfig.plans.live.price;
+    if (reg.course_slug) {
+      const coursePrice = coursePriceBySlug.get(reg.course_slug);
+      if (coursePrice != null) return coursePrice;
+    }
+    return siteConfig.plans.premium.price;
+  };
 
-    totalLessons += lessons.length;
-    videoLessons += videos.length;
-    lessonsWithoutVideo += missingVideo;
-    previewLessons += previews;
-
-    return {
-      slug: course.slug,
-      title: course.title,
-      plan: course.plan ?? "premium",
-      lessonCount: lessons.length,
-      videoCount: videos.length,
-      missingVideo,
-    };
-  });
-
-  const affiliateCount = affiliateSummary.affiliateCount;
-  const pendingWithdrawals = affiliateSummary.pendingWithdrawals;
+  const totalIncomeUsd = registrations.reduce((sum, reg) => sum + estimatePaidAmount(reg), 0);
 
   return {
-    stats,
-    content: {
-      courseCount: courses.length,
-      totalLessons,
-      videoLessons,
-      lessonsWithoutVideo,
-      previewLessons,
-      courses: courseSummaries,
+    stats: {
+      total: stats.total,
+      paid: stats.paid,
+      pending: stats.pending + stats.manual_pending,
+      vip: stats.vip,
+    },
+    finance: {
+      totalIncomeUsd,
+      totalCommissionUsd: affiliateSummary.totalCommissionUsd,
+      paidRegistrations: stats.paid,
     },
     affiliate: {
-      affiliateCount,
-      pendingWithdrawals,
+      affiliateCount: affiliateSummary.affiliateCount,
+      pendingWithdrawals: affiliateSummary.pendingWithdrawals,
     },
-    services: {
-      newBookings: serviceBookings.filter((booking) => booking.status === "new").length,
-      totalBookings: serviceBookings.length,
-    },
-    recentRegistrations: registrations.slice(0, 8).map((r) => ({
+    recentRegistrations: registrations.slice(0, 12).map((r) => ({
       id: r.id,
       full_name: r.full_name,
       email: r.email,
       country: r.country,
       plan: r.plan,
       payment_status: r.payment_status,
+      course_slug: r.course_slug,
+      amount_usd: estimatePaidAmount(r),
       created_at: r.created_at,
     })),
   };
@@ -708,12 +699,18 @@ export const adminUpdateCourse = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     await requireAdmin();
-    const { updateCourseMeta, getResolvedCourses } = await import("@/server/site-content");
+    const { updateCourseMeta, getResolvedCourses, getResolvedCourseCategories } =
+      await import("@/server/site-content");
     const { normalizeCourseCategories } = await import("@/lib/course-categories");
     const { courseSlug, categories, ...rest } = data;
+    const allowed = categories
+      ? (await getResolvedCourseCategories()).map((c) => c.id)
+      : undefined;
     const patch = {
       ...rest,
-      ...(categories !== undefined ? { categories: normalizeCourseCategories(categories) } : {}),
+      ...(categories !== undefined
+        ? { categories: normalizeCourseCategories(categories, allowed) }
+        : {}),
     };
 
     const result = await updateCourseMeta({ courseSlug, patch });
@@ -1059,6 +1056,40 @@ export const getAdminSiteSettings = createServerFn({ method: "GET" }).handler(as
   const settings = await getSiteSettings();
   return { settings, defaults: getDefaultSiteSettings() };
 });
+
+export const getAdminCourseCategories = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getResolvedCourseCategories } = await import("@/server/site-content");
+  const { DEFAULT_COURSE_CATEGORIES } = await import("@/lib/course-categories");
+  const categories = await getResolvedCourseCategories();
+  return { categories, defaults: DEFAULT_COURSE_CATEGORIES };
+});
+
+export const adminSaveCourseCategories = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        categories: z
+          .array(
+            z.object({
+              id: z.string().min(2).max(48),
+              label: z.string().trim().min(2).max(80),
+            }),
+          )
+          .min(1)
+          .max(40),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { saveCourseCategories } = await import("@/server/site-content");
+    const result = await saveCourseCategories(data.categories);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+    return { ok: true as const, categories: result.categories };
+  });
 
 export const adminSaveSiteSettings = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>

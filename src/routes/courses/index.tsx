@@ -11,12 +11,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
 import { isFreeCourse } from "@/lib/courses";
-import {
-  COURSE_CATEGORIES,
-  getCourseCategoryLabel,
-  isCourseCategoryId,
-} from "@/lib/course-categories";
-import { getPublicCourses } from "@/lib/fns/courses";
+import { getCourseCategoryLabel, isCourseCategoryId } from "@/lib/course-categories";
+import { getPublicCourseCategories, getPublicCourses } from "@/lib/fns/courses";
 import { seoHead } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
@@ -34,8 +30,11 @@ export const Route = createFileRoute("/courses/")({
     }),
   validateSearch: searchSchema,
   loader: async () => {
-    const publicCourses = await getPublicCourses();
-    return { courses: publicCourses };
+    const [publicCourses, categories] = await Promise.all([
+      getPublicCourses(),
+      getPublicCourseCategories(),
+    ]);
+    return { courses: publicCourses, categories };
   },
   component: CoursesIndexPage,
 });
@@ -44,10 +43,13 @@ type PriceFilter = "all" | "paid" | "free";
 type LayoutMode = "grid" | "row";
 
 function CoursesIndexPage() {
-  const { courses } = Route.useLoaderData();
+  const { courses, categories } = Route.useLoaderData();
   const navigate = Route.useNavigate();
   const search = Route.useSearch();
-  const categoryFilter = isCourseCategoryId(search.category ?? "") ? search.category : undefined;
+  const allowedIds = categories.map((c) => c.id);
+  const categoryFilter = isCourseCategoryId(search.category ?? "", allowedIds)
+    ? search.category
+    : undefined;
 
   const [query, setQuery] = useState(search.q ?? "");
   const [priceFilter, setPriceFilter] = useState<PriceFilter>("all");
@@ -100,7 +102,7 @@ function CoursesIndexPage() {
               </p>
               <h1 className="mt-3 max-w-2xl font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
                 {categoryFilter
-                  ? getCourseCategoryLabel(categoryFilter)
+                  ? getCourseCategoryLabel(categoryFilter, categories)
                   : "Trouvez le parcours qui vous fait avancer"}
               </h1>
               <p className="mt-4 max-w-2xl text-muted-foreground md:text-lg">
@@ -137,7 +139,7 @@ function CoursesIndexPage() {
                   onClick={clearCategory}
                   className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-primary bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
                 >
-                  {getCourseCategoryLabel(categoryFilter)}
+                  {getCourseCategoryLabel(categoryFilter, categories)}
                   <X className="h-3.5 w-3.5" aria-hidden />
                 </button>
               ) : null}
@@ -195,7 +197,7 @@ function CoursesIndexPage() {
                 aria-label="Filtrer par catégorie"
               >
                 <option value="all">Toutes les catégories</option>
-                {COURSE_CATEGORIES.map((category) => (
+                {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.label}
                   </option>

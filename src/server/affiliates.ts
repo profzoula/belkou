@@ -984,23 +984,31 @@ export type AffiliateAdminRow = {
 export async function getAdminAffiliateSummary(): Promise<{
   affiliateCount: number;
   pendingWithdrawals: number;
+  totalCommissionUsd: number;
 }> {
   const sb = getSupabaseAdmin();
   if (!sb || !(await checkAffiliateTables(sb))) {
-    return { affiliateCount: 0, pendingWithdrawals: 0 };
+    return { affiliateCount: 0, pendingWithdrawals: 0, totalCommissionUsd: 0 };
   }
 
-  const [affiliatesRes, pendingRes] = await Promise.all([
+  const [affiliatesRes, pendingRes, commissionsRes] = await Promise.all([
     sb.from("affiliates").select("id", { count: "exact", head: true }),
     sb
       .from("affiliate_withdrawals")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
+    sb.from("affiliate_referrals").select("amount_usd"),
   ]);
+
+  const totalCommissionUsd = (commissionsRes.data ?? []).reduce(
+    (sum, row) => sum + (Number(row.amount_usd) || 0),
+    0,
+  );
 
   return {
     affiliateCount: affiliatesRes.count ?? 0,
     pendingWithdrawals: pendingRes.error ? 0 : (pendingRes.count ?? 0),
+    totalCommissionUsd,
   };
 }
 

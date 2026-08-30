@@ -12,6 +12,7 @@ import {
   Radio,
   RefreshCw,
   Settings,
+  Tags,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 export type AdminSection =
   | "overview"
   | "courses"
+  | "categories"
   | "videos"
   | "live"
   | "services"
@@ -42,6 +44,7 @@ const navItems: {
   { id: "vip", label: "VIP", icon: Crown, group: "ops" },
   { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
   { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
+  { id: "categories", label: "Category", icon: Tags, group: "catalog" },
   { id: "live", label: "Live", icon: Radio, group: "catalog" },
   { id: "videos", label: "Vidéos", icon: Film, group: "catalog" },
   { id: "services", label: "Services", icon: Briefcase, group: "catalog" },
