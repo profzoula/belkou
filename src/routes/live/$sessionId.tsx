@@ -133,11 +133,12 @@ function LiveSessionPage() {
     };
   }, [listFn]);
 
+  const free = Boolean(live && live.liveTicketPrice <= 0);
   const showPlayer = Boolean(
     live &&
-    live.canWatch &&
-    live.playbackUrl &&
-    (live.status === "live" || live.status === "ended"),
+      live.canWatch &&
+      live.playbackUrl &&
+      (free || live.status === "live" || live.status === "ended"),
   );
 
   return (

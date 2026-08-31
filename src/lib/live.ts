@@ -39,6 +39,10 @@ export function formatLivePrice(priceUsd?: number | null): string {
   return formatUsd(price);
 }
 
+export function isFreeLivePrice(priceUsd?: number | null): boolean {
+  return resolveLivePrice(priceUsd) <= 0;
+}
+
 /**
  * Button label that reads as one phrase — "Réserver pour $19.99" — instead of an
  * action and a price stapled together by a dash.
@@ -125,6 +129,23 @@ export type PublicLiveSession = Omit<LiveSession, "playbackUrl"> & {
   reservedCount: number;
   course: LiveCourseInfo;
 };
+
+/** The free live shown as a YouTube-style stage — never as a catalog card. */
+export function pickFeaturedFreeLive(
+  sessions: PublicLiveListItem[],
+): PublicLiveListItem | null {
+  const free = sessions.filter((session) => session.ticketPrice <= 0);
+  return (
+    free.find((session) => session.status === "live") ??
+    free.find((session) => session.status === "scheduled") ??
+    free.find((session) => session.status === "ended") ??
+    null
+  );
+}
+
+export function paidLiveSessions(sessions: PublicLiveListItem[]): PublicLiveListItem[] {
+  return sessions.filter((session) => session.ticketPrice > 0);
+}
 
 export function liveStatusLabel(status: LiveStatus): string {
   switch (status) {

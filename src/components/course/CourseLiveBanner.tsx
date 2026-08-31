@@ -22,13 +22,14 @@ export function CourseLiveBanner({ courseSlug }: { courseSlug: string }) {
     listFn()
       .then((sessions) => {
         if (cancelled) return;
-        const forCourse = sessions.filter((session) => session.courseSlug === courseSlug);
+        const paid = sessions.filter((session) => session.ticketPrice > 0);
+        const forCourse = paid.filter((session) => session.courseSlug === courseSlug);
         const live =
           forCourse.find((session) => session.status === "live") ??
-          sessions.find((session) => session.status === "live");
+          paid.find((session) => session.status === "live");
         const next =
           forCourse.find((session) => session.status === "scheduled") ??
-          sessions.find((session) => session.status === "scheduled");
+          paid.find((session) => session.status === "scheduled");
         setItem(live ?? next ?? null);
       })
       .catch(() => undefined);

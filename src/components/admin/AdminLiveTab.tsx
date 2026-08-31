@@ -239,7 +239,7 @@ export function AdminLiveTab() {
       setSessions(result.sessions);
       setTitle("");
       setPlaybackUrl("");
-      toast.success("Live gratuit créé — cliquez Démarrer pour diffuser");
+      toast.success("Live gratuit en direct — ouvert sur /live");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Création impossible");
     } finally {

@@ -16,13 +16,14 @@ function byScheduledAsc(a: PublicLiveListItem, b: PublicLiveListItem) {
 }
 
 export function LiveEventsSection({ sessions }: LiveEventsSectionProps) {
-  const liveNow = sessions.filter((session) => session.status === "live");
+  const paid = sessions.filter((session) => session.ticketPrice > 0);
+  const liveNow = paid.filter((session) => session.status === "live");
   // Sessions arrive newest-first, which would put the most distant date at the top of a
   // teaser that only shows three. The next one to sell is the one closest to starting.
-  const upcoming = sessions
+  const upcoming = paid
     .filter((session) => session.status === "scheduled")
     .sort(byScheduledAsc);
-  const replays = sessions.filter((session) => session.status === "ended");
+  const replays = paid.filter((session) => session.status === "ended");
 
   const featured = [...liveNow, ...upcoming, ...replays].slice(0, MAX_VISIBLE);
   if (featured.length === 0) return null;

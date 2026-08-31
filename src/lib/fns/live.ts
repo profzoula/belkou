@@ -224,7 +224,12 @@ function toPublicSession(
   if (!session) {
     throw new Error("Live introuvable.");
   }
-  const canSeeStream = access.canWatch && (session.status === "live" || session.status === "ended");
+  const free = resolveLivePrice(session.priceUsd) <= 0;
+  const canSeeStream =
+    access.canWatch &&
+    (session.status === "live" ||
+      session.status === "ended" ||
+      (free && session.status === "scheduled"));
   return {
     ...session,
     // An ended event plays its recording or nothing at all. Falling back to the live URL
@@ -515,8 +520,10 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
       thumbnailUrl = upload.publicUrl;
     }
 
-    const { createLiveSession, listLiveSessions } = await import("@/server/live");
-    await createLiveSession({
+    const { createLiveSession, listLiveSessions, updateLiveSession } = await import(
+      "@/server/live"
+    );
+    const created = await createLiveSession({
       courseSlug: STANDALONE_LIVE_SLUG,
       title: data.title,
       description: data.description,
@@ -526,6 +533,12 @@ export const adminCreateLiveSession = createServerFn({ method: "POST" })
       thumbnailUrl,
       priceUsd: data.priceUsd ?? null,
     });
+    if (resolveLivePrice(data.priceUsd) <= 0) {
+      await updateLiveSession(created.id, {
+        status: "live",
+        startedAt: created.startedAt ?? new Date().toISOString(),
+      });
+    }
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 

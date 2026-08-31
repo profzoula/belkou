@@ -7,7 +7,7 @@ BelKou jwe yon URL **HTTPS `.m3u8`** (provider `hls`). Sit la pa gen sèvè RTMP
 Deux onglets :
 
 1. **Live Payant** — formulaire complet (date, prix, titre, thumbnail, OBS, description).
-2. **Live Free** — seulement **Titre**, **Source OBS**, **Lien de diffusion** (prix `$0` auto). Puis **Démarrer** dans la liste.
+2. **Live Free** — seulement **Titre**, **Source OBS**, **Lien de diffusion** (prix `$0` auto). Dès la création, le live s’ouvre en player YouTube (vidéo + chat) sur `/live` — jamais en carte.
 
 ## Chemin lokal (MediaMTX + Docker)
 

@@ -8,7 +8,9 @@ export function LiveRelatedRail({
   sessions: PublicLiveListItem[];
   currentId: string;
 }) {
-  const related = sessions.filter((session) => session.id !== currentId).slice(0, 6);
+  const related = sessions
+    .filter((session) => session.id !== currentId && session.ticketPrice > 0)
+    .slice(0, 6);
   if (related.length === 0) return null;
 
   return (
