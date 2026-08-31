@@ -36,11 +36,15 @@ Kontenè `belkou` = `ossrs/srs:6`.
 
 Pa kole `…:1935/…` — 1935 se RTMP, pa HLS.
 
-Lanse SRS si li pa la :
+Lanse SRS (segman HLS 1s — mwens reta) :
 
 ```bat
-docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 ossrs/srs:6
+docker stop belkou
+docker rm belkou
+docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 -v C:/Project/belkou/deploy/srs/srs.conf:/usr/local/srs/conf/srs.conf ossrs/srs:6
 ```
+
+Nan OBS → Sortie → Encodage : **Keyframe 1 seconde** (sinon HLS rete an reta).
 
 ## Altènatif MediaMTX
 
