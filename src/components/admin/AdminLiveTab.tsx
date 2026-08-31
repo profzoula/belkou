@@ -23,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { AdminCourse } from "@/lib/admin-courses";
 import { getAdminCourses } from "@/lib/fns/admin";
@@ -618,21 +617,44 @@ export function AdminLiveTab() {
         description="Live Payant (ticket / VIP) ou Live Free (ouvert sans compte). OBS → BelKou."
       />
 
-      <Tabs
-        value={createTab}
-        onValueChange={(value) => setCreateTab(value as "paid" | "free")}
-        className="space-y-6"
-      >
-        <TabsList className="h-11 w-full justify-start gap-1 rounded-xl bg-muted/80 p-1 sm:w-auto">
-          <TabsTrigger value="paid" className="rounded-lg px-4">
+      <div className="space-y-6">
+        <div
+          className="inline-flex h-11 w-full justify-start gap-1 rounded-xl bg-muted/80 p-1 sm:w-auto"
+          role="tablist"
+          aria-label="Type de live"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={createTab === "paid"}
+            className={cn(
+              "inline-flex items-center justify-center rounded-lg px-4 text-sm font-medium transition-all",
+              createTab === "paid"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+            onClick={() => setCreateTab("paid")}
+          >
             Live Payant
-          </TabsTrigger>
-          <TabsTrigger value="free" className="rounded-lg px-4">
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={createTab === "free"}
+            className={cn(
+              "inline-flex items-center justify-center rounded-lg px-4 text-sm font-medium transition-all",
+              createTab === "free"
+                ? "bg-background text-foreground shadow"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+            onClick={() => setCreateTab("free")}
+          >
             Live Free
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
-        <TabsContent value="paid" className="mt-0 space-y-8">
+        {createTab === "paid" ? (
+          <div className="space-y-8">
           <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
             <h2 className="flex items-center gap-2 font-semibold">
               <CalendarClock className="size-4 text-primary" aria-hidden />
@@ -769,9 +791,9 @@ export function AdminLiveTab() {
             <h2 className="font-semibold">Lives payants</h2>
             {renderSessionList(paidSessions, "paid")}
           </section>
-        </TabsContent>
-
-        <TabsContent value="free" className="mt-0 space-y-8">
+          </div>
+        ) : (
+          <div className="space-y-8">
           <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
             <h2 className="flex items-center gap-2 font-semibold">
               <Radio className="size-4 text-primary" aria-hidden />
@@ -809,8 +831,9 @@ export function AdminLiveTab() {
             <h2 className="font-semibold">Lives gratuits</h2>
             {renderSessionList(freeSessions, "free")}
           </section>
-        </TabsContent>
-      </Tabs>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
