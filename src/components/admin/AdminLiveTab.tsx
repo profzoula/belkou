@@ -454,11 +454,19 @@ export function AdminLiveTab() {
           value={playbackUrl}
           onChange={(event) => setPlaybackUrl(event.target.value)}
           placeholder={
-            provider === "hls" ? "https://….m3u8" : "https://youtube.com/live/…"
+            provider === "hls"
+              ? "http://127.0.0.1:8081/live/stream.m3u8"
+              : "https://youtube.com/live/…"
           }
           className="rounded-xl"
         />
-      </div>
+        {provider === "hls" ? (
+          <p className="text-xs text-muted-foreground">
+            Docker SRS : OBS → <code>rtmp://127.0.0.1:1935/live</code>, BelKou →{" "}
+            <code>http://127.0.0.1:8081/live/stream.m3u8</code> (PC seulement). Sur le site :
+            <code> https://….m3u8</code> public (tunnel Cloudflare ou Mux). Pas le port 1935.
+          </p>
+        ) : null}
     </>
   );
 

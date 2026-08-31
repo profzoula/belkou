@@ -1,6 +1,6 @@
 # Live BelKou — OBS + HLS (Docker local)
 
-BelKou jwe yon URL **HTTPS `.m3u8`** (provider `hls`). Sit la pa gen sèvè RTMP entegre : ou voye stream lan soti nan **OBS** vè YouTube, Vimeo, Mux, Cloudflare, oswa yon **MediaMTX** lokal (Docker).
+BelKou jwe yon URL **`.m3u8`** (provider `hls`). Sit la pa gen sèvè RTMP entegre : OBS voye videyo a nan Docker (SRS oswa MediaMTX), YouTube, Vimeo, Mux, oswa Cloudflare.
 
 ## Admin BelKou
 
@@ -9,45 +9,67 @@ Deux onglets :
 1. **Live Payant** — formulaire complet (date, prix, titre, thumbnail, OBS, description).
 2. **Live Free** — seulement **Titre**, **Source OBS**, **Lien de diffusion** (prix `$0` auto). Dès la création, le live s’ouvre en player YouTube (vidéo + chat) sur `/live` — jamais en carte.
 
-## Chemin lokal (MediaMTX + Docker)
+## Chemin lokal — SRS (sa ki ap mache kounye a)
 
-### 1. Lanse sèvè a (CMD / PowerShell)
+Kontenè `belkou` = `ossrs/srs:6`.
 
-Asire **Docker Desktop** ap mache, epi:
+| Pò sou PC ou | Itilizasyon |
+|--------------|-------------|
+| `1935` | RTMP — sa OBS itilize |
+| `8081` | HLS — sa BelKou bezwen (`.m3u8`) |
+| `1985` | API SRS |
+
+`8888` se pou MediaMTX. **Ou pa gen MediaMTX** — pa itilize 8888.
+
+### OBS
+
+- Service : Custom…
+- Serveur : `rtmp://127.0.0.1:1935/live`
+- Clé : `stream`
+- **Démarrer la diffusion**
+
+### BelKou Admin → Live Free
+
+- Source : HLS
+- Lien : `http://127.0.0.1:8081/live/stream.m3u8`  
+  (si kle OBS te `cours1` → `http://127.0.0.1:8081/live/cours1.m3u8`)
+
+Pa kole `…:1935/…` — 1935 se RTMP, pa HLS.
+
+Lanse SRS si li pa la :
 
 ```bat
-docker run --rm -it -p 1935:1935 -p 8554:8554 -p 8888:8888 -p 8889:8889 bluenviron/mediamtx:latest
+docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 ossrs/srs:6
 ```
 
-| Pò | Itilizasyon |
-|----|-------------|
-| `1935` | RTMP (OBS) |
-| `8888` | HLS (player / BelKou) |
-| `8554` | RTSP (opsyonèl) |
-| `8889` | WebRTC (opsyonèl) |
+## Altènatif MediaMTX
 
-### 2. OBS
+```bat
+docker run --rm -it -p 1935:1935 -p 8888:8888 bluenviron/mediamtx:latest
+```
 
-- **Paramètres → Diffusion → Service :** Custom…
-- **Serveur :** `rtmp://127.0.0.1:1935/live`
-- **Clé de diffusion :** `stream` (oswa nenpòt non san espas)
-- Klike **Démarrer la diffusion**
-
-### 3. BelKou Admin → Live
-
-- **Source OBS :** `HLS (.m3u8 Mux / Cloudflare)`
-- **URL :** `http://127.0.0.1:8888/live/stream/index.m3u8`  
-  (si kle a te `cours1` → `…/live/cours1/index.m3u8`)
-- Pri `0` = gratis san kont (gade + replay lè gen recording)
-- **Créer**, lè ou pare : **Démarrer**
-
-Elèv yo louvri `/live/{sessionId}` — player anlè + chat (ekri = login).
+HLS MediaMTX : `http://127.0.0.1:8888/live/stream/index.m3u8` — **pa melanje ak SRS.**
 
 ### Limit lokal
 
-- `127.0.0.1` mache **sèlman** sou PC kote Docker ap kouri.
-- Pou spektatè sou internet / **belkou.online**, itilize Mux, Cloudflare Stream, oswa yon MediaMTX piblik ak **HTTPS**.
-- Lè ou **Terminer** yon live HLS, manisfè `.m3u8` live a mouri — pa gen replay otomatik ; kole yon nouvo URL (`.m3u8` / YouTube / Vimeo) pou replay.
+- `127.0.0.1:8081` jwe si w ouvri sit la **sou menm PC** (`localhost`). Sou **belkou.online** li bloke.
+- Lè ou **Terminer** yon live HLS, manisfè `.m3u8` live a mouri — pa gen replay otomatik.
+
+## HLS sou belkou.online (toujou HLS, pa YouTube)
+
+Docker rete sou PC ou. Ekspoze pò 8081 an HTTPS ak Cloudflare Tunnel, epi kole lyen sa a nan Admin.
+
+```bat
+cloudflared tunnel --url http://127.0.0.1:8081
+```
+
+Kopiye URL `https://xxxxx.trycloudflare.com` epi nan BelKou mete:
+
+`https://xxxxx.trycloudflare.com/live/stream.m3u8`
+
+BelKou proxye HLS sa a (`/api/hls-proxy`) pou CSP / CORS pa bloke player la.
+
+OBS dwe deja ap diffuse. Altènatif: Mux / Cloudflare Stream (`.m3u8` HTTPS yo ba ou).
 
 ## Chemin pwodiksyon (rekòmande)
 

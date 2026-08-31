@@ -3,6 +3,7 @@ import Hls from "hls.js";
 import { Check, Radio, Settings } from "lucide-react";
 import { YouTubeVideoPlayer } from "@/components/course/YouTubeVideoPlayer";
 import { useCoarsePointer } from "@/hooks/use-coarse-pointer";
+import { sameOriginHlsUrl } from "@/lib/hls-proxy";
 import type { LiveProvider } from "@/lib/live";
 import { SiteLogoMark } from "@/components/site/SiteLogoMark";
 import { cn } from "@/lib/utils";
@@ -17,12 +18,25 @@ type LiveStreamPlayerProps = {
   fill?: boolean;
 };
 
+function isLocalPage() {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1";
+}
+
 function isLocalOrInsecureStream(url: string): boolean {
   try {
     const parsed = new URL(url);
     const host = parsed.hostname;
-    if (host === "127.0.0.1" || host === "localhost" || host.endsWith(".local")) return true;
-    if (typeof window !== "undefined" && window.location.protocol === "https:" && parsed.protocol === "http:") {
+    const localStream =
+      host === "127.0.0.1" || host === "localhost" || host.endsWith(".local");
+    // Local Docker HLS (SRS :8081) can play on the same PC. On belkou.online it cannot.
+    if (localStream) return !isLocalPage();
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol === "https:" &&
+      parsed.protocol === "http:"
+    ) {
       return true;
     }
   } catch {
@@ -253,15 +267,21 @@ export function LiveStreamPlayer({
           <Radio className="size-8 text-red-500" aria-hidden />
           <p className="text-sm font-medium text-white">Le stream HLS n&apos;est pas joignable ici.</p>
           <p className="max-w-md text-xs leading-relaxed text-zinc-400">
-            Un lien <code className="text-zinc-200">127.0.0.1</code> ou HTTP ne joue pas sur
-            belkou.online. Collez un <code className="text-zinc-200">.m3u8</code> HTTPS public
-            (Mux / Cloudflare) ou un lien YouTube Live.
+            HLS lokal (<code className="text-zinc-200">127.0.0.1:8081</code>) jwe sou PC ou
+            sèlman. Pou belkou.online, ekspoze SRS ak Cloudflare Tunnel epi kole yon{" "}
+            <code className="text-zinc-200">https://….m3u8</code> (oswa Mux).
           </p>
         </div>
       );
     }
 
-    return <HlsLivePlayer url={url} title={title} nativeFullscreen={nativeFullscreen} />;
+    return (
+      <HlsLivePlayer
+        url={sameOriginHlsUrl(url)}
+        title={title}
+        nativeFullscreen={nativeFullscreen}
+      />
+    );
   })();
 
   if (!media) return <LivePlayerFallback fill={fill} />;
