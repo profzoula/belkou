@@ -466,6 +466,7 @@ export function AdminLiveTab() {
             <code> https://….m3u8</code> public (tunnel Cloudflare ou Mux). Pas le port 1935.
           </p>
         ) : null}
+      </div>
     </>
   );
 
