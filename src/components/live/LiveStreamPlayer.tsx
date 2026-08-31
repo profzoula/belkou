@@ -17,6 +17,20 @@ type LiveStreamPlayerProps = {
   fill?: boolean;
 };
 
+function isLocalOrInsecureStream(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname;
+    if (host === "127.0.0.1" || host === "localhost" || host.endsWith(".local")) return true;
+    if (typeof window !== "undefined" && window.location.protocol === "https:" && parsed.protocol === "http:") {
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 type QualityLevel = { index: number; height: number };
 
 /** Quality picker for adaptive HLS streams. Hidden when the manifest has a single rendition. */
@@ -117,6 +131,7 @@ function HlsLivePlayer({
     if (video.canPlayType("application/vnd.apple.mpegurl")) {
       // Safari picks the rendition itself and exposes no level API.
       video.src = url;
+      void video.play().catch(() => undefined);
       return;
     }
 
@@ -131,6 +146,7 @@ function HlsLivePlayer({
             .filter((level) => level.height > 0)
             .sort((a, b) => b.height - a.height),
         );
+        void video.play().catch(() => undefined);
       });
       hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
         setAutoHeight(hls.levels[data.level]?.height ?? null);
@@ -228,6 +244,20 @@ export function LiveStreamPlayer({
           allowFullScreen={nativeFullscreen}
           className="absolute inset-0 h-full w-full"
         />
+      );
+    }
+
+    if (isLocalOrInsecureStream(url)) {
+      return (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-zinc-950 px-6 text-center text-zinc-300">
+          <Radio className="size-8 text-red-500" aria-hidden />
+          <p className="text-sm font-medium text-white">Le stream HLS n&apos;est pas joignable ici.</p>
+          <p className="max-w-md text-xs leading-relaxed text-zinc-400">
+            Un lien <code className="text-zinc-200">127.0.0.1</code> ou HTTP ne joue pas sur
+            belkou.online. Collez un <code className="text-zinc-200">.m3u8</code> HTTPS public
+            (Mux / Cloudflare) ou un lien YouTube Live.
+          </p>
+        </div>
       );
     }
 

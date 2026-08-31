@@ -350,6 +350,19 @@ export const listMyLiveSessions = createServerFn({ method: "POST" })
     };
   });
 
+/** Free lives go on air as soon as they are programmed — no extra Démarrer click. */
+async function startFreeIfScheduled(
+  session: NonNullable<Awaited<ReturnType<typeof import("@/server/live").getLiveSession>>>,
+) {
+  if (resolveLivePrice(session.priceUsd) > 0) return session;
+  if (session.status !== "scheduled") return session;
+  const { updateLiveSession } = await import("@/server/live");
+  return updateLiveSession(session.id, {
+    status: "live",
+    startedAt: session.startedAt ?? new Date().toISOString(),
+  });
+}
+
 export const getPublicLiveSession = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z
@@ -361,11 +374,12 @@ export const getPublicLiveSession = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { getLiveSession } = await import("@/server/live");
-    const session = await getLiveSession(data.sessionId);
+    const found = await getLiveSession(data.sessionId);
     // A canceled live still resolves: ticket holders deserve to be told, not 404'd.
-    if (!session) {
+    if (!found) {
       throw new Error("Live introuvable.");
     }
+    const session = await startFreeIfScheduled(found);
     const [withCourse] = await withPublicCourse([session]);
     const [access, reservedCount] = await Promise.all([
       resolveLiveAccess(session.courseSlug, session.id, data.accessToken, session.priceUsd),
