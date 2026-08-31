@@ -25,9 +25,11 @@ type LiveVideoCardProps = {
 export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps) {
   const isLive = session.status === "live";
   const isReplay = session.status === "ended";
+  const free = session.ticketPrice <= 0;
   const countdown = useLiveCountdown(session.scheduledAt, session.status === "scheduled");
   const priceLabel = formatLivePrice(session.ticketPrice);
-  const seats = liveReservedLabel(session.reservedCount);
+  const seats = free ? null : liveReservedLabel(session.reservedCount);
+  const showReservedBadge = reserved && !free;
 
   const dateLine = isLive
     ? "En direct maintenant"
@@ -39,15 +41,21 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
     ? "En ligne · BelKou"
     : `En ligne · ${session.courseTitle}`;
 
-  const ctaLabel = isLive
-    ? reserved
-      ? "Entrer dans le live"
-      : "Regarder en direct"
-    : isReplay
-      ? "Voir le replay"
-      : reserved
-        ? "Place réservée"
-        : liveCtaLabel("Réserver", session.ticketPrice);
+  const ctaLabel = free
+    ? isLive
+      ? "Regarder"
+      : isReplay
+        ? "Voir le replay"
+        : "Voir le live"
+    : isLive
+      ? reserved
+        ? "Entrer dans le live"
+        : "Regarder en direct"
+      : isReplay
+        ? "Voir le replay"
+        : reserved
+          ? "Place réservée"
+          : liveCtaLabel("Réserver", session.ticketPrice);
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -69,7 +77,7 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
               En direct
             </span>
           ) : null}
-          {reserved ? (
+          {showReservedBadge ? (
             <span className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white">
               <Check className="size-3" aria-hidden />
               Réservé
@@ -101,7 +109,7 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
       <div className="mt-auto flex items-center gap-2 px-3 pb-3">
         <Button
           asChild
-          variant={reserved || isReplay ? "secondary" : "default"}
+          variant={free || reserved || isReplay ? "secondary" : "default"}
           className="h-9 flex-1 rounded-lg text-sm"
         >
           <Link to="/live/$sessionId" params={{ sessionId: session.id }}>

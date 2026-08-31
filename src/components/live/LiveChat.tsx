@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 type LiveChatProps = {
   sessionId: string;
+  canWatch?: boolean;
   canComment: boolean;
   live: boolean;
   loggedIn?: boolean;
@@ -33,6 +34,7 @@ function commentTime(iso: string): string {
 
 export function LiveChat({
   sessionId,
+  canWatch = false,
   canComment,
   live,
   loggedIn = false,
@@ -222,14 +224,18 @@ export function LiveChat({
         </form>
       ) : live ? (
         <div className="flex items-center justify-between gap-3 border-t border-zinc-800 px-4 py-3">
-          <p className="text-xs text-zinc-400">Réservez votre place pour commenter.</p>
+          <p className="text-xs text-zinc-400">
+            {canWatch || !loggedIn
+              ? "Connectez-vous pour commenter."
+              : "Réservez votre place pour commenter."}
+          </p>
           <Button asChild size="sm" className="h-8 shrink-0 rounded-full px-3 text-xs">
-            {loggedIn ? (
-              <Link to="/checkout" search={{ plan: "live", session: sessionId }}>
-                Réserver
+            {canWatch || !loggedIn ? (
+              <Link to="/login" search={{ redirect: `/live/${sessionId}` }}>
+                Se connecter
               </Link>
             ) : (
-              <Link to="/login" search={{ redirect: `/live/${sessionId}` }}>
+              <Link to="/checkout" search={{ plan: "live", session: sessionId }}>
                 Réserver
               </Link>
             )}

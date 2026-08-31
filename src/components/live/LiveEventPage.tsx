@@ -143,11 +143,17 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
       ? `Replay disponible · ${formatLiveScheduleShort(live.scheduledAt)}`
       : formatLiveSchedule(live.scheduledAt);
 
-  const ctaLabel = isLive
-    ? liveCtaLabel("Rejoindre le live", live.liveTicketPrice)
-    : isReplay
-      ? liveCtaLabel("Voir le replay", live.liveTicketPrice)
-      : liveCtaLabel("Réserver ma place", live.liveTicketPrice);
+  const ctaLabel = free
+    ? isLive
+      ? "Regarder le live"
+      : isReplay
+        ? "Voir le replay"
+        : "Voir la page du live"
+    : isLive
+      ? liveCtaLabel("Rejoindre le live", live.liveTicketPrice)
+      : isReplay
+        ? liveCtaLabel("Voir le replay", live.liveTicketPrice)
+        : liveCtaLabel("Réserver ma place", live.liveTicketPrice);
 
   const addToCalendar = () =>
     downloadIcs({
@@ -158,7 +164,13 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
       startIso: live.scheduledAt,
     });
 
-  const reserveButton = (
+  const reserveButton = free ? (
+    <Button asChild className="h-11 w-full rounded-xl text-sm font-semibold">
+      <Link to="/live/$sessionId" params={{ sessionId: live.id }}>
+        {ctaLabel}
+      </Link>
+    </Button>
+  ) : (
     <Button asChild className="h-11 w-full rounded-xl text-sm font-semibold">
       {loggedIn ? (
         <Link to="/checkout" search={{ plan: "live", session: live.id }}>
@@ -240,10 +252,14 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
           <Panel padding="md" className="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
             {live.canWatch ? (
               <>
-                <p className="font-display text-lg font-semibold tracking-tight">Place réservée</p>
+                <p className="font-display text-lg font-semibold tracking-tight">
+                  {free ? "Live gratuit" : "Place réservée"}
+                </p>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {live.status === "scheduled"
-                    ? `Cette page ouvre le direct toute seule ${countdown ?? "au démarrage"}.`
+                    ? free
+                      ? "Le player s’ouvrira automatiquement au démarrage — aucun compte requis."
+                      : `Cette page ouvre le direct toute seule ${countdown ?? "au démarrage"}.`
                     : "Le replay se prépare — revenez dans un moment."}
                 </p>
                 {live.status === "scheduled" ? (
@@ -309,7 +325,9 @@ export function LiveEventPage({ live, loggedIn }: LiveEventPageProps) {
                 {live.status === "scheduled" ? " La page bascule toute seule au démarrage." : null}
               </DetailRow>
               <DetailRow icon={Ticket}>
-                {free ? "Gratuit — réservation requise" : `${priceLabel} pour ce live`}
+                {free
+                  ? "Gratuit — accessible sans compte"
+                  : `${priceLabel} pour ce live`}
                 {standalone ? null : (
                   <span className="block text-muted-foreground">
                     Non inclus dans l&apos;achat du cours.

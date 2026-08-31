@@ -423,7 +423,8 @@ export function AdminLiveTab() {
             />
             <p className="text-xs text-muted-foreground">
               Chaque live se paie séparément. Laissez vide pour {formatLivePrice(null)}, ou mettez 0
-              pour un live gratuit sur réservation. Les membres VIP entrent sans payer.
+              pour un live gratuit — accessible sans compte. Les membres VIP entrent sans payer
+              sur les lives payants.
             </p>
           </div>
           <div className="space-y-1.5 md:col-span-2">
@@ -777,7 +778,9 @@ function AdminLivePriceField({
           Prix par défaut ({formatLivePrice(LIVE_TICKET_PRICE_USD)})
         </span>
       ) : saved <= 0 ? (
-        <span className="text-[11px] font-medium text-success">Gratuit sur réservation</span>
+        <span className="text-[11px] font-medium text-success">
+          Live gratuit — accessible sans compte
+        </span>
       ) : null}
     </div>
   );

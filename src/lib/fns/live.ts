@@ -183,19 +183,27 @@ async function ticketOpensSession(
 }
 
 /**
- * A live is its own product: only VIP membership or a ticket for that exact event opens it.
- * Owning the course a live belongs to is not enough — the student still enrolls in the live.
+ * Paid lives need VIP or a ticket for that exact event.
+ * Free lives ($0) are open to watch without an account; commenting still needs login.
  */
 async function resolveLiveAccess(
   courseSlug: string,
   sessionId: string,
-  accessToken?: string,
+  accessToken: string | undefined,
+  priceUsd: number | null | undefined,
 ): Promise<{
   canWatch: boolean;
   canComment: boolean;
   actorUserId?: string;
 }> {
+  const free = resolveLivePrice(priceUsd) <= 0;
   const context = await loadLiveTicketContext(accessToken);
+
+  if (free) {
+    if (!context) return { canWatch: true, canComment: false };
+    return { canWatch: true, canComment: true, actorUserId: context.userId };
+  }
+
   if (!context) return { canWatch: false, canComment: false };
 
   const canWatch = await ticketOpensSession(context, courseSlug, sessionId);
@@ -355,7 +363,7 @@ export const getPublicLiveSession = createServerFn({ method: "POST" })
     }
     const [withCourse] = await withPublicCourse([session]);
     const [access, reservedCount] = await Promise.all([
-      resolveLiveAccess(session.courseSlug, session.id, data.accessToken),
+      resolveLiveAccess(session.courseSlug, session.id, data.accessToken, session.priceUsd),
       countReservedSeats(session.id),
     ]);
     return toPublicSession(withCourse, access, reservedCount);
@@ -376,7 +384,12 @@ export const listLiveComments = createServerFn({ method: "POST" })
     if (!session || session.status === "canceled") {
       throw new Error("Live introuvable.");
     }
-    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
+    const access = await resolveLiveAccess(
+      session.courseSlug,
+      session.id,
+      data.accessToken,
+      session.priceUsd,
+    );
     if (!access.canWatch && session.status === "live") {
       return { comments: [] as const };
     }
@@ -426,9 +439,18 @@ export const postLiveComment = createServerFn({ method: "POST" })
     const user = await getUserFromAccessToken(data.accessToken);
     if (!user?.email || !user.id) throw new Error("Connexion requise.");
 
-    const access = await resolveLiveAccess(session.courseSlug, session.id, data.accessToken);
+    const access = await resolveLiveAccess(
+      session.courseSlug,
+      session.id,
+      data.accessToken,
+      session.priceUsd,
+    );
     if (!access.canComment) {
-      throw new Error("Réservez votre place pour ce live afin de commenter.");
+      throw new Error(
+        resolveLivePrice(session.priceUsd) <= 0
+          ? "Connectez-vous pour commenter."
+          : "Réservez votre place pour ce live afin de commenter.",
+      );
     }
 
     const { normalizeRegistrationEmail } = await import("@/lib/schemas/registration");

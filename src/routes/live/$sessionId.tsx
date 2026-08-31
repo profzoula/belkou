@@ -196,6 +196,7 @@ function LiveSessionPage() {
                 chat={
                   <LiveChat
                     sessionId={live.id}
+                    canWatch={live.canWatch}
                     canComment={live.canComment}
                     live={live.status === "live"}
                     loggedIn={Boolean(session)}
