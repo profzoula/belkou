@@ -90,8 +90,8 @@ function LiveIndexPage() {
                 Live
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Directs, questions en live, puis replay — le tout sur BelKou. Chaque live a son prix
-                : réservez votre place dès l&apos;annonce, avant le début.
+                Directs, questions en live, puis replay — le tout sur BelKou. Les lives gratuits
+                s&apos;ouvrent sans compte ; les lives payants demandent une place ou le VIP.
               </p>
             </div>
             {liveNow.length > 0 ? (

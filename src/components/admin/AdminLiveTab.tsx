@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { AdminCourse } from "@/lib/admin-courses";
 import { getAdminCourses } from "@/lib/fns/admin";
@@ -121,6 +122,8 @@ export function AdminLiveTab() {
   const [saving, setSaving] = useState(false);
   const [actingId, setActingId] = useState<string | null>(null);
 
+  const [createTab, setCreateTab] = useState<"paid" | "free">("paid");
+
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -130,6 +133,15 @@ export function AdminLiveTab() {
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [thumbPreview, setThumbPreview] = useState<string | null>(null);
   const thumbInputRef = useRef<HTMLInputElement>(null);
+
+  const paidSessions = useMemo(
+    () => sessions.filter((session) => resolveLivePrice(session.priceUsd) > 0),
+    [sessions],
+  );
+  const freeSessions = useMemo(
+    () => sessions.filter((session) => resolveLivePrice(session.priceUsd) <= 0),
+    [sessions],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -152,7 +164,19 @@ export function AdminLiveTab() {
 
   const detected = useMemo(() => detectLiveProvider(playbackUrl), [playbackUrl]);
 
-  const create = async () => {
+  const resetCreateForm = () => {
+    setTitle("");
+    setPrice("");
+    setDescription("");
+    setPlaybackUrl("");
+    setScheduledAt(defaultScheduleValue());
+    setThumbFile(null);
+    if (thumbPreview) URL.revokeObjectURL(thumbPreview);
+    setThumbPreview(null);
+    if (thumbInputRef.current) thumbInputRef.current.value = "";
+  };
+
+  const createPaid = async () => {
     if (!title.trim() || !playbackUrl.trim()) {
       toast.error("Titre et lien de diffusion sont requis.");
       return;
@@ -160,6 +184,10 @@ export function AdminLiveTab() {
     const parsedPrice = parsePriceInput(price);
     if (parsedPrice === "invalid") {
       toast.error("Prix invalide — entrez un montant en dollars (ex. 9.99).");
+      return;
+    }
+    if (parsedPrice === 0) {
+      toast.error("Pour un live gratuit, utilisez l’onglet Live Free.");
       return;
     }
     setSaving(true);
@@ -182,18 +210,38 @@ export function AdminLiveTab() {
         },
       });
       setSessions(result.sessions);
-      setTitle("");
-      setPrice("");
-      setDescription("");
-      setPlaybackUrl("");
-      setScheduledAt(defaultScheduleValue());
-      setThumbFile(null);
-      if (thumbPreview) URL.revokeObjectURL(thumbPreview);
-      setThumbPreview(null);
-      if (thumbInputRef.current) thumbInputRef.current.value = "";
-      toast.success("Live programmé");
+      resetCreateForm();
+      toast.success("Live payant programmé");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Programmation impossible");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /** Free live: title + OBS source + URL only — price $0, starts scheduled for now. */
+  const createFree = async () => {
+    if (!title.trim() || !playbackUrl.trim()) {
+      toast.error("Titre et lien de diffusion sont requis.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const result = await createFn({
+        data: {
+          title: title.trim(),
+          provider,
+          playbackUrl: playbackUrl.trim(),
+          scheduledAt: new Date().toISOString(),
+          priceUsd: 0,
+        },
+      });
+      setSessions(result.sessions);
+      setTitle("");
+      setPlaybackUrl("");
+      toast.success("Live gratuit créé — cliquez Démarrer pour diffuser");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Création impossible");
     } finally {
       setSaving(false);
     }
@@ -379,299 +427,382 @@ export function AdminLiveTab() {
     }
   };
 
+  const providerFields = (idPrefix: string) => (
+    <>
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-provider`}>Source OBS</Label>
+        <Select value={provider} onValueChange={(value) => setProvider(value as LiveProvider)}>
+          <SelectTrigger id={`${idPrefix}-provider`} className="rounded-xl">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="youtube">YouTube Live (recommandé)</SelectItem>
+            <SelectItem value="vimeo">Vimeo Live</SelectItem>
+            <SelectItem value="hls">HLS (.m3u8 Mux / Cloudflare)</SelectItem>
+          </SelectContent>
+        </Select>
+        {playbackUrl && detected !== provider ? (
+          <p className="text-xs text-amber-700 dark:text-amber-400">
+            Le lien ressemble à {liveProviderLabel(detected)}.
+          </p>
+        ) : null}
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor={`${idPrefix}-url`}>Lien de diffusion</Label>
+        <Input
+          id={`${idPrefix}-url`}
+          value={playbackUrl}
+          onChange={(event) => setPlaybackUrl(event.target.value)}
+          placeholder={
+            provider === "hls" ? "https://….m3u8" : "https://youtube.com/live/…"
+          }
+          className="rounded-xl"
+        />
+      </div>
+    </>
+  );
+
+  const renderSessionList = (items: LiveSession[], mode: "paid" | "free") => {
+    if (loading) {
+      return <p className="text-sm text-muted-foreground">Chargement…</p>;
+    }
+    if (items.length === 0) {
+      return (
+        <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
+          {mode === "free" ? "Aucun live gratuit pour l’instant." : "Aucun live payant pour l’instant."}
+        </p>
+      );
+    }
+    return (
+      <ul className="space-y-3">
+        {items.map((session) => (
+          <li
+            key={session.id}
+            className="rounded-2xl border border-border bg-card p-4 sm:flex sm:items-start sm:justify-between sm:gap-4"
+          >
+            <div className="flex min-w-0 gap-3">
+              {mode === "paid" ? (
+                <AdminLiveSessionThumb
+                  session={session}
+                  course={courses.find((course) => course.slug === session.courseSlug)}
+                  busy={actingId === session.id}
+                  onPick={(file) => void uploadSessionThumb(session.id, file)}
+                  onRemove={() => void removeSessionThumb(session.id)}
+                />
+              ) : null}
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                      statusClass(session.status),
+                    )}
+                  >
+                    {liveStatusLabel(session.status)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {liveProviderLabel(session.provider)}
+                  </span>
+                  {mode === "free" ? (
+                    <span className="text-[11px] font-medium text-success">Gratuit</span>
+                  ) : null}
+                </div>
+                <p className="mt-2 font-semibold text-foreground">{session.title}</p>
+                {mode === "paid" ? (
+                  <p className="mt-0.5 text-sm text-muted-foreground">
+                    {session.courseTitle
+                      ? `${session.courseTitle} · ${formatLiveSchedule(session.scheduledAt)}`
+                      : formatLiveSchedule(session.scheduledAt)}
+                  </p>
+                ) : null}
+                {session.recordingLessonId ? (
+                  <p className="mt-1 text-xs text-success">Replay ajouté au programme du cours.</p>
+                ) : null}
+                {mode === "paid" &&
+                (session.status === "scheduled" || session.status === "live") ? (
+                  <AdminLiveScheduleField
+                    session={session}
+                    busy={actingId === session.id}
+                    onSave={(next) => saveSchedule(session.id, next)}
+                  />
+                ) : null}
+                {mode === "paid" ? (
+                  <AdminLivePriceField
+                    session={session}
+                    busy={actingId === session.id}
+                    onSave={(priceUsd) => savePrice(session.id, priceUsd)}
+                  />
+                ) : null}
+                {session.status === "ended" ? (
+                  <AdminLiveRecordingField
+                    session={session}
+                    busy={actingId === session.id}
+                    onSave={(recordingUrl) => saveRecording(session.id, recordingUrl)}
+                    onRemove={() => void removeRecording(session)}
+                  />
+                ) : null}
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 sm:mt-0 sm:shrink-0">
+              {session.status === "scheduled" || session.status === "live" ? (
+                session.status === "scheduled" ? (
+                  <Button
+                    size="sm"
+                    className="rounded-xl"
+                    disabled={actingId === session.id}
+                    onClick={() => void runAction(session.id, "start")}
+                  >
+                    <Radio className="size-3.5" aria-hidden />
+                    Démarrer
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="rounded-xl"
+                    disabled={actingId === session.id}
+                    onClick={() => void endSession(session)}
+                  >
+                    <Square className="size-3.5" aria-hidden />
+                    Terminer
+                  </Button>
+                )
+              ) : null}
+              {session.status === "scheduled" || session.status === "live" ? (
+                <>
+                  {mode === "paid" ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl"
+                      disabled={actingId === session.id}
+                      onClick={() => void sendReminder(session)}
+                      title="Envoyer un e-mail à toutes les personnes qui ont réservé"
+                    >
+                      <Bell className="size-3.5" aria-hidden />
+                      Rappel
+                    </Button>
+                  ) : null}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl"
+                    disabled={actingId === session.id}
+                    onClick={() => void runAction(session.id, "cancel")}
+                  >
+                    <Trash2 className="size-3.5" aria-hidden />
+                    Annuler
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Catalogue"
         title="Live"
-        description="Programmez un direct OBS. Les étudiants regardent et commentent sur BelKou. À la fin, le replay reste sur la page live."
+        description="Live Payant (ticket / VIP) ou Live Free (ouvert sans compte). OBS → BelKou."
       />
 
-      <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
-        <h2 className="flex items-center gap-2 font-semibold">
-          <CalendarClock className="size-4 text-primary" aria-hidden />
-          Programmer un live
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Dans OBS : YouTube Live (non répertorié) ou Vimeo Live. Collez ensuite le lien public de
-          la diffusion ici — le live se joue sur le site, pas sur YouTube.
-        </p>
+      <Tabs
+        value={createTab}
+        onValueChange={(value) => setCreateTab(value as "paid" | "free")}
+        className="space-y-6"
+      >
+        <TabsList className="h-11 w-full justify-start gap-1 rounded-xl bg-muted/80 p-1 sm:w-auto">
+          <TabsTrigger value="paid" className="rounded-lg px-4">
+            Live Payant
+          </TabsTrigger>
+          <TabsTrigger value="free" className="rounded-lg px-4">
+            Live Free
+          </TabsTrigger>
+        </TabsList>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="live-when">Date et heure</Label>
-            <Input
-              id="live-when"
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(event) => setScheduledAt(event.target.value)}
-              className="rounded-xl"
-            />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="live-price">Prix de l&apos;événement (USD)</Label>
-            <Input
-              id="live-price"
-              type="number"
-              min={0}
-              step="0.01"
-              inputMode="decimal"
-              value={price}
-              onChange={(event) => setPrice(event.target.value)}
-              placeholder={String(LIVE_TICKET_PRICE_USD)}
-              className="rounded-xl sm:max-w-[200px]"
-            />
-            <p className="text-xs text-muted-foreground">
-              Chaque live se paie séparément. Laissez vide pour {formatLivePrice(null)}, ou mettez 0
-              pour un live gratuit — accessible sans compte. Les membres VIP entrent sans payer
-              sur les lives payants.
+        <TabsContent value="paid" className="mt-0 space-y-8">
+          <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
+            <h2 className="flex items-center gap-2 font-semibold">
+              <CalendarClock className="size-4 text-primary" aria-hidden />
+              Programmer un live payant
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Ticket ou VIP. OBS → YouTube / Vimeo / HLS, puis collez le lien public ici.
             </p>
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="live-title">Titre du live</Label>
-            <Input
-              id="live-title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="Session live — Q&A Dropshipping"
-              className="rounded-xl"
-            />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="live-thumb">Thumbnail du live</Label>
-            <p className="text-xs text-muted-foreground">
-              Image 16:9 affichée sur /live et dans le player tant que le direct n&apos;a pas
-              commencé.
-            </p>
-            <CourseThumbnailBanner
-              thumbnail={{
-                gradient: "from-primary/80 to-primary",
-                label: "LIVE",
-                imageUrl: thumbPreview || undefined,
-              }}
-              slug="live"
-              aspectClass="aspect-video max-w-md"
-              className="overflow-hidden rounded-xl border border-border"
-              showLabel={false}
-              showIcon={!thumbPreview}
-            />
-            <input
-              ref={thumbInputRef}
-              id="live-thumb"
-              type="file"
-              accept={THUMB_ACCEPT}
-              className="hidden"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) pickCreateThumb(file);
-              }}
-            />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="rounded-xl"
-                onClick={() => thumbInputRef.current?.click()}
-              >
-                <ImagePlus className="size-4" aria-hidden />
-                {thumbFile ? "Changer l'image" : "Choisir une image"}
-              </Button>
-              {thumbFile ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-when">Date et heure</Label>
+                <Input
+                  id="live-when"
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(event) => setScheduledAt(event.target.value)}
                   className="rounded-xl"
-                  onClick={() => {
-                    if (thumbPreview) URL.revokeObjectURL(thumbPreview);
-                    setThumbFile(null);
-                    setThumbPreview(null);
-                    if (thumbInputRef.current) thumbInputRef.current.value = "";
+                />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-price">Prix de l&apos;événement (USD)</Label>
+                <Input
+                  id="live-price"
+                  type="number"
+                  min={0.01}
+                  step="0.01"
+                  inputMode="decimal"
+                  value={price}
+                  onChange={(event) => setPrice(event.target.value)}
+                  placeholder={String(LIVE_TICKET_PRICE_USD)}
+                  className="rounded-xl sm:max-w-[200px]"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Champ vide = {formatLivePrice(null)}. VIP entre sans payer. Pour un live
+                  gratuit, utilisez l&apos;onglet <strong>Live Free</strong>.
+                </p>
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-title">Titre du live</Label>
+                <Input
+                  id="live-title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Session live — Q&A Dropshipping"
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-thumb">Thumbnail du live</Label>
+                <p className="text-xs text-muted-foreground">
+                  Image 16:9 affichée sur /live et dans le player tant que le direct n&apos;a
+                  pas commencé.
+                </p>
+                <CourseThumbnailBanner
+                  thumbnail={{
+                    gradient: "from-primary/80 to-primary",
+                    label: "LIVE",
+                    imageUrl: thumbPreview || undefined,
                   }}
-                >
-                  <Trash2 className="size-4" aria-hidden />
-                  Retirer
-                </Button>
-              ) : null}
+                  slug="live"
+                  aspectClass="aspect-video max-w-md"
+                  className="overflow-hidden rounded-xl border border-border"
+                  showLabel={false}
+                  showIcon={!thumbPreview}
+                />
+                <input
+                  ref={thumbInputRef}
+                  id="live-thumb"
+                  type="file"
+                  accept={THUMB_ACCEPT}
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) pickCreateThumb(file);
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl"
+                    onClick={() => thumbInputRef.current?.click()}
+                  >
+                    <ImagePlus className="size-4" aria-hidden />
+                    {thumbFile ? "Changer l'image" : "Choisir une image"}
+                  </Button>
+                  {thumbFile ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-xl"
+                      onClick={() => {
+                        if (thumbPreview) URL.revokeObjectURL(thumbPreview);
+                        setThumbFile(null);
+                        setThumbPreview(null);
+                        if (thumbInputRef.current) thumbInputRef.current.value = "";
+                      }}
+                    >
+                      <Trash2 className="size-4" aria-hidden />
+                      Retirer
+                    </Button>
+                  ) : null}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  JPG, PNG, WebP ou GIF — max 5 Mo.
+                </p>
+              </div>
+              {providerFields("live-paid")}
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-desc">Description (optionnel)</Label>
+                <Textarea
+                  id="live-desc"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  rows={3}
+                  className="rounded-xl"
+                />
+              </div>
             </div>
-            <p className="text-[11px] text-muted-foreground">JPG, PNG, WebP ou GIF — max 5 Mo.</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Source OBS</Label>
-            <Select value={provider} onValueChange={(value) => setProvider(value as LiveProvider)}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="youtube">YouTube Live (recommandé)</SelectItem>
-                <SelectItem value="vimeo">Vimeo Live</SelectItem>
-                <SelectItem value="hls">HLS (.m3u8 Mux / Cloudflare)</SelectItem>
-              </SelectContent>
-            </Select>
-            {playbackUrl && detected !== provider ? (
-              <p className="text-xs text-amber-700 dark:text-amber-400">
-                Le lien ressemble à {liveProviderLabel(detected)}.
-              </p>
-            ) : null}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="live-url">Lien de diffusion</Label>
-            <Input
-              id="live-url"
-              value={playbackUrl}
-              onChange={(event) => setPlaybackUrl(event.target.value)}
-              placeholder="https://youtube.com/live/…"
-              className="rounded-xl"
-            />
-          </div>
-          <div className="space-y-1.5 md:col-span-2">
-            <Label htmlFor="live-desc">Description (optionnel)</Label>
-            <Textarea
-              id="live-desc"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              rows={3}
-              className="rounded-xl"
-            />
-          </div>
-        </div>
 
-        <Button
-          className="mt-5 rounded-xl"
-          onClick={() => void create()}
-          disabled={saving || loading}
-        >
-          {saving ? "Enregistrement…" : "Programmer le live"}
-        </Button>
-      </section>
+            <Button
+              className="mt-5 rounded-xl"
+              onClick={() => void createPaid()}
+              disabled={saving || loading}
+            >
+              {saving ? "Enregistrement…" : "Programmer le live"}
+            </Button>
+          </section>
 
-      <section className="space-y-3">
-        <h2 className="font-semibold">Programmation</h2>
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Chargement…</p>
-        ) : sessions.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
-            Aucun live pour l’instant.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {sessions.map((session) => (
-              <li
-                key={session.id}
-                className="rounded-2xl border border-border bg-card p-4 sm:flex sm:items-start sm:justify-between sm:gap-4"
-              >
-                <div className="flex min-w-0 gap-3">
-                  <AdminLiveSessionThumb
-                    session={session}
-                    course={courses.find((course) => course.slug === session.courseSlug)}
-                    busy={actingId === session.id}
-                    onPick={(file) => void uploadSessionThumb(session.id, file)}
-                    onRemove={() => void removeSessionThumb(session.id)}
-                  />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                          statusClass(session.status),
-                        )}
-                      >
-                        {liveStatusLabel(session.status)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {liveProviderLabel(session.provider)}
-                      </span>
-                    </div>
-                    <p className="mt-2 font-semibold text-foreground">{session.title}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
-                      {session.courseTitle
-                        ? `${session.courseTitle} · ${formatLiveSchedule(session.scheduledAt)}`
-                        : formatLiveSchedule(session.scheduledAt)}
-                    </p>
-                    {session.recordingLessonId ? (
-                      <p className="mt-1 text-xs text-success">
-                        Replay ajouté au programme du cours.
-                      </p>
-                    ) : null}
-                    {session.status === "scheduled" || session.status === "live" ? (
-                      <AdminLiveScheduleField
-                        session={session}
-                        busy={actingId === session.id}
-                        onSave={(scheduledAt) => saveSchedule(session.id, scheduledAt)}
-                      />
-                    ) : null}
-                    <AdminLivePriceField
-                      session={session}
-                      busy={actingId === session.id}
-                      onSave={(priceUsd) => savePrice(session.id, priceUsd)}
-                    />
-                    {session.status === "ended" ? (
-                      <AdminLiveRecordingField
-                        session={session}
-                        busy={actingId === session.id}
-                        onSave={(recordingUrl) => saveRecording(session.id, recordingUrl)}
-                        onRemove={() => void removeRecording(session)}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2 sm:mt-0 sm:shrink-0">
-                  {session.status === "scheduled" || session.status === "live" ? (
-                    session.status === "scheduled" ? (
-                      <Button
-                        size="sm"
-                        className="rounded-xl"
-                        disabled={actingId === session.id}
-                        onClick={() => void runAction(session.id, "start")}
-                      >
-                        <Radio className="size-3.5" aria-hidden />
-                        Démarrer
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="rounded-xl"
-                        disabled={actingId === session.id}
-                        onClick={() => void endSession(session)}
-                      >
-                        <Square className="size-3.5" aria-hidden />
-                        Terminer
-                      </Button>
-                    )
-                  ) : null}
-                  {session.status === "scheduled" || session.status === "live" ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl"
-                        disabled={actingId === session.id}
-                        onClick={() => void sendReminder(session)}
-                        title="Envoyer un e-mail à toutes les personnes qui ont réservé"
-                      >
-                        <Bell className="size-3.5" aria-hidden />
-                        Rappel
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl"
-                        disabled={actingId === session.id}
-                        onClick={() => void runAction(session.id, "cancel")}
-                      >
-                        <Trash2 className="size-3.5" aria-hidden />
-                        Annuler
-                      </Button>
-                    </>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+          <section className="space-y-3">
+            <h2 className="font-semibold">Lives payants</h2>
+            {renderSessionList(paidSessions, "paid")}
+          </section>
+        </TabsContent>
+
+        <TabsContent value="free" className="mt-0 space-y-8">
+          <section className="rounded-[20px] border border-border/80 bg-card p-5 shadow-[0_8px_24px_rgb(15_23_42_/_0.04)] sm:p-6">
+            <h2 className="flex items-center gap-2 font-semibold">
+              <Radio className="size-4 text-primary" aria-hidden />
+              Live Free
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Ouvert sans compte. Trois champs seulement — puis <strong>Démarrer</strong> dans la
+              liste.
+            </p>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5 md:col-span-2">
+                <Label htmlFor="live-free-title">Titre du live</Label>
+                <Input
+                  id="live-free-title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Live gratuit — Q&A"
+                  className="rounded-xl"
+                />
+              </div>
+              {providerFields("live-free")}
+            </div>
+
+            <Button
+              className="mt-5 rounded-xl"
+              onClick={() => void createFree()}
+              disabled={saving || loading}
+            >
+              {saving ? "Création…" : "Créer le live gratuit"}
+            </Button>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="font-semibold">Lives gratuits</h2>
+            {renderSessionList(freeSessions, "free")}
+          </section>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
