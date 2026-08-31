@@ -583,6 +583,32 @@ export const adminSetLiveSessionSchedule = createServerFn({ method: "POST" })
     return { sessions: await withCourseTitles(await listLiveSessions()) };
   });
 
+export const adminSetLivePlayback = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        sessionId: z.string().uuid(),
+        playbackUrl: z.string().trim().min(8),
+        provider: providerSchema.optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { getLiveSession, updateLiveSession, listLiveSessions } = await import("@/server/live");
+    const session = await getLiveSession(data.sessionId);
+    if (!session) throw new Error("Live introuvable.");
+    if (session.status === "canceled") throw new Error("Live annulé.");
+    if (session.status === "ended") {
+      throw new Error("Pour un replay, utilisez le champ d’enregistrement.");
+    }
+
+    const provider = data.provider ?? detectLiveProvider(data.playbackUrl);
+    const playbackUrl = validatePlaybackUrl(provider, data.playbackUrl);
+    await updateLiveSession(data.sessionId, { provider, playbackUrl });
+    return { sessions: await withCourseTitles(await listLiveSessions()) };
+  });
+
 export const adminSetLiveSessionPrice = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

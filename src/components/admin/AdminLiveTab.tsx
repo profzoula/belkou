@@ -34,6 +34,7 @@ import {
   adminRemoveLiveRecording,
   adminRemoveLiveThumbnail,
   adminSendLiveReminder,
+  adminSetLivePlayback,
   adminSetLiveRecording,
   adminSetLiveSessionPrice,
   adminSetLiveSessionSchedule,
@@ -110,6 +111,7 @@ export function AdminLiveTab() {
   const removeThumbFn = useServerFn(adminRemoveLiveThumbnail);
   const setPriceFn = useServerFn(adminSetLiveSessionPrice);
   const setScheduleFn = useServerFn(adminSetLiveSessionSchedule);
+  const setPlaybackFn = useServerFn(adminSetLivePlayback);
   const setRecordingFn = useServerFn(adminSetLiveRecording);
   const removeRecordingFn = useServerFn(adminRemoveLiveRecording);
   const reminderFn = useServerFn(adminSendLiveReminder);
@@ -305,6 +307,19 @@ export function AdminLiveTab() {
       toast.success("Date du live mise à jour");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Date non enregistrée");
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const savePlayback = async (sessionId: string, playbackUrl: string) => {
+    setActingId(sessionId);
+    try {
+      const result = await setPlaybackFn({ data: { sessionId, playbackUrl } });
+      setSessions(result.sessions);
+      toast.success("Lien de diffusion mis à jour");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Lien non enregistré");
     } finally {
       setActingId(null);
     }
@@ -539,6 +554,13 @@ export function AdminLiveTab() {
                     session={session}
                     busy={actingId === session.id}
                     onSave={(priceUsd) => savePrice(session.id, priceUsd)}
+                  />
+                ) : null}
+                {session.status === "scheduled" || session.status === "live" ? (
+                  <AdminLivePlaybackField
+                    session={session}
+                    busy={actingId === session.id}
+                    onSave={(playbackUrl) => savePlayback(session.id, playbackUrl)}
                   />
                 ) : null}
                 {session.status === "ended" ? (
@@ -945,6 +967,53 @@ function AdminLivePriceField({
           Live gratuit — accessible sans compte
         </span>
       ) : null}
+    </div>
+  );
+}
+
+function AdminLivePlaybackField({
+  session,
+  busy,
+  onSave,
+}: {
+  session: LiveSession;
+  busy: boolean;
+  onSave: (playbackUrl: string) => void;
+}) {
+  const saved = session.playbackUrl.trim();
+  const [value, setValue] = useState(saved);
+
+  useEffect(() => {
+    setValue(session.playbackUrl.trim());
+  }, [session.playbackUrl]);
+
+  const trimmed = value.trim();
+  const dirty = trimmed.length >= 8 && trimmed !== saved;
+
+  return (
+    <div className="mt-2 space-y-1.5 rounded-xl border border-border/70 bg-muted/30 p-2.5">
+      <Label htmlFor={`live-url-${session.id}`} className="text-xs text-muted-foreground">
+        Lien de diffusion
+      </Label>
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          id={`live-url-${session.id}`}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={busy}
+          placeholder="https://youtube.com/watch?v=…"
+          className="h-8 min-w-0 flex-1 rounded-lg text-xs"
+        />
+        <Button
+          type="button"
+          size="sm"
+          className="h-8 rounded-lg"
+          disabled={busy || !dirty}
+          onClick={() => onSave(trimmed)}
+        >
+          Enregistrer
+        </Button>
+      </div>
     </div>
   );
 }
