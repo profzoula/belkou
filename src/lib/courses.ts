@@ -594,8 +594,17 @@ export function isPreviewVideoAvailable(lesson: CourseLesson): boolean {
   return lesson.type === "video" && Boolean(lesson.preview) && lessonHasVideo(lesson);
 }
 
-export function getPreviewVideoLessons(course: { sections: CourseSection[] }): CourseLesson[] {
-  return getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson));
+export function getPreviewVideoLessons(course: {
+  sections: CourseSection[];
+  price?: number;
+}): CourseLesson[] {
+  const flagged = getAllLessons(course).filter((lesson) => isPreviewVideoAvailable(lesson));
+  if (flagged.length) return flagged;
+  if (course.price !== undefined && isFreeCourse({ price: course.price })) {
+    const firstVideo = getAllLessons(course).find((lesson) => lessonHasVideo(lesson));
+    return firstVideo ? [firstVideo] : [];
+  }
+  return [];
 }
 
 export function getFirstPreviewVideoLesson(course: {

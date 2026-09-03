@@ -27,6 +27,7 @@ import {
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
+  formatCoursePrice,
   isFreeCourse,
 } from "@/lib/courses";
 import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
@@ -395,7 +396,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                       <div className="rounded-xl border border-border bg-muted/30 p-4">
                         <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
                         <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                          <span className="font-display text-3xl font-bold">${course.price}</span>
+                          <span className="font-display text-3xl font-bold">
+                            {formatCoursePrice(course.price)}
+                          </span>
                           {courseDiscount > 0 && (
                             <>
                               <span className="text-sm text-muted-foreground line-through">
@@ -489,7 +492,26 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                             )}
                           </>
                         ) : isFreeCourse(course) ? (
-                          <FreeCourseAuthCta slug={course.slug} />
+                          <>
+                            <FreeCourseAuthCta slug={course.slug} />
+                            {hasPublicPreview ? (
+                              <Button
+                                asChild
+                                variant="soft"
+                                size="lg"
+                                className="w-full rounded-lg"
+                              >
+                                <Link
+                                  to="/courses/$slug/learn"
+                                  params={{ slug: course.slug }}
+                                  search={previewLearnSearch}
+                                >
+                                  <Play className="h-4 w-4 mr-1 fill-current" />
+                                  Voir la preview gratuite
+                                </Link>
+                              </Button>
+                            ) : null}
+                          </>
                         ) : (
                           <>
                             <Button
@@ -644,7 +666,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                         : "Inscription confirmée"}
                   </p>
                 ) : (
-                  <p className="text-xl font-bold">${course.price}</p>
+                  <p className="text-xl font-bold">{formatCoursePrice(course.price)}</p>
                 )}
               </div>
               {canStartCourse ? (

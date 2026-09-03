@@ -1,5 +1,11 @@
 import { BASE_COURSE_SLUGS } from "@/lib/courses";
-import { getSequenceLessonIds, isWelcomePreviewLesson, lessonHasVideo } from "@/lib/courses";
+import {
+  getPreviewVideoLessons,
+  getSequenceLessonIds,
+  isFreeCourse,
+  isWelcomePreviewLesson,
+  lessonHasVideo,
+} from "@/lib/courses";
 import type { CourseLesson, CourseSection } from "@/lib/courses";
 import { isCourseContentLive } from "@/lib/course-publish";
 import { STANDALONE_LIVE_SLUG, liveTicketSlug } from "@/lib/live";
@@ -130,7 +136,12 @@ export function getLessonLockState(
       vimeoUrl?: string;
       content?: string;
     };
-    course: { published?: boolean; scheduledPublishAt?: string; sections?: CourseSection[] };
+    course: {
+      published?: boolean;
+      scheduledPublishAt?: string;
+      sections?: CourseSection[];
+      price?: number;
+    };
     hasPaidAccess: boolean;
     completedLessonIds?: string[];
     orderedLessonIds?: string[];
@@ -149,6 +160,21 @@ export function getLessonLockState(
 
   if (lesson.type === "article" && lesson.preview && (lesson as CourseLesson).content?.trim()) {
     if (!hasPaidAccess) {
+      return { locked: false, reason: "none" };
+    }
+  }
+
+  if (
+    !hasPaidAccess &&
+    typeof course.price === "number" &&
+    isFreeCourse({ price: course.price }) &&
+    course.sections?.length
+  ) {
+    const freePreview = getPreviewVideoLessons({
+      sections: course.sections,
+      price: course.price,
+    }).some((item) => item.id === lesson.id);
+    if (freePreview) {
       return { locked: false, reason: "none" };
     }
   }

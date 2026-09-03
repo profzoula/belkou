@@ -125,7 +125,7 @@ export function CourseHeroEnrollCta({
           </Button>
           )}
 
-          {scheduledSoon && hasPublicPreview && previewLearnSearch ? (
+          {hasPublicPreview && previewLearnSearch ? (
             <Button asChild variant="link" size="sm" className="h-auto px-0 text-primary">
               <Link
                 to="/courses/$slug/learn"
@@ -134,19 +134,9 @@ export function CourseHeroEnrollCta({
                 className="inline-flex items-center gap-1 text-sm font-semibold"
               >
                 <Play className="size-3.5 fill-current" aria-hidden />
-                Voir la preview gratuite
-              </Link>
-            </Button>
-          ) : !scheduledSoon && hasPublicPreview && previewLearnSearch ? (
-            <Button asChild variant="link" size="sm" className="h-auto px-0 text-primary">
-              <Link
-                to="/courses/$slug/learn"
-                params={{ slug: courseSlug }}
-                search={previewLearnSearch}
-                className="inline-flex items-center gap-1 text-sm font-semibold"
-              >
-                <Play className="size-3.5 fill-current" aria-hidden />
-                Preview gratuite avant achat
+                {isFreeCourse({ price }) || scheduledSoon
+                  ? "Voir la preview gratuite"
+                  : "Preview gratuite avant achat"}
               </Link>
             </Button>
           ) : null}
