@@ -27,11 +27,13 @@ import {
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
+  isFreeCourse,
 } from "@/lib/courses";
 import { CoursePreviewVideo } from "@/components/course/CoursePreviewVideo";
 import { CourseLiveBanner } from "@/components/course/CourseLiveBanner";
 import { CourseHeroStatsBar } from "@/components/course/CourseHeroStatsBar";
 import { CourseHeroEnrollCta } from "@/components/course/CourseHeroEnrollCta";
+import { FreeCourseAuthCta } from "@/components/course/FreeCourseAuthCta";
 import { CoursePublicCurriculum } from "@/components/course/CoursePublicCurriculum";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import {
@@ -406,7 +408,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                           )}
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
-                          Accès complet au cours · paiement unique
+                          {isFreeCourse(course)
+                            ? "Accès complet · connexion requise"
+                            : "Accès complet au cours · paiement unique"}
                         </p>
                       </div>
                     )}
@@ -469,17 +473,23 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                                 </Link>
                               </Button>
                             ) : null}
-                            <Button
-                              asChild
-                              variant="soft"
-                              size="lg"
-                              className="w-full rounded-lg text-base font-bold"
-                            >
-                              <Link to="/checkout" search={{ course: course.slug }}>
-                                S&apos;inscrire maintenant
-                              </Link>
-                            </Button>
+                            {isFreeCourse(course) ? (
+                              <FreeCourseAuthCta slug={course.slug} />
+                            ) : (
+                              <Button
+                                asChild
+                                variant="soft"
+                                size="lg"
+                                className="w-full rounded-lg text-base font-bold"
+                              >
+                                <Link to="/checkout" search={{ course: course.slug }}>
+                                  S&apos;inscrire maintenant
+                                </Link>
+                              </Button>
+                            )}
                           </>
+                        ) : isFreeCourse(course) ? (
+                          <FreeCourseAuthCta slug={course.slug} />
                         ) : (
                           <>
                             <Button
@@ -668,11 +678,15 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </Link>
                 </Button>
               ) : (
-                <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-                  <Link to="/checkout" search={{ course: course.slug }}>
-                    S&apos;inscrire
-                  </Link>
-                </Button>
+                isFreeCourse(course) ? (
+                  <FreeCourseAuthCta slug={course.slug} stacked={false} className="shrink-0" />
+                ) : (
+                  <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+                    <Link to="/checkout" search={{ course: course.slug }}>
+                      S&apos;inscrire
+                    </Link>
+                  </Button>
+                )
               )}
             </>
           )}

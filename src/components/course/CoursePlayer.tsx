@@ -23,9 +23,11 @@ import {
   getWelcomePreviewLesson,
   lastLessonStorageKey,
   lessonHasVideo,
+  isFreeCourse,
   lessonIsCompletable,
   type CourseLesson,
 } from "@/lib/courses";
+import { FreeCourseAuthCta } from "@/components/course/FreeCourseAuthCta";
 import { getLessonLockState, type LessonLockReason } from "@/lib/course-access";
 import { getCourseIcon } from "@/lib/course-icons";
 import { isExamEbookLesson } from "@/lib/exam-ebooks";
@@ -69,6 +71,27 @@ import {
   lessonHasRequiredQuiz,
   requestOpenLessonQuiz,
 } from "@/lib/lesson-quiz";
+
+function CourseEnrollCta({
+  course,
+  label,
+  size = "sm",
+}: {
+  course: PublicCourse;
+  label: string;
+  size?: "sm" | "lg";
+}) {
+  if (isFreeCourse(course)) {
+    return <FreeCourseAuthCta slug={course.slug} stacked={false} size={size} />;
+  }
+  return (
+    <Button asChild size={size} className={size === "lg" ? "mt-2 rounded-full" : undefined}>
+      <Link to="/checkout" search={{ course: course.slug }}>
+        {label}
+      </Link>
+    </Button>
+  );
+}
 
 type CoursePlayerProps = {
   course: PublicCourse;
@@ -268,17 +291,9 @@ function CourseVideoArea({
             <Link to="/dashboard">Voir Mes cours</Link>
           </Button>
         ) : reason === "schedule" && startLabel ? (
-          <Button asChild size="sm">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire maintenant
-            </Link>
-          </Button>
+          <CourseEnrollCta course={course} label="S'inscrire maintenant" />
         ) : locked ? (
-          <Button asChild size="sm">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire
-            </Link>
-          </Button>
+          <CourseEnrollCta course={course} label="S'inscrire" />
         ) : null}
       </div>
     );
@@ -315,17 +330,9 @@ function CourseVideoArea({
             </Button>
           )
         ) : reason === "schedule" && startLabel ? (
-          <Button asChild size="sm">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire maintenant
-            </Link>
-          </Button>
+          <CourseEnrollCta course={course} label="S'inscrire maintenant" />
         ) : locked ? (
-          <Button asChild size="sm">
-            <Link to="/checkout" search={{ course: course.slug }}>
-              S&apos;inscrire
-            </Link>
-          </Button>
+          <CourseEnrollCta course={course} label="S'inscrire" />
         ) : null}
       </div>
     );
@@ -442,15 +449,17 @@ function CourseVideoArea({
               </Button>
             )
           ) : (
-            <Button asChild size="lg" className="mt-2 rounded-full">
-              <Link to="/checkout" search={{ course: course.slug }}>
-                {reason === "schedule"
+            <CourseEnrollCta
+              course={course}
+              size="lg"
+              label={
+                reason === "schedule"
                   ? startLabel
                     ? `S'inscrire pour l'accès du ${startLabel}`
                     : "S'inscrire dès maintenant"
-                  : "S'inscrire pour débloquer"}
-              </Link>
-            </Button>
+                  : "S'inscrire pour débloquer"
+              }
+            />
           )
         ) : null}
       </div>
@@ -1453,11 +1462,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       <p className="text-sm text-muted-foreground">
                         Les ressources sont disponibles après inscription au cours.
                       </p>
-                      <Button asChild className="mt-4" size="sm">
-                        <Link to="/checkout" search={{ course: course.slug }}>
-                          S&apos;inscrire maintenant
-                        </Link>
-                      </Button>
+                      <div className="mt-4 flex justify-center">
+                        <CourseEnrollCta course={course} label="S'inscrire maintenant" />
+                      </div>
                     </div>
                   )}
                 </TabsContent>
@@ -1515,11 +1522,9 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                         <p className="text-sm text-muted-foreground">
                           Disponible après inscription à ce cours.
                         </p>
-                        <Button asChild className="mt-4" size="sm">
-                          <Link to="/checkout" search={{ course: course.slug }}>
-                            S&apos;inscrire maintenant
-                          </Link>
-                        </Button>
+                        <div className="mt-4 flex justify-center">
+                          <CourseEnrollCta course={course} label="S'inscrire maintenant" />
+                        </div>
                       </>
                     )}
                   </TabsContent>

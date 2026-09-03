@@ -581,6 +581,11 @@ export function isFreeCourse(course: Pick<Course, "price">): boolean {
   return course.price <= 0;
 }
 
+/** After login/signup, send the student into the player — access grants free enrollment. */
+export function freeCourseLearnRedirect(slug: string): string {
+  return `/courses/${slug}/learn`;
+}
+
 export function formatCoursePrice(price: number): string {
   return isFreeCourse({ price }) ? "Gratuit" : `$${price}`;
 }

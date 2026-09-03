@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Search } from "lucide-react";
 import { UserAccountMenu } from "@/components/auth/UserAccountMenu";
+import { FreeCourseAuthCta } from "@/components/course/FreeCourseAuthCta";
 import { SiteLogo } from "@/components/site/SiteLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
+import { isFreeCourse } from "@/lib/courses";
 import { cn } from "@/lib/utils";
 
 type LearnHeaderProps = {
@@ -92,6 +94,21 @@ export function LearnHeader({
           <Button asChild size="sm" variant="soft" className="hidden rounded-xl sm:inline-flex">
             <Link to="/dashboard">Mes cours</Link>
           </Button>
+        ) : isFreeCourse({ price: coursePrice }) ? (
+          user ? (
+            <Button asChild size="sm" className="hidden rounded-xl sm:inline-flex">
+              <Link to="/courses/$slug/learn" params={{ slug: courseSlug }}>
+                Commencer
+              </Link>
+            </Button>
+          ) : (
+            <FreeCourseAuthCta
+              slug={courseSlug}
+              stacked={false}
+              size="sm"
+              className="hidden sm:flex"
+            />
+          )
         ) : (
           <Button asChild size="sm" className="hidden rounded-xl sm:inline-flex">
             <Link to="/checkout" search={{ course: courseSlug }}>

@@ -17,6 +17,8 @@ import { SiteLogo } from "@/components/site/SiteLogo";
 import { getStoredReferralCode, saveReferralCode } from "@/lib/referral-storage";
 import { saveRegistrationHandoff } from "@/lib/registration-handoff";
 import { trackMetaEvent } from "@/lib/meta-pixel";
+import { FreeCourseAuthCta } from "@/components/course/FreeCourseAuthCta";
+import { isFreeCourse } from "@/lib/courses";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { getCourseIcon } from "@/lib/course-icons";
@@ -58,7 +60,7 @@ export function CheckoutPage({
   initialCourse = null,
 }: CheckoutPageProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const submitFn = useServerFn(submitRegistration);
   const loadCourseFn = useServerFn(getPublicCourse);
   const [course, setCourse] = useState<PublicCourse | null>(initialCourse);
@@ -105,6 +107,13 @@ export function CheckoutPage({
       .then((loaded) => setCourse(loaded))
       .catch(() => setCourse(null));
   }, [courseSlug, initialCourse, loadCourseFn]);
+
+  const freeCourse = Boolean(courseSlug && course && isFreeCourse(course) && !liveTicket);
+
+  useEffect(() => {
+    if (!freeCourse || authLoading || !user || !courseSlug) return;
+    navigate({ to: "/courses/$slug/learn", params: { slug: courseSlug } });
+  }, [authLoading, courseSlug, freeCourse, navigate, user]);
 
   const isLiveTicket = Boolean(liveTicket);
   const isVipMembership = Boolean(initialPlan === "vip" && !isLiveTicket && !courseSlug);
@@ -257,6 +266,34 @@ export function CheckoutPage({
       currency: "USD",
     });
   }, [course, courseSlug, displayPrice, isLiveTicket, liveSessionId, productTitle, selectedPlan]);
+
+  if (freeCourse && courseSlug) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <header className="border-b border-border/60">
+          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+            <Link to="/" className="inline-flex">
+              <SiteWordmark size="sm" />
+            </Link>
+          </div>
+        </header>
+        <main id="main-content" className="mx-auto max-w-md px-4 py-16 sm:px-6">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
+            Cours gratuit
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            {course?.title ?? "Ce cours"} est gratuit. Connectez-vous ou créez un compte pour
+            commencer — aucun paiement.
+          </p>
+          {authLoading || user ? (
+            <p className="mt-8 text-sm text-muted-foreground">Ouverture du cours…</p>
+          ) : (
+            <FreeCourseAuthCta slug={courseSlug} className="mt-8" />
+          )}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

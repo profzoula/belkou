@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, Play } from "lucide-react";
+import { FreeCourseAuthCta } from "@/components/course/FreeCourseAuthCta";
 import { Button } from "@/components/ui/button";
-import { formatCount } from "@/lib/courses";
+import { formatCount, isFreeCourse } from "@/lib/courses";
 import { cn } from "@/lib/utils";
 
 type CourseHeroEnrollCtaProps = {
@@ -100,6 +101,9 @@ export function CourseHeroEnrollCta({
         </Button>
       ) : (
         <>
+          {isFreeCourse({ price }) ? (
+            <FreeCourseAuthCta slug={courseSlug} stacked={false} />
+          ) : (
           <Button
             asChild
             variant="hero"
@@ -119,6 +123,7 @@ export function CourseHeroEnrollCta({
               )}
             </Link>
           </Button>
+          )}
 
           {scheduledSoon && hasPublicPreview && previewLearnSearch ? (
             <Button asChild variant="link" size="sm" className="h-auto px-0 text-primary">
