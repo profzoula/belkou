@@ -107,7 +107,7 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         <CourseThumbnailBanner
           thumbnail={course.thumbnail}
           slug={course.slug}
-          aspectClass="aspect-video"
+          aspectClass="aspect-[4/3]"
           className="rounded-none border-0"
           showLabel={false}
           showIcon={!course.thumbnail.imageUrl}
