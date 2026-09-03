@@ -338,20 +338,15 @@ export function CheckoutPage({
             {/* Product */}
             <section className="space-y-6">
               <div className="flex items-start gap-4">
-                <div
-                  className={cn(
-                    "flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br",
-                    course?.thumbnail.gradient ?? "from-primary to-primary/80",
-                  )}
-                >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-border bg-muted">
                   {isVipMembership ? (
-                    <Gift className="h-6 w-6 text-white" aria-hidden />
+                    <Gift className="h-5 w-5 text-foreground" aria-hidden />
                   ) : isLiveTicket && !CourseIcon ? (
-                    <Radio className="h-6 w-6 text-white" aria-hidden />
+                    <Radio className="h-5 w-5 text-foreground" aria-hidden />
                   ) : CourseIcon ? (
-                    <CourseIcon className="h-6 w-6 text-white/90" />
+                    <CourseIcon className="h-5 w-5 text-foreground" />
                   ) : (
-                    <SiteLogo className="h-8 w-8 rounded" alt="" />
+                    <SiteLogo className="h-7 w-7" alt="" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1 pt-0.5">
@@ -392,10 +387,10 @@ export function CheckoutPage({
                       <label
                         key={planId}
                         className={cn(
-                          "cursor-pointer rounded-2xl border px-4 py-4 transition-colors",
+                          "cursor-pointer border px-4 py-4 transition-colors",
                           active
-                            ? "border-primary bg-primary/[0.04]"
-                            : "border-border/80 hover:border-foreground/20",
+                            ? "border-foreground bg-muted/40"
+                            : "border-border hover:border-foreground/25",
                         )}
                       >
                         <div className="flex items-start gap-3">
@@ -527,7 +522,7 @@ export function CheckoutPage({
                   Square
                 </span>
               </div>
-              <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-card px-4 py-3.5">
+              <div className="flex items-center gap-3 border border-border px-4 py-3.5">
                 <CreditCard className="h-5 w-5 shrink-0 text-foreground/70" aria-hidden />
                 <div className="min-w-0">
                   <p className="text-sm font-medium">Carte bancaire</p>
@@ -545,7 +540,7 @@ export function CheckoutPage({
 
           {/* Summary */}
           <aside className="lg:sticky lg:top-8">
-            <div className="rounded-2xl border border-border/80 bg-card p-6">
+            <div className="rounded-lg border border-border bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
               <h2 className="text-sm font-medium text-muted-foreground">Total</h2>
               <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
                 {formatUsd(displayPrice)}
@@ -581,7 +576,7 @@ export function CheckoutPage({
                       value={form.referral_code}
                       onChange={(e) => update("referral_code", e.target.value.toUpperCase())}
                       placeholder="CODE"
-                      className="rounded-xl font-mono uppercase"
+                      className="rounded-md font-mono uppercase"
                     />
                   </div>
                 )}
@@ -621,7 +616,7 @@ export function CheckoutPage({
                 type="submit"
                 disabled={loading || !acceptedTerms}
                 size="xl"
-                className="mt-5 h-12 w-full rounded-xl"
+                className="mt-5 h-12 w-full rounded font-bold"
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1.5 h-4 w-4" aria-hidden />

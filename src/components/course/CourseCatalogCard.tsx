@@ -2,9 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { CourseThumbnailBanner } from "@/components/course/CourseThumbnailBanner";
 import { CourseScheduleBadge } from "@/components/course/CourseScheduleBadge";
-import { SiteLogoMark } from "@/components/site/SiteLogoMark";
 import { getCourseCategoryLabel } from "@/lib/course-categories";
-import { isFreeCourse } from "@/lib/courses";
+import { formatCount, isFreeCourse } from "@/lib/courses";
 import type { PublicCourse } from "@/lib/fns/courses";
 import { cn } from "@/lib/utils";
 
@@ -27,27 +26,18 @@ function courseCategoryLabel(course: PublicCourse) {
   return id ? getCourseCategoryLabel(id) : "Formation";
 }
 
-function PriceBlock({ course, className }: { course: PublicCourse; className?: string }) {
-  const free = isFreeCourse(course);
-  if (free) {
-    return <span className={cn("font-semibold text-success", className)}>Gratuit</span>;
+function PriceBlock({ course }: { course: PublicCourse }) {
+  if (isFreeCourse(course)) {
+    return <span className="font-bold text-foreground">Gratuit</span>;
   }
   return (
-    <span className={cn("inline-flex flex-wrap items-baseline gap-1.5", className)}>
-      <span className="font-semibold text-foreground">
+    <span className="inline-flex items-baseline gap-1.5">
+      <span className="font-bold text-foreground">
         ${Number.isInteger(course.price) ? course.price : course.price.toFixed(2)}
       </span>
       {course.originalPrice > course.price ? (
         <span className="text-xs text-muted-foreground line-through">${course.originalPrice}</span>
       ) : null}
-    </span>
-  );
-}
-
-function AuthorMark() {
-  return (
-    <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
-      <SiteLogoMark className="size-3.5" />
     </span>
   );
 }
@@ -62,11 +52,11 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         to="/courses/$slug"
         params={{ slug: course.slug }}
         className={cn(
-          "group flex overflow-hidden rounded-2xl border border-border/80 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "group flex overflow-hidden rounded-lg border border-border bg-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card",
           className,
         )}
       >
-        <div className="relative w-36 shrink-0 bg-neutral-950 sm:w-48">
+        <div className="relative w-40 shrink-0 bg-neutral-900 sm:w-52">
           <CourseThumbnailBanner
             thumbnail={course.thumbnail}
             slug={course.slug}
@@ -80,32 +70,24 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
           </CourseThumbnailBanner>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-3 p-4 sm:p-5">
-          <div className="min-w-0">
-            <h2 className="line-clamp-2 font-display text-base font-semibold leading-snug tracking-tight text-foreground sm:text-lg">
-              {course.title}
-            </h2>
-            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-              {course.description}
-            </p>
-          </div>
-
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2">
-              <AuthorMark />
-              <span className="truncate text-sm text-muted-foreground">{instructor}</span>
-            </div>
-            <span className="inline-flex max-w-full truncate rounded-full border border-border bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-              {category}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
-            <PriceBlock course={course} className="text-base" />
-            <span className="inline-flex items-center gap-1 text-sm font-medium text-foreground">
+        <div className="flex min-w-0 flex-1 flex-col gap-2 p-4 sm:p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {category}
+          </p>
+          <h2 className="line-clamp-2 text-base font-bold leading-snug text-foreground sm:text-lg">
+            {course.title}
+          </h2>
+          <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
+          <p className="text-sm text-muted-foreground">{instructor}</p>
+          <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+            <span className="inline-flex items-center gap-1 text-sm font-bold text-[#b4690e]">
               {course.rating.toFixed(1)}
-              <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
+              <Star className="size-3.5 fill-[#b4690e] text-[#b4690e]" aria-hidden />
+              <span className="font-normal text-muted-foreground">
+                ({formatCount(course.ratingsCount)})
+              </span>
             </span>
+            <PriceBlock course={course} />
           </div>
         </div>
       </Link>
@@ -117,15 +99,15 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
       to="/courses/$slug"
       params={{ slug: course.slug }}
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card",
         className,
       )}
     >
-      <div className="relative bg-neutral-950">
+      <div className="relative bg-neutral-900">
         <CourseThumbnailBanner
           thumbnail={course.thumbnail}
           slug={course.slug}
-          aspectClass="aspect-[4/3]"
+          aspectClass="aspect-video"
           className="rounded-none border-0"
           showLabel={false}
           showIcon={!course.thumbnail.imageUrl}
@@ -135,32 +117,20 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         </CourseThumbnailBanner>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-        <div className="min-w-0">
-          <h3 className="line-clamp-2 font-display text-sm font-semibold leading-snug tracking-tight text-foreground sm:text-[15px]">
-            {course.title}
-          </h3>
-          <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-            {course.description}
-          </p>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between gap-3 pt-1">
-          <div className="flex min-w-0 items-center gap-2">
-            <AuthorMark />
-            <span className="truncate text-xs text-muted-foreground sm:text-sm">{instructor}</span>
-          </div>
-          <span className="inline-flex max-w-[45%] shrink-0 truncate rounded-full border border-border bg-muted/40 px-2.5 py-1 text-[10px] font-medium text-muted-foreground sm:text-[11px]">
-            {category}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 border-t border-border/70 pt-3">
-          <PriceBlock course={course} className="text-sm sm:text-base" />
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground sm:text-sm">
+      <div className="flex flex-1 flex-col gap-1.5 p-3.5 sm:p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {category}
+        </p>
+        <h3 className="line-clamp-2 text-sm font-bold leading-snug text-foreground sm:text-[15px]">
+          {course.title}
+        </h3>
+        <p className="text-xs text-muted-foreground sm:text-sm">{instructor}</p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#b4690e] sm:text-sm">
             {course.rating.toFixed(1)}
-            <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
+            <Star className="size-3.5 fill-[#b4690e] text-[#b4690e]" aria-hidden />
           </span>
+          <PriceBlock course={course} />
         </div>
       </div>
     </Link>

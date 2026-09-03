@@ -34,7 +34,7 @@ export function CourseThumbnailBanner({
     showLabel && thumbnail.label && !hasImage ? (
       <span
         className={cn(
-          "absolute left-3 top-3 z-10 rounded-md bg-black/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-sm",
+          "absolute left-3 top-3 z-10 bg-black/55 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-white",
           labelClassName,
         )}
       >

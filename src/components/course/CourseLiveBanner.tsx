@@ -41,26 +41,26 @@ export function CourseLiveBanner({ courseSlug }: { courseSlug: string }) {
   if (!item) return null;
 
   return (
-    <div className="mb-5 flex flex-col gap-3 overflow-hidden rounded-2xl border border-red-500/25 bg-red-500/[0.07] p-3 sm:flex-row sm:items-center sm:justify-between sm:pr-4">
+    <div className="mb-5 flex flex-col gap-3 overflow-hidden border border-border p-3 sm:flex-row sm:items-center sm:justify-between sm:pr-4">
       <div className="flex min-w-0 items-center gap-3">
         <CourseThumbnailBanner
           thumbnail={liveEventThumbnail(item, item.course)}
           slug={item.course.slug}
           aspectClass="aspect-video w-28 shrink-0 sm:w-32"
-          className="rounded-lg"
+          className="rounded-none border border-border"
           showLabel={false}
           showIcon={false}
         />
         <div className="min-w-0">
-          <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
+          <p className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
             <Radio className="size-3.5" aria-hidden />
             {liveStatusLabel(item.status)}
           </p>
-          <p className="mt-1 truncate text-sm font-semibold text-foreground">{item.title}</p>
+          <p className="mt-1 truncate text-sm font-medium text-foreground">{item.title}</p>
           <p className="text-xs text-muted-foreground">{formatLiveSchedule(item.scheduledAt)}</p>
         </div>
       </div>
-      <Button asChild size="sm" className="rounded-full">
+      <Button asChild size="sm" className="rounded-md">
         <Link to="/live/$sessionId" params={{ sessionId: item.id }}>
           {item.status === "live"
             ? "Regarder en direct"

@@ -44,9 +44,9 @@ export function CourseHeroEnrollCta({
 }: CourseHeroEnrollCtaProps) {
   if (accessLoading) {
     return (
-      <div className={cn("mt-5", className)} aria-busy="true" aria-label="Chargement">
-        <div className="h-11 w-44 animate-pulse rounded-lg bg-muted" />
-        <div className="mt-2 h-3 w-36 animate-pulse rounded bg-muted/70" />
+      <div className={cn("mt-5 flex flex-col items-start gap-2", className)} aria-busy="true" aria-label="Chargement">
+        <div className="h-11 w-44 rounded-md bg-muted" />
+        <div className="mt-2 h-3 w-36 rounded bg-muted/70" />
       </div>
     );
   }
@@ -60,7 +60,7 @@ export function CourseHeroEnrollCta({
           asChild
           variant="hero"
           size="lg"
-          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
+          className="h-auto min-w-[11rem] rounded-md px-5 py-2.5 text-left"
         >
           <Link
             to="/courses/$slug/learn"
@@ -82,7 +82,7 @@ export function CourseHeroEnrollCta({
           asChild
           variant="hero"
           size="lg"
-          className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
+          className="h-auto min-w-[11rem] rounded-md px-5 py-2.5 text-left"
         >
           <Link
             to="/courses/$slug/learn"
@@ -108,7 +108,7 @@ export function CourseHeroEnrollCta({
             asChild
             variant="hero"
             size="lg"
-            className="h-auto min-w-[11rem] rounded-lg px-5 py-2.5 text-left"
+            className="h-auto min-w-[11rem] rounded-md px-5 py-2.5 text-left"
           >
             <Link
               to="/checkout"

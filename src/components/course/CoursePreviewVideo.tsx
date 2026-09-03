@@ -202,20 +202,18 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
     <section
       ref={sectionRef}
       className={cn(
-        "mb-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
+        "mb-8 overflow-hidden rounded-lg border border-border bg-white shadow-sm dark:bg-card",
         className,
       )}
     >
-      <div className="border-b border-border/80 px-4 py-3 sm:px-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-          Aperçu vidéo
-        </p>
-        <h2 className="mt-1 text-base font-semibold text-foreground sm:text-lg">{lesson.title}</h2>
+      <div className="border-b border-border px-4 py-3 sm:px-5">
+        <h2 className="text-base font-bold text-foreground sm:text-lg">{lesson.title}</h2>
+        <p className="mt-0.5 text-xs text-muted-foreground">Aperçu du cours</p>
       </div>
 
       {!activated ? (
         playbackLoading ? (
-          <div className="aspect-video w-full animate-pulse bg-muted/60" aria-hidden />
+          <div className="aspect-video w-full bg-muted/60" aria-hidden />
         ) : posterUrl ? (
           <button
             type="button"

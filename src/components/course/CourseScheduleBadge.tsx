@@ -24,7 +24,7 @@ export function CourseScheduleBadge({
     return (
       <Badge
         className={cn(
-          "absolute left-3 top-3 z-10 gap-1 rounded-md border-transparent bg-primary/95 px-2.5 py-1 text-[10px] font-bold text-primary-foreground shadow-sm backdrop-blur-sm",
+          "absolute left-3 top-3 z-10 gap-1 rounded-md border-transparent bg-foreground px-2.5 py-1 text-[10px] font-medium text-background",
           className,
         )}
       >

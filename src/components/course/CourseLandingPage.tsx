@@ -10,7 +10,6 @@ import {
   Play,
   ShieldCheck,
   Star,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +17,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   countLessons,
   formatCount,
-  getAllLessons,
   getContinueLearnSearch,
   getCourseActionLabel,
   getCourseDisplayDuration,
   getDisplayedCourseStudentsCount,
-  getFirstPreviewVideoLesson,
   getPlayableLearnSearch,
   getPreviewLearnSearch,
   getPreviewVideoLessons,
@@ -87,19 +84,17 @@ function CourseThumbnail({
       showOverlay={false}
     >
       {accessLoading ? (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20">
-          <span className="h-10 w-10 animate-pulse rounded-full bg-white/40" />
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/15">
+          <span className="h-9 w-9 rounded-md bg-white/35" />
         </div>
       ) : enrolledWaiting && availabilityLabel && !playableLearnSearch ? (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/45 px-4 text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-white/95 text-primary shadow-lg">
-            <CalendarClock className="h-7 w-7" />
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/50 px-4 text-center">
+          <span className="grid h-12 w-12 place-items-center rounded-md border border-white/20 bg-white text-foreground">
+            <CalendarClock className="h-6 w-6" />
           </span>
           <div className="max-w-[240px]">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-white/80">
-              Inscription confirmée
-            </p>
-            <p className="mt-1 text-base font-bold leading-snug text-white drop-shadow-sm">
+            <p className="text-xs text-white/75">Inscription confirmée</p>
+            <p className="mt-1 text-base font-semibold leading-snug text-white">
               Disponible le {availabilityLabel}
             </p>
           </div>
@@ -244,357 +239,226 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-0">
+    <div className="min-h-screen bg-[#f3f4f6] pb-24 dark:bg-background lg:pb-0">
       <Navbar />
 
       <main id="main-content" className="site-page-top">
-        <section className="relative overflow-hidden border-b border-border bg-course-hero text-foreground pb-16 pt-6 sm:pb-20">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-mesh opacity-60"
-          />
-          <div className="site-container relative">
+        <div className="border-b border-border bg-white dark:bg-card">
+          <div className="site-container py-6 sm:py-8">
             <nav
               className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground"
               aria-label="Fil d'Ariane"
             >
-              <Link to="/" className="hover:text-foreground hover:underline">
+              <Link to="/" className="text-primary hover:underline">
                 {siteConfig.name}
               </Link>
               <ChevronRight className="h-3 w-3" />
-              <Link to="/courses" className="hover:text-foreground hover:underline">
+              <Link to="/courses" className="text-primary hover:underline">
                 Cours
               </Link>
               <ChevronRight className="h-3 w-3" />
-              <span className="line-clamp-1 text-foreground/90">{course.title}</span>
+              <span className="line-clamp-1 text-foreground">{course.title}</span>
             </nav>
 
-            <CourseLiveBanner courseSlug={course.slug} />
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-10">
+              <div className="min-w-0">
+                <CourseLiveBanner courseSlug={course.slug} />
 
-            {!authLoading && !user && (
-              <p className="mb-4 inline-flex w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-brand-accent/40 bg-brand-accent/15 px-4 py-3 text-sm text-foreground">
-                <span>Déjà payé pour ce cours ?</span>
-                <Link
-                  to="/login"
-                  className="font-semibold text-primary underline underline-offset-2"
-                >
-                  Connectez-vous
-                </Link>
-                <span>avec le même email que votre inscription.</span>
-              </p>
-            )}
+                {!authLoading && !user && (
+                  <p className="mb-4 rounded border border-border bg-[#f8fafc] px-4 py-3 text-sm text-muted-foreground dark:bg-muted/40">
+                    Déjà payé pour ce cours ?{" "}
+                    <Link
+                      to="/login"
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      Connectez-vous
+                    </Link>{" "}
+                    avec le même email que votre inscription.
+                  </p>
+                )}
 
-            {enrolledWaiting && access?.scheduledPublishAt && (
-              <p className="mb-4 inline-flex rounded-xl border border-success/30 bg-success/10 px-3 py-2 text-xs text-foreground">
-                Vous êtes inscrit — accès complet au cours le{" "}
-                {formatScheduledPublishLabel(access.scheduledPublishAt)}
-              </p>
-            )}
+                {enrolledWaiting && access?.scheduledPublishAt && (
+                  <p className="mb-4 rounded border border-success/30 bg-success/10 px-3 py-2 text-sm text-foreground">
+                    Vous êtes inscrit — accès complet au cours le{" "}
+                    {formatScheduledPublishLabel(access.scheduledPublishAt)}
+                  </p>
+                )}
 
-            {scheduledSoon && course.scheduledPublishAt && !hasPaidAccess && (
-              <p className="mb-4 inline-flex rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-xs text-foreground">
-                Inscriptions ouvertes — les vidéos seront disponibles le{" "}
-                {formatScheduledPublishLabel(course.scheduledPublishAt)}
-              </p>
-            )}
+                {scheduledSoon && course.scheduledPublishAt && !hasPaidAccess && (
+                  <p className="mb-4 rounded border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-foreground">
+                    Inscriptions ouvertes — les vidéos seront disponibles le{" "}
+                    {formatScheduledPublishLabel(course.scheduledPublishAt)}
+                  </p>
+                )}
 
-            {!contentLive && !scheduledSoon && !hasPaidAccess && (
-              <p className="mb-4 inline-flex rounded-xl border border-border bg-card/80 px-3 py-2 text-xs text-muted-foreground">
-                Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
-              </p>
-            )}
+                {!contentLive && !scheduledSoon && !hasPaidAccess && (
+                  <p className="mb-4 rounded border border-border px-3 py-2 text-sm text-muted-foreground">
+                    Brouillon — ce cours n&apos;est pas encore visible dans le catalogue public.
+                  </p>
+                )}
 
-            <h1 className="max-w-4xl font-display text-3xl font-bold leading-[1.15] tracking-[-0.01em] md:text-4xl">
-              {course.title}
-            </h1>
-            <p className="mt-3 max-w-3xl text-lg leading-normal text-muted-foreground">
-              {course.description}
-            </p>
+                <h1 className="max-w-3xl text-2xl font-bold leading-tight text-foreground sm:text-3xl md:text-[2rem]">
+                  {course.title}
+                </h1>
 
-            <div className="mt-3 flex items-center gap-2.5 text-sm">
-              <Avatar className="h-7 w-7 border border-border/60">
-                <AvatarImage
-                  src={siteConfig.founder.avatarUrl}
-                  alt={siteConfig.founder.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-[10px] font-semibold">
-                  {siteConfig.founder.name
-                    .split(/\s+/)
-                    .map((part) => part[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <p className="text-muted-foreground">
-                Instructeur:{" "}
-                <span className="font-medium text-primary underline underline-offset-2">
-                  {siteConfig.founder.name}
-                </span>
-              </p>
+                <p className="mt-3 max-w-2xl text-base leading-relaxed text-foreground/80">
+                  {course.description}
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                  <span className="inline-flex items-center gap-1 font-bold text-[#f4b400]">
+                    {course.rating.toFixed(1)}
+                    <Star className="h-4 w-4 fill-[#f4b400] text-[#f4b400]" aria-hidden />
+                  </span>
+                  <span className="font-semibold text-primary underline-offset-2 hover:underline">
+                    {formatCount(course.ratingsCount)} avis
+                  </span>
+                  <span className="text-muted-foreground">
+                    {formatCount(getDisplayedCourseStudentsCount(course))} déjà inscrits
+                  </span>
+                  {courseDiscount > 0 ? (
+                    <Badge variant="success">{courseDiscount}% off</Badge>
+                  ) : null}
+                </div>
+
+                <div className="mt-4 flex items-center gap-2.5 text-sm">
+                  <Avatar className="h-8 w-8 border border-border">
+                    <AvatarImage
+                      src={siteConfig.founder.avatarUrl}
+                      alt={siteConfig.founder.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-[10px] font-semibold">
+                      {siteConfig.founder.name
+                        .split(/\s+/)
+                        .map((part) => part[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-muted-foreground">
+                    Proposé par{" "}
+                    <span className="font-semibold text-primary">{siteConfig.founder.name}</span>
+                  </p>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Globe className="h-3.5 w-3.5" aria-hidden />
+                    Mis à jour {course.lastUpdated}
+                  </span>
+                  <span>{course.language}</span>
+                  {course.captions ? <span>Sous-titres disponibles</span> : null}
+                  <span>Niveau {course.skillLevel}</span>
+                </div>
+
+                <div className="mt-5 lg:hidden">
+                  <CourseHeroEnrollCta
+                    courseSlug={course.slug}
+                    price={course.price}
+                    studentCount={getDisplayedCourseStudentsCount(course)}
+                    accessLoading={accessLoading}
+                    hasPaidAccess={hasPaidAccess}
+                    canStartCourse={canStartCourse}
+                    enrolledWaiting={enrolledWaiting}
+                    scheduledSoon={scheduledSoon}
+                    startLabel={startLabel}
+                    hasPublicPreview={hasPublicPreview}
+                    courseActionLabel={courseActionLabel}
+                    continueLearnSearch={continueLearnSearch}
+                    playableLearnSearch={playableLearnSearch}
+                    previewLearnSearch={previewLearnSearch}
+                    progressPercent={progress?.progressPercent ?? 0}
+                  />
+                </div>
+              </div>
+
+              <aside className="mt-8 hidden lg:sticky lg:top-6 lg:mt-0 lg:block lg:self-start">
+                <div className="overflow-hidden rounded-lg border border-border bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
+                  <CourseThumbnail
+                    course={course}
+                    accessLoading={accessLoading}
+                    enrolledWaiting={enrolledWaiting}
+                    scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
+                    playableLearnSearch={playableLearnSearch}
+                  />
+                  <div className="space-y-4 p-5">
+                    {accessLoading ? (
+                      <div className="space-y-3" aria-busy="true" aria-label="Chargement de votre accès">
+                        <div className="h-10 rounded bg-muted" />
+                        <div className="h-11 rounded bg-muted" />
+                      </div>
+                    ) : (
+                      <CourseEnrollSidebar
+                        course={course}
+                        courseDiscount={courseDiscount}
+                        hasPaidAccess={hasPaidAccess}
+                        canStartCourse={canStartCourse}
+                        enrolledWaiting={enrolledWaiting}
+                        scheduledSoon={scheduledSoon}
+                        startLabel={startLabel}
+                        hasPublicPreview={hasPublicPreview}
+                        courseActionLabel={courseActionLabel}
+                        continueLearnSearch={continueLearnSearch}
+                        playableLearnSearch={playableLearnSearch}
+                        previewLearnSearch={previewLearnSearch}
+                        progressPercent={progress?.progressPercent ?? 0}
+                      />
+                    )}
+                  </div>
+                </div>
+              </aside>
             </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Globe className="h-3.5 w-3.5" />
-                Dernière mise à jour {course.lastUpdated}
-              </span>
-              <span>{course.language}</span>
-              {course.captions && <span>Sous-titres</span>}
-            </div>
-
-            <CourseHeroEnrollCta
-              courseSlug={course.slug}
-              price={course.price}
-              studentCount={getDisplayedCourseStudentsCount(course)}
-              accessLoading={accessLoading}
-              hasPaidAccess={hasPaidAccess}
-              canStartCourse={canStartCourse}
-              enrolledWaiting={enrolledWaiting}
-              scheduledSoon={scheduledSoon}
-              startLabel={startLabel}
-              hasPublicPreview={hasPublicPreview}
-              courseActionLabel={courseActionLabel}
-              continueLearnSearch={continueLearnSearch}
-              playableLearnSearch={playableLearnSearch}
-              previewLearnSearch={previewLearnSearch}
-              progressPercent={progress?.progressPercent ?? 0}
-            />
           </div>
-        </section>
-
-        <div className="site-container relative z-10 -mt-8 sm:-mt-10">
-          <CourseHeroStatsBar course={statsCourse} />
         </div>
 
-        <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10 lg:pt-10">
-          <aside className="mb-8 lg:sticky lg:top-6 lg:order-2 lg:mb-0 lg:self-start">
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
-              <CourseThumbnail
-                course={course}
-                accessLoading={accessLoading}
-                enrolledWaiting={enrolledWaiting}
-                scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
-                playableLearnSearch={playableLearnSearch}
-              />
-
-              <div className="space-y-4 p-5">
-                {accessLoading ? (
-                  <div
-                    className="space-y-3"
-                    aria-busy="true"
-                    aria-label="Chargement de votre accès"
-                  >
-                    <div className="h-24 animate-pulse rounded-xl bg-muted" />
-                    <div className="h-11 animate-pulse rounded-xl bg-muted" />
-                    <div className="h-9 animate-pulse rounded-xl bg-muted/70" />
-                  </div>
-                ) : (
-                  <>
-                    {!hasPaidAccess && (
-                      <div className="rounded-xl border border-border bg-muted/30 p-4">
-                        <p className="text-xs font-medium text-muted-foreground">Prix du cours</p>
-                        <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                          <span className="font-display text-3xl font-bold">
-                            {formatCoursePrice(course.price)}
-                          </span>
-                          {courseDiscount > 0 && (
-                            <>
-                              <span className="text-sm text-muted-foreground line-through">
-                                ${course.originalPrice}
-                              </span>
-                              <span className="text-xs font-semibold text-success">
-                                −{courseDiscount}%
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {isFreeCourse(course)
-                            ? "Accès complet · connexion requise"
-                            : "Accès complet au cours · paiement unique"}
-                        </p>
-                      </div>
-                    )}
-
-                    {canStartCourse ? (
-                      <Button
-                        asChild
-                        variant="hero"
-                        size="lg"
-                        className="w-full rounded-lg text-base font-bold"
-                      >
-                        <Link
-                          to="/courses/$slug/learn"
-                          params={{ slug: course.slug }}
-                          search={continueLearnSearch}
-                        >
-                          <BookOpen className="h-4 w-4 mr-2" />
-                          {courseActionLabel}
-                        </Link>
-                      </Button>
-                    ) : hasPaidAccess ? (
-                      <>
-                        <Button
-                          asChild
-                          variant="hero"
-                          size="lg"
-                          className="w-full rounded-lg text-base font-bold"
-                        >
-                          <Link
-                            to="/courses/$slug/learn"
-                            params={{ slug: course.slug }}
-                            search={playableLearnSearch}
-                          >
-                            <Play className="h-4 w-4 mr-1 fill-current" />
-                            {hasPublicPreview ? "Voir la preview" : "Voir la vidéo de bienvenue"}
-                          </Link>
-                        </Button>
-                        <Button asChild variant="soft" size="sm" className="w-full">
-                          <Link to="/dashboard">Mes cours</Link>
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        {scheduledSoon ? (
-                          <>
-                            {hasPublicPreview ? (
-                              <Button
-                                asChild
-                                variant="hero"
-                                size="lg"
-                                className="w-full rounded-lg text-base font-bold"
-                              >
-                                <Link
-                                  to="/courses/$slug/learn"
-                                  params={{ slug: course.slug }}
-                                  search={previewLearnSearch}
-                                >
-                                  <Play className="h-4 w-4 mr-1 fill-current" />
-                                  Voir la preview gratuite
-                                </Link>
-                              </Button>
-                            ) : null}
-                            {isFreeCourse(course) ? (
-                              <FreeCourseAuthCta slug={course.slug} />
-                            ) : (
-                              <Button
-                                asChild
-                                variant="soft"
-                                size="lg"
-                                className="w-full rounded-lg text-base font-bold"
-                              >
-                                <Link to="/checkout" search={{ course: course.slug }}>
-                                  S&apos;inscrire maintenant
-                                </Link>
-                              </Button>
-                            )}
-                          </>
-                        ) : isFreeCourse(course) ? (
-                          <>
-                            <FreeCourseAuthCta slug={course.slug} />
-                            {hasPublicPreview ? (
-                              <Button
-                                asChild
-                                variant="soft"
-                                size="lg"
-                                className="w-full rounded-lg"
-                              >
-                                <Link
-                                  to="/courses/$slug/learn"
-                                  params={{ slug: course.slug }}
-                                  search={previewLearnSearch}
-                                >
-                                  <Play className="h-4 w-4 mr-1 fill-current" />
-                                  Voir la preview gratuite
-                                </Link>
-                              </Button>
-                            ) : null}
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              asChild
-                              variant="hero"
-                              size="lg"
-                              className="w-full rounded-lg text-base font-bold"
-                            >
-                              <Link to="/checkout" search={{ course: course.slug }}>
-                                S&apos;inscrire maintenant
-                              </Link>
-                            </Button>
-
-                            {hasPublicPreview ? (
-                              <Button
-                                asChild
-                                variant="soft"
-                                size="lg"
-                                className="w-full rounded-lg"
-                              >
-                                <Link
-                                  to="/courses/$slug/learn"
-                                  params={{ slug: course.slug }}
-                                  search={previewLearnSearch}
-                                >
-                                  <Play className="h-4 w-4 mr-1 fill-current" />
-                                  Voir la preview gratuite
-                                </Link>
-                              </Button>
-                            ) : null}
-                          </>
-                        )}
-                      </>
-                    )}
-
-                    {hasPaidAccess || scheduledSoon ? (
-                      <p className="text-center text-[11px] text-muted-foreground">
-                        {hasPaidAccess
-                          ? canStartCourse
-                            ? (progress?.progressPercent ?? 0) > 0
-                              ? `${progress?.progressPercent}% terminé · progression sauvegardée`
-                              : "Progression sauvegardée dans Mes cours"
-                            : enrolledWaiting
-                              ? hasPublicPreview
-                                ? `Preview disponible · cours complet le ${startLabel}`
-                                : `Vidéo de bienvenue disponible · cours complet le ${startLabel}`
-                              : "Accès BelKou confirmé"
-                          : `Preview gratuite · cours complet le ${startLabel}`}
-                      </p>
-                    ) : null}
-                  </>
-                )}
+        <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-10">
+          <div className="min-w-0">
+            <div className="mb-8 lg:hidden">
+              <div className="overflow-hidden rounded-lg border border-border bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
+                <CourseThumbnail
+                  course={course}
+                  accessLoading={accessLoading}
+                  enrolledWaiting={enrolledWaiting}
+                  scheduledPublishAt={access?.scheduledPublishAt ?? course.scheduledPublishAt}
+                  playableLearnSearch={playableLearnSearch}
+                />
+                <div className="space-y-4 p-5">
+                  {!accessLoading ? (
+                    <CourseEnrollSidebar
+                      course={course}
+                      courseDiscount={courseDiscount}
+                      hasPaidAccess={hasPaidAccess}
+                      canStartCourse={canStartCourse}
+                      enrolledWaiting={enrolledWaiting}
+                      scheduledSoon={scheduledSoon}
+                      startLabel={startLabel}
+                      hasPublicPreview={hasPublicPreview}
+                      courseActionLabel={courseActionLabel}
+                      continueLearnSearch={continueLearnSearch}
+                      playableLearnSearch={playableLearnSearch}
+                      previewLearnSearch={previewLearnSearch}
+                      progressPercent={progress?.progressPercent ?? 0}
+                    />
+                  ) : null}
+                </div>
               </div>
             </div>
-          </aside>
 
-          <div className="min-w-0 lg:order-1">
             <CoursePreviewVideo course={previewCourse} hasPaidAccess={hasPaidAccess} />
 
-            <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3 text-sm shadow-sm">
-              <span className="inline-flex items-center gap-1 font-bold text-foreground">
-                {course.rating.toFixed(1)}
-                <Star className="h-4 w-4 fill-brand-accent text-brand-accent" />
-              </span>
-              <span className="text-primary underline">
-                {formatCount(course.ratingsCount)} avis
-              </span>
-              <span className="inline-flex items-center gap-1 text-muted-foreground">
-                <Users className="h-4 w-4" />
-                {formatCount(getDisplayedCourseStudentsCount(course))} étudiants
-              </span>
-              {courseDiscount > 0 && (
-                <Badge variant="success">{courseDiscount}% off aujourd&apos;hui</Badge>
-              )}
+            <div className="mb-8">
+              <CourseHeroStatsBar course={statsCourse} />
             </div>
 
             {course.whatYouLearn.length > 0 && (
-              <section className="mb-10 rounded-xl border border-border p-5 sm:p-6">
-                <h2 className="text-xl font-bold mb-4">Ce que vous apprendrez</h2>
+              <section className="mb-8 rounded-lg border border-border bg-white p-5 shadow-sm sm:p-6 dark:bg-card">
+                <h2 className="mb-4 text-xl font-bold text-foreground">Ce que vous apprendrez</h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {course.whatYouLearn.map((item) => (
-                    <li key={item} className="flex gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <li key={item} className="flex gap-2.5 text-sm leading-snug text-foreground">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                       {item}
                     </li>
                   ))}
@@ -602,63 +466,65 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </section>
             )}
 
-            <section className="mb-10">
-              <h2 className="text-xl font-bold mb-1">Table des matières</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                {course.sections.length} parties · {countLessons(course)} leçons ·{" "}
-                {getCourseDisplayDuration(course)} · Niveau {course.skillLevel}
+            <section className="mb-8">
+              <h2 className="mb-1 text-xl font-bold text-foreground">Programme du cours</h2>
+              <p className="mb-4 text-sm text-muted-foreground">
+                {course.sections.length} modules · {countLessons(course)} leçons ·{" "}
+                {getCourseDisplayDuration(course)}
               </p>
               <CoursePublicCurriculum course={course} hasPaidAccess={hasPaidAccess} />
             </section>
 
-            <section className="mb-10">
-              <h2 className="text-xl font-bold mb-3">Description</h2>
-              <p className="text-sm leading-relaxed text-muted-foreground">{course.description}</p>
+            <section className="mb-8 rounded-lg border border-border bg-white p-5 shadow-sm dark:bg-card">
+              <h2 className="mb-3 text-xl font-bold text-foreground">À propos</h2>
+              <p className="text-sm leading-relaxed text-foreground/80">{course.description}</p>
             </section>
 
-            <section className="rounded-xl border border-border bg-muted/30 p-5 flex gap-3">
-              <ShieldCheck className="h-8 w-8 shrink-0 text-primary" />
+            <section className="mb-4 flex gap-3 rounded-lg border border-border bg-white p-5 shadow-sm dark:bg-card">
+              <ShieldCheck className="h-7 w-7 shrink-0 text-primary" aria-hidden />
               <div>
-                <h3 className="font-semibold">
+                <h3 className="font-bold text-foreground">
                   {hasPaidAccess
                     ? canStartCourse
                       ? "Vous êtes inscrit à cette formation"
                       : `Inscription confirmée${startLabel ? ` — début le ${startLabel}` : ""}`
                     : scheduledSoon
                       ? `Formation BelKou — début le ${startLabel}`
-                      : "Cours BelKou — accès à vie après achat"}
+                      : "Accès à vie après inscription"}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {hasPaidAccess
                     ? canStartCourse
                       ? "Retrouvez toutes vos leçons dans le lecteur ou depuis Mes cours."
-                      : "Le contenu vidéo sera débloqué automatiquement à la date prévue. En attendant, la vidéo de bienvenue reste accessible."
+                      : "Le contenu vidéo sera débloqué automatiquement à la date prévue."
                     : scheduledSoon
-                      ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué automatiquement à la date prévue."
-                      : "Accès WhatsApp, mentorat et projets réels. Paiement sécurisé via Square, PayPal, MonCash ou cash."}
+                      ? "Inscrivez-vous dès maintenant. Le contenu vidéo sera débloqué à la date prévue."
+                      : "Paiement sécurisé. Support communauté BelKou inclus."}
                 </p>
               </div>
             </section>
           </div>
+
+          <div className="hidden lg:block" aria-hidden />
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur-sm p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] dark:bg-card lg:hidden">
         <div className="site-container flex items-center gap-3">
           {accessLoading ? (
             <>
               <div className="min-w-0 flex-1 space-y-2">
-                <div className="h-3 w-2/3 animate-pulse rounded bg-muted" />
-                <div className="h-5 w-1/2 animate-pulse rounded bg-muted" />
+                <div className="h-3 w-2/3 rounded bg-muted" />
+                <div className="h-5 w-1/2 rounded bg-muted" />
               </div>
-              <div className="h-11 w-28 animate-pulse rounded-lg bg-muted" />
+              <div className="h-11 w-28 rounded bg-muted" />
             </>
           ) : (
             <>
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-muted-foreground truncate">{course.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{course.title}</p>
                 {hasPaidAccess ? (
-                  <p className="text-sm font-semibold text-success">
+                  <p className="text-sm font-semibold text-foreground">
                     {canStartCourse
                       ? "Accès actif"
                       : access?.scheduledPublishAt
@@ -666,11 +532,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                         : "Inscription confirmée"}
                   </p>
                 ) : (
-                  <p className="text-xl font-bold">{formatCoursePrice(course.price)}</p>
+                  <p className="text-xl font-bold tracking-tight text-foreground">
+                    {formatCoursePrice(course.price)}
+                  </p>
                 )}
               </div>
               {canStartCourse ? (
-                <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
                   <Link
                     to="/courses/$slug/learn"
                     params={{ slug: course.slug }}
@@ -680,7 +548,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </Link>
                 </Button>
               ) : hasPaidAccess ? (
-                <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
+                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
                   <Link
                     to="/courses/$slug/learn"
                     params={{ slug: course.slug }}
@@ -689,31 +557,175 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                     {playableLearnSearch ? (hasPublicPreview ? "Preview" : "Bienvenue") : "Cours"}
                   </Link>
                 </Button>
-              ) : hasPublicPreview ? (
-                <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-                  <Link
-                    to="/courses/$slug/learn"
-                    params={{ slug: course.slug }}
-                    search={previewLearnSearch}
-                  >
-                    Preview
+              ) : isFreeCourse(course) ? (
+                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                  <Link to="/login" search={{ redirect: `/courses/${course.slug}/learn` }}>
+                    S&apos;inscrire
                   </Link>
                 </Button>
               ) : (
-                isFreeCourse(course) ? (
-                  <FreeCourseAuthCta slug={course.slug} stacked={false} className="shrink-0" />
-                ) : (
-                  <Button asChild variant="hero" size="lg" className="shrink-0 rounded-lg px-5">
-                    <Link to="/checkout" search={{ course: course.slug }}>
-                      S&apos;inscrire
-                    </Link>
-                  </Button>
-                )
+                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                  <Link to="/checkout" search={{ course: course.slug }}>
+                    S&apos;inscrire
+                  </Link>
+                </Button>
               )}
             </>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+function CourseEnrollSidebar({
+  course,
+  courseDiscount,
+  hasPaidAccess,
+  canStartCourse,
+  enrolledWaiting,
+  scheduledSoon,
+  startLabel,
+  hasPublicPreview,
+  courseActionLabel,
+  continueLearnSearch,
+  playableLearnSearch,
+  previewLearnSearch,
+  progressPercent,
+}: {
+  course: PublicCourse;
+  courseDiscount: number;
+  hasPaidAccess: boolean;
+  canStartCourse: boolean;
+  enrolledWaiting: boolean;
+  scheduledSoon: boolean;
+  startLabel: string | null;
+  hasPublicPreview: boolean;
+  courseActionLabel: string;
+  continueLearnSearch?: { lesson: string };
+  playableLearnSearch?: { lesson: string };
+  previewLearnSearch?: { lesson: string };
+  progressPercent: number;
+}) {
+  return (
+    <>
+      {!hasPaidAccess && (
+        <div>
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="text-3xl font-bold tracking-tight text-foreground">
+              {formatCoursePrice(course.price)}
+            </span>
+            {courseDiscount > 0 && (
+              <>
+                <span className="text-base text-muted-foreground line-through">
+                  ${course.originalPrice}
+                </span>
+                <span className="text-sm font-semibold text-success">−{courseDiscount}%</span>
+              </>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isFreeCourse(course)
+              ? "Accès complet · compte requis"
+              : "Paiement unique · accès à vie"}
+          </p>
+        </div>
+      )}
+
+      {canStartCourse ? (
+        <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+          <Link
+            to="/courses/$slug/learn"
+            params={{ slug: course.slug }}
+            search={continueLearnSearch}
+          >
+            <BookOpen className="mr-2 h-4 w-4" />
+            {courseActionLabel}
+            {progressPercent > 0 ? ` · ${progressPercent}%` : ""}
+          </Link>
+        </Button>
+      ) : hasPaidAccess ? (
+        <>
+          <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+            <Link
+              to="/courses/$slug/learn"
+              params={{ slug: course.slug }}
+              search={playableLearnSearch}
+            >
+              <Play className="mr-1 h-4 w-4 fill-current" />
+              {hasPublicPreview ? "Voir la preview" : "Voir la vidéo de bienvenue"}
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="w-full rounded">
+            <Link to="/dashboard">Mes cours</Link>
+          </Button>
+        </>
+      ) : isFreeCourse(course) ? (
+        <>
+          <FreeCourseAuthCta slug={course.slug} />
+          {hasPublicPreview ? (
+            <Button asChild variant="outline" size="lg" className="w-full rounded font-semibold">
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={previewLearnSearch}
+              >
+                <Play className="mr-1 h-4 w-4 fill-current" />
+                Aperçu gratuit
+              </Link>
+            </Button>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+            <Link to="/checkout" search={{ course: course.slug }}>
+              S&apos;inscrire
+            </Link>
+          </Button>
+          {hasPublicPreview ? (
+            <Button asChild variant="outline" size="lg" className="w-full rounded font-semibold">
+              <Link
+                to="/courses/$slug/learn"
+                params={{ slug: course.slug }}
+                search={previewLearnSearch}
+              >
+                <Play className="mr-1 h-4 w-4 fill-current" />
+                Aperçu gratuit
+              </Link>
+            </Button>
+          ) : null}
+        </>
+      )}
+
+      {(hasPaidAccess || scheduledSoon) && (
+        <p className="text-center text-xs text-muted-foreground">
+          {hasPaidAccess
+            ? canStartCourse
+              ? progressPercent > 0
+                ? `${progressPercent}% terminé · progression sauvegardée`
+                : "Progression sauvegardée dans Mes cours"
+              : enrolledWaiting
+                ? `Cours complet le ${startLabel}`
+                : "Accès BelKou confirmé"
+            : `Cours complet le ${startLabel}`}
+        </p>
+      )}
+
+      <ul className="space-y-2 border-t border-border pt-4 text-sm text-foreground/80">
+        <li className="flex gap-2">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+          Accès complet au cours
+        </li>
+        <li className="flex gap-2">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+          Vidéos et ressources
+        </li>
+        <li className="flex gap-2">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+          Support communauté BelKou
+        </li>
+      </ul>
+    </>
   );
 }

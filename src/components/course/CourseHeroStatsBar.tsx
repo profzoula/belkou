@@ -53,22 +53,22 @@ export function CourseHeroStatsBar({ course, className }: CourseHeroStatsBarProp
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-xl border border-border bg-card shadow-[0_8px_30px_rgb(15_23_42_/_0.08)]",
+        "overflow-hidden rounded-lg border border-border bg-white shadow-sm dark:bg-card",
         className,
       )}
     >
       <ul className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-y-0">
         {items.map((item, index) => (
-          <li key={index} className="px-5 py-5 sm:px-6 sm:py-6">
+          <li key={index} className="px-5 py-4 sm:px-5">
             <p
               className={cn(
-                "text-base font-semibold text-foreground",
-                item.underline && "underline decoration-foreground/30 underline-offset-4",
+                "text-sm font-bold text-foreground",
+                item.underline && "underline decoration-foreground/25 underline-offset-4",
               )}
             >
               {item.title}
             </p>
-            <p className="mt-1.5 text-sm leading-normal text-muted-foreground">
+            <p className="mt-1 text-xs leading-normal text-muted-foreground sm:text-sm">
               {item.subtitle}
             </p>
           </li>

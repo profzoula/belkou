@@ -85,7 +85,7 @@ function CourseEnrollCta({
     return <FreeCourseAuthCta slug={course.slug} stacked={false} size={size} />;
   }
   return (
-    <Button asChild size={size} className={size === "lg" ? "mt-2 rounded-full" : undefined}>
+    <Button asChild size={size} className={size === "lg" ? "mt-2 rounded-md" : undefined}>
       <Link to="/checkout" search={{ course: course.slug }}>
         {label}
       </Link>
@@ -434,7 +434,7 @@ function CourseVideoArea({
         {locked && reason !== "sequential" ? (
           enrolledWaiting ? (
             welcomeLessonId && lesson.id !== welcomeLessonId ? (
-              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-full">
+              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-md">
                 <Link
                   to="/courses/$slug/learn"
                   params={{ slug: course.slug }}
@@ -444,7 +444,7 @@ function CourseVideoArea({
                 </Link>
               </Button>
             ) : (
-              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-full">
+              <Button asChild size="lg" variant="secondary" className="mt-2 rounded-md">
                 <Link to="/dashboard">Retour à Mes cours</Link>
               </Button>
             )
@@ -1188,7 +1188,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
               "hidden lg:sticky lg:top-16 lg:flex lg:h-[calc(100dvh-4rem)] lg:max-h-[calc(100dvh-4rem)] lg:flex-col lg:overflow-hidden",
               isArticleLesson
                 ? "border-r border-border bg-background"
-                : "lg:top-[calc(4rem+1rem)] lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:rounded-[20px] lg:border lg:border-border lg:bg-card lg:shadow-[0_8px_30px_rgb(15_23_42_/_0.06)]",
+                : "lg:top-[calc(4rem+1rem)] lg:h-[calc(100dvh-5rem)] lg:max-h-[calc(100dvh-5rem)] lg:border lg:border-border lg:bg-card",
             )}
           >
             <CurriculumSidebar
@@ -1212,7 +1212,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 "overflow-hidden",
                 isArticleLesson
                   ? "bg-white"
-                  : "rounded-[20px] border border-border bg-card shadow-[0_12px_40px_rgb(15_23_42_/_0.08)]",
+                  : "border border-border bg-card",
               )}
             >
               {!isArticleLesson ? (
@@ -1302,7 +1302,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                 "p-3 sm:p-4",
                 isArticleLesson
                   ? "border-t border-border bg-white pt-6"
-                  : "rounded-[20px] border border-border bg-card shadow-sm",
+                  : "border border-border bg-card",
               )}
             >
               <Tabs value={playerTab} onValueChange={setPlayerTab} className="w-full">
@@ -1319,7 +1319,7 @@ export function CoursePlayer({ course, initialLessonId }: CoursePlayerProps) {
                       key={tab.value}
                       value={tab.value}
                       className={cn(
-                        "shrink-0 rounded-[12px] px-3 py-2 text-xs font-semibold text-muted-foreground transition data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-sm",
+                        "shrink-0 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition data-[state=active]:bg-muted data-[state=active]:text-foreground sm:text-sm",
                         tab.mobileOnly && "lg:hidden",
                       )}
                     >

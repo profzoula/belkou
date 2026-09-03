@@ -24,7 +24,7 @@ export function FreeCourseAuthCta({
         asChild
         variant="hero"
         size={size}
-        className={cn("rounded-lg", size === "lg" && "font-bold", stacked && "w-full")}
+        className={cn("rounded font-bold", stacked && "w-full")}
       >
         <Link to="/login" search={{ redirect }}>
           Connexion
@@ -34,7 +34,7 @@ export function FreeCourseAuthCta({
         asChild
         variant="soft"
         size={size}
-        className={cn("rounded-lg", size === "lg" && "font-bold", stacked && "w-full")}
+        className={cn("rounded font-bold", stacked && "w-full")}
       >
         <Link to="/signup" search={{ redirect }}>
           Créer un compte
