@@ -202,12 +202,12 @@ export function CoursePreviewVideo({ course, hasPaidAccess, className }: CourseP
     <section
       ref={sectionRef}
       className={cn(
-        "mb-8 overflow-hidden rounded-lg border border-border bg-white shadow-sm dark:bg-card",
+        "mb-8 overflow-hidden rounded-2xl border border-border bg-card",
         className,
       )}
     >
       <div className="border-b border-border px-4 py-3 sm:px-5">
-        <h2 className="text-base font-bold text-foreground sm:text-lg">{lesson.title}</h2>
+        <h2 className="text-base font-semibold text-foreground sm:text-lg">{lesson.title}</h2>
         <p className="mt-0.5 text-xs text-muted-foreground">Aperçu du cours</p>
       </div>
 

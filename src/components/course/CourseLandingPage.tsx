@@ -239,11 +239,11 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] pb-24 dark:bg-background lg:pb-0">
+    <div className="min-h-screen bg-elevated pb-24 dark:bg-background lg:pb-0">
       <Navbar />
 
       <main id="main-content" className="site-page-top">
-        <div className="border-b border-border bg-white dark:bg-card">
+        <div className="border-b border-border bg-background">
           <div className="site-container py-6 sm:py-8">
             <nav
               className="mb-4 flex flex-wrap items-center gap-1 text-xs text-muted-foreground"
@@ -265,7 +265,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 <CourseLiveBanner courseSlug={course.slug} />
 
                 {!authLoading && !user && (
-                  <p className="mb-4 rounded border border-border bg-[#f8fafc] px-4 py-3 text-sm text-muted-foreground dark:bg-muted/40">
+                  <p className="mb-4 rounded-lg border border-border bg-elevated px-4 py-3 text-sm text-muted-foreground">
                     Déjà payé pour ce cours ?{" "}
                     <Link
                       to="/login"
@@ -297,7 +297,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </p>
                 )}
 
-                <h1 className="max-w-3xl text-2xl font-bold leading-tight text-foreground sm:text-3xl md:text-[2rem]">
+                <h1 className="max-w-3xl text-2xl font-semibold leading-tight tracking-tight text-foreground sm:text-3xl md:text-[2rem]">
                   {course.title}
                 </h1>
 
@@ -306,9 +306,9 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                 </p>
 
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                  <span className="inline-flex items-center gap-1 font-bold text-[#f4b400]">
+                  <span className="inline-flex items-center gap-1 font-semibold text-brand-accent">
                     {course.rating.toFixed(1)}
-                    <Star className="h-4 w-4 fill-[#f4b400] text-[#f4b400]" aria-hidden />
+                    <Star className="h-4 w-4 fill-brand-accent text-brand-accent" aria-hidden />
                   </span>
                   <span className="font-semibold text-primary underline-offset-2 hover:underline">
                     {formatCount(course.ratingsCount)} avis
@@ -375,7 +375,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               </div>
 
               <aside className="mt-8 hidden lg:sticky lg:top-6 lg:mt-0 lg:block lg:self-start">
-                <div className="overflow-hidden rounded-lg border border-border bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
+                <div className="bk-card overflow-hidden">
                   <CourseThumbnail
                     course={course}
                     accessLoading={accessLoading}
@@ -416,7 +416,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         <div className="site-container py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-10">
           <div className="min-w-0">
             <div className="mb-8 lg:hidden">
-              <div className="overflow-hidden rounded-lg border border-border bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
+              <div className="bk-card overflow-hidden">
                 <CourseThumbnail
                   course={course}
                   accessLoading={accessLoading}
@@ -453,8 +453,8 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             </div>
 
             {course.whatYouLearn.length > 0 && (
-              <section className="mb-8 rounded-lg border border-border bg-white p-5 shadow-sm sm:p-6 dark:bg-card">
-                <h2 className="mb-4 text-xl font-bold text-foreground">Ce que vous apprendrez</h2>
+              <section className="bk-card mb-8 p-5 sm:p-6">
+                <h2 className="mb-4 text-xl font-semibold text-foreground">Ce que vous apprendrez</h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {course.whatYouLearn.map((item) => (
                     <li key={item} className="flex gap-2.5 text-sm leading-snug text-foreground">
@@ -467,7 +467,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
             )}
 
             <section className="mb-8">
-              <h2 className="mb-1 text-xl font-bold text-foreground">Programme du cours</h2>
+              <h2 className="mb-1 text-xl font-semibold text-foreground">Programme du cours</h2>
               <p className="mb-4 text-sm text-muted-foreground">
                 {course.sections.length} modules · {countLessons(course)} leçons ·{" "}
                 {getCourseDisplayDuration(course)}
@@ -475,15 +475,15 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
               <CoursePublicCurriculum course={course} hasPaidAccess={hasPaidAccess} />
             </section>
 
-            <section className="mb-8 rounded-lg border border-border bg-white p-5 shadow-sm dark:bg-card">
-              <h2 className="mb-3 text-xl font-bold text-foreground">À propos</h2>
+            <section className="bk-card mb-8 p-5">
+              <h2 className="mb-3 text-xl font-semibold text-foreground">À propos</h2>
               <p className="text-sm leading-relaxed text-foreground/80">{course.description}</p>
             </section>
 
-            <section className="mb-4 flex gap-3 rounded-lg border border-border bg-white p-5 shadow-sm dark:bg-card">
+            <section className="bk-card mb-4 flex gap-3 p-5">
               <ShieldCheck className="h-7 w-7 shrink-0 text-primary" aria-hidden />
               <div>
-                <h3 className="font-bold text-foreground">
+                <h3 className="font-semibold text-foreground">
                   {hasPaidAccess
                     ? canStartCourse
                       ? "Vous êtes inscrit à cette formation"
@@ -509,7 +509,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
         </div>
       </main>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] dark:bg-card lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
         <div className="site-container flex items-center gap-3">
           {accessLoading ? (
             <>
@@ -532,13 +532,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                         : "Inscription confirmée"}
                   </p>
                 ) : (
-                  <p className="text-xl font-bold tracking-tight text-foreground">
+                  <p className="text-xl font-semibold tracking-tight text-foreground">
                     {formatCoursePrice(course.price)}
                   </p>
                 )}
               </div>
               {canStartCourse ? (
-                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                <Button asChild size="lg" className="shrink-0 rounded-lg px-4 font-semibold">
                   <Link
                     to="/courses/$slug/learn"
                     params={{ slug: course.slug }}
@@ -548,7 +548,7 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </Link>
                 </Button>
               ) : hasPaidAccess ? (
-                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                <Button asChild size="lg" className="shrink-0 rounded-lg px-4 font-semibold">
                   <Link
                     to="/courses/$slug/learn"
                     params={{ slug: course.slug }}
@@ -558,13 +558,13 @@ export function CourseLandingPage({ course }: CourseLandingPageProps) {
                   </Link>
                 </Button>
               ) : isFreeCourse(course) ? (
-                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                <Button asChild size="lg" className="shrink-0 rounded-lg px-4 font-semibold">
                   <Link to="/login" search={{ redirect: `/courses/${course.slug}/learn` }}>
                     S&apos;inscrire
                   </Link>
                 </Button>
               ) : (
-                <Button asChild size="lg" className="shrink-0 rounded px-5 font-bold">
+                <Button asChild size="lg" className="shrink-0 rounded-lg px-4 font-semibold">
                   <Link to="/checkout" search={{ course: course.slug }}>
                     S&apos;inscrire
                   </Link>
@@ -612,7 +612,7 @@ function CourseEnrollSidebar({
       {!hasPaidAccess && (
         <div>
           <div className="flex flex-wrap items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight text-foreground">
+            <span className="text-3xl font-semibold tracking-tight text-foreground">
               {formatCoursePrice(course.price)}
             </span>
             {courseDiscount > 0 && (
@@ -633,7 +633,7 @@ function CourseEnrollSidebar({
       )}
 
       {canStartCourse ? (
-        <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+        <Button asChild size="lg" className="h-12 w-full rounded-lg font-semibold">
           <Link
             to="/courses/$slug/learn"
             params={{ slug: course.slug }}
@@ -646,7 +646,7 @@ function CourseEnrollSidebar({
         </Button>
       ) : hasPaidAccess ? (
         <>
-          <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+          <Button asChild size="lg" className="h-12 w-full rounded-lg font-semibold">
             <Link
               to="/courses/$slug/learn"
               params={{ slug: course.slug }}
@@ -678,7 +678,7 @@ function CourseEnrollSidebar({
         </>
       ) : (
         <>
-          <Button asChild size="lg" className="h-12 w-full rounded font-bold">
+          <Button asChild size="lg" className="h-12 w-full rounded-lg font-semibold">
             <Link to="/checkout" search={{ course: course.slug }}>
               S&apos;inscrire
             </Link>

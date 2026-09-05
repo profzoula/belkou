@@ -32,6 +32,7 @@ import { Route as LegalPrivacyRouteImport } from './routes/legal/privacy'
 import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
 import { Route as CoursesSlugRouteImport } from './routes/courses/$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as ApiHlsProxyRouteImport } from './routes/api/hls-proxy'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ForumCourseSlugIndexRouteImport } from './routes/forum/$courseSlug/index'
 import { Route as ForumCourseSlugPostIdRouteImport } from './routes/forum/$courseSlug/$postId'
@@ -156,6 +157,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHlsProxyRoute = ApiHlsProxyRouteImport.update({
+  id: '/api/hls-proxy',
+  path: '/api/hls-proxy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -210,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/api/hls-proxy'
     | '/auth/callback'
     | '/courses/$slug'
     | '/legal/cgv'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/api/hls-proxy'
     | '/auth/callback'
     | '/courses/$slug'
     | '/legal/cgv'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/admin/login'
+    | '/api/hls-proxy'
     | '/auth/callback'
     | '/courses/$slug'
     | '/legal/cgv'
@@ -412,6 +424,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  ApiHlsProxyRoute: typeof ApiHlsProxyRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   CoursesSlugRoute: typeof CoursesSlugRouteWithChildren
   LegalCgvRoute: typeof LegalCgvRoute
@@ -594,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hls-proxy': {
+      id: '/api/hls-proxy'
+      path: '/api/hls-proxy'
+      fullPath: '/api/hls-proxy'
+      preLoaderRoute: typeof ApiHlsProxyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -680,6 +700,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
   AdminLoginRoute: AdminLoginRoute,
+  ApiHlsProxyRoute: ApiHlsProxyRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   CoursesSlugRoute: CoursesSlugRouteWithChildren,
   LegalCgvRoute: LegalCgvRoute,

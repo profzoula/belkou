@@ -52,7 +52,7 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         to="/courses/$slug"
         params={{ slug: course.slug }}
         className={cn(
-          "group flex overflow-hidden rounded-lg border border-border bg-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card",
+          "group flex overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,box-shadow,opacity] duration-300 hover:border-primary/35 hover:shadow-md focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#0056d2]",
           className,
         )}
       >
@@ -80,9 +80,9 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
           <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
           <p className="text-sm text-muted-foreground">{instructor}</p>
           <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-            <span className="inline-flex items-center gap-1 text-sm font-bold text-[#b4690e]">
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-accent">
               {course.rating.toFixed(1)}
-              <Star className="size-3.5 fill-[#b4690e] text-[#b4690e]" aria-hidden />
+              <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
               <span className="font-normal text-muted-foreground">
                 ({formatCount(course.ratingsCount)})
               </span>
@@ -99,7 +99,7 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
       to="/courses/$slug"
       params={{ slug: course.slug }}
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-white shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-card",
+        "group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-[border-color,box-shadow,opacity] duration-300 hover:border-primary/35 hover:shadow-md focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_#0056d2]",
         className,
       )}
     >
@@ -126,9 +126,9 @@ export function CourseCatalogCard({ course, layout = "grid", className }: Course
         </h3>
         <p className="text-xs text-muted-foreground sm:text-sm">{instructor}</p>
         <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-[#b4690e] sm:text-sm">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand-accent sm:text-sm">
             {course.rating.toFixed(1)}
-            <Star className="size-3.5 fill-[#b4690e] text-[#b4690e]" aria-hidden />
+            <Star className="size-3.5 fill-brand-accent text-brand-accent" aria-hidden />
           </span>
           <PriceBlock course={course} />
         </div>

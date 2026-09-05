@@ -36,7 +36,7 @@ export function LearnHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b border-border bg-white dark:bg-background",
+        "sticky top-0 z-40 border-b border-border bg-background",
         className,
       )}
     >

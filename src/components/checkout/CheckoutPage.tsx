@@ -540,7 +540,7 @@ export function CheckoutPage({
 
           {/* Summary */}
           <aside className="lg:sticky lg:top-8">
-            <div className="rounded-lg border border-border bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] dark:bg-card">
+            <div className="bk-card p-6">
               <h2 className="text-sm font-medium text-muted-foreground">Total</h2>
               <p className="mt-2 text-3xl font-semibold tracking-tight tabular-nums">
                 {formatUsd(displayPrice)}
@@ -616,7 +616,7 @@ export function CheckoutPage({
                 type="submit"
                 disabled={loading || !acceptedTerms}
                 size="xl"
-                className="mt-5 h-12 w-full rounded font-bold"
+                className="mt-5 h-12 w-full rounded-lg font-semibold"
                 aria-describedby={!acceptedTerms ? "checkout-submit-help" : undefined}
               >
                 <Lock className="mr-1.5 h-4 w-4" aria-hidden />

@@ -53,7 +53,7 @@ export function CourseHeroStatsBar({ course, className }: CourseHeroStatsBarProp
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border border-border bg-white shadow-sm dark:bg-card",
+        "overflow-hidden rounded-2xl border border-border bg-card",
         className,
       )}
     >

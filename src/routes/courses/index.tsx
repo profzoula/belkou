@@ -90,12 +90,12 @@ function CoursesIndexPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] dark:bg-background">
+    <div className="min-h-screen bg-elevated dark:bg-background">
       <Navbar />
       <main id="main-content" className="site-page-top">
-        <section className="border-b border-border bg-white dark:bg-card">
+        <section className="border-b border-border bg-background">
           <div className="site-container py-8 sm:py-10">
-            <h1 className="max-w-2xl text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="max-w-2xl text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
               {categoryFilter
                 ? getCourseCategoryLabel(categoryFilter, categories)
                 : "Explorez nos cours"}
@@ -111,7 +111,7 @@ function CoursesIndexPage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Que voulez-vous apprendre ?"
-                className="h-11 rounded border-border bg-white pl-10 shadow-sm dark:bg-background"
+                className="h-11 rounded-lg border-border bg-background pl-10"
               />
             </label>
           </div>
@@ -149,7 +149,7 @@ function CoursesIndexPage() {
                     "cursor-pointer rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                     priceFilter === item.id
                       ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-white text-muted-foreground hover:border-primary/40 hover:text-foreground dark:bg-card",
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground",
                   )}
                 >
                   {item.label}
@@ -158,7 +158,7 @@ function CoursesIndexPage() {
               <select
                 value={levelFilter}
                 onChange={(event) => setLevelFilter(event.target.value)}
-                className="h-8 cursor-pointer rounded-full border border-border bg-white px-3 text-xs font-semibold text-foreground dark:bg-card"
+                className="h-8 cursor-pointer rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground"
                 aria-label="Filtrer par niveau"
               >
                 <option value="all">Tous les niveaux</option>
@@ -184,7 +184,7 @@ function CoursesIndexPage() {
                     },
                   });
                 }}
-                className="h-8 cursor-pointer rounded-full border border-border bg-white px-3 text-xs font-semibold text-foreground dark:bg-card"
+                className="h-8 cursor-pointer rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground"
                 aria-label="Filtrer par catégorie"
               >
                 <option value="all">Toutes les catégories</option>
@@ -198,9 +198,9 @@ function CoursesIndexPage() {
 
             <div className="flex items-center justify-between gap-3 sm:justify-end">
               <p className="text-sm text-muted-foreground">
-                <span className="font-bold text-foreground">{filtered.length}</span> cours
+                <span className="font-semibold text-foreground">{filtered.length}</span> cours
               </p>
-              <div className="inline-flex rounded border border-border bg-white p-0.5 dark:bg-card">
+              <div className="inline-flex rounded-lg border border-border bg-card p-0.5">
                 <Button
                   type="button"
                   variant="ghost"

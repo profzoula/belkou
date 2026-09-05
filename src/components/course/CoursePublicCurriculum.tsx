@@ -24,7 +24,7 @@ export function CoursePublicCurriculum({ course, hasPaidAccess }: CoursePublicCu
   let globalStep = 0;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm dark:bg-card">
+    <div className="bk-card overflow-hidden">
       {course.sections.map((section, sectionIndex) => {
         const entries = section.lessons.map((lesson) => {
           const { locked } = getLessonLockState({ lesson, course, hasPaidAccess });
