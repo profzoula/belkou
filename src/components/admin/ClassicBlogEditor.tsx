@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   AlignCenter,
   AlignLeft,
@@ -12,11 +13,14 @@ import {
   Link2Off,
   List,
   ListOrdered,
+  Loader2,
   Maximize2,
   MoreHorizontal,
   Quote,
   Unlink,
+  Upload,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +32,32 @@ import {
   getPostContentHtml,
   withPostContentHtml,
 } from "@/lib/blog-storage";
+import { adminUploadBlogImage } from "@/lib/fns/admin";
 import { cn } from "@/lib/utils";
+
+const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("Lecture impossible"));
+        return;
+      }
+      const base64 = result.split(",")[1];
+      if (!base64) {
+        reject(new Error("Fichier invalide"));
+        return;
+      }
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error("Lecture impossible"));
+    reader.readAsDataURL(file);
+  });
+}
 
 type ClassicBlogEditorProps = {
   post: StoredBlogPost;
@@ -98,10 +127,15 @@ export function ClassicBlogEditor({
   const [mode, setMode] = useState<EditorMode>("visual");
   const [kitchenSink, setKitchenSink] = useState(false);
   const [distractionFree, setDistractionFree] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const lastHtml = useRef<string | null>(null);
   const contentHtml = getPostContentHtml(post);
+  const uploadImageFn = useServerFn(adminUploadBlogImage);
 
   useEffect(() => {
     if (mode !== "visual") return;
@@ -152,13 +186,65 @@ export function ClassicBlogEditor({
     flushVisual();
   };
 
-  const insertMedia = () => {
-    const url = window.prompt("URL du média (image https://…)");
-    if (!url?.trim()) return;
-    const alt = window.prompt("Texte alternatif (alt)", "") ?? "";
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    if (!IMAGE_ACCEPT.split(",").includes(file.type)) {
+      toast.error("Format non supporté (JPG, PNG, WebP, GIF)");
+      return null;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error("Image trop volumineuse (max 5 Mo)");
+      return null;
+    }
+    const dataBase64 = await readFileAsBase64(file);
+    const result = await uploadImageFn({
+      data: {
+        postId: post.id,
+        contentType: file.type,
+        dataBase64,
+      },
+    });
+    return result.publicUrl;
+  };
+
+  const insertMediaFromUrl = (url: string, alt = "") => {
     insertHtml(
-      `<figure><img src="${escapeHtml(url.trim())}" alt="${escapeHtml(alt)}" loading="lazy" /><figcaption></figcaption></figure><p></p>`,
+      `<figure><img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" loading="lazy" /><figcaption></figcaption></figure><p></p>`,
     );
+  };
+
+  const insertMedia = () => {
+    mediaInputRef.current?.click();
+  };
+
+  const handleMediaFile = async (file: File) => {
+    setUploadingMedia(true);
+    try {
+      const publicUrl = await uploadImageFile(file);
+      if (!publicUrl) return;
+      const alt = window.prompt("Texte alternatif (alt)", file.name.replace(/\.[^.]+$/, "")) ?? "";
+      insertMediaFromUrl(publicUrl, alt);
+      toast.success("Image ajoutée dans l’article");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload impossible");
+    } finally {
+      setUploadingMedia(false);
+      if (mediaInputRef.current) mediaInputRef.current.value = "";
+    }
+  };
+
+  const handleCoverFile = async (file: File) => {
+    setUploadingCover(true);
+    try {
+      const publicUrl = await uploadImageFile(file);
+      if (!publicUrl) return;
+      patchPost({ coverImageUrl: publicUrl, coverAlt: file.name.replace(/\.[^.]+$/, "") });
+      toast.success("Image de couverture enregistrée");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload impossible");
+    } finally {
+      setUploadingCover(false);
+      if (coverInputRef.current) coverInputRef.current.value = "";
+    }
   };
 
   const insertLink = () => {
@@ -273,18 +359,48 @@ export function ClassicBlogEditor({
 
             {/* Classic Editor chrome */}
             <div className="overflow-hidden rounded-sm border border-[#8c8f94] bg-white shadow-sm">
+              <input
+                ref={mediaInputRef}
+                type="file"
+                accept={IMAGE_ACCEPT}
+                className="hidden"
+                disabled={uploadingMedia || mode !== "visual"}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void handleMediaFile(file);
+                }}
+              />
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#c3c4c7] bg-[#f6f7f7] px-2 py-1.5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 gap-1.5 rounded-sm border-[#8c8f94] bg-white text-xs font-medium"
-                  onClick={insertMedia}
-                  disabled={mode !== "visual"}
-                >
-                  <ImageIcon className="size-3.5" />
-                  Ajouter un média
-                </Button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5 rounded-sm border-[#8c8f94] bg-white text-xs font-medium"
+                    onClick={insertMedia}
+                    disabled={mode !== "visual" || uploadingMedia}
+                  >
+                    {uploadingMedia ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="size-3.5" />
+                    )}
+                    {uploadingMedia ? "Envoi…" : "Ajouter un média"}
+                  </Button>
+                  <button
+                    type="button"
+                    className="text-[11px] text-[#646970] underline-offset-2 hover:text-[#1d2327] hover:underline disabled:opacity-50"
+                    disabled={mode !== "visual" || uploadingMedia}
+                    onClick={() => {
+                      const url = window.prompt("Ou collez une URL d’image (https://…)");
+                      if (!url?.trim()) return;
+                      const alt = window.prompt("Texte alternatif (alt)", "") ?? "";
+                      insertMediaFromUrl(url.trim(), alt);
+                    }}
+                  >
+                    Coller une URL
+                  </button>
+                </div>
                 <div className="flex overflow-hidden rounded-sm border border-[#c3c4c7]">
                   <button
                     type="button"
@@ -536,12 +652,66 @@ export function ClassicBlogEditor({
                   className="rounded-sm"
                 />
               </Field>
-              <Field label="Image de couverture (URL)">
+              <Field label="Image de couverture">
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept={IMAGE_ACCEPT}
+                  className="hidden"
+                  disabled={uploadingCover}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void handleCoverFile(file);
+                  }}
+                />
+                {post.coverImageUrl ? (
+                  <div className="mb-2 overflow-hidden rounded-sm border border-[#c3c4c7]">
+                    <img
+                      src={post.coverImageUrl}
+                      alt={post.coverAlt || ""}
+                      className="h-28 w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-sm"
+                    disabled={uploadingCover}
+                    onClick={() => coverInputRef.current?.click()}
+                  >
+                    {uploadingCover ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="size-3.5" />
+                    )}
+                    {uploadingCover
+                      ? "Envoi…"
+                      : post.coverImageUrl
+                        ? "Changer (appareil)"
+                        : "Choisir sur l’appareil"}
+                  </Button>
+                  {post.coverImageUrl ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-sm text-destructive"
+                      onClick={() => patchPost({ coverImageUrl: undefined })}
+                    >
+                      Retirer
+                    </Button>
+                  ) : null}
+                </div>
                 <Input
                   value={post.coverImageUrl ?? ""}
-                  onChange={(e) => patchPost({ coverImageUrl: e.target.value.trim() || undefined })}
-                  className="rounded-sm"
-                  placeholder="https://…"
+                  onChange={(e) =>
+                    patchPost({ coverImageUrl: e.target.value.trim() || undefined })
+                  }
+                  className="mt-2 rounded-sm"
+                  placeholder="Ou collez une URL https://…"
                 />
               </Field>
               <Field label="SEO — titre">

@@ -493,16 +493,19 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Médias"
-          description="Ajoutez des images de couverture et des médias via URL dans chaque article."
+          description="Uploadez des images depuis votre appareil dans l’éditeur (Ajouter un média) ou en image de couverture."
         />
         <div className="surface space-y-3 rounded-2xl p-5 text-sm text-muted-foreground sm:p-6">
           <p>
-            Dans le Classic Editor, utilisez <strong>Ajouter un média</strong> pour l’image dans
-            le contenu, et le panneau Article pour l’image de couverture.
+            Ouvrez un article → <strong>Ajouter un média</strong> choisit une image sur votre
+            téléphone ou ordinateur (JPG, PNG, WebP, GIF — max 5 Mo).
           </p>
           <p>
-            Une bibliothèque médias intégrée (upload) pourra être ajoutée ensuite. Pour
-            l’instant, collez une URL d’image publique (Supabase Storage, CDN, etc.).
+            L’image de couverture se règle aussi depuis le panneau Article (upload appareil ou URL).
+          </p>
+          <p className="text-xs">
+            Prérequis Supabase : bucket public <code>blog-images</code> (
+            <code>supabase/blog_images_storage.sql</code>).
           </p>
         </div>
       </div>

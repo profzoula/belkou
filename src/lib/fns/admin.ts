@@ -1543,6 +1543,30 @@ export const adminMergeAstucesBlogSeed = createServerFn({ method: "POST" }).hand
   },
 );
 
+export const adminUploadBlogImage = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        postId: z.string().min(1).max(80),
+        contentType: z.string().min(1),
+        dataBase64: z.string().min(1),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { uploadBlogImage } = await import("@/server/blog-image-storage");
+    const upload = await uploadBlogImage({
+      postId: data.postId,
+      contentType: data.contentType,
+      dataBase64: data.dataBase64,
+    });
+    if (!upload.ok) {
+      throw new Error(upload.reason);
+    }
+    return { publicUrl: upload.publicUrl };
+  });
+
 export const getAdminBlogCategories = createServerFn({ method: "GET" }).handler(async () => {
   await requireAdmin();
   const { getResolvedBlogCategories } = await import("@/server/site-content");
