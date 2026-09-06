@@ -69,6 +69,12 @@ type AdminLayoutProps = {
   refreshing?: boolean;
   onLogout: () => void;
   children: React.ReactNode;
+  /** Nested sidebar (ex. Blog → Articles, Catégories…) */
+  secondarySidebar?: () => React.ReactNode;
+  /** Sous-titre dans le header (ex. Articles) */
+  secondaryLabel?: string | null;
+  /** Contenu plein largeur sans padding (ex. éditeur Gutenberg) */
+  contentFlush?: boolean;
 };
 
 export function AdminLayout({
@@ -78,13 +84,25 @@ export function AdminLayout({
   refreshing,
   onLogout,
   children,
+  secondarySidebar,
+  secondaryLabel,
+  contentFlush = false,
 }: AdminLayoutProps) {
   const activeLabel = navItems.find((item) => item.id === active)?.label ?? "Admin";
   const adminFirst = siteConfig.founder.name.split(" ")[0] ?? "Admin";
+  const hasSecondary = Boolean(secondarySidebar);
+  const pageTitle = secondaryLabel || activeLabel;
 
   return (
     <div className="min-h-dvh bg-[#f5f6f8] text-foreground dark:bg-background">
-      <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div
+        className={cn(
+          "lg:grid",
+          hasSecondary
+            ? "lg:grid-cols-[240px_220px_minmax(0,1fr)]"
+            : "lg:grid-cols-[240px_minmax(0,1fr)]",
+        )}
+      >
         <aside className="sticky top-0 z-30 flex flex-col border-b border-transparent bg-white dark:border-border dark:bg-card lg:h-dvh lg:border-b-0 lg:border-r lg:border-[#eef0f3]">
           <div className="px-5 py-5">
             <SiteWordmark size="sm" />
@@ -206,15 +224,26 @@ export function AdminLayout({
           </div>
         </aside>
 
+        {hasSecondary ? (
+          <aside className="sticky top-0 z-20 hidden h-dvh flex-col border-r border-[#eef0f3] bg-white dark:border-border dark:bg-card lg:flex">
+            {secondarySidebar?.()}
+          </aside>
+        ) : null}
+
         <div className="min-w-0">
           <header className="sticky top-0 z-20 border-b border-transparent bg-[#f5f6f8]/90 backdrop-blur-xl dark:border-border dark:bg-background/85">
             <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
               <div className="min-w-0">
                 <p className="text-[11px] font-medium text-muted-foreground">
                   BelKou <span className="mx-1 text-[#d4d7de]">/</span> {activeLabel}
+                  {secondaryLabel ? (
+                    <>
+                      <span className="mx-1 text-[#d4d7de]">/</span> {secondaryLabel}
+                    </>
+                  ) : null}
                 </p>
                 <p className="truncate text-[15px] font-semibold tracking-[-0.02em]">
-                  {activeLabel}
+                  {pageTitle}
                 </p>
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
@@ -269,9 +298,19 @@ export function AdminLayout({
             </div>
           </header>
 
+          {hasSecondary && !contentFlush ? (
+            <div className="border-b border-[#eef0f3] bg-white px-4 py-3 dark:border-border dark:bg-card lg:hidden">
+              {secondarySidebar?.()}
+            </div>
+          ) : null}
+
           <main
             id="main-content"
-            className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+            className={cn(
+              contentFlush
+                ? "p-0"
+                : "mx-auto max-w-[1400px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8",
+            )}
           >
             {children}
           </main>

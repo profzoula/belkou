@@ -3,7 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AdminCategoriesTab } from "@/components/admin/AdminCategoriesTab";
-import { AdminBlogTab } from "@/components/admin/AdminBlogTab";
+import {
+  AdminBlogSecondaryNav,
+  AdminBlogTab,
+  blogPanelLabel,
+  type BlogPanel,
+} from "@/components/admin/AdminBlogTab";
 import { AdminCommissionsTab } from "@/components/admin/AdminCommissionsTab";
 import { AdminCoursesTab } from "@/components/admin/AdminCoursesTab";
 import { AdminLayout, type AdminSection } from "@/components/admin/AdminLayout";
@@ -39,6 +44,8 @@ function AdminDashboardPage() {
   const overviewFn = useServerFn(getAdminOverview);
   const refreshSessionFn = useServerFn(refreshAdminSession);
   const [section, setSection] = useState<AdminSection>("overview");
+  const [blogPanel, setBlogPanel] = useState<BlogPanel>("articles");
+  const [blogEditing, setBlogEditing] = useState(false);
   const [mounted, setMounted] = useState<Partial<Record<AdminSection, true>>>({
     overview: true,
   });
@@ -83,6 +90,10 @@ function AdminDashboardPage() {
 
   const goTo = useCallback((next: AdminSection) => {
     setSection(next);
+    if (next === "blog") {
+      setBlogPanel("articles");
+      setBlogEditing(false);
+    }
     setMounted((current) => (current[next] ? current : { ...current, [next]: true }));
   }, []);
 
@@ -117,6 +128,8 @@ function AdminDashboardPage() {
     );
   };
 
+  const showBlogSidebar = section === "blog" && !blogEditing;
+
   return (
     <AdminLayout
       active={section}
@@ -124,6 +137,15 @@ function AdminDashboardPage() {
       onRefresh={refresh}
       refreshing={loading && section === "overview"}
       onLogout={logout}
+      secondarySidebar={
+        showBlogSidebar
+          ? () => (
+              <AdminBlogSecondaryNav panel={blogPanel} onPanelChange={setBlogPanel} />
+            )
+          : undefined
+      }
+      secondaryLabel={showBlogSidebar ? blogPanelLabel(blogPanel) : null}
+      contentFlush={section === "blog" && blogEditing}
     >
       {panel(
         "overview",
@@ -153,7 +175,14 @@ function AdminDashboardPage() {
 
       {panel("courses", <AdminCoursesTab key={tabEpoch.courses ?? 0} />)}
       {panel("categories", <AdminCategoriesTab key={tabEpoch.categories ?? 0} />)}
-      {panel("blog", <AdminBlogTab key={tabEpoch.blog ?? 0} />)}
+      {panel(
+        "blog",
+        <AdminBlogTab
+          key={tabEpoch.blog ?? 0}
+          panel={blogPanel}
+          onEditingChange={setBlogEditing}
+        />,
+      )}
       {panel("live", <AdminLiveTab key={tabEpoch.live ?? 0} />)}
       {panel("videos", <AdminVideosTab key={tabEpoch.videos ?? 0} />)}
       {panel("services", <AdminServicesTab key={tabEpoch.services ?? 0} />)}

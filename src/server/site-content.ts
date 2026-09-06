@@ -1104,3 +1104,29 @@ export async function mergeAstucesSeedPosts() {
     .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
   return saveStoredBlogPosts(cleaned);
 }
+
+const BLOG_CATEGORIES_KEY = "blog_categories";
+
+export async function getResolvedBlogCategories() {
+  const { DEFAULT_BLOG_CATEGORIES, sanitizeBlogCategoryList } = await import(
+    "@/lib/blog-categories"
+  );
+  const stored = await readJson<unknown>(BLOG_CATEGORIES_KEY, null);
+  const custom = sanitizeBlogCategoryList(stored);
+  return custom.length > 0 ? custom : [...DEFAULT_BLOG_CATEGORIES];
+}
+
+export async function saveBlogCategories(
+  categories: Array<{ id: string; label: string }>,
+) {
+  const { sanitizeBlogCategoryList } = await import("@/lib/blog-categories");
+  const cleaned = sanitizeBlogCategoryList(categories);
+  if (cleaned.length === 0) {
+    return { ok: false as const, reason: "Ajoutez au moins une catégorie" };
+  }
+  const result = await writeJson(BLOG_CATEGORIES_KEY, cleaned);
+  if (!result.ok) {
+    return { ok: false as const, reason: result.reason ?? "Sauvegarde impossible" };
+  }
+  return { ok: true as const, categories: cleaned };
+}

@@ -1542,3 +1542,37 @@ export const adminMergeAstucesBlogSeed = createServerFn({ method: "POST" }).hand
     return { posts: result.posts, imported: result.posts.filter((p) => p.id.startsWith("astuce_")).length };
   },
 );
+
+export const getAdminBlogCategories = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getResolvedBlogCategories } = await import("@/server/site-content");
+  const { DEFAULT_BLOG_CATEGORIES } = await import("@/lib/blog-categories");
+  const categories = await getResolvedBlogCategories();
+  return { categories, defaults: DEFAULT_BLOG_CATEGORIES };
+});
+
+export const adminSaveBlogCategories = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        categories: z
+          .array(
+            z.object({
+              id: z.string().min(2).max(48),
+              label: z.string().trim().min(2).max(80),
+            }),
+          )
+          .min(1)
+          .max(40),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { saveBlogCategories } = await import("@/server/site-content");
+    const result = await saveBlogCategories(data.categories);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+    return { categories: result.categories };
+  });

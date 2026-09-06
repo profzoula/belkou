@@ -35,6 +35,7 @@ type GutenbergEditorProps = {
   onSave: (status?: StoredBlogPost["status"]) => void;
   onClose: () => void;
   saving?: boolean;
+  categoryOptions?: string[];
 };
 
 const GROUP_LABELS = {
@@ -51,7 +52,12 @@ export function GutenbergEditor({
   onSave,
   onClose,
   saving,
+  categoryOptions,
 }: GutenbergEditorProps) {
+  const categories =
+    categoryOptions && categoryOptions.length > 0
+      ? categoryOptions
+      : [...blogCategories];
   const [selectedId, setSelectedId] = useState<string | null>(post.blocks[0]?.id ?? null);
   const [inserterOpen, setInserterOpen] = useState(false);
   const [insertAt, setInsertAt] = useState<number | null>(null);
@@ -346,7 +352,11 @@ export function GutenbergEditor({
 
           <div className="space-y-4 p-4">
             {sidebarTab === "document" ? (
-              <DocumentSettings post={post} onChange={patchPost} />
+              <DocumentSettings
+                post={post}
+                onChange={patchPost}
+                categoryOptions={categories}
+              />
             ) : selected ? (
               <BlockSettings
                 block={selected}
@@ -437,9 +447,11 @@ function IconBtn({
 function DocumentSettings({
   post,
   onChange,
+  categoryOptions,
 }: {
   post: StoredBlogPost;
   onChange: (patch: Partial<StoredBlogPost>) => void;
+  categoryOptions: string[];
 }) {
   return (
     <>
@@ -485,12 +497,12 @@ function DocumentSettings({
           value={post.category}
           onChange={(e) => onChange({ category: e.target.value })}
         >
-          {blogCategories.map((cat) => (
+          {categoryOptions.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
             </option>
           ))}
-          {!blogCategories.includes(post.category as (typeof blogCategories)[number]) ? (
+          {!categoryOptions.includes(post.category) ? (
             <option value={post.category}>{post.category}</option>
           ) : null}
         </select>
