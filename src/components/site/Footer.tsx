@@ -31,6 +31,7 @@ const footerColumns: FooterColumn[] = [
     items: [
       { name: "Comment ça marche", href: "/#how-it-works" },
       { name: "À propos", href: "/about" },
+      { name: "Blog", href: "/blog" },
       { name: "Témoignages", href: "/#testimonials" },
       { name: "FAQ", href: "/faq" },
       { name: "Contact", href: `mailto:${siteConfig.contactEmail}` },
@@ -39,6 +40,7 @@ const footerColumns: FooterColumn[] = [
   {
     title: "Ressources",
     items: [
+      { name: "Blog", href: "/blog" },
       { name: "Connexion", href: "/login" },
       { name: "Confidentialité", href: "/legal/privacy" },
       { name: "Conditions", href: "/legal/terms" },
@@ -206,8 +208,8 @@ export function Footer() {
               <SiteWordmark size="sm" />
             </Link>
             <p className="mb-7 max-w-80 text-sm leading-7 text-muted-foreground">
-              {siteConfig.tagline}. Une variété de cours vidéo en Creole: tech, business, création
-              et plus, pour Haïti, la diaspora et le monde entier.
+              {siteConfig.tagline}. Une variété de cours vidéo : tech, business, création et plus,
+              pour apprenants du monde entier.
             </p>
             <div className="flex gap-3">
               <a

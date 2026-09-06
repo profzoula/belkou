@@ -2,10 +2,10 @@ import { siteConfig } from "@/lib/site-config";
 
 export const siteUrl = siteConfig.siteUrl.replace(/\/$/, "");
 
-export const defaultTitle = "BelKou ACADEMIC — Formation en ligne en Creole";
+export const defaultTitle = "BelKou ACADEMIC — Formation en ligne";
 
 export const defaultDescription =
-  "Plateforme de formation en ligne en Creole : une variété de cours, preview gratuite, paiement flexible et communauté active.";
+  "Plateforme de formation en ligne en français : une variété de cours, preview gratuite, paiement flexible et communauté active.";
 
 export function absoluteUrl(path = "/"): string {
   if (path.startsWith("http")) return path;

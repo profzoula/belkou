@@ -1456,3 +1456,89 @@ export const adminGetCourseResourceUrl = createServerFn({ method: "POST" })
 
     return { url: signed.url, fileName: resource.fileName };
   });
+
+export const getAdminBlogPosts = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getStoredBlogPosts } = await import("@/server/site-content");
+  const posts = await getStoredBlogPosts();
+  return { posts };
+});
+
+export const adminSaveBlogPost = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        post: z.record(z.any()),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { upsertStoredBlogPost } = await import("@/server/site-content");
+    const result = await upsertStoredBlogPost(
+      data.post as import("@/lib/blog-blocks").StoredBlogPost,
+    );
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Sauvegarde impossible");
+    }
+    return { post: result.post, posts: result.posts };
+  });
+
+export const adminDeleteBlogPost = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z.object({ id: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+    const { deleteStoredBlogPost, getStoredBlogPosts } = await import(
+      "@/server/site-content"
+    );
+    const result = await deleteStoredBlogPost(data.id);
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Suppression impossible");
+    }
+    return { posts: await getStoredBlogPosts() };
+  });
+
+export const getPublicBlogPosts = createServerFn({ method: "GET" }).handler(async () => {
+  const { getPublishedBlogPosts } = await import("@/server/site-content");
+  const { storedToPublicPost } = await import("@/lib/blog-storage");
+  const posts = await getPublishedBlogPosts();
+  return {
+    posts: posts.map((post) => ({
+      ...storedToPublicPost(post),
+      seoTitle: post.seoTitle,
+      seoDescription: post.seoDescription,
+    })),
+  };
+});
+
+export const getPublicBlogPost = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) =>
+    z.object({ slug: z.string().min(1) }).parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { getPublishedBlogPostBySlug } = await import("@/server/site-content");
+    const { storedToPublicPost } = await import("@/lib/blog-storage");
+    const post = await getPublishedBlogPostBySlug(data.slug);
+    if (!post) return { post: null };
+    return {
+      post: {
+        ...storedToPublicPost(post),
+        seoTitle: post.seoTitle,
+        seoDescription: post.seoDescription,
+      },
+    };
+  });
+
+export const adminMergeAstucesBlogSeed = createServerFn({ method: "POST" }).handler(
+  async () => {
+    await requireAdmin();
+    const { mergeAstucesSeedPosts } = await import("@/server/site-content");
+    const result = await mergeAstucesSeedPosts();
+    if (!result.ok) {
+      throw new Error(result.reason ?? "Import impossible");
+    }
+    return { posts: result.posts, imported: result.posts.filter((p) => p.id.startsWith("astuce_")).length };
+  },
+);

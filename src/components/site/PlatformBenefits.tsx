@@ -29,8 +29,8 @@ const benefits = [
   },
   {
     icon: Globe,
-    title: "100 % en Creole",
-    description: "Tout kou yo an Creole — adapte pou Ayiti, dyaspora a ak pi lwen.",
+    title: "100 % en français",
+    description: "Des formations claires en français, accessibles partout dans le monde.",
   },
   {
     icon: Shield,

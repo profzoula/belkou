@@ -96,7 +96,7 @@ async function readJson<T>(key: string, fallback: T): Promise<T> {
 async function writeJson<T>(key: string, value: T): Promise<{ ok: boolean; reason?: string }> {
   const sb = getSupabaseAdmin();
   if (!sb) {
-    return { ok: false, reason: "Supabase non configuré (SUPABASE_SERVICE_ROLE_KEY)" };
+    return { ok: false, reason: "Supabase non configurÃ© (SUPABASE_SERVICE_ROLE_KEY)" };
   }
 
   const { error } = await sb.from("site_content").upsert(
@@ -112,7 +112,7 @@ async function writeJson<T>(key: string, value: T): Promise<{ ok: boolean; reaso
     if (isMissingTable(error.message)) {
       return {
         ok: false,
-        reason: "Table site_content manquante — exécutez supabase/site_content.sql",
+        reason: "Table site_content manquante â exÃ©cutez supabase/site_content.sql",
       };
     }
     console.error(`[BelKou] site_content write (${key}):`, error.message);
@@ -394,7 +394,7 @@ export async function saveCourseCategories(
   const { sanitizeCategoryList } = await import("@/lib/course-categories");
   const cleaned = sanitizeCategoryList(categories);
   if (cleaned.length === 0) {
-    return { ok: false as const, reason: "Ajoutez au moins une catégorie" };
+    return { ok: false as const, reason: "Ajoutez au moins une catÃ©gorie" };
   }
   const result = await writeJson(COURSE_CATEGORIES_KEY, cleaned);
   if (!result.ok) {
@@ -559,7 +559,7 @@ export async function addSectionToCourse(params: { courseSlug: string; title: st
 export async function deleteLessonFromCourse(params: { courseSlug: string; lessonId: string }) {
   const lessonId = params.lessonId.trim();
   if (!lessonId) {
-    return { ok: false, reason: "Leçon introuvable" };
+    return { ok: false, reason: "LeÃ§on introuvable" };
   }
 
   if (isBaseCourseSlug(params.courseSlug)) {
@@ -599,7 +599,7 @@ export async function deleteLessonFromCourse(params: { courseSlug: string; lesso
     section.lessons.some((lesson) => lesson.id === lessonId),
   );
   if (!hasLesson) {
-    return { ok: false, reason: "Leçon introuvable" };
+    return { ok: false, reason: "LeÃ§on introuvable" };
   }
 
   stored[index] = deleteLessonFromStoredCourse(stored[index], lessonId);
@@ -803,12 +803,12 @@ export async function createAdminCourse(input: CreateCourseInput) {
   }
 
   if (isBaseCourseSlug(slug)) {
-    return { ok: false as const, reason: "Ce slug est réservé au cours de base" };
+    return { ok: false as const, reason: "Ce slug est rÃ©servÃ© au cours de base" };
   }
 
   const existing = await resolveCourseList();
   if (existing.some((course) => course.slug === slug)) {
-    return { ok: false as const, reason: "Un cours avec ce slug existe déjà" };
+    return { ok: false as const, reason: "Un cours avec ce slug existe dÃ©jÃ " };
   }
 
   const course = buildDefaultStoredCourse({ ...input, slug });
@@ -823,7 +823,7 @@ export async function createAdminCourse(input: CreateCourseInput) {
 
 export async function deleteAdminCourse(slug: string) {
   if (isBaseCourseSlug(slug)) {
-    return { ok: false as const, reason: "Le cours de base ne peut pas être supprimé" };
+    return { ok: false as const, reason: "Le cours de base ne peut pas Ãªtre supprimÃ©" };
   }
 
   const stored = await getStoredAdminCourses();
@@ -994,4 +994,113 @@ export async function updateServiceBookingStatus(
   const result = await saveServiceBookings(bookings);
   if (!result.ok) return result;
   return { ok: true as const, booking: bookings[index] };
+}
+
+const BLOG_POSTS_KEY = "blog_posts";
+
+export async function getStoredBlogPosts(): Promise<
+  import("@/lib/blog-blocks").StoredBlogPost[]
+> {
+  const { sanitizeStoredPost, seedStoredPostsFromStatic } = await import(
+    "@/lib/blog-storage"
+  );
+  const stored = await readJson<unknown>(BLOG_POSTS_KEY, null);
+  if (!Array.isArray(stored) || stored.length === 0) {
+    return seedStoredPostsFromStatic();
+  }
+  const cleaned = stored
+    .map((item) => sanitizeStoredPost(item))
+    .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
+  return cleaned.length ? cleaned : seedStoredPostsFromStatic();
+}
+
+export async function saveStoredBlogPosts(
+  posts: import("@/lib/blog-blocks").StoredBlogPost[],
+) {
+  const { sanitizeStoredPost } = await import("@/lib/blog-storage");
+  const cleaned = posts
+    .map((item) => sanitizeStoredPost(item))
+    .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
+  const result = await writeJson(BLOG_POSTS_KEY, cleaned);
+  if (!result.ok) {
+    return { ok: false as const, reason: result.reason ?? "Sauvegarde impossible" };
+  }
+  return { ok: true as const, posts: cleaned };
+}
+
+export async function upsertStoredBlogPost(
+  post: import("@/lib/blog-blocks").StoredBlogPost,
+) {
+  const { sanitizeStoredPost, estimateReadMinutes } = await import("@/lib/blog-storage");
+  const cleaned = sanitizeStoredPost({
+    ...post,
+    updatedAt: new Date().toISOString(),
+    readMinutes: post.readMinutes || estimateReadMinutes(post.blocks ?? []),
+  });
+  if (!cleaned) {
+    return { ok: false as const, reason: "Article invalide" };
+  }
+  const posts = await getStoredBlogPosts();
+  const index = posts.findIndex((item) => item.id === cleaned.id);
+  const slugClash = posts.find(
+    (item) => item.slug === cleaned.slug && item.id !== cleaned.id,
+  );
+  if (slugClash) {
+    return { ok: false as const, reason: `Slug déjà utilisé par « ${slugClash.title} »` };
+  }
+  if (index >= 0) posts[index] = cleaned;
+  else posts.unshift(cleaned);
+  const result = await saveStoredBlogPosts(posts);
+  if (!result.ok) return result;
+  return { ok: true as const, post: cleaned, posts: result.posts };
+}
+
+export async function deleteStoredBlogPost(id: string) {
+  const posts = await getStoredBlogPosts();
+  const next = posts.filter((item) => item.id !== id);
+  if (next.length === posts.length) {
+    return { ok: false as const, reason: "Article introuvable" };
+  }
+  return saveStoredBlogPosts(next);
+}
+
+export async function getPublishedBlogPosts() {
+  const posts = await getStoredBlogPosts();
+  const now = Date.now();
+  return posts.filter((post) => {
+    if (post.status === "published") return true;
+    if (post.status === "scheduled" && post.scheduledAt) {
+      return Date.parse(post.scheduledAt) <= now;
+    }
+    return false;
+  });
+}
+
+export async function getPublishedBlogPostBySlug(slug: string) {
+  const posts = await getPublishedBlogPosts();
+  return posts.find((post) => post.slug === slug) ?? null;
+}
+
+export async function mergeAstucesSeedPosts() {
+  const { sanitizeStoredPost, seedStoredPostsFromStatic } = await import(
+    "@/lib/blog-storage"
+  );
+  const existing = await getStoredBlogPosts();
+  const seed = seedStoredPostsFromStatic();
+  const tipSeeds = seed.filter((post) => post.id.startsWith("astuce_"));
+  const byId = new Map(existing.map((post) => [post.id, post]));
+  for (const tip of tipSeeds) {
+    byId.set(tip.id, tip);
+  }
+  const merged = [...byId.values()].sort((a, b) =>
+    a.id.startsWith("astuce_") === b.id.startsWith("astuce_")
+      ? Date.parse(b.publishedAt) - Date.parse(a.publishedAt)
+      : a.id.startsWith("astuce_")
+        ? -1
+        : 1,
+  );
+  const cleaned = merged
+    .map((item) => sanitizeStoredPost(item))
+    .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
+  return saveStoredBlogPosts(cleaned);
 }

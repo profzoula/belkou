@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { AdminCategoriesTab } from "@/components/admin/AdminCategoriesTab";
+import { AdminBlogTab } from "@/components/admin/AdminBlogTab";
 import { AdminCommissionsTab } from "@/components/admin/AdminCommissionsTab";
 import { AdminCoursesTab } from "@/components/admin/AdminCoursesTab";
 import { AdminLayout, type AdminSection } from "@/components/admin/AdminLayout";
@@ -152,6 +153,7 @@ function AdminDashboardPage() {
 
       {panel("courses", <AdminCoursesTab key={tabEpoch.courses ?? 0} />)}
       {panel("categories", <AdminCategoriesTab key={tabEpoch.categories ?? 0} />)}
+      {panel("blog", <AdminBlogTab key={tabEpoch.blog ?? 0} />)}
       {panel("live", <AdminLiveTab key={tabEpoch.live ?? 0} />)}
       {panel("videos", <AdminVideosTab key={tabEpoch.videos ?? 0} />)}
       {panel("services", <AdminServicesTab key={tabEpoch.services ?? 0} />)}

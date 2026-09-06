@@ -24,6 +24,7 @@ import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as LiveIndexRouteImport } from './routes/live/index'
 import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as LiveSessionIdRouteImport } from './routes/live/$sessionId'
@@ -31,6 +32,7 @@ import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as LegalPrivacyRouteImport } from './routes/legal/privacy'
 import { Route as LegalCgvRouteImport } from './routes/legal/cgv'
 import { Route as CoursesSlugRouteImport } from './routes/courses/$slug'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as ApiHlsProxyRouteImport } from './routes/api/hls-proxy'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -117,6 +119,11 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
   path: '/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -150,6 +157,11 @@ const LegalCgvRoute = LegalCgvRouteImport.update({
 const CoursesSlugRoute = CoursesSlugRouteImport.update({
   id: '/courses/$slug',
   path: '/courses/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -218,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -225,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/live/$sessionId': typeof LiveSessionIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/live/': typeof LiveIndexRoute
@@ -252,6 +266,7 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -259,6 +274,7 @@ export interface FileRoutesByTo {
   '/live/$sessionId': typeof LiveSessionIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/courses': typeof CoursesIndexRoute
   '/forum': typeof ForumIndexRoute
   '/live': typeof LiveIndexRoute
@@ -287,6 +303,7 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/api/hls-proxy': typeof ApiHlsProxyRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/legal/cgv': typeof LegalCgvRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -294,6 +311,7 @@ export interface FileRoutesById {
   '/live/$sessionId': typeof LiveSessionIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/forum/': typeof ForumIndexRoute
   '/live/': typeof LiveIndexRoute
@@ -323,6 +341,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/hls-proxy'
     | '/auth/callback'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/legal/cgv'
     | '/legal/privacy'
@@ -330,6 +349,7 @@ export interface FileRouteTypes {
     | '/live/$sessionId'
     | '/services/$slug'
     | '/admin/'
+    | '/blog/'
     | '/courses/'
     | '/forum/'
     | '/live/'
@@ -357,6 +377,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/hls-proxy'
     | '/auth/callback'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/legal/cgv'
     | '/legal/privacy'
@@ -364,6 +385,7 @@ export interface FileRouteTypes {
     | '/live/$sessionId'
     | '/services/$slug'
     | '/admin'
+    | '/blog'
     | '/courses'
     | '/forum'
     | '/live'
@@ -391,6 +413,7 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/api/hls-proxy'
     | '/auth/callback'
+    | '/blog/$slug'
     | '/courses/$slug'
     | '/legal/cgv'
     | '/legal/privacy'
@@ -398,6 +421,7 @@ export interface FileRouteTypes {
     | '/live/$sessionId'
     | '/services/$slug'
     | '/admin/'
+    | '/blog/'
     | '/courses/'
     | '/forum/'
     | '/live/'
@@ -426,6 +450,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   ApiHlsProxyRoute: typeof ApiHlsProxyRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   CoursesSlugRoute: typeof CoursesSlugRouteWithChildren
   LegalCgvRoute: typeof LegalCgvRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
@@ -433,6 +458,7 @@ export interface RootRouteChildren {
   LiveSessionIdRoute: typeof LiveSessionIdRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
   ForumIndexRoute: typeof ForumIndexRoute
   LiveIndexRoute: typeof LiveIndexRoute
@@ -551,6 +577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
@@ -598,6 +631,13 @@ declare module '@tanstack/react-router' {
       path: '/courses/$slug'
       fullPath: '/courses/$slug'
       preLoaderRoute: typeof CoursesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -702,6 +742,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   ApiHlsProxyRoute: ApiHlsProxyRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  BlogSlugRoute: BlogSlugRoute,
   CoursesSlugRoute: CoursesSlugRouteWithChildren,
   LegalCgvRoute: LegalCgvRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
@@ -709,6 +750,7 @@ const rootRouteChildren: RootRouteChildren = {
   LiveSessionIdRoute: LiveSessionIdRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   CoursesIndexRoute: CoursesIndexRoute,
   ForumIndexRoute: ForumIndexRoute,
   LiveIndexRoute: LiveIndexRoute,

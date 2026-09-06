@@ -232,7 +232,7 @@ export function paymentConfirmedEmail(
       <div style="margin:18px 0;border:1px solid #e4e4e7;border-radius:10px;padding:14px 16px;">
         <h2 style="font-size:16px;margin:0 0 6px;">${liveEvent.title}</h2>
         <p style="margin:0 0 4px;font-size:15px;"><strong>${formatLiveEmailDate(liveEvent.scheduledAt)}</strong></p>
-        <p style="margin:0 0 12px;font-size:13px;color:#52525b;">Heure d'Haïti. Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
+        <p style="margin:0 0 12px;font-size:13px;color:#52525b;">Heure du live (fuseau annoncé). Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
         <p style="margin:0;"><a href="${liveEvent.url}" style="display:inline-block;background:#111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;">Voir mon live</a></p>
       </div>
     `
@@ -292,7 +292,7 @@ export function liveReminderEmail(params: {
       <p style="margin:0 0 12px;">${firstName ? `Bonjour ${firstName}, v` : "V"}otre place est réservée.</p>
       <div style="margin:18px 0;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;">
         <p style="margin:0 0 4px;font-size:15px;"><strong>${formatLiveEmailDate(params.scheduledAt)}</strong></p>
-        <p style="margin:0 0 12px;font-size:13px;color:#64748b;">Heure d'Haïti. Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
+        <p style="margin:0 0 12px;font-size:13px;color:#64748b;">Heure du live (fuseau annoncé). Ouvrez la page du live : elle bascule sur le direct toute seule au démarrage.</p>
         <p style="margin:0;"><a href="${params.url}" style="display:inline-block;background:#0f172a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;">Rejoindre le live</a></p>
       </div>
       ${params.note?.trim() ? `<p style="white-space:pre-line;">${params.note.trim()}</p>` : ""}

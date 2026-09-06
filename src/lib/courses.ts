@@ -60,7 +60,7 @@ export type Course = {
   resources?: CourseResource[];
 };
 
-export const DEFAULT_COURSE_LANGUAGE = "Creole";
+export const DEFAULT_COURSE_LANGUAGE = "Français";
 
 export function getCourseDisplayLanguage(language?: string): string {
   const value = language?.trim();

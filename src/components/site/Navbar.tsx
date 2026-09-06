@@ -17,6 +17,7 @@ import { getPublicLiveSummary } from "@/lib/fns/live";
 const links = [
   { href: "/courses", label: "Cours", route: true },
   { href: "/services", label: "Services", route: true },
+  { href: "/blog", label: "Blog", route: true },
   { href: "/about", label: "À propos", route: true },
   { href: "/live", label: "Live", route: true },
 ];

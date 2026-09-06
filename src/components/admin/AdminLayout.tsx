@@ -9,6 +9,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Newspaper,
   Radio,
   RefreshCw,
   Settings,
@@ -25,6 +26,7 @@ export type AdminSection =
   | "overview"
   | "courses"
   | "categories"
+  | "blog"
   | "videos"
   | "live"
   | "services"
@@ -46,6 +48,7 @@ const navItems: {
   { id: "students", label: "Étudiants", icon: GraduationCap, group: "ops" },
   { id: "courses", label: "Cours", icon: BookOpen, group: "catalog" },
   { id: "categories", label: "Category", icon: Tags, group: "catalog" },
+  { id: "blog", label: "Blog", icon: Newspaper, group: "catalog" },
   { id: "live", label: "Live", icon: Radio, group: "catalog" },
   { id: "videos", label: "Vidéos", icon: Film, group: "catalog" },
   { id: "services", label: "Services", icon: Briefcase, group: "catalog" },

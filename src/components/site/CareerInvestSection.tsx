@@ -18,7 +18,7 @@ const pillars = [
     icon: Star,
     title: "Apprenez avec les meilleurs",
     description:
-      "Des parcours structurés, des mentors expérimentés et un accompagnement pensé pour la diaspora francophone.",
+      "Des parcours structurés, des mentors expérimentés et un accompagnement pensé pour les apprenants francophones.",
   },
 ] as const;
 

@@ -16,38 +16,38 @@ const testimonials: Testimonial[] = [
   {
     image: avatar("junior-pierre"),
     name: "Junior Pierre",
-    handle: "@juniorpap · Port-au-Prince",
-    text: "En 2 semaines, mwen lanse premye sit mwen an epi mwen jwenn premye kliyan mwen an.",
+    handle: "@juniorp · Miami",
+    text: "En 2 semaines, j’ai lancé mon premier site et trouvé mon premier client.",
   },
   {
     image: avatar("marie-claire-desir"),
     name: "Marie-Claire Désir",
-    handle: "@mariecap · Cap-Haïtien",
-    text: "Mwen pa t janm panse m te kapab kode. BelKou chanje fason m travay ak teknoloji a.",
+    handle: "@marieclaire · Paris",
+    text: "Je ne pensais jamais pouvoir coder. BelKou a changé ma façon de travailler avec la tech.",
   },
   {
     image: avatar("wislande-joseph"),
     name: "Wislande Joseph",
-    handle: "@wislandeht · Les Cayes",
-    text: "Pi bon envestisman mwen fè ane sa a. Mentorat VIP la vo chak dola.",
+    handle: "@wislande · Montréal",
+    text: "Le meilleur investissement de l’année. Le mentorat VIP vaut chaque dollar.",
   },
   {
     image: avatar("mackenson-etienne"),
     name: "Mackenson Étienne",
-    handle: "@mackjacmel · Jacmel",
-    text: "Kou BelKou yo ede m pase de zewo rive nan premye app mwen lanse an production.",
+    handle: "@macke · New York",
+    text: "Les cours BelKou m’ont aidé à passer de zéro à ma première app en production.",
   },
   {
     image: avatar("sherline-volcy"),
     name: "Sherline Volcy",
-    handle: "@sherline509 · Gonaïves",
-    text: "Fòmasyon klè, kominote aktif. Mwen finalman konprann kijan pou m monetize konpetans tech mwen yo.",
+    handle: "@sherline · Lyon",
+    text: "Formation claire, communauté active. J’ai enfin compris comment monétiser mes compétences tech.",
   },
   {
     image: avatar("roodly-alce"),
     name: "Roodly Alcé",
-    handle: "@roodlydiaspora · Montréal",
-    text: "Cursor, Supabase, deplwaman : tout eksplike etap pa etap. M rekòmande BelKou 100 %.",
+    handle: "@roodly · Bruxelles",
+    text: "Cursor, Supabase, déploiement : tout est expliqué étape par étape. Je recommande BelKou à 100 %.",
   },
 ];
 
@@ -148,7 +148,7 @@ export function Testimonials() {
         <SectionHeader
           label="Témoignages"
           title="Ce que disent nos étudiants"
-          description="Des parcours réels: Pòtoprens, Cap-Haïtien, diaspora."
+          description="Des parcours réels d’apprenants à travers le monde."
           className="max-w-lg"
         />
         <button

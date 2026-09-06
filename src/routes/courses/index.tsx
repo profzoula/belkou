@@ -24,7 +24,7 @@ export const Route = createFileRoute("/courses/")({
   head: () =>
     seoHead({
       title: "Cours — BelKou",
-      description: "Explorez les cours BelKou : une variété de formations en ligne en Creole.",
+      description: "Explorez les cours BelKou : une variété de formations en ligne en français.",
       path: "/courses",
     }),
   validateSearch: searchSchema,

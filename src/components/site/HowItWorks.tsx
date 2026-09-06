@@ -89,8 +89,8 @@ export function HowItWorks() {
                 <span className="h-px flex-1 bg-primary-foreground/25" />
               </div>
               <p className="max-w-md text-sm leading-relaxed text-primary-foreground/80 sm:text-base">
-                Une variété de cours en Creole, comme Udemy ou Coursera, pensé pour Haïti et la
-                diaspora.
+                Une variété de cours en français, comme Udemy ou Coursera, pensés pour tous
+                les apprenants.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
                 <Link
@@ -154,8 +154,8 @@ export function HowItWorks() {
                 </div>
 
                 <p className="max-w-md text-base leading-relaxed text-primary-foreground/80">
-                  Une variété de cours en Creole, comme Udemy ou Coursera, pensé pour Haïti et la
-                  diaspora.
+                  Une variété de cours en français, comme Udemy ou Coursera, pensés pour tous
+                  les apprenants.
                 </p>
 
                 <div className="mt-9 flex items-center gap-3">

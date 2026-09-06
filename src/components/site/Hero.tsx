@@ -125,7 +125,7 @@ export function Hero({ studentCount }: HeroProps) {
             </h1>
 
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base md:text-lg">
-              Cours en Creole: tech, business, création. Mentors, projets, communauté.
+              Cours en français : tech, business, création. Mentors, projets, communauté.
             </p>
           </motion.div>
 
