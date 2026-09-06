@@ -6,6 +6,7 @@ import {
   type StoredBlogPost,
 } from "@/lib/blog-blocks";
 import { blogPosts, type BlogPost } from "@/lib/blog";
+import { sanitizeBlogHtml } from "@/lib/blog-html";
 import { siteConfig } from "@/lib/site-config";
 import { astucesBlogSeed } from "@/data/astuces-blog-seed";
 
@@ -204,7 +205,22 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
   return parts.join("\n");
 }
 
+export function estimateReadMinutesFromHtml(html: string): number {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const words = text.split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 export function estimateReadMinutes(blocks: BlogBlock[]): number {
+  if (blocks.length === 1 && blocks[0]?.type === "html") {
+    return estimateReadMinutesFromHtml(blocks[0].content);
+  }
   const text = blocks
     .map((b) => {
       if ("content" in b && typeof b.content === "string") return b.content;
@@ -217,6 +233,34 @@ export function estimateReadMinutes(blocks: BlogBlock[]): number {
     .join(" ");
   const words = text.trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
+}
+
+/** Contenu éditable (Classic Editor) — HTML unique ou conversion depuis les blocs. */
+export function getPostContentHtml(post: StoredBlogPost): string {
+  if (post.blocks.length === 1 && post.blocks[0]?.type === "html") {
+    return post.blocks[0].content;
+  }
+  if (!post.blocks.length) return "";
+  return blocksToHtml(post.blocks);
+}
+
+export function withPostContentHtml(post: StoredBlogPost, html: string): StoredBlogPost {
+  const cleaned = sanitizeBlogHtml(html);
+  return {
+    ...post,
+    blocks: [
+      {
+        id:
+          post.blocks.length === 1 && post.blocks[0]?.type === "html"
+            ? post.blocks[0].id
+            : `blk_${crypto.randomUUID().slice(0, 12)}`,
+        type: "html",
+        content: cleaned,
+      },
+    ],
+    readMinutes: estimateReadMinutesFromHtml(cleaned),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function seedStoredPostsFromStatic(): StoredBlogPost[] {
@@ -285,7 +329,7 @@ export function createBlankPost(): StoredBlogPost {
     coverAlt: "",
     seoTitle: "",
     seoDescription: "",
-    blocks: [createEmptyBlock("paragraph"), createEmptyBlock("heading")],
+    blocks: [{ id: `blk_${crypto.randomUUID().slice(0, 12)}`, type: "html", content: "" }],
   };
 }
 
@@ -360,7 +404,11 @@ export function storedToPublicPost(post: StoredBlogPost): BlogPost & {
       .filter((b): b is Extract<BlogBlock, { type: "paragraph" }> => b.type === "paragraph")
       .map((b) => b.content)
       .filter(Boolean),
-    htmlBody: blocksToHtml(post.blocks),
+    htmlBody: sanitizeBlogHtml(
+      post.blocks.length === 1 && post.blocks[0]?.type === "html"
+        ? post.blocks[0].content
+        : blocksToHtml(post.blocks),
+    ),
     coverImageUrl: post.coverImageUrl,
   };
 }

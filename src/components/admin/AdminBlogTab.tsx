@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { GutenbergEditor } from "@/components/admin/gutenberg/GutenbergEditor";
+import { ClassicBlogEditor } from "@/components/admin/ClassicBlogEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -225,7 +225,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
 
   if (editing) {
     return (
-      <GutenbergEditor
+      <ClassicBlogEditor
         post={editing}
         onChange={setEditing}
         onSave={saveEditing}
@@ -253,7 +253,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Articles"
-          description="Tous les articles du blog — édition Gutenberg, publication et brouillons."
+          description="Tous les articles du blog — Classic Editor, publication et brouillons."
           actions={
             <div className="flex flex-wrap gap-2">
               <Button
@@ -497,8 +497,8 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         />
         <div className="surface space-y-3 rounded-2xl p-5 text-sm text-muted-foreground sm:p-6">
           <p>
-            Dans l’éditeur Gutenberg, utilisez le panneau <strong>Article</strong> pour l’image
-            de couverture, et les blocs Image / Galerie / Vidéo pour le contenu.
+            Dans le Classic Editor, utilisez <strong>Ajouter un média</strong> pour l’image dans
+            le contenu, et le panneau Article pour l’image de couverture.
           </p>
           <p>
             Une bibliothèque médias intégrée (upload) pourra être ajoutée ensuite. Pour
