@@ -6,7 +6,6 @@ import {
   type StoredBlogPost,
 } from "@/lib/blog-blocks";
 import { type BlogPost } from "@/lib/blog";
-import { sanitizeBlogHtml } from "@/lib/blog-html";
 import { siteConfig } from "@/lib/site-config";
 import { astucesBlogSeed } from "@/data/astuces-blog-seed";
 
@@ -245,7 +244,9 @@ export function getPostContentHtml(post: StoredBlogPost): string {
 }
 
 export function withPostContentHtml(post: StoredBlogPost, html: string): StoredBlogPost {
-  const cleaned = sanitizeBlogHtml(html);
+  // Sanitization is done by ClassicBlogEditor / BlogBlockContent — keep storage free of DOMPurify
+  // so public blog SSR never imports isomorphic-dompurify via this module.
+  const cleaned = String(html ?? "");
   return {
     ...post,
     blocks: [
@@ -397,11 +398,10 @@ export function storedToPublicPost(post: StoredBlogPost): BlogPost & {
       .filter((b): b is Extract<BlogBlock, { type: "paragraph" }> => b.type === "paragraph")
       .map((b) => b.content)
       .filter(Boolean),
-    htmlBody: sanitizeBlogHtml(
+    htmlBody:
       post.blocks.length === 1 && post.blocks[0]?.type === "html"
         ? post.blocks[0].content
         : blocksToHtml(post.blocks),
-    ),
     coverImageUrl: post.coverImageUrl,
   };
 }
