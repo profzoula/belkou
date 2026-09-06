@@ -198,7 +198,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
     try {
       const result = await mergeAstucesFn();
       setPosts(result.posts);
-      toast.success(`${result.imported} astuces publiées sur le blog`);
+      toast.success(`${result.imported} astuces publiées — les autres articles ont été retirés`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Import impossible");
     } finally {
@@ -263,7 +263,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
                 disabled={saving}
                 onClick={importAstuces}
               >
-                Importer astuces 1–10
+                  Importer les 10 astuces
               </Button>
               <Button type="button" className="rounded-full" onClick={startCreate}>
                 <Plus className="size-4" /> Nouvel article
@@ -520,7 +520,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <div>
           <h3 className="font-semibold text-foreground">Import d’astuces</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Publie ou met à jour les 10 premiers articles d’astuces Windows sur le blog.
+            Remplace tout le blog par les 10 articles d’astuces Windows (retire les autres).
           </p>
           <Button
             type="button"
@@ -528,7 +528,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
             disabled={saving}
             onClick={importAstuces}
           >
-            Importer astuces 1–10
+            Importer les 10 astuces
           </Button>
         </div>
         <div className="border-t border-border pt-4">

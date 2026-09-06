@@ -5,7 +5,7 @@ import {
   type BlogBlock,
   type StoredBlogPost,
 } from "@/lib/blog-blocks";
-import { blogPosts, type BlogPost } from "@/lib/blog";
+import { type BlogPost } from "@/lib/blog";
 import { sanitizeBlogHtml } from "@/lib/blog-html";
 import { siteConfig } from "@/lib/site-config";
 import { astucesBlogSeed } from "@/data/astuces-blog-seed";
@@ -264,15 +264,8 @@ export function withPostContentHtml(post: StoredBlogPost, html: string): StoredB
 }
 
 export function seedStoredPostsFromStatic(): StoredBlogPost[] {
-  const now = new Date().toISOString();
-  const tipSeed = loadAstucesSeed();
-  const legacy = blogPosts.map((post) => staticPostToStored(post, now));
-  // Astuces d’abord (blog BelKou), puis anciens articles éditoriaux
-  const bySlug = new Map<string, StoredBlogPost>();
-  for (const post of [...tipSeed, ...legacy]) {
-    bySlug.set(post.slug, post);
-  }
-  return [...bySlug.values()];
+  // Blog BelKou : uniquement les 10 astuces (pas les anciens articles éditoriaux)
+  return loadAstucesSeed();
 }
 
 function loadAstucesSeed(): StoredBlogPost[] {
