@@ -263,7 +263,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
                 disabled={saving}
                 onClick={importAstuces}
               >
-                  Importer les 70 astuces
+                  Importer les 90 articles
               </Button>
               <Button type="button" className="rounded-full" onClick={startCreate}>
                 <Plus className="size-4" /> Nouvel article
@@ -523,7 +523,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <div>
           <h3 className="font-semibold text-foreground">Import d’astuces</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Remplace tout le blog par les 70 articles d’astuces (Windows + Linux).
+            Remplace tout le blog par les 90 articles (70 astuces Windows/Linux + 20 IA).
           </p>
           <Button
             type="button"
@@ -531,7 +531,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
             disabled={saving}
             onClick={importAstuces}
           >
-            Importer les 70 astuces
+            Importer les 90 articles
           </Button>
         </div>
         <div className="border-t border-border pt-4">

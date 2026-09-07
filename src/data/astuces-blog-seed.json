@@ -13649,5 +13649,4145 @@
         ]
       }
     ]
+  },
+  {
+    "id": "ia_0001",
+    "tipId": 9001,
+    "slug": "qu-est-ce-que-l-intelligence-artificielle-et-comment-fonctionne-t-elle",
+    "title": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
+    "excerpt": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-27",
+    "updatedAt": "2026-09-07T22:54:50.959Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": true,
+    "coverGradient": "from-primary via-primary/80 to-[#7ed874]",
+    "coverLabel": "IA #01",
+    "coverAlt": "Illustration moderne représentant comprendre l’intelligence artificielle",
+    "seoTitle": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
+    "seoDescription": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
+    "ogTitle": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
+    "ogDescription": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
+    "primaryKeyword": "comprendre l’intelligence artificielle",
+    "secondaryKeywords": [
+      "intelligence artificielle",
+      "fonctionnement de l’IA",
+      "technologies IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_ss2oddjn",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_9mt4dhx5",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de comprendre l’intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_94rl4gmr",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_d98ya0tg",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_jpms0695",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_htvnzl5d",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_8cjm9tfm",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_v2xv3u2r",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_ajxba6xp",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_81rupgov",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_6msx4zbv",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_pr44ikb6",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_jiylcp0y",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_tpdwje7j",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_6vtn4rul",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_cxi16h2a",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_n729sq49",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_nvjow42s",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_ikk8kaac",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_1c38x8w6",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_n9zpjr00",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_m2uqarpp",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_edfj7uwa",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_fow18c7b",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0002",
+    "tipId": 9002,
+    "slug": "chatgpt-qu-est-ce-que-c-est-et-comment-l-utiliser-efficacement",
+    "title": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
+    "excerpt": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-26",
+    "updatedAt": "2026-09-07T22:54:50.960Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": true,
+    "coverGradient": "from-[#0056D2] to-[#003d99]",
+    "coverLabel": "IA #02",
+    "coverAlt": "Illustration moderne représentant utiliser ChatGPT",
+    "seoTitle": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
+    "seoDescription": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
+    "ogTitle": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
+    "ogDescription": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
+    "primaryKeyword": "utiliser ChatGPT",
+    "secondaryKeywords": [
+      "ChatGPT",
+      "assistant IA",
+      "prompts ChatGPT"
+    ],
+    "blocks": [
+      {
+        "id": "blk_mpgruf7v",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_5xni2x9v",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de utiliser ChatGPT, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_28yw23z9",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_yaqbt4o9",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_pawr5y6c",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_mdbxy7yf",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_68zi9p1b",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_ks8fxvrm",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_tajb4smt",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_6cj8qpfi",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_b8h0yvz1",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_sv31lh3m",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_97kalxgf",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_00f7iz21",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_94zohvzv",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_phkctnar",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_1fr3ncid",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_l90y3b8r",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_y7kdp915",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_s2jngz5d",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_xywybo8f",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_rv6acu0n",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_t29ykepw",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_a73c8mzk",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0003",
+    "tipId": 9003,
+    "slug": "10-facons-d-utiliser-l-ia-pour-gagner-du-temps",
+    "title": "10 façons d’utiliser l’IA pour gagner du temps",
+    "excerpt": "Découvrez 10 utilisations concrètes de l’intelligence artificielle pour automatiser certaines tâches et gagner du temps au quotidien.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-25",
+    "updatedAt": "2026-09-07T22:54:50.960Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary/90 to-[#7ed874]",
+    "coverLabel": "IA #03",
+    "coverAlt": "Illustration moderne représentant IA pour gagner du temps",
+    "seoTitle": "10 façons d’utiliser l’IA pour gagner du temps",
+    "seoDescription": "Découvrez 10 utilisations concrètes de l’intelligence artificielle pour automatiser certaines tâches et gagner du temps au quotidien.",
+    "ogTitle": "10 façons d’utiliser l’IA pour gagner du temps",
+    "ogDescription": "Découvrez 10 utilisations concrètes de l’intelligence artificielle pour automatiser certaines tâches et gagner du temps au quotidien.",
+    "primaryKeyword": "IA pour gagner du temps",
+    "secondaryKeywords": [
+      "productivité IA",
+      "automatisation",
+      "outils IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_snf7x523",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_pgnwct9k",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA pour gagner du temps, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_y77fllqy",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_xozhdz1a",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_3rtrjovs",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_zrnxfady",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_gh0hjdxq",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_8eayfarf",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_4hl299a2",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_zzg3ypf8",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_s64w0td9",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_ye67f9rr",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_laea74li",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_xho8h6y0",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_zjxy1769",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_4fx3khqg",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_t1svkv45",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_gdf3jb71",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_1awvwy5e",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_fz7b7802",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_fde94q9p",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_eae4lhhb",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_ugv5a570",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_owwi8kfe",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0004",
+    "tipId": 9004,
+    "slug": "comment-utiliser-l-ia-pour-apprendre-plus-rapidement",
+    "title": "Comment utiliser l’IA pour apprendre plus rapidement ?",
+    "excerpt": "Apprenez à utiliser l’intelligence artificielle comme assistant d’apprentissage pour comprendre, réviser, pratiquer et organiser vos connaissances.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Apprentissage"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-24",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0c1520] to-primary",
+    "coverLabel": "IA #04",
+    "coverAlt": "Illustration moderne représentant IA pour apprendre",
+    "seoTitle": "Comment utiliser l’IA pour apprendre plus rapidement ?",
+    "seoDescription": "Apprenez à utiliser l’intelligence artificielle comme assistant d’apprentissage pour comprendre, réviser, pratiquer et organiser vos connaissances.",
+    "ogTitle": "Comment utiliser l’IA pour apprendre plus rapidement ?",
+    "ogDescription": "Apprenez à utiliser l’intelligence artificielle comme assistant d’apprentissage pour comprendre, réviser, pratiquer et organiser vos connaissances.",
+    "primaryKeyword": "IA pour apprendre",
+    "secondaryKeywords": [
+      "apprentissage avec IA",
+      "étudier avec IA",
+      "assistant pédagogique"
+    ],
+    "blocks": [
+      {
+        "id": "blk_6ap98ae4",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_hwdphito",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA pour apprendre, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_fbfrpa02",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_rlyp9v5d",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_xkrs5fq4",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_kn6kh3jb",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_tlyz3hyy",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_kv1yeigm",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_ia9orioo",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_6fydp9h8",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_fdo4gtn1",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_xk5mj5zh",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_pepchpuh",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_hhz42zie",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_qale5i4j",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_mxyxmgg4",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_wq9cvufr",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_twbzmpiv",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_5dfb5lmp",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_2gyx0zih",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_ft2ia4o6",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_nj6333st",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_n51bd36i",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_7cnni060",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0005",
+    "tipId": 9005,
+    "slug": "prompt-engineering-comment-ecrire-de-meilleurs-prompts",
+    "title": "Prompt Engineering : comment écrire de meilleurs prompts",
+    "excerpt": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Développement"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-23",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": true,
+    "coverGradient": "from-[#0045a8] to-primary",
+    "coverLabel": "IA #05",
+    "coverAlt": "Illustration moderne représentant prompt engineering",
+    "seoTitle": "Prompt Engineering : comment écrire de meilleurs prompts",
+    "seoDescription": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
+    "ogTitle": "Prompt Engineering : comment écrire de meilleurs prompts",
+    "ogDescription": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
+    "primaryKeyword": "prompt engineering",
+    "secondaryKeywords": [
+      "prompts IA",
+      "prompt engineering",
+      "instructions pour IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_vcp0wna0",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_9eidqpsw",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de prompt engineering, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_2tcc1i4x",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_435h5lpu",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_qzzvxs2b",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_7bjoy9v2",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_cyfhk9iz",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_r6p34dc4",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_qqp8fnob",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_9lrmnx35",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_qjnf5n6a",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_y6s7hahs",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_95c8tfdg",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_6f4ek9hk",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_8zaxg3m6",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_96rfck99",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_ce2891yz",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_6fe5h3yo",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_z4zve2i4",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_a5zdw0ye",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_6rhxtvcm",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_b5o1rt89",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_r4mnpssl",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_hqoj615i",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0006",
+    "tipId": 9006,
+    "slug": "les-meilleurs-outils-d-ia-gratuits-a-connaitre",
+    "title": "Les meilleurs outils d’IA gratuits à connaître",
+    "excerpt": "Découvrez une sélection d’outils d’intelligence artificielle accessibles gratuitement pour écrire, apprendre, créer et travailler plus efficacement.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-22",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary via-primary/80 to-[#7ed874]",
+    "coverLabel": "IA #06",
+    "coverAlt": "Illustration moderne représentant outils IA gratuits",
+    "seoTitle": "Les meilleurs outils d’IA gratuits à connaître",
+    "seoDescription": "Découvrez une sélection d’outils d’intelligence artificielle accessibles gratuitement pour écrire, apprendre, créer et travailler plus efficacement.",
+    "ogTitle": "Les meilleurs outils d’IA gratuits à connaître",
+    "ogDescription": "Découvrez une sélection d’outils d’intelligence artificielle accessibles gratuitement pour écrire, apprendre, créer et travailler plus efficacement.",
+    "primaryKeyword": "outils IA gratuits",
+    "secondaryKeywords": [
+      "outils intelligence artificielle",
+      "IA gratuite",
+      "applications IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_83m6rpf8",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_n9g4p5pi",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de outils IA gratuits, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_bmgd87tj",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_o876l92o",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_0hgawqnd",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_gdvj0crq",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_whq1bwwj",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_n2f1adtj",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_se7hvt51",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_f7wmedx2",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_y7jjnd06",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_sztefua9",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_8kgxp8rb",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_m5ipfzgy",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_869h95mx",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_nkpkzfvr",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_4vdew9s8",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_dkqyzxci",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_ts1njxzx",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_jszwghmx",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_5nchxj7q",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_lvawvfc3",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_5cdbid3z",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_sknyx6ik",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0007",
+    "tipId": 9007,
+    "slug": "comment-l-ia-peut-aider-les-etudiants",
+    "title": "Comment l’IA peut aider les étudiants",
+    "excerpt": "Découvrez comment les étudiants peuvent utiliser l’intelligence artificielle pour comprendre leurs cours, réviser, organiser leur travail et pratiquer.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Apprentissage"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-21",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0056D2] to-[#003d99]",
+    "coverLabel": "IA #07",
+    "coverAlt": "Illustration moderne représentant IA pour étudiants",
+    "seoTitle": "Comment l’IA peut aider les étudiants",
+    "seoDescription": "Découvrez comment les étudiants peuvent utiliser l’intelligence artificielle pour comprendre leurs cours, réviser, organiser leur travail et pratiquer.",
+    "ogTitle": "Comment l’IA peut aider les étudiants",
+    "ogDescription": "Découvrez comment les étudiants peuvent utiliser l’intelligence artificielle pour comprendre leurs cours, réviser, organiser leur travail et pratiquer.",
+    "primaryKeyword": "IA pour étudiants",
+    "secondaryKeywords": [
+      "étudiants et IA",
+      "révision avec IA",
+      "apprentissage"
+    ],
+    "blocks": [
+      {
+        "id": "blk_8m2ot6i3",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_lhrsbwu4",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA pour étudiants, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_4bv76ii8",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_y29mk6l4",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_bphau8id",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_k3igm6us",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_gpaiuyk7",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_qcrop10e",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_tefik75w",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_2qdtpe3r",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_2scbmxl1",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_yfa8vzif",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_5zgjpchs",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_bw53c24y",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_g7jjzprg",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_aehyi266",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_irck4jxy",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_g7ubkgz2",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_asn2u0j9",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_ved39dc6",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_e9uki05o",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_1cn28mcp",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_oyk37y48",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_8gj8nevv",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0008",
+    "tipId": 9008,
+    "slug": "ia-generative-definition-fonctionnement-et-exemples",
+    "title": "IA générative : définition, fonctionnement et exemples",
+    "excerpt": "Découvrez ce qu’est l’IA générative, comment elle produit du texte ou des images et quelles sont ses principales applications.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-20",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary/90 to-[#7ed874]",
+    "coverLabel": "IA #08",
+    "coverAlt": "Illustration moderne représentant IA générative",
+    "seoTitle": "IA générative : définition, fonctionnement et exemples",
+    "seoDescription": "Découvrez ce qu’est l’IA générative, comment elle produit du texte ou des images et quelles sont ses principales applications.",
+    "ogTitle": "IA générative : définition, fonctionnement et exemples",
+    "ogDescription": "Découvrez ce qu’est l’IA générative, comment elle produit du texte ou des images et quelles sont ses principales applications.",
+    "primaryKeyword": "IA générative",
+    "secondaryKeywords": [
+      "IA générative",
+      "génération de contenu",
+      "modèles génératifs"
+    ],
+    "blocks": [
+      {
+        "id": "blk_h9zy6pk8",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_jwpolknu",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA générative, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_b4gkiakk",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_m88utbs4",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_ra6sb2sn",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_ne6w913c",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_t9tn57dh",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_c2lop5a5",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_hix88dsv",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_ql4ikn5r",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_q05japav",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_hltndek7",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_6ciit3dx",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_75ayziyk",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_uo4ah66p",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_delvs9g2",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_zrycc29u",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_ca03oi3t",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_nq9opkxq",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_em9ysj6f",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_b2quyjse",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_a1nvc7s3",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_5gm0fgpe",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_etdyh3kn",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0009",
+    "tipId": 9009,
+    "slug": "chatgpt-vs-gemini-vs-claude-quelles-differences",
+    "title": "ChatGPT vs Gemini vs Claude : quelles différences ?",
+    "excerpt": "Comparez les grandes caractéristiques de ChatGPT, Gemini et Claude afin de mieux comprendre leurs usages et leurs différences.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-19",
+    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0c1520] to-primary",
+    "coverLabel": "IA #09",
+    "coverAlt": "Illustration moderne représentant ChatGPT vs Gemini vs Claude",
+    "seoTitle": "ChatGPT vs Gemini vs Claude : quelles différences ?",
+    "seoDescription": "Comparez les grandes caractéristiques de ChatGPT, Gemini et Claude afin de mieux comprendre leurs usages et leurs différences.",
+    "ogTitle": "ChatGPT vs Gemini vs Claude : quelles différences ?",
+    "ogDescription": "Comparez les grandes caractéristiques de ChatGPT, Gemini et Claude afin de mieux comprendre leurs usages et leurs différences.",
+    "primaryKeyword": "ChatGPT vs Gemini vs Claude",
+    "secondaryKeywords": [
+      "Gemini",
+      "Claude",
+      "comparatif IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_815nl1yi",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_3mb4otte",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de ChatGPT vs Gemini vs Claude, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_crqxit5p",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_wipz7e1p",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_ipswrejq",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_md4pa34l",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_kcf63xxk",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_qyqxia5k",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_q0peiyop",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_8burr5zx",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_vko06b5h",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_5s54u5fy",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_jjt6tyoi",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_9yxbtwvm",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_8tg30ebv",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_fscgdge1",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_gu45f57q",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_5nsh4h6q",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_v907ydem",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_i0063kv6",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_pev3v6fm",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_nfz7dp70",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_9h3sv81z",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_kg0ocmk2",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0010",
+    "tipId": 9010,
+    "slug": "comment-creer-des-images-avec-l-intelligence-artificielle",
+    "title": "Comment créer des images avec l’intelligence artificielle",
+    "excerpt": "Découvrez les étapes essentielles pour transformer une idée ou une description en image grâce aux générateurs d’images par intelligence artificielle.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-18",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0045a8] to-primary",
+    "coverLabel": "IA #10",
+    "coverAlt": "Illustration moderne représentant créer des images avec IA",
+    "seoTitle": "Comment créer des images avec l’intelligence artificielle",
+    "seoDescription": "Découvrez les étapes essentielles pour transformer une idée ou une description en image grâce aux générateurs d’images par intelligence artificielle.",
+    "ogTitle": "Comment créer des images avec l’intelligence artificielle",
+    "ogDescription": "Découvrez les étapes essentielles pour transformer une idée ou une description en image grâce aux générateurs d’images par intelligence artificielle.",
+    "primaryKeyword": "créer des images avec IA",
+    "secondaryKeywords": [
+      "générateur d’images IA",
+      "images générées par IA",
+      "création visuelle"
+    ],
+    "blocks": [
+      {
+        "id": "blk_0r0rv6r3",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_pg2y36mu",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de créer des images avec IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_u5nztwlo",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_zlfr1dn8",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_337p7oln",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_utylwhh2",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_kbun1ha2",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_n92t60lg",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_j7qcgzsg",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_u3f2uzu0",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_h8yd3f6l",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_6o7qfjor",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_iew7c8hu",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_10lrft8e",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_sdd87yp1",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_lk0wemkb",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_uqywlhgg",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_e6ycpg2h",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_7pi9y40z",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_whnz2puz",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_lrhl3tgn",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_c9i5sjzs",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_lsyt2qx0",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_6ukn7y3o",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0011",
+    "tipId": 9011,
+    "slug": "comment-utiliser-l-ia-pour-creer-du-contenu-sur-les-reseaux-sociaux",
+    "title": "Comment utiliser l’IA pour créer du contenu sur les réseaux sociaux",
+    "excerpt": "Découvrez comment utiliser l’intelligence artificielle pour préparer des idées, textes, visuels et calendriers de contenu pour les réseaux sociaux.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-17",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary via-primary/80 to-[#7ed874]",
+    "coverLabel": "IA #11",
+    "coverAlt": "Illustration moderne représentant IA pour réseaux sociaux",
+    "seoTitle": "Comment utiliser l’IA pour créer du contenu sur les réseaux sociaux",
+    "seoDescription": "Découvrez comment utiliser l’intelligence artificielle pour préparer des idées, textes, visuels et calendriers de contenu pour les réseaux sociaux.",
+    "ogTitle": "Comment utiliser l’IA pour créer du contenu sur les réseaux sociaux",
+    "ogDescription": "Découvrez comment utiliser l’intelligence artificielle pour préparer des idées, textes, visuels et calendriers de contenu pour les réseaux sociaux.",
+    "primaryKeyword": "IA pour réseaux sociaux",
+    "secondaryKeywords": [
+      "création de contenu",
+      "réseaux sociaux",
+      "productivité"
+    ],
+    "blocks": [
+      {
+        "id": "blk_qxiwsqtb",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_13cb7ppy",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA pour réseaux sociaux, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_qe1uiq0g",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_9ugwj7v2",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_bb8xme62",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_bfuiv5il",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_3wg3bdpy",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_od6yedcb",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_tnmpv4ub",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_x25jzy3g",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_z7u8sgod",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_wrebcqsg",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_17fopm9a",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_p6vmh3mx",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_l70dcka1",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_5upotctj",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_m378yz10",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_r009iii5",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_wkffbfrv",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_bfwes1sl",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_v7q7vamb",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_knz9bi3h",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_gj3eb8f9",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_h4g2sury",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0012",
+    "tipId": 9012,
+    "slug": "l-ia-peut-elle-remplacer-les-programmeurs",
+    "title": "L’IA peut-elle remplacer les programmeurs ?",
+    "excerpt": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-16",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": true,
+    "coverGradient": "from-[#0056D2] to-[#003d99]",
+    "coverLabel": "IA #12",
+    "coverAlt": "Illustration moderne représentant IA et programmation",
+    "seoTitle": "L’IA peut-elle remplacer les programmeurs ?",
+    "seoDescription": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
+    "ogTitle": "L’IA peut-elle remplacer les programmeurs ?",
+    "ogDescription": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
+    "primaryKeyword": "IA et programmation",
+    "secondaryKeywords": [
+      "développement logiciel",
+      "programmation et IA",
+      "développeurs"
+    ],
+    "blocks": [
+      {
+        "id": "blk_mho8mynr",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_k7gs8nr4",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA et programmation, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_2xh8s9lz",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_2vy1gam4",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_1gl92wpp",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_83rz4nxf",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_256anmo4",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_1389dq1l",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_37oxxo2m",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_eqn9cst7",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_5ghqhkv6",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_o3svgxb5",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_z1wu9ilu",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_x9rxz0cx",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_ww4nh06n",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_6mcl19yp",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_g6a2odko",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_ykforclm",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_5hyzb274",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_yqv6gf2f",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_bdt1q6df",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_vvwg69ri",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_8mjkfwzs",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_9obpof2j",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0013",
+    "tipId": 9013,
+    "slug": "comment-utiliser-l-ia-pour-apprendre-a-programmer",
+    "title": "Comment utiliser l’IA pour apprendre à programmer",
+    "excerpt": "Découvrez comment utiliser un assistant IA pour expliquer du code, pratiquer, corriger des erreurs et progresser en programmation.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Développement"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-15",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary/90 to-[#7ed874]",
+    "coverLabel": "IA #13",
+    "coverAlt": "Illustration moderne représentant apprendre à programmer avec IA",
+    "seoTitle": "Comment utiliser l’IA pour apprendre à programmer",
+    "seoDescription": "Découvrez comment utiliser un assistant IA pour expliquer du code, pratiquer, corriger des erreurs et progresser en programmation.",
+    "ogTitle": "Comment utiliser l’IA pour apprendre à programmer",
+    "ogDescription": "Découvrez comment utiliser un assistant IA pour expliquer du code, pratiquer, corriger des erreurs et progresser en programmation.",
+    "primaryKeyword": "apprendre à programmer avec IA",
+    "secondaryKeywords": [
+      "code avec IA",
+      "apprentissage programmation",
+      "assistant de code"
+    ],
+    "blocks": [
+      {
+        "id": "blk_jewyexnf",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_oc0nktwk",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de apprendre à programmer avec IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_4a7v2j4x",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_ga1ysx1u",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_o1fg6er3",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_v3i8m8pv",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_uy82ml51",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_sktc7ev6",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_xdgs0giu",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_wxsz316d",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_0mhegt9d",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_h2l19ue6",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_vkckygn6",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_5xbv648u",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_c1fx3l3v",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_1hapsqmm",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_zljssyzm",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_cnj6eg3u",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_y1s5tu0z",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_ic5x0hmm",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_ylbru1c3",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_u8vkrneh",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_blv2w23m",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_uifjhcdg",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0014",
+    "tipId": 9014,
+    "slug": "les-avantages-et-les-limites-de-l-intelligence-artificielle",
+    "title": "Les avantages et les limites de l’intelligence artificielle",
+    "excerpt": "Faites le point sur les principaux avantages de l’intelligence artificielle, mais aussi sur ses limites et les précautions à prendre.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-14",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0c1520] to-primary",
+    "coverLabel": "IA #14",
+    "coverAlt": "Illustration moderne représentant avantages et limites de l’IA",
+    "seoTitle": "Les avantages et les limites de l’intelligence artificielle",
+    "seoDescription": "Faites le point sur les principaux avantages de l’intelligence artificielle, mais aussi sur ses limites et les précautions à prendre.",
+    "ogTitle": "Les avantages et les limites de l’intelligence artificielle",
+    "ogDescription": "Faites le point sur les principaux avantages de l’intelligence artificielle, mais aussi sur ses limites et les précautions à prendre.",
+    "primaryKeyword": "avantages et limites de l’IA",
+    "secondaryKeywords": [
+      "limites de l’IA",
+      "risques IA",
+      "technologie IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_oegnpdv3",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_bg8q7q7q",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de avantages et limites de l’IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_e4k7p4m6",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_w02fz7fc",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_2v8gm7ez",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_zng1nnqx",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_m39uyror",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_6rfu3t9h",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_rbjz5qh0",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_j6ole2uf",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_1c4ksuzv",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_odcbo5px",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_va3ly5f3",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_xgtq92r4",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_kx1ho7qq",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_t2m2t3af",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_cwg2an2h",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_gf2vrw9v",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_30ttbm17",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_376c1rxn",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_8qyj8dz5",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_dlmd5e2j",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_mwke37rv",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_yg1z2dlu",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0015",
+    "tipId": 9015,
+    "slug": "comment-detecter-un-contenu-genere-par-une-ia",
+    "title": "Comment détecter un contenu généré par une IA",
+    "excerpt": "Découvrez pourquoi il est difficile d’identifier avec certitude un texte généré par IA et quelles méthodes peuvent aider à l’évaluer.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-13",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0045a8] to-primary",
+    "coverLabel": "IA #15",
+    "coverAlt": "Illustration moderne représentant détecter contenu généré par IA",
+    "seoTitle": "Comment détecter un contenu généré par une IA",
+    "seoDescription": "Découvrez pourquoi il est difficile d’identifier avec certitude un texte généré par IA et quelles méthodes peuvent aider à l’évaluer.",
+    "ogTitle": "Comment détecter un contenu généré par une IA",
+    "ogDescription": "Découvrez pourquoi il est difficile d’identifier avec certitude un texte généré par IA et quelles méthodes peuvent aider à l’évaluer.",
+    "primaryKeyword": "détecter contenu généré par IA",
+    "secondaryKeywords": [
+      "texte généré par IA",
+      "détection IA",
+      "contenu artificiel"
+    ],
+    "blocks": [
+      {
+        "id": "blk_ku5m9xy6",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_b2qjhc53",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de détecter contenu généré par IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_m5vkj9nh",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_uoqxg5rm",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_kn8ye7da",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_4fli5mj5",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_j1nc1f28",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_syckapnb",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_73n9do3e",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_15vglo4j",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_63hfu8xd",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_r2fhqaad",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_rsdu4k8o",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_9xb24zvh",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_452if8n8",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_7dy2mmmc",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_8ep3obcf",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_kwc0fgai",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_frms3kuz",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_7qdp2x20",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_tb3u737x",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_75kbgdwt",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_bxz91zov",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_g01cffnt",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0016",
+    "tipId": 9016,
+    "slug": "ia-et-cybersecurite-comment-l-ia-transforme-la-securite",
+    "title": "IA et cybersécurité : comment l’IA transforme la sécurité",
+    "excerpt": "Découvrez comment l’intelligence artificielle peut aider à détecter des anomalies, analyser des données et renforcer certaines opérations de cybersécurité.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-12",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary via-primary/80 to-[#7ed874]",
+    "coverLabel": "IA #16",
+    "coverAlt": "Illustration moderne représentant IA et cybersécurité",
+    "seoTitle": "IA et cybersécurité : comment l’IA transforme la sécurité",
+    "seoDescription": "Découvrez comment l’intelligence artificielle peut aider à détecter des anomalies, analyser des données et renforcer certaines opérations de cybersécurité.",
+    "ogTitle": "IA et cybersécurité : comment l’IA transforme la sécurité",
+    "ogDescription": "Découvrez comment l’intelligence artificielle peut aider à détecter des anomalies, analyser des données et renforcer certaines opérations de cybersécurité.",
+    "primaryKeyword": "IA et cybersécurité",
+    "secondaryKeywords": [
+      "sécurité informatique",
+      "détection d’anomalies",
+      "cybersécurité IA"
+    ],
+    "blocks": [
+      {
+        "id": "blk_wrh518rx",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_79a2uqep",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de IA et cybersécurité, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_9z5034ec",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_bujibbdx",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_qcaevgrm",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_9j246z5l",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_ryu0d6ff",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_furhoyjm",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_bsnoppg4",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_ra44yn7n",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_c10ob80m",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_tj0kp0o8",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_s4220710",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_2c62mxko",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_jhg9062g",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_n5o11lcl",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_7tnpj0nc",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_tgq8ckjp",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_aguulhvj",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_2agygjeo",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_w4uxyomb",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_s0oo2biu",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_a1e6qlhm",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_ulltpw73",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0017",
+    "tipId": 9017,
+    "slug": "comment-automatiser-des-taches-avec-l-intelligence-artificielle",
+    "title": "Comment automatiser des tâches avec l’intelligence artificielle",
+    "excerpt": "Découvrez une méthode simple pour identifier les tâches répétitives et utiliser l’intelligence artificielle afin d’améliorer votre productivité.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-11",
+    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0056D2] to-[#003d99]",
+    "coverLabel": "IA #17",
+    "coverAlt": "Illustration moderne représentant automatisation avec IA",
+    "seoTitle": "Comment automatiser des tâches avec l’intelligence artificielle",
+    "seoDescription": "Découvrez une méthode simple pour identifier les tâches répétitives et utiliser l’intelligence artificielle afin d’améliorer votre productivité.",
+    "ogTitle": "Comment automatiser des tâches avec l’intelligence artificielle",
+    "ogDescription": "Découvrez une méthode simple pour identifier les tâches répétitives et utiliser l’intelligence artificielle afin d’améliorer votre productivité.",
+    "primaryKeyword": "automatisation avec IA",
+    "secondaryKeywords": [
+      "automatisation IA",
+      "tâches répétitives",
+      "productivité"
+    ],
+    "blocks": [
+      {
+        "id": "blk_9rk5pri5",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_qimgen9g",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de automatisation avec IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_mjykj9t0",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_p9mhczty",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_v9x1joml",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_d3l0rkiy",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_vb64hmyy",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_yr5nxym4",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_axmqgl32",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_4wool2du",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_us0ecq18",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_tdni8eac",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_kw7en76n",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_tj01jafz",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_xoc6uc2u",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_bw0i4fgj",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_9l3p8vf3",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_4ygcai1s",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_89m0wfet",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_oqmc6rdo",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_z4x6uvak",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_7cax0kxi",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_wopdga0f",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_215hajks",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0018",
+    "tipId": 9018,
+    "slug": "les-metiers-qui-evoluent-avec-l-intelligence-artificielle",
+    "title": "Les métiers qui évoluent avec l’intelligence artificielle",
+    "excerpt": "Découvrez comment l’intelligence artificielle transforme les métiers, les compétences recherchées et certaines méthodes de travail.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-10",
+    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-primary/90 to-[#7ed874]",
+    "coverLabel": "IA #18",
+    "coverAlt": "Illustration moderne représentant métiers et intelligence artificielle",
+    "seoTitle": "Les métiers qui évoluent avec l’intelligence artificielle",
+    "seoDescription": "Découvrez comment l’intelligence artificielle transforme les métiers, les compétences recherchées et certaines méthodes de travail.",
+    "ogTitle": "Les métiers qui évoluent avec l’intelligence artificielle",
+    "ogDescription": "Découvrez comment l’intelligence artificielle transforme les métiers, les compétences recherchées et certaines méthodes de travail.",
+    "primaryKeyword": "métiers et intelligence artificielle",
+    "secondaryKeywords": [
+      "emploi et IA",
+      "compétences IA",
+      "transformation des métiers"
+    ],
+    "blocks": [
+      {
+        "id": "blk_hrb8f3sa",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_5rzc2yj9",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de métiers et intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_h1h2khd5",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_0c74p069",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_xwn9d02x",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_0ammivur",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_b48bdj73",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_jzbyf4zx",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_v4cbnp6z",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_xg0ghl1d",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_68zvi8av",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_5dri7m7h",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_id2l7psp",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_mgblslbb",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_7mdv3yr4",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_0aranr1r",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_yll122c6",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_cpturank",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_ocs1m3j4",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_ec6lmu93",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_npftklaa",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_v7cu96tr",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_az75ipcf",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_v0lu8k1z",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0019",
+    "tipId": 9019,
+    "slug": "comment-creer-une-application-avec-l-aide-de-l-ia",
+    "title": "Comment créer une application avec l’aide de l’IA",
+    "excerpt": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Développement"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-09",
+    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": true,
+    "coverGradient": "from-[#0c1520] to-primary",
+    "coverLabel": "IA #19",
+    "coverAlt": "Illustration moderne représentant créer une application avec IA",
+    "seoTitle": "Comment créer une application avec l’aide de l’IA",
+    "seoDescription": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
+    "ogTitle": "Comment créer une application avec l’aide de l’IA",
+    "ogDescription": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
+    "primaryKeyword": "créer une application avec IA",
+    "secondaryKeywords": [
+      "développement avec IA",
+      "application IA",
+      "vibe coding"
+    ],
+    "blocks": [
+      {
+        "id": "blk_f2836hjw",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_i428s4g2",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de créer une application avec IA, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_jqmqtxql",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_p351p0jj",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_zq1ie6wr",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_xjwfy87w",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_pbhagqxr",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_jzullabp",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_91bb0lck",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_opa3rh76",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_4282qa8q",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_bavdigyq",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_o41m867f",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_zkq5a30j",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_6n3e6o0v",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_plckn4d4",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_o8r8b86d",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_3fxdibb3",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_9euxwvv7",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_adpxaixv",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_dyse7zy0",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_928axzno",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_hhsfutv9",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_cjqaziod",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ia_0020",
+    "tipId": 9020,
+    "slug": "l-avenir-de-l-intelligence-artificielle-quelles-evolutions",
+    "title": "L’avenir de l’intelligence artificielle : quelles évolutions ?",
+    "excerpt": "Explorez les grandes tendances de l’intelligence artificielle et les questions importantes que son évolution soulève pour les utilisateurs et les entreprises.",
+    "category": "IA",
+    "tags": [
+      "IA",
+      "Intelligence artificielle",
+      "Technologie",
+      "Productivité"
+    ],
+    "status": "published",
+    "publishedAt": "2026-09-08",
+    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "authorName": "Mackenson Lundi",
+    "authorRole": "Fondateur BelKou",
+    "authorInitials": "ML",
+    "readMinutes": 7,
+    "difficulty": "Débutant",
+    "featured": false,
+    "trending": false,
+    "coverGradient": "from-[#0045a8] to-primary",
+    "coverLabel": "IA #20",
+    "coverAlt": "Illustration moderne représentant avenir de l’intelligence artificielle",
+    "seoTitle": "L’avenir de l’intelligence artificielle : quelles évolutions ?",
+    "seoDescription": "Explorez les grandes tendances de l’intelligence artificielle et les questions importantes que son évolution soulève pour les utilisateurs et les entreprises.",
+    "ogTitle": "L’avenir de l’intelligence artificielle : quelles évolutions ?",
+    "ogDescription": "Explorez les grandes tendances de l’intelligence artificielle et les questions importantes que son évolution soulève pour les utilisateurs et les entreprises.",
+    "primaryKeyword": "avenir de l’intelligence artificielle",
+    "secondaryKeywords": [
+      "futur de l’IA",
+      "tendances IA",
+      "technologies futures"
+    ],
+    "blocks": [
+      {
+        "id": "blk_81bk4pwk",
+        "type": "paragraph",
+        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+      },
+      {
+        "id": "blk_owfaw5q8",
+        "type": "paragraph",
+        "content": "Dans cet article, nous allons voir les principes essentiels de avenir de l’intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
+      },
+      {
+        "id": "blk_a110vyax",
+        "type": "heading",
+        "level": 2,
+        "content": "Pourquoi cette astuce est utile ?"
+      },
+      {
+        "id": "blk_hlol6j2h",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Comprendre plus facilement une technologie devenue courante.",
+          "Identifier des usages concrets de l’intelligence artificielle.",
+          "Gagner du temps grâce à une méthode structurée.",
+          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+        ]
+      },
+      {
+        "id": "blk_iy64alxn",
+        "type": "heading",
+        "level": 2,
+        "content": "Prérequis"
+      },
+      {
+        "id": "blk_sygfmpk3",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Un ordinateur, une tablette ou un smartphone.",
+          "Une connexion Internet pour les services d’IA en ligne.",
+          "Une idée claire de la tâche que vous souhaitez réaliser.",
+          "Un esprit critique pour vérifier les résultats produits."
+        ]
+      },
+      {
+        "id": "blk_egwzvh0e",
+        "type": "heading",
+        "level": 2,
+        "content": "Comment faire ?"
+      },
+      {
+        "id": "blk_br8quz4r",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 1 — Donner le contexte nécessaire"
+      },
+      {
+        "id": "blk_soeowd99",
+        "type": "paragraph",
+        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+      },
+      {
+        "id": "blk_21ddyt7x",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 2 — Formuler une demande claire"
+      },
+      {
+        "id": "blk_ap9z2sxl",
+        "type": "paragraph",
+        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+      },
+      {
+        "id": "blk_dkdc3anw",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 3 — Vérifier le résultat"
+      },
+      {
+        "id": "blk_fi0vxk8v",
+        "type": "paragraph",
+        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+      },
+      {
+        "id": "blk_7cflkpnv",
+        "type": "heading",
+        "level": 3,
+        "content": "Étape 4 — Améliorer progressivement"
+      },
+      {
+        "id": "blk_awsk6bll",
+        "type": "paragraph",
+        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+      },
+      {
+        "id": "blk_3e1j2htv",
+        "type": "heading",
+        "level": 2,
+        "content": "Commande / Code"
+      },
+      {
+        "id": "blk_zvjnf7ke",
+        "type": "callout",
+        "variant": "info",
+        "title": "Note",
+        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+      },
+      {
+        "id": "blk_84mlbdm4",
+        "type": "code",
+        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "language": "text"
+      },
+      {
+        "id": "blk_ej8lk4uc",
+        "type": "heading",
+        "level": 2,
+        "content": "Conseils"
+      },
+      {
+        "id": "blk_taailm1f",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Commencez par des demandes simples et précises.",
+          "Vérifiez les informations importantes avant de les utiliser.",
+          "Évitez de partager des données sensibles ou confidentielles.",
+          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
+          "Pour un travail important, comparez les résultats avec des sources fiables."
+        ]
+      },
+      {
+        "id": "blk_zy5u64ud",
+        "type": "heading",
+        "level": 2,
+        "content": "Erreurs fréquentes"
+      },
+      {
+        "id": "blk_nlyg41mu",
+        "type": "list",
+        "ordered": false,
+        "items": [
+          "Demande trop vague : ajoutez un objectif et un contexte précis.",
+          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
+          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
+          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+        ]
+      },
+      {
+        "id": "blk_ggc72nnd",
+        "type": "heading",
+        "level": 2,
+        "content": "FAQ"
+      },
+      {
+        "id": "blk_ejghw8p3",
+        "type": "faq",
+        "items": [
+          {
+            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
+            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+          },
+          {
+            "q": "Peut-on utiliser l’IA pour tout faire ?",
+            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+          }
+        ]
+      }
+    ]
   }
 ]
