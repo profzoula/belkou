@@ -6,7 +6,7 @@ import { Footer } from "@/components/site/Footer";
 import { Navbar } from "@/components/site/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { blogCategories, formatBlogDate, type BlogPost } from "@/lib/blog";
+import { formatBlogDate, type BlogPost } from "@/lib/blog";
 import { siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
@@ -46,10 +46,14 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categories = useMemo(
-    () => Array.from(new Set([...blogCategories, ...posts.map((post) => post.category)])),
-    [posts],
-  );
+  const categories = useMemo(() => {
+    const preferred = ["Windows", "Linux", "IA", "Programmation", "Formation", "Live"];
+    const present = Array.from(new Set(posts.map((post) => post.category)));
+    return [
+      ...preferred.filter((c) => present.includes(c)),
+      ...present.filter((c) => !preferred.includes(c)).sort((a, b) => a.localeCompare(b, "fr")),
+    ];
+  }, [posts]);
 
   const filtered = useMemo(() => {
     const query = searchQuery
@@ -82,8 +86,11 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="site-container site-page-top py-16 text-center">
-          <h1 className="sr-only">Blog BelKou</h1>
-          <p className="text-muted-foreground">Aucun article publié pour le moment.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Blog BelKou</h1>
+          <p className="mt-3 text-muted-foreground">Aucun article publié pour le moment.</p>
+          <Button asChild className="mt-6 rounded-lg">
+            <Link to="/courses">Voir les cours</Link>
+          </Button>
         </main>
         <Footer />
       </div>
@@ -207,15 +214,15 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                 <aside className="space-y-8">
                   <div>
                     <SectionHeading eyebrow="Tendances" title="Les plus lus" />
-                    <ol className="space-y-3">
+                    <ol className="space-y-4">
                       {trending.map((post, index) => (
                         <li key={post.slug}>
                           <Link
                             to="/blog/$slug"
                             params={{ slug: post.slug }}
-                            className="group flex gap-3 rounded-2xl border border-border bg-card p-3 transition-[border-color] hover:border-primary/40"
+                            className="group flex gap-3"
                           >
-                            <span className="font-display text-2xl font-semibold tabular-nums text-primary/40">
+                            <span className="w-8 shrink-0 font-display text-2xl font-semibold tabular-nums text-primary/35">
                               {String(index + 1).padStart(2, "0")}
                             </span>
                             <div className="min-w-0">

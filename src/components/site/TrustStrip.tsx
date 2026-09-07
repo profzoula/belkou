@@ -26,7 +26,7 @@ export function TrustStrip() {
                     strokeWidth={1.5}
                     aria-hidden
                   />
-                  <span className="whitespace-pre-line text-[10px] font-medium leading-snug text-muted-foreground sm:text-xs md:text-sm">
+                  <span className="whitespace-pre-line text-xs font-medium leading-snug text-muted-foreground sm:text-sm">
                     {item.label}
                   </span>
                 </li>

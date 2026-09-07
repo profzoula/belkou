@@ -11,6 +11,7 @@ type BlogCardProps = {
 
 const CATEGORY_PILL: Record<string, string> = {
   Windows: "bg-[#0056D2]",
+  Linux: "bg-[#0f766e]",
   Technologie: "bg-[#0056D2]",
   IA: "bg-emerald-600",
   Formation: "bg-sky-600",
@@ -88,7 +89,7 @@ function OverlayCard({
       to="/blog/$slug"
       params={{ slug: post.slug }}
       className={cn(
-        "group relative flex overflow-hidden rounded-[22px] shadow-[0_12px_40px_rgb(0_0_0_/_0.18)]",
+        "group relative flex overflow-hidden rounded-[22px]",
         featured ? "min-h-[340px] sm:min-h-[440px]" : "min-h-[200px] sm:min-h-[210px]",
         className,
       )}
@@ -214,7 +215,7 @@ export function BlogCard({ post, variant = "default", className }: BlogCardProps
       to="/blog/$slug"
       params={{ slug: post.slug }}
       className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-[20px] border border-border/80 bg-card shadow-[0_8px_28px_rgb(15_23_42_/_0.06)] transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgb(15_23_42_/_0.1)]",
+        "group flex h-full flex-col overflow-hidden rounded-[20px] border border-border/80 bg-card transition-[border-color] duration-300 hover:border-primary/35",
         className,
       )}
     >

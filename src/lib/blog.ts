@@ -2,6 +2,7 @@ import { siteConfig } from "@/lib/site-config";
 
 export type BlogCategory =
   | "Windows"
+  | "Linux"
   | "Technologie"
   | "IA"
   | "Formation"
@@ -43,8 +44,9 @@ const founder: BlogAuthor = {
 
 export const blogCategories: BlogCategory[] = [
   "Windows",
-  "Technologie",
+  "Linux",
   "IA",
+  "Technologie",
   "Formation",
   "Programmation",
   "Live",

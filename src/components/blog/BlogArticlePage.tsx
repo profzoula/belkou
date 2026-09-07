@@ -28,13 +28,16 @@ function CoverBlock({ post }: { post: ArticlePost }) {
       <img
         src={post.coverImageUrl}
         alt={post.coverAlt || post.coverLabel || post.title}
-        className="aspect-[21/9] w-full object-cover"
+        className="aspect-video w-full rounded-xl object-cover"
       />
     );
   }
   return (
     <div
-      className={cn("aspect-[21/9] w-full bg-gradient-to-br", post.coverGradient)}
+      className={cn(
+        "aspect-video w-full rounded-xl bg-gradient-to-br",
+        post.coverGradient,
+      )}
       role="img"
       aria-label={post.coverAlt || post.coverLabel || post.title}
     />
@@ -48,31 +51,49 @@ function PopularThumb({ post }: { post: BlogPost }) {
   return <div className={cn("size-full bg-gradient-to-br", post.coverGradient)} aria-hidden />;
 }
 
-/** Widget Facebook compact (cover + Follow), dimensions stables pour éviter le clipping. */
+/** Carte Facebook native BelKou — évite le plugin iframe qui clippe. */
 function FacebookSidebar() {
   const facebookUrl = siteConfig.founder.facebookUrl;
   if (!facebookUrl) return null;
-
-  // Largeur fixe = sidebar ; hauteur ≥ contenu cover + nom + barre Follow/Share.
-  const width = 280;
-  const height = 200;
-  const pluginSrc = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
-    facebookUrl,
-  )}&tabs=&width=${width}&height=${height}&small_header=false&adapt_container_width=false&hide_cover=false&show_facepile=false&locale=fr_FR`;
+  const name = "Prof Zoula";
+  const avatar = siteConfig.founder.avatarUrl;
 
   return (
-    <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-md border border-[#ddd] bg-white">
-      <iframe
-        title="Page Facebook BelKou"
-        src={pluginSrc}
-        width={width}
-        height={height}
-        style={{ border: "none", overflow: "hidden", display: "block", width: "100%" }}
-        scrolling="no"
-        allow="encrypted-media"
-        loading="lazy"
-      />
-    </div>
+    <aside className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-3 border-b border-border p-4">
+        <img
+          src={avatar}
+          alt=""
+          className="size-12 shrink-0 rounded-full object-cover ring-2 ring-[#1877F2]/30"
+        />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-[#1877F2]">{name}</p>
+          <p className="text-xs text-muted-foreground">Page Facebook BelKou</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 bg-muted/40 p-3">
+        <a
+          href={facebookUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 text-sm font-semibold text-foreground transition-colors hover:bg-elevated"
+        >
+          <svg viewBox="0 0 24 24" className="size-4 fill-[#1877F2]" aria-hidden>
+            <path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07" />
+          </svg>
+          Suivre la page
+        </a>
+        <a
+          href={facebookUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="grid size-9 shrink-0 place-items-center rounded-md border border-border bg-background text-muted-foreground transition-colors hover:bg-elevated hover:text-foreground"
+          aria-label="Ouvrir sur Facebook"
+        >
+          <Share2 className="size-4" aria-hidden />
+        </a>
+      </div>
+    </aside>
   );
 }
 
@@ -143,7 +164,7 @@ export function BlogArticlePage({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="ml-auto rounded-full"
+                      className="ml-auto rounded-lg"
                       onClick={() => void share()}
                     >
                       {copied ? (
@@ -159,14 +180,13 @@ export function BlogArticlePage({
 
                   {post.tags?.length ? (
                     <div className="mt-5 flex flex-wrap gap-2">
-                      {post.tags.map((tag) => (
-                        <Link
+                      {post.tags.slice(0, 5).map((tag) => (
+                        <span
                           key={tag}
-                          to="/blog"
-                          className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                          className="rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
                         >
-                          #{tag}
-                        </Link>
+                          {tag}
+                        </span>
                       ))}
                     </div>
                   ) : null}
