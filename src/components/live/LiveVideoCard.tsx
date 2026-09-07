@@ -7,7 +7,6 @@ import {
   formatLivePrice,
   formatLiveScheduleShort,
   isStandaloneLiveSlug,
-  liveCtaLabel,
   liveEventThumbnail,
   liveReservedLabel,
   type PublicLiveListItem,
@@ -41,6 +40,7 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
     ? "En ligne · BelKou"
     : `En ligne · ${session.courseTitle}`;
 
+  // Labels courts : le prix est déjà affiché au-dessus — pas de doublon dans le bouton.
   const ctaLabel = free
     ? isLive
       ? "Regarder"
@@ -49,20 +49,20 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
         : "Voir le live"
     : isLive
       ? reserved
-        ? "Entrer dans le live"
-        : "Regarder en direct"
+        ? "Entrer"
+        : "Regarder"
       : isReplay
-        ? "Voir le replay"
+        ? "Replay"
         : reserved
           ? "Place réservée"
-          : liveCtaLabel("Réserver", session.ticketPrice);
+          : "Réserver";
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card">
       <Link
         to="/live/$sessionId"
         params={{ sessionId: session.id }}
-        className="block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        className="block min-w-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
         <CourseThumbnailBanner
           thumbnail={liveEventThumbnail(session, session.course)}
@@ -85,34 +85,42 @@ export function LiveVideoCard({ session, reserved = false }: LiveVideoCardProps)
           ) : null}
         </CourseThumbnailBanner>
 
-        <div className="p-3">
+        <div className="space-y-1 p-3">
           <p
             className={cn(
-              "truncate text-sm",
+              "text-xs sm:text-sm",
               isLive ? "font-semibold text-red-600 dark:text-red-400" : "text-muted-foreground",
             )}
           >
             {dateLine}
-            {countdown ? <span className="text-primary"> · {countdown}</span> : null}
           </p>
-          <h3 className="mt-0.5 line-clamp-2 font-semibold leading-snug text-foreground group-hover:underline">
+          {countdown ? (
+            <p className="text-xs font-medium text-primary">{countdown}</p>
+          ) : null}
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground group-hover:underline sm:text-[0.95rem]">
             {session.title}
           </h3>
-          <p className="mt-0.5 truncate text-sm text-muted-foreground">{venue}</p>
-          <p className="mt-0.5 truncate text-sm text-muted-foreground">
+          <p className="truncate text-xs text-muted-foreground sm:text-sm">{venue}</p>
+          <p className="text-sm font-medium text-foreground">
             {priceLabel}
-            {seats ? ` · ${seats}` : null}
+            {seats ? (
+              <span className="font-normal text-muted-foreground"> · {seats}</span>
+            ) : null}
           </p>
         </div>
       </Link>
 
-      <div className="mt-auto flex items-center gap-2 px-3 pb-3">
+      <div className="mt-auto flex min-w-0 items-center gap-2 p-3 pt-0">
         <Button
           asChild
           variant={free || reserved || isReplay ? "secondary" : "default"}
-          className="h-9 flex-1 rounded-lg text-sm"
+          className="h-9 min-w-0 flex-1 rounded-lg px-2 text-xs sm:text-sm"
         >
-          <Link to="/live/$sessionId" params={{ sessionId: session.id }}>
+          <Link
+            to="/live/$sessionId"
+            params={{ sessionId: session.id }}
+            className="truncate"
+          >
             {ctaLabel}
           </Link>
         </Button>

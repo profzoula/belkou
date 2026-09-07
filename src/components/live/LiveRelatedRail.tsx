@@ -25,7 +25,7 @@ export function LiveRelatedRail({
       <h2 className="mb-4 text-sm font-semibold tracking-tight text-foreground sm:text-base">
         {title}
       </h2>
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(240px,1fr))] sm:gap-4">
         {related.map((session) => (
           <LiveVideoCard
             key={session.id}
