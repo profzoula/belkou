@@ -13655,203 +13655,199 @@
     "tipId": 9001,
     "slug": "qu-est-ce-que-l-intelligence-artificielle-et-comment-fonctionne-t-elle",
     "title": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
-    "excerpt": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
+    "excerpt": "Comprenez ce qu’est l’IA, comment elle apprend à partir des données, et où elle intervient déjà dans votre quotidien numérique.",
     "category": "IA",
     "tags": [
       "IA",
-      "Intelligence artificielle",
       "Technologie",
       "Productivité"
     ],
     "status": "published",
     "publishedAt": "2026-09-27",
-    "updatedAt": "2026-09-07T22:54:50.959Z",
+    "updatedAt": "2026-09-07T23:30:00.078Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
-    "readMinutes": 7,
+    "readMinutes": 8,
     "difficulty": "Débutant",
     "featured": false,
     "trending": true,
     "coverGradient": "from-primary via-primary/80 to-[#7ed874]",
     "coverLabel": "IA #01",
-    "coverAlt": "Illustration moderne représentant comprendre l’intelligence artificielle",
-    "seoTitle": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
-    "seoDescription": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
-    "ogTitle": "Qu’est-ce que l’intelligence artificielle et comment fonctionne-t-elle ?",
-    "ogDescription": "Comprenez simplement ce qu’est l’intelligence artificielle, comment elle apprend à partir des données et où elle est utilisée au quotidien.",
+    "coverAlt": "Schéma simple illustrant des données, un modèle et une réponse générée",
+    "seoTitle": "Intelligence artificielle expliquée simplement — fonctionnement et usages",
+    "seoDescription": "Comprenez ce qu’est l’IA, comment elle apprend à partir des données, et où elle intervient déjà dans votre quotidien numérique.",
+    "ogTitle": "L’intelligence artificielle, expliquée sans jargon",
+    "ogDescription": "Une base claire pour utiliser l’IA avec méthode — et sans croire tout ce qu’elle écrit.",
     "primaryKeyword": "comprendre l’intelligence artificielle",
     "secondaryKeywords": [
-      "intelligence artificielle",
       "fonctionnement de l’IA",
-      "technologies IA"
+      "machine learning",
+      "usages IA"
     ],
     "blocks": [
       {
-        "id": "blk_ss2oddjn",
+        "id": "blk_z6qy2v4w",
         "type": "paragraph",
-        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+        "content": "L’intelligence artificielle n’est pas une « machine qui pense ». C’est un ensemble de systèmes capables d’estimer une réponse à partir d’exemples : texte, images, sons, ou historiques d’actions."
       },
       {
-        "id": "blk_9mt4dhx5",
+        "id": "blk_6ct2ya5l",
         "type": "paragraph",
-        "content": "Dans cet article, nous allons voir les principes essentiels de comprendre l’intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
+        "content": "Dans la pratique, vous la croisez déjà : suggestions de recherche, traduction, filtres anti-spam, assistants comme ChatGPT, ou outils qui génèrent du code. Comprendre le mécanisme évite deux pièges : la magie et la méfiance totale."
       },
       {
-        "id": "blk_94rl4gmr",
+        "id": "blk_ze2fz4za",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_d98ya0tg",
+        "id": "blk_igksar5h",
         "type": "list",
         "ordered": false,
         "items": [
-          "Comprendre plus facilement une technologie devenue courante.",
-          "Identifier des usages concrets de l’intelligence artificielle.",
-          "Gagner du temps grâce à une méthode structurée.",
-          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+          "Distinguer ce que l’IA fait bien de ce qu’elle invente",
+          "Formuler de meilleures demandes (prompts)",
+          "Choisir le bon outil selon la tâche",
+          "Protéger vos données et votre jugement"
         ]
       },
       {
-        "id": "blk_jpms0695",
+        "id": "blk_5u6qwf2u",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_htvnzl5d",
+        "id": "blk_5ackr1ch",
         "type": "list",
         "ordered": false,
         "items": [
-          "Un ordinateur, une tablette ou un smartphone.",
-          "Une connexion Internet pour les services d’IA en ligne.",
-          "Une idée claire de la tâche que vous souhaitez réaliser.",
-          "Un esprit critique pour vérifier les résultats produits."
+          "Un navigateur et une connexion Internet",
+          "Un cas d’usage concret (rédiger, résumer, apprendre, coder…)",
+          "L’habitude de vérifier les faits importants"
         ]
       },
       {
-        "id": "blk_8cjm9tfm",
+        "id": "blk_k76bmwj7",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_v2xv3u2r",
+        "id": "blk_aeq5iui2",
         "type": "heading",
         "level": 3,
-        "content": "Étape 1 — Donner le contexte nécessaire"
+        "content": "Étape 1 — Comprendre « apprentissage » en une phrase"
       },
       {
-        "id": "blk_ajxba6xp",
+        "id": "blk_5p29bxeh",
         "type": "paragraph",
-        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+        "content": "Un modèle a vu d’énormes quantités de textes ou d’images. Il prédit la suite la plus probable — pas une vérité garantie. D’où les hallucinations : une réponse fluide peut être fausse."
       },
       {
-        "id": "blk_81rupgov",
+        "id": "blk_dq0db7d4",
         "type": "heading",
         "level": 3,
-        "content": "Étape 2 — Formuler une demande claire"
+        "content": "Étape 2 — Donner un contexte utile"
       },
       {
-        "id": "blk_6msx4zbv",
+        "id": "blk_dnjgqafd",
         "type": "paragraph",
-        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+        "content": "Indiquez le public, le ton, le format et les contraintes. « Explique comme à un débutant, en 8 puces, sans jargon » produit mieux qu’« Explique l’IA »."
       },
       {
-        "id": "blk_pr44ikb6",
+        "id": "blk_ug2nbwi9",
         "type": "heading",
         "level": 3,
-        "content": "Étape 3 — Vérifier le résultat"
+        "content": "Étape 3 — Vérifier avant d’utiliser"
       },
       {
-        "id": "blk_jiylcp0y",
+        "id": "blk_8o3fp9wo",
         "type": "paragraph",
-        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+        "content": "Pour dates, chiffres, citations, code critique ou conseils sensibles : croisez avec une source fiable (doc officielle, cours BelKou, documentation technique)."
       },
       {
-        "id": "blk_tpdwje7j",
+        "id": "blk_pmekrqdg",
         "type": "heading",
         "level": 3,
-        "content": "Étape 4 — Améliorer progressivement"
+        "content": "Étape 4 — Itérer"
       },
       {
-        "id": "blk_6vtn4rul",
+        "id": "blk_y7ai3wg2",
         "type": "paragraph",
-        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+        "content": "Si le résultat est faible, ne recommencez pas au hasard : précisez ce qui manque (« plus court », « ajoute un exemple Windows », « corrige le ton »)."
       },
       {
-        "id": "blk_cxi16h2a",
+        "id": "blk_1ct3lrbr",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_n729sq49",
+        "id": "blk_brgxqbdv",
         "type": "callout",
         "variant": "info",
         "title": "Note",
-        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+        "content": "Ce canevas marche sur ChatGPT, Claude, Gemini et la plupart des assistants texte."
       },
       {
-        "id": "blk_nvjow42s",
+        "id": "blk_uetu8sjb",
         "type": "code",
-        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "content": "Rôle : [ex. tuteur patient]\nObjectif : [résultat attendu]\nPublic : [débutant / intermédiaire]\nContraintes : [longueur, langue, ce qu’il ne faut pas faire]\nFormat : [liste, tableau, étapes]\nVérification : [ce que je dois contrôler moi-même]",
         "language": "text"
       },
       {
-        "id": "blk_ikk8kaac",
+        "id": "blk_xmnqqfem",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_1c38x8w6",
+        "id": "blk_uns47oq3",
         "type": "list",
         "ordered": false,
         "items": [
-          "Commencez par des demandes simples et précises.",
-          "Vérifiez les informations importantes avant de les utiliser.",
-          "Évitez de partager des données sensibles ou confidentielles.",
-          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
-          "Pour un travail important, comparez les résultats avec des sources fiables."
+          "Preférez plusieurs petites demandes à un monologue flou",
+          "Gardez les secrets hors du prompt (mots de passe, données clients)",
+          "Pour apprendre : demandez des exercices + correction, pas seulement le corrigé",
+          "Sur BelKou, couplez l’IA à un cours structuré plutôt qu’à des réponses isolées"
         ]
       },
       {
-        "id": "blk_n9zpjr00",
+        "id": "blk_8wmuot54",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_m2uqarpp",
+        "id": "blk_2w8v62j6",
         "type": "list",
         "ordered": false,
         "items": [
-          "Demande trop vague : ajoutez un objectif et un contexte précis.",
-          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
-          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
-          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+          "Croire que « ça a l’air vrai » = c’est vrai : vérifiez",
+          "Coller tout le contexte confidentiel : anonymisez",
+          "Attendre une expertise magique : l’IA assiste, elle ne remplace pas l’expérience"
         ]
       },
       {
-        "id": "blk_edfj7uwa",
+        "id": "blk_wc08meyr",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_fow18c7b",
+        "id": "blk_j90m3in3",
         "type": "faq",
         "items": [
           {
-            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
-            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+            "q": "Faut-il coder pour l’utiliser ?",
+            "a": "Non pour les assistants grand public. Le code aide surtout à automatiser et à intégrer l’IA dans des applications."
           },
           {
-            "q": "Peut-on utiliser l’IA pour tout faire ?",
-            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+            "q": "Par où commencer sur BelKou ?",
+            "a": "Un cas concret : résumer une leçon, générer un plan d’étude, ou débloquer une erreur avec un prompt précis — puis vérifier dans le cours."
           }
         ]
       }
@@ -13862,31 +13858,30 @@
     "tipId": 9002,
     "slug": "chatgpt-qu-est-ce-que-c-est-et-comment-l-utiliser-efficacement",
     "title": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
-    "excerpt": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
+    "excerpt": "Découvrez ChatGPT en pratique : rédiger un bon prompt, structurer une conversation et vérifier les réponses avant de les publier.",
     "category": "IA",
     "tags": [
       "IA",
-      "Intelligence artificielle",
-      "Technologie",
-      "Productivité"
+      "Productivité",
+      "Technologie"
     ],
     "status": "published",
     "publishedAt": "2026-09-26",
-    "updatedAt": "2026-09-07T22:54:50.960Z",
+    "updatedAt": "2026-09-07T23:30:00.079Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
-    "readMinutes": 7,
+    "readMinutes": 8,
     "difficulty": "Débutant",
     "featured": false,
     "trending": true,
     "coverGradient": "from-[#0056D2] to-[#003d99]",
     "coverLabel": "IA #02",
-    "coverAlt": "Illustration moderne représentant utiliser ChatGPT",
-    "seoTitle": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
-    "seoDescription": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
-    "ogTitle": "ChatGPT : qu’est-ce que c’est et comment l’utiliser efficacement ?",
-    "ogDescription": "Découvrez comment fonctionne ChatGPT et les bonnes pratiques pour obtenir des réponses plus utiles, précises et adaptées à vos besoins.",
+    "coverAlt": "Interface de conversation avec un assistant IA et un prompt structuré",
+    "seoTitle": "Utiliser ChatGPT efficacement — bonnes pratiques débutant",
+    "seoDescription": "Découvrez ChatGPT en pratique : rédiger un bon prompt, structurer une conversation et vérifier les réponses avant de les publier.",
+    "ogTitle": "ChatGPT sans perte de temps",
+    "ogDescription": "Une méthode simple pour passer de réponses vagues à des résultats réellement utiles.",
     "primaryKeyword": "utiliser ChatGPT",
     "secondaryKeywords": [
       "ChatGPT",
@@ -13895,170 +13890,182 @@
     ],
     "blocks": [
       {
-        "id": "blk_mpgruf7v",
+        "id": "blk_v975h3hv",
         "type": "paragraph",
-        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+        "content": "ChatGPT est un assistant conversationnel : vous écrivez une consigne, il propose une réponse en langage naturel. Il excelle pour démarrer un texte, expliquer une notion, reformuler, ou explorer des options."
       },
       {
-        "id": "blk_5xni2x9v",
+        "id": "blk_ncob0ypz",
         "type": "paragraph",
-        "content": "Dans cet article, nous allons voir les principes essentiels de utiliser ChatGPT, avec une approche simple et pratique adaptée aux débutants."
+        "content": "Il échoue souvent sur les faits récents non fournis, les calculs délicats sans vérification, et tout ce qui demande une responsabilité professionnelle. L’efficacité vient de la façon dont vous pilotez la conversation."
       },
       {
-        "id": "blk_28yw23z9",
+        "id": "blk_609dku9g",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_yaqbt4o9",
+        "id": "blk_qfgyu394",
         "type": "list",
         "ordered": false,
         "items": [
-          "Comprendre plus facilement une technologie devenue courante.",
-          "Identifier des usages concrets de l’intelligence artificielle.",
-          "Gagner du temps grâce à une méthode structurée.",
-          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+          "Obtenir un premier jet utilisable en quelques minutes",
+          "Éviter les allers-retours « trop vague / trop long »",
+          "Réduire les hallucinations en cadrant le sujet",
+          "Garder le contrôle éditorial de ce que vous publiez"
         ]
       },
       {
-        "id": "blk_pawr5y6c",
+        "id": "blk_a4sfld0k",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_mdbxy7yf",
+        "id": "blk_whwli0ib",
         "type": "list",
         "ordered": false,
         "items": [
-          "Un ordinateur, une tablette ou un smartphone.",
-          "Une connexion Internet pour les services d’IA en ligne.",
-          "Une idée claire de la tâche que vous souhaitez réaliser.",
-          "Un esprit critique pour vérifier les résultats produits."
+          "Un compte ChatGPT (ou un équivalent compatible)",
+          "Un objectif clair pour la session (ex. « plan de cours », « email », « debug »)",
+          "5 minutes pour relire et corriger"
         ]
       },
       {
-        "id": "blk_68zi9p1b",
+        "id": "blk_5uril2rt",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_ks8fxvrm",
+        "id": "blk_9bigc6kx",
         "type": "heading",
         "level": 3,
-        "content": "Étape 1 — Donner le contexte nécessaire"
+        "content": "Étape 1 — Poser le cadre en 4 lignes"
       },
       {
-        "id": "blk_tajb4smt",
+        "id": "blk_z28q64kb",
         "type": "paragraph",
-        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+        "content": "Indiquez : qui vous êtes (rôle), pour qui c’est, le format, et ce qui est interdit (« pas de jargon », « max 150 mots », « français de France / Canada »)."
       },
       {
-        "id": "blk_6cj8qpfi",
+        "id": "blk_vrjgm7e0",
         "type": "heading",
         "level": 3,
-        "content": "Étape 2 — Formuler une demande claire"
+        "content": "Étape 2 — Demander une structure avant le fond"
       },
       {
-        "id": "blk_b8h0yvz1",
+        "id": "blk_alyaryiq",
         "type": "paragraph",
-        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+        "content": "Exemple : « Propose d’abord un plan en 5 points ; attends ma validation. » Vous évitez un pavé hors sujet."
       },
       {
-        "id": "blk_sv31lh3m",
+        "id": "blk_xf3c1t6h",
         "type": "heading",
         "level": 3,
-        "content": "Étape 3 — Vérifier le résultat"
+        "content": "Étape 3 — Affiner avec des retours concrets"
       },
       {
-        "id": "blk_97kalxgf",
+        "id": "blk_lqfa50gn",
         "type": "paragraph",
-        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+        "content": "« Garde le point 2, raccourcis le 3, ajoute un exemple Windows 11. » Les micro-ajustements battent un nouveau prompt flou."
       },
       {
-        "id": "blk_00f7iz21",
+        "id": "blk_84wu0pbv",
         "type": "heading",
         "level": 3,
-        "content": "Étape 4 — Améliorer progressivement"
+        "content": "Étape 4 — Extraire et vérifier"
       },
       {
-        "id": "blk_94zohvzv",
+        "id": "blk_965m6b4w",
         "type": "paragraph",
-        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+        "content": "Copiez le résultat hors de l’outil, relisez à voix haute, vérifiez liens / commandes / chiffres. Puis seulement publiez ou envoyez."
       },
       {
-        "id": "blk_phkctnar",
+        "id": "blk_2d1ueiho",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_1fr3ncid",
+        "id": "blk_g2r87nb9",
         "type": "callout",
         "variant": "info",
         "title": "Note",
-        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+        "content": "Adaptez le même canevas à Claude ou Gemini : la logique de cadrage reste identique."
       },
       {
-        "id": "blk_l90y3b8r",
+        "id": "blk_vhnouj8l",
         "type": "code",
-        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "content": "Tu es [rôle].\nPublic : [qui lit].\nTâche : [ce que je veux].\nContraintes : [longueur, ton, langue].\nLivrable : [plan / texte final / liste d’étapes].\nSi une info manque, pose 3 questions max avant de répondre.",
         "language": "text"
       },
       {
-        "id": "blk_y7kdp915",
+        "id": "blk_3rlud37b",
+        "type": "paragraph",
+        "content": "Le rôle stabilise le ton"
+      },
+      {
+        "id": "blk_8txwqp20",
+        "type": "paragraph",
+        "content": "Les questions avant réponse évitent les inventions pour combler les trous"
+      },
+      {
+        "id": "blk_eovh4oz1",
+        "type": "paragraph",
+        "content": "Le livrable force un format exploitable"
+      },
+      {
+        "id": "blk_1fe9ll9u",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_s2jngz5d",
+        "id": "blk_87w3zdeu",
         "type": "list",
         "ordered": false,
         "items": [
-          "Commencez par des demandes simples et précises.",
-          "Vérifiez les informations importantes avant de les utiliser.",
-          "Évitez de partager des données sensibles ou confidentielles.",
-          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
-          "Pour un travail important, comparez les résultats avec des sources fiables."
+          "Utilisez le mode « brouillon » pour les idées, pas pour les faits sensibles",
+          "Pour le code : demandez l’explication ligne par ligne + risques",
+          "Sauvegardez vos meilleurs prompts dans un fichier personnel",
+          "Sur mobile, dictez puis reformatez (« rends ça plus clair »)"
         ]
       },
       {
-        "id": "blk_xywybo8f",
+        "id": "blk_8vidndtu",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_rv6acu0n",
+        "id": "blk_o955fhgb",
         "type": "list",
         "ordered": false,
         "items": [
-          "Demande trop vague : ajoutez un objectif et un contexte précis.",
-          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
-          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
-          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+          "« Fais-moi un article » sans angle : précisez public et promesse",
+          "Accepter la première version : une passe d’affinage double souvent la qualité",
+          "Coller des données personnelles : anonymisez noms, emails, dossiers clients"
         ]
       },
       {
-        "id": "blk_t29ykepw",
+        "id": "blk_ufl3ia6k",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_a73c8mzk",
+        "id": "blk_ib2usc8y",
         "type": "faq",
         "items": [
           {
-            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
-            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+            "q": "Faut-il payer la version Plus ?",
+            "a": "Utile si vous avez besoin de modèles plus récents ou de limites plus hautes. Pour apprendre, la version gratuite suffit souvent au début."
           },
           {
-            "q": "Peut-on utiliser l’IA pour tout faire ?",
-            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+            "q": "Puis-je l’utiliser pour un devoir ou un travail ?",
+            "a": "Oui comme assistant (plan, reformulation, explications), pas comme substitut à votre compréhension — et respectez les règles de votre école ou employeur."
           }
         ]
       }
@@ -14079,7 +14086,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-25",
-    "updatedAt": "2026-09-07T22:54:50.960Z",
+    "updatedAt": "2026-09-07T23:30:00.079Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -14102,23 +14109,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_snf7x523",
+        "id": "blk_martzn3c",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_pgnwct9k",
+        "id": "blk_ctdvvjvs",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA pour gagner du temps, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_y77fllqy",
+        "id": "blk_etmrk6l0",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_xozhdz1a",
+        "id": "blk_uaho6hyk",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14129,13 +14136,13 @@
         ]
       },
       {
-        "id": "blk_3rtrjovs",
+        "id": "blk_vdv2tukk",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_zrnxfady",
+        "id": "blk_rhro4r7t",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14146,82 +14153,82 @@
         ]
       },
       {
-        "id": "blk_gh0hjdxq",
+        "id": "blk_a9900btu",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_8eayfarf",
+        "id": "blk_xcp9zala",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_4hl299a2",
+        "id": "blk_xrhzzx8p",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_zzg3ypf8",
+        "id": "blk_x5lowypm",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_s64w0td9",
+        "id": "blk_27459e4a",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_ye67f9rr",
+        "id": "blk_cps6patr",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_laea74li",
+        "id": "blk_zwg553pk",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_xho8h6y0",
+        "id": "blk_6oes2lk0",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_zjxy1769",
+        "id": "blk_2wv5p0p2",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_4fx3khqg",
+        "id": "blk_smjmyr5h",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_t1svkv45",
+        "id": "blk_16of5hgd",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_gdf3jb71",
+        "id": "blk_pk1ky2z8",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_1awvwy5e",
+        "id": "blk_whz7glem",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_fz7b7802",
+        "id": "blk_tcqkd5oe",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14233,13 +14240,13 @@
         ]
       },
       {
-        "id": "blk_fde94q9p",
+        "id": "blk_3utxkh9g",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_eae4lhhb",
+        "id": "blk_bv00he8k",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14250,13 +14257,13 @@
         ]
       },
       {
-        "id": "blk_ugv5a570",
+        "id": "blk_yqu0x8ug",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_owwi8kfe",
+        "id": "blk_1mo5w5pl",
         "type": "faq",
         "items": [
           {
@@ -14286,7 +14293,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-24",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.079Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -14309,23 +14316,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_6ap98ae4",
+        "id": "blk_47dn91hh",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_hwdphito",
+        "id": "blk_fh4po203",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA pour apprendre, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_fbfrpa02",
+        "id": "blk_z04yacjq",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_rlyp9v5d",
+        "id": "blk_rcwkq9a7",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14336,13 +14343,13 @@
         ]
       },
       {
-        "id": "blk_xkrs5fq4",
+        "id": "blk_0nmpzov7",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_kn6kh3jb",
+        "id": "blk_27sqefmr",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14353,82 +14360,82 @@
         ]
       },
       {
-        "id": "blk_tlyz3hyy",
+        "id": "blk_v219tyzf",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_kv1yeigm",
+        "id": "blk_7nnyizge",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_ia9orioo",
+        "id": "blk_4n6zcn8c",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_6fydp9h8",
+        "id": "blk_52lbxvcr",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_fdo4gtn1",
+        "id": "blk_eglxgte2",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_xk5mj5zh",
+        "id": "blk_2w2ckz01",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_pepchpuh",
+        "id": "blk_84xdu7mi",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_hhz42zie",
+        "id": "blk_5v64odx9",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_qale5i4j",
+        "id": "blk_ulhw8wmu",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_mxyxmgg4",
+        "id": "blk_193zqflr",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_wq9cvufr",
+        "id": "blk_9uvw9jql",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_twbzmpiv",
+        "id": "blk_xoj64amy",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_5dfb5lmp",
+        "id": "blk_ml9xlg2i",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_2gyx0zih",
+        "id": "blk_yzoyh165",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14440,13 +14447,13 @@
         ]
       },
       {
-        "id": "blk_ft2ia4o6",
+        "id": "blk_pxujeo9h",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_nj6333st",
+        "id": "blk_d1xdj0b2",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14457,13 +14464,13 @@
         ]
       },
       {
-        "id": "blk_n51bd36i",
+        "id": "blk_2v7r26wa",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_7cnni060",
+        "id": "blk_a3q9hhnb",
         "type": "faq",
         "items": [
           {
@@ -14483,203 +14490,214 @@
     "tipId": 9005,
     "slug": "prompt-engineering-comment-ecrire-de-meilleurs-prompts",
     "title": "Prompt Engineering : comment écrire de meilleurs prompts",
-    "excerpt": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
+    "excerpt": "Apprenez à structurer un prompt : rôle, contexte, contraintes, format et critères de réussite pour des réponses IA plus utiles.",
     "category": "IA",
     "tags": [
       "IA",
-      "Intelligence artificielle",
-      "Technologie",
+      "Productivité",
       "Développement"
     ],
     "status": "published",
     "publishedAt": "2026-09-23",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
-    "readMinutes": 7,
+    "readMinutes": 9,
     "difficulty": "Débutant",
     "featured": false,
     "trending": true,
     "coverGradient": "from-[#0045a8] to-primary",
     "coverLabel": "IA #05",
-    "coverAlt": "Illustration moderne représentant prompt engineering",
-    "seoTitle": "Prompt Engineering : comment écrire de meilleurs prompts",
-    "seoDescription": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
-    "ogTitle": "Prompt Engineering : comment écrire de meilleurs prompts",
-    "ogDescription": "Apprenez les principes essentiels du Prompt Engineering pour formuler des instructions claires et obtenir de meilleurs résultats avec l’IA.",
+    "coverAlt": "Checklist d’un prompt structuré : rôle, objectif, format, contraintes",
+    "seoTitle": "Prompt engineering — écrire des prompts clairs pour l’IA",
+    "seoDescription": "Apprenez à structurer un prompt : rôle, contexte, contraintes, format et critères de réussite pour des réponses IA plus utiles.",
+    "ogTitle": "Des prompts qui marchent vraiment",
+    "ogDescription": "Une méthode concrète pour passer du « aide-moi » au résultat livrable.",
     "primaryKeyword": "prompt engineering",
     "secondaryKeywords": [
-      "prompts IA",
-      "prompt engineering",
-      "instructions pour IA"
+      "écrire un prompt",
+      "instructions IA",
+      "bons prompts"
     ],
     "blocks": [
       {
-        "id": "blk_vcp0wna0",
+        "id": "blk_h3mgb2kv",
         "type": "paragraph",
-        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+        "content": "Le prompt engineering, c’est l’art de formuler une demande que l’IA peut exécuter sans deviner. Ce n’est pas une formule magique : c’est de la clarté, de la structure et des exemples."
       },
       {
-        "id": "blk_9eidqpsw",
+        "id": "blk_3ycaahb2",
         "type": "paragraph",
-        "content": "Dans cet article, nous allons voir les principes essentiels de prompt engineering, avec une approche simple et pratique adaptée aux débutants."
+        "content": "Un bon prompt réduit les allers-retours. Un mauvais prompt produit du texte long, poli… et inutile."
       },
       {
-        "id": "blk_2tcc1i4x",
+        "id": "blk_az6sw58v",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_435h5lpu",
+        "id": "blk_6ezkqpe2",
         "type": "list",
         "ordered": false,
         "items": [
-          "Comprendre plus facilement une technologie devenue courante.",
-          "Identifier des usages concrets de l’intelligence artificielle.",
-          "Gagner du temps grâce à une méthode structurée.",
-          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+          "Gagner du temps sur rédaction, étude et code",
+          "Obtenir des formats prêts à coller (tableaux, étapes, checklists)",
+          "Limiter les hallucinations en cadrant le périmètre",
+          "Reproduire vos succès (bibliothèque de prompts)"
         ]
       },
       {
-        "id": "blk_qzzvxs2b",
+        "id": "blk_lv2ka18n",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_7bjoy9v2",
+        "id": "blk_7eggznp7",
         "type": "list",
         "ordered": false,
         "items": [
-          "Un ordinateur, une tablette ou un smartphone.",
-          "Une connexion Internet pour les services d’IA en ligne.",
-          "Une idée claire de la tâche que vous souhaitez réaliser.",
-          "Un esprit critique pour vérifier les résultats produits."
+          "Un assistant texte (ChatGPT, Claude, Gemini…)",
+          "Un résultat mesurable (« un email de 120 mots », « 5 questions d’examen »)",
+          "Un exemple du « bon » résultat si vous en avez un"
         ]
       },
       {
-        "id": "blk_cyfhk9iz",
+        "id": "blk_ca1axina",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_r6p34dc4",
+        "id": "blk_ew0mbi0z",
         "type": "heading",
         "level": 3,
-        "content": "Étape 1 — Donner le contexte nécessaire"
+        "content": "Étape 1 — Ajouter rôle + public"
       },
       {
-        "id": "blk_qqp8fnob",
+        "id": "blk_5sfi359q",
         "type": "paragraph",
-        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+        "content": "« Tu es formateur Windows pour débutants » n’est pas du théâtre : cela oriente le vocabulaire et le niveau de détail."
       },
       {
-        "id": "blk_9lrmnx35",
+        "id": "blk_adp31t8h",
         "type": "heading",
         "level": 3,
-        "content": "Étape 2 — Formuler une demande claire"
+        "content": "Étape 2 — Imposer le format"
       },
       {
-        "id": "blk_qjnf5n6a",
+        "id": "blk_fc13q9sj",
         "type": "paragraph",
-        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+        "content": "Liste numérotée, tableau Markdown, JSON, email, script bash… Sans format, l’IA improvise une dissertation."
       },
       {
-        "id": "blk_y6s7hahs",
+        "id": "blk_fmr1ukeg",
         "type": "heading",
         "level": 3,
-        "content": "Étape 3 — Vérifier le résultat"
+        "content": "Étape 3 — Donner un exemple (few-shot)"
       },
       {
-        "id": "blk_95c8tfdg",
+        "id": "blk_rfoe9mmt",
         "type": "paragraph",
-        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+        "content": "Montrez 1 entrée → 1 sortie attendue. Les modèles imitent mieux un modèle qu’une description abstraite."
       },
       {
-        "id": "blk_6f4ek9hk",
+        "id": "blk_fe7igbtu",
         "type": "heading",
         "level": 3,
-        "content": "Étape 4 — Améliorer progressivement"
+        "content": "Étape 4 — Définir le succès et les interdits"
       },
       {
-        "id": "blk_8zaxg3m6",
+        "id": "blk_p1um2yrn",
         "type": "paragraph",
-        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+        "content": "« Succès = 5 étapes testables. Interdit = jargon, liens inventés, conseils médicaux. »"
       },
       {
-        "id": "blk_96rfck99",
+        "id": "blk_z82e74ev",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_ce2891yz",
+        "id": "blk_ujlntz52",
         "type": "callout",
         "variant": "info",
         "title": "Note",
-        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+        "content": "Pour le code, ajoutez : langage, version, OS, et « n’invente pas d’API »."
       },
       {
-        "id": "blk_6fe5h3yo",
+        "id": "blk_6rx1cu50",
         "type": "code",
-        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "content": "Rôle : [expert / tuteur / relecteur]\nObjectif : [résultat final]\nContexte : [faits utiles uniquement]\nExemples :\n- Entrée : …\n  Sortie : …\nContraintes : [longueur, langue, ton]\nFormat de sortie : [structure exacte]\nCritères de réussite : [comment je jugerai]\nSi ambigu, pose des questions avant de produire.",
         "language": "text"
       },
       {
-        "id": "blk_z4zve2i4",
+        "id": "blk_sq2k5rq4",
+        "type": "paragraph",
+        "content": "Les exemples ancrent le style"
+      },
+      {
+        "id": "blk_iskdnfpb",
+        "type": "paragraph",
+        "content": "Les critères de réussite orientent vers l’utile, pas le verbeux"
+      },
+      {
+        "id": "blk_u4ma55k4",
+        "type": "paragraph",
+        "content": "Les questions évitent le remplissage inventé"
+      },
+      {
+        "id": "blk_aqa7gskr",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_a5zdw0ye",
+        "id": "blk_ovpnx79r",
         "type": "list",
         "ordered": false,
         "items": [
-          "Commencez par des demandes simples et précises.",
-          "Vérifiez les informations importantes avant de les utiliser.",
-          "Évitez de partager des données sensibles ou confidentielles.",
-          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
-          "Pour un travail important, comparez les résultats avec des sources fiables."
+          "Un prompt long et clair bat un prompt court et vague",
+          "Découpez : plan → validation → rédaction",
+          "Versionnez vos prompts comme du code (`prompt-email-v3.txt`)",
+          "Testez le même prompt sur deux modèles si le sujet est critique"
         ]
       },
       {
-        "id": "blk_6rhxtvcm",
+        "id": "blk_13k3f41f",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_b5o1rt89",
+        "id": "blk_83c5yv2i",
         "type": "list",
         "ordered": false,
         "items": [
-          "Demande trop vague : ajoutez un objectif et un contexte précis.",
-          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
-          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
-          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+          "Tout mettre en une seule phrase : structurez",
+          "Oublier le public : le ton rate souvent à cause de ça",
+          "Demander « sois créatif » sans contraintes : la créativité a besoin de rails"
         ]
       },
       {
-        "id": "blk_r4mnpssl",
+        "id": "blk_c8gv4lc6",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_hqoj615i",
+        "id": "blk_oda23hwy",
         "type": "faq",
         "items": [
           {
-            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
-            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+            "q": "C’est réservé aux développeurs ?",
+            "a": "Non. Les marketeurs, étudiants et formateurs gagnent autant à structurer leurs demandes."
           },
           {
-            "q": "Peut-on utiliser l’IA pour tout faire ?",
-            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+            "q": "Combien d’exemples faut-il ?",
+            "a": "Un bon exemple vaut mieux que cinq médiocres. Commencez par un."
           }
         ]
       }
@@ -14700,7 +14718,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-22",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -14723,23 +14741,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_83m6rpf8",
+        "id": "blk_hqs9u11s",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_n9g4p5pi",
+        "id": "blk_o51i73xp",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de outils IA gratuits, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_bmgd87tj",
+        "id": "blk_m9kh0zi1",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_o876l92o",
+        "id": "blk_sn8z5jo7",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14750,13 +14768,13 @@
         ]
       },
       {
-        "id": "blk_0hgawqnd",
+        "id": "blk_303f983y",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_gdvj0crq",
+        "id": "blk_0xfn8ov9",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14767,82 +14785,82 @@
         ]
       },
       {
-        "id": "blk_whq1bwwj",
+        "id": "blk_spi09rw3",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_n2f1adtj",
+        "id": "blk_v21vi7r8",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_se7hvt51",
+        "id": "blk_fq2tyalb",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_f7wmedx2",
+        "id": "blk_16585fxb",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_y7jjnd06",
+        "id": "blk_mzmwbzl6",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_sztefua9",
+        "id": "blk_l6418ypy",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_8kgxp8rb",
+        "id": "blk_mjaztpd0",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_m5ipfzgy",
+        "id": "blk_2z2bxe9d",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_869h95mx",
+        "id": "blk_nnjwk8ax",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_nkpkzfvr",
+        "id": "blk_7crepsll",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_4vdew9s8",
+        "id": "blk_wilke6vr",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_dkqyzxci",
+        "id": "blk_x4hvy8kc",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_ts1njxzx",
+        "id": "blk_hi57l6te",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_jszwghmx",
+        "id": "blk_6zt9m19k",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14854,13 +14872,13 @@
         ]
       },
       {
-        "id": "blk_5nchxj7q",
+        "id": "blk_vt9wthd7",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_lvawvfc3",
+        "id": "blk_idafw17w",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14871,13 +14889,13 @@
         ]
       },
       {
-        "id": "blk_5cdbid3z",
+        "id": "blk_so1nwkzb",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_sknyx6ik",
+        "id": "blk_n6xdtm2m",
         "type": "faq",
         "items": [
           {
@@ -14907,7 +14925,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-21",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -14930,23 +14948,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_8m2ot6i3",
+        "id": "blk_06osv3ag",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_lhrsbwu4",
+        "id": "blk_435ifx2a",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA pour étudiants, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_4bv76ii8",
+        "id": "blk_i7dvpv8a",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_y29mk6l4",
+        "id": "blk_0a9dbkmz",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14957,13 +14975,13 @@
         ]
       },
       {
-        "id": "blk_bphau8id",
+        "id": "blk_8utssctw",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_k3igm6us",
+        "id": "blk_0vs1apzb",
         "type": "list",
         "ordered": false,
         "items": [
@@ -14974,82 +14992,82 @@
         ]
       },
       {
-        "id": "blk_gpaiuyk7",
+        "id": "blk_4xbdt5i5",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_qcrop10e",
+        "id": "blk_qwyy3bv8",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_tefik75w",
+        "id": "blk_r3b6wu34",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_2qdtpe3r",
+        "id": "blk_0bmr3mtq",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_2scbmxl1",
+        "id": "blk_e4pyjiq0",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_yfa8vzif",
+        "id": "blk_xdmqd8lb",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_5zgjpchs",
+        "id": "blk_su8y39gc",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_bw53c24y",
+        "id": "blk_mk1poycg",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_g7jjzprg",
+        "id": "blk_7vbw80sx",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_aehyi266",
+        "id": "blk_wvcj15g7",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_irck4jxy",
+        "id": "blk_sobd6k0n",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_g7ubkgz2",
+        "id": "blk_gdmiqmqh",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_asn2u0j9",
+        "id": "blk_gcasoz5w",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_ved39dc6",
+        "id": "blk_88m37pz3",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15061,13 +15079,13 @@
         ]
       },
       {
-        "id": "blk_e9uki05o",
+        "id": "blk_e7vb8yf6",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_1cn28mcp",
+        "id": "blk_ac9x6l6r",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15078,13 +15096,13 @@
         ]
       },
       {
-        "id": "blk_oyk37y48",
+        "id": "blk_xsxz0hub",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_8gj8nevv",
+        "id": "blk_53l62udq",
         "type": "faq",
         "items": [
           {
@@ -15114,7 +15132,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-20",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -15137,23 +15155,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_h9zy6pk8",
+        "id": "blk_lmhmefsr",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_jwpolknu",
+        "id": "blk_xhzuwjqm",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA générative, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_b4gkiakk",
+        "id": "blk_gpp7q1lo",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_m88utbs4",
+        "id": "blk_e43g3fp6",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15164,13 +15182,13 @@
         ]
       },
       {
-        "id": "blk_ra6sb2sn",
+        "id": "blk_9e1v7aov",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_ne6w913c",
+        "id": "blk_0eqgrme3",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15181,82 +15199,82 @@
         ]
       },
       {
-        "id": "blk_t9tn57dh",
+        "id": "blk_zvnreleg",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_c2lop5a5",
+        "id": "blk_i6ffakz9",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_hix88dsv",
+        "id": "blk_mog2spkq",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_ql4ikn5r",
+        "id": "blk_qllkh0ic",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_q05japav",
+        "id": "blk_u4iaewwr",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_hltndek7",
+        "id": "blk_fvki3n88",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_6ciit3dx",
+        "id": "blk_ybvzebv0",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_75ayziyk",
+        "id": "blk_blszvvlv",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_uo4ah66p",
+        "id": "blk_g744pzzw",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_delvs9g2",
+        "id": "blk_rev5pg5c",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_zrycc29u",
+        "id": "blk_bei7f8wi",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_ca03oi3t",
+        "id": "blk_7r2k96k9",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_nq9opkxq",
+        "id": "blk_vbf8wkro",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_em9ysj6f",
+        "id": "blk_9350j2yd",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15268,13 +15286,13 @@
         ]
       },
       {
-        "id": "blk_b2quyjse",
+        "id": "blk_9yfv41li",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_a1nvc7s3",
+        "id": "blk_fgs7y8g4",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15285,13 +15303,13 @@
         ]
       },
       {
-        "id": "blk_5gm0fgpe",
+        "id": "blk_54xxqxt0",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_etdyh3kn",
+        "id": "blk_578d62bu",
         "type": "faq",
         "items": [
           {
@@ -15321,7 +15339,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-19",
-    "updatedAt": "2026-09-07T22:54:50.961Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -15344,23 +15362,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_815nl1yi",
+        "id": "blk_xeatf6ui",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_3mb4otte",
+        "id": "blk_4r54qu16",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de ChatGPT vs Gemini vs Claude, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_crqxit5p",
+        "id": "blk_4hmzu4vs",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_wipz7e1p",
+        "id": "blk_ux3qfnro",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15371,13 +15389,13 @@
         ]
       },
       {
-        "id": "blk_ipswrejq",
+        "id": "blk_1oufw9f1",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_md4pa34l",
+        "id": "blk_9nkvdrm0",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15388,82 +15406,82 @@
         ]
       },
       {
-        "id": "blk_kcf63xxk",
+        "id": "blk_qxi354gj",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_qyqxia5k",
+        "id": "blk_sl0ql3vu",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_q0peiyop",
+        "id": "blk_qz2zf1tw",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_8burr5zx",
+        "id": "blk_wbfyjuwu",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_vko06b5h",
+        "id": "blk_ho7ilfp8",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_5s54u5fy",
+        "id": "blk_ipic3zip",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_jjt6tyoi",
+        "id": "blk_ddsjs4rn",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_9yxbtwvm",
+        "id": "blk_mwyk5trx",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_8tg30ebv",
+        "id": "blk_hs8855dt",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_fscgdge1",
+        "id": "blk_cwgd0fi7",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_gu45f57q",
+        "id": "blk_jir2rpc6",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_5nsh4h6q",
+        "id": "blk_p3gzwp6c",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_v907ydem",
+        "id": "blk_we6mf2a3",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_i0063kv6",
+        "id": "blk_v2fhcir7",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15475,13 +15493,13 @@
         ]
       },
       {
-        "id": "blk_pev3v6fm",
+        "id": "blk_bdowxwd9",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_nfz7dp70",
+        "id": "blk_q686itb9",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15492,13 +15510,13 @@
         ]
       },
       {
-        "id": "blk_9h3sv81z",
+        "id": "blk_za5a0sgd",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_kg0ocmk2",
+        "id": "blk_wd744s3v",
         "type": "faq",
         "items": [
           {
@@ -15528,7 +15546,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-18",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.080Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -15551,23 +15569,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_0r0rv6r3",
+        "id": "blk_0olmz8mg",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_pg2y36mu",
+        "id": "blk_exd5sf2r",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de créer des images avec IA, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_u5nztwlo",
+        "id": "blk_ik7abd0k",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_zlfr1dn8",
+        "id": "blk_6wwmlpep",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15578,13 +15596,13 @@
         ]
       },
       {
-        "id": "blk_337p7oln",
+        "id": "blk_3hn1s92i",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_utylwhh2",
+        "id": "blk_r7f6movq",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15595,82 +15613,82 @@
         ]
       },
       {
-        "id": "blk_kbun1ha2",
+        "id": "blk_74zr8kqe",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_n92t60lg",
+        "id": "blk_qvzxer9v",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_j7qcgzsg",
+        "id": "blk_bnvqiz2u",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_u3f2uzu0",
+        "id": "blk_x3717j51",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_h8yd3f6l",
+        "id": "blk_48i894zy",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_6o7qfjor",
+        "id": "blk_p50py6ez",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_iew7c8hu",
+        "id": "blk_l6bhy6is",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_10lrft8e",
+        "id": "blk_kijsi1gb",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_sdd87yp1",
+        "id": "blk_yibh4dru",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_lk0wemkb",
+        "id": "blk_ehn6aybo",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_uqywlhgg",
+        "id": "blk_gro46i0z",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_e6ycpg2h",
+        "id": "blk_d0f55w51",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_7pi9y40z",
+        "id": "blk_jqbqfnjr",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_whnz2puz",
+        "id": "blk_fuyr4d78",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15682,13 +15700,13 @@
         ]
       },
       {
-        "id": "blk_lrhl3tgn",
+        "id": "blk_1t55lxv4",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_c9i5sjzs",
+        "id": "blk_zxtjx14q",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15699,13 +15717,13 @@
         ]
       },
       {
-        "id": "blk_lsyt2qx0",
+        "id": "blk_9744xtak",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_6ukn7y3o",
+        "id": "blk_ga5fcq5u",
         "type": "faq",
         "items": [
           {
@@ -15735,7 +15753,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-17",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -15758,23 +15776,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_qxiwsqtb",
+        "id": "blk_kybx5p3d",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_13cb7ppy",
+        "id": "blk_k326ll3k",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA pour réseaux sociaux, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_qe1uiq0g",
+        "id": "blk_swn8b3hu",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_9ugwj7v2",
+        "id": "blk_mp31qdgg",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15785,13 +15803,13 @@
         ]
       },
       {
-        "id": "blk_bb8xme62",
+        "id": "blk_idf301es",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_bfuiv5il",
+        "id": "blk_ov19ev9p",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15802,82 +15820,82 @@
         ]
       },
       {
-        "id": "blk_3wg3bdpy",
+        "id": "blk_ikwlwfp5",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_od6yedcb",
+        "id": "blk_7s4f9ldb",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_tnmpv4ub",
+        "id": "blk_pi9c1tdl",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_x25jzy3g",
+        "id": "blk_wryg9deo",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_z7u8sgod",
+        "id": "blk_2d6q506f",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_wrebcqsg",
+        "id": "blk_44q98wwb",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_17fopm9a",
+        "id": "blk_mfwzo2f9",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_p6vmh3mx",
+        "id": "blk_cpmjal68",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_l70dcka1",
+        "id": "blk_9bt0yost",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_5upotctj",
+        "id": "blk_nx66c670",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_m378yz10",
+        "id": "blk_div0kdez",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_r009iii5",
+        "id": "blk_n5xrodpl",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_wkffbfrv",
+        "id": "blk_34pkbdwp",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_bfwes1sl",
+        "id": "blk_ecqmwe17",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15889,13 +15907,13 @@
         ]
       },
       {
-        "id": "blk_v7q7vamb",
+        "id": "blk_5hamuykx",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_knz9bi3h",
+        "id": "blk_e9klxkyy",
         "type": "list",
         "ordered": false,
         "items": [
@@ -15906,13 +15924,13 @@
         ]
       },
       {
-        "id": "blk_gj3eb8f9",
+        "id": "blk_s4cfh6ld",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_h4g2sury",
+        "id": "blk_2651r7ch",
         "type": "faq",
         "items": [
           {
@@ -15932,203 +15950,214 @@
     "tipId": 9012,
     "slug": "l-ia-peut-elle-remplacer-les-programmeurs",
     "title": "L’IA peut-elle remplacer les programmeurs ?",
-    "excerpt": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
+    "excerpt": "Ce que l’IA change vraiment dans le métier de développeur : productivité, limites, et compétences qui restent indispensables.",
     "category": "IA",
     "tags": [
       "IA",
-      "Intelligence artificielle",
-      "Technologie",
-      "Productivité"
+      "Programmation",
+      "Développement"
     ],
     "status": "published",
     "publishedAt": "2026-09-16",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
-    "readMinutes": 7,
-    "difficulty": "Débutant",
+    "readMinutes": 9,
+    "difficulty": "Intermédiaire",
     "featured": false,
     "trending": true,
     "coverGradient": "from-[#0056D2] to-[#003d99]",
     "coverLabel": "IA #12",
-    "coverAlt": "Illustration moderne représentant IA et programmation",
-    "seoTitle": "L’IA peut-elle remplacer les programmeurs ?",
-    "seoDescription": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
-    "ogTitle": "L’IA peut-elle remplacer les programmeurs ?",
-    "ogDescription": "Comprenez comment l’intelligence artificielle transforme le développement logiciel et pourquoi les compétences humaines restent essentielles.",
-    "primaryKeyword": "IA et programmation",
+    "coverAlt": "Développeur travaillant avec un assistant de code IA à l’écran",
+    "seoTitle": "IA et programmeurs — remplacement ou accélération ?",
+    "seoDescription": "Ce que l’IA change vraiment dans le métier de développeur : productivité, limites, et compétences qui restent indispensables.",
+    "ogTitle": "L’IA ne remplace pas les programmeurs — elle les trie",
+    "ogDescription": "Une lecture lucide pour étudiants et pros qui veulent rester employables à l’ère des assistants de code.",
+    "primaryKeyword": "IA et programmeurs",
     "secondaryKeywords": [
-      "développement logiciel",
-      "programmation et IA",
-      "développeurs"
+      "IA générative code",
+      "métier développeur",
+      "Cursor Claude"
     ],
     "blocks": [
       {
-        "id": "blk_mho8mynr",
+        "id": "blk_790kbvy7",
         "type": "paragraph",
-        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+        "content": "Oui, l’IA écrit du code. Non, cela ne signifie pas la fin des développeurs. Elle accélère ceux qui savent spécifier, lire, tester et assumer un système — et elle expose ceux qui collaient des tutoriels sans comprendre."
       },
       {
-        "id": "blk_k7gs8nr4",
+        "id": "blk_248nvt9t",
         "type": "paragraph",
-        "content": "Dans cet article, nous allons voir les principes essentiels de IA et programmation, avec une approche simple et pratique adaptée aux débutants."
+        "content": "La question utile n’est pas « serai-je remplacé ? » mais « quelles parties de mon travail deviennent un commodité, et lesquelles restent rares ? »."
       },
       {
-        "id": "blk_2xh8s9lz",
+        "id": "blk_hv5gkdb7",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_2vy1gam4",
+        "id": "blk_1y3hylyh",
         "type": "list",
         "ordered": false,
         "items": [
-          "Comprendre plus facilement une technologie devenue courante.",
-          "Identifier des usages concrets de l’intelligence artificielle.",
-          "Gagner du temps grâce à une méthode structurée.",
-          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+          "Prioriser les compétences durables (architecture, debug, produit)",
+          "Utiliser l’IA comme pair-programmeur, pas comme pilote automatique",
+          "Éviter de livrer du code que vous ne pouvez pas maintenir",
+          "Préparer un parcours type BelKou (projets + revue)"
         ]
       },
       {
-        "id": "blk_1gl92wpp",
+        "id": "blk_4myeiack",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_83rz4nxf",
+        "id": "blk_rx5wv06b",
         "type": "list",
         "ordered": false,
         "items": [
-          "Un ordinateur, une tablette ou un smartphone.",
-          "Une connexion Internet pour les services d’IA en ligne.",
-          "Une idée claire de la tâche que vous souhaitez réaliser.",
-          "Un esprit critique pour vérifier les résultats produits."
+          "Bases d’un langage (JS/TS, Python…)",
+          "Un éditeur avec assistant (Cursor, Copilot, etc.)",
+          "Un petit projet réel (pas seulement des exercices isolés)"
         ]
       },
       {
-        "id": "blk_256anmo4",
+        "id": "blk_463x0jho",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_1389dq1l",
+        "id": "blk_zkfl9yb4",
         "type": "heading",
         "level": 3,
-        "content": "Étape 1 — Donner le contexte nécessaire"
+        "content": "Étape 1 — Spécifier avant de générer"
       },
       {
-        "id": "blk_37oxxo2m",
+        "id": "blk_253sajuf",
         "type": "paragraph",
-        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+        "content": "Décrivez entrées, sorties, cas limites, et « ce qui ne doit pas arriver ». Un mauvais brief produit un beau code faux."
       },
       {
-        "id": "blk_eqn9cst7",
+        "id": "blk_lzlx7cxm",
         "type": "heading",
         "level": 3,
-        "content": "Étape 2 — Formuler une demande claire"
+        "content": "Étape 2 — Demander des tests avec le code"
       },
       {
-        "id": "blk_5ghqhkv6",
+        "id": "blk_6r9yxkiu",
         "type": "paragraph",
-        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+        "content": "« Écris la fonction + 5 tests (happy path + erreurs). » Les tests révèlent vite les hallucinations d’API."
       },
       {
-        "id": "blk_o3svgxb5",
+        "id": "blk_dn2odlk5",
         "type": "heading",
         "level": 3,
-        "content": "Étape 3 — Vérifier le résultat"
+        "content": "Étape 3 — Relire comme un code review"
       },
       {
-        "id": "blk_z1wu9ilu",
+        "id": "blk_hvja3yua",
         "type": "paragraph",
-        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+        "content": "Cherchez secrets en dur, SQL injecté, `any` partout, effets de bord, dépendances inventées. Faites tourner localement."
       },
       {
-        "id": "blk_x9rxz0cx",
+        "id": "blk_b2ix766o",
         "type": "heading",
         "level": 3,
-        "content": "Étape 4 — Améliorer progressivement"
+        "content": "Étape 4 — Renforcer ce que l’IA ne fait pas bien"
       },
       {
-        "id": "blk_ww4nh06n",
+        "id": "blk_0ehdlylf",
         "type": "paragraph",
-        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+        "content": "Produit, UX, trade-offs d’architecture, communication avec un client, ownership d’un incident : c’est là que la valeur humaine monte."
       },
       {
-        "id": "blk_6mcl19yp",
+        "id": "blk_abw9m5i4",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_g6a2odko",
+        "id": "blk_z8v4o9dd",
         "type": "callout",
         "variant": "info",
         "title": "Note",
-        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+        "content": "Sur BelKou, couplez l’assistant à un projet guidé (ex. apps avec Cursor / Claude) plutôt qu’à du code jetable."
       },
       {
-        "id": "blk_ykforclm",
+        "id": "blk_am9iylka",
         "type": "code",
-        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "content": "Contexte : app [stack], fichier [chemin].\nObjectif : [comportement].\nContraintes : pas de nouvelle dépendance ; TypeScript strict ; gérer erreur réseau.\nLivrable : patch minimal + tests + risques connus.\nN’invente pas d’API : si tu n’es pas sûr, dis-le.",
         "language": "text"
       },
       {
-        "id": "blk_5hyzb274",
+        "id": "blk_g60g3htf",
+        "type": "paragraph",
+        "content": "Le « patch minimal » évite les refactors fantaisie"
+      },
+      {
+        "id": "blk_9pdmsl0w",
+        "type": "paragraph",
+        "content": "L’interdiction d’inventer des API réduit les packages fantômes"
+      },
+      {
+        "id": "blk_o3jyg8sw",
+        "type": "paragraph",
+        "content": "Les risques connus forcent l’honnêteté du modèle"
+      },
+      {
+        "id": "blk_ikudcmkm",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_yqv6gf2f",
+        "id": "blk_3ba072fi",
         "type": "list",
         "ordered": false,
         "items": [
-          "Commencez par des demandes simples et précises.",
-          "Vérifiez les informations importantes avant de les utiliser.",
-          "Évitez de partager des données sensibles ou confidentielles.",
-          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
-          "Pour un travail important, comparez les résultats avec des sources fiables."
+          "Apprenez à lire le diff avant d’apprendre à générer plus vite",
+          "Gardez un journal des bugs que l’IA a introduits — pattern d’apprentissage",
+          "Pratiquez le debug sans IA une fois par semaine",
+          "Documentez vos décisions (ADR courts)"
         ]
       },
       {
-        "id": "blk_bdt1q6df",
+        "id": "blk_10nfhmoo",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_vvwg69ri",
+        "id": "blk_0b2nefwa",
         "type": "list",
         "ordered": false,
         "items": [
-          "Demande trop vague : ajoutez un objectif et un contexte précis.",
-          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
-          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
-          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+          "Shipper sans faire tourner : toujours exécuter",
+          "Accepter une archi “enterprise” pour un MVP : simplifiez",
+          "Ne plus écrire une ligne à la main : l’atrophie est réelle"
         ]
       },
       {
-        "id": "blk_8mjkfwzs",
+        "id": "blk_931tihd7",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_9obpof2j",
+        "id": "blk_30wov1cv",
         "type": "faq",
         "items": [
           {
-            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
-            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+            "q": "L’IA est-elle fiable pour la prod ?",
+            "a": "Utile, jamais seule. Revue + CI + monitoring restent non négociables."
           },
           {
-            "q": "Peut-on utiliser l’IA pour tout faire ?",
-            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+            "q": "Quel profil gagne avec l’IA ?",
+            "a": "Celui qui pose de bonnes questions produit, mesure, et assume le résultat."
           }
         ]
       }
@@ -16149,7 +16178,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-15",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -16172,23 +16201,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_jewyexnf",
+        "id": "blk_q8xg0lvv",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_oc0nktwk",
+        "id": "blk_dhnihbix",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de apprendre à programmer avec IA, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_4a7v2j4x",
+        "id": "blk_dot1gaoo",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_ga1ysx1u",
+        "id": "blk_u3t9f6ju",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16199,13 +16228,13 @@
         ]
       },
       {
-        "id": "blk_o1fg6er3",
+        "id": "blk_nraa7xak",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_v3i8m8pv",
+        "id": "blk_dmbjxtta",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16216,82 +16245,82 @@
         ]
       },
       {
-        "id": "blk_uy82ml51",
+        "id": "blk_usupnnjb",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_sktc7ev6",
+        "id": "blk_qtra2v34",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_xdgs0giu",
+        "id": "blk_vh2fkyuz",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_wxsz316d",
+        "id": "blk_b7awcsug",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_0mhegt9d",
+        "id": "blk_6q62qg7m",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_h2l19ue6",
+        "id": "blk_o5l7282c",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_vkckygn6",
+        "id": "blk_oul2ojw4",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_5xbv648u",
+        "id": "blk_lvrk779b",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_c1fx3l3v",
+        "id": "blk_y769esb8",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_1hapsqmm",
+        "id": "blk_44hlqqmo",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_zljssyzm",
+        "id": "blk_v4rpp8fo",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_cnj6eg3u",
+        "id": "blk_3x8zu9j4",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_y1s5tu0z",
+        "id": "blk_xtdv4nnz",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_ic5x0hmm",
+        "id": "blk_w0kkcowk",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16303,13 +16332,13 @@
         ]
       },
       {
-        "id": "blk_ylbru1c3",
+        "id": "blk_yasl3wwu",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_u8vkrneh",
+        "id": "blk_dvwm0lbg",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16320,13 +16349,13 @@
         ]
       },
       {
-        "id": "blk_blv2w23m",
+        "id": "blk_613uwcaa",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_uifjhcdg",
+        "id": "blk_ecl9fl32",
         "type": "faq",
         "items": [
           {
@@ -16356,7 +16385,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-14",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -16379,23 +16408,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_oegnpdv3",
+        "id": "blk_npk6b8nu",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_bg8q7q7q",
+        "id": "blk_1hky9x0o",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de avantages et limites de l’IA, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_e4k7p4m6",
+        "id": "blk_ojj3hoth",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_w02fz7fc",
+        "id": "blk_8cczyy45",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16406,13 +16435,13 @@
         ]
       },
       {
-        "id": "blk_2v8gm7ez",
+        "id": "blk_cet3h0ur",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_zng1nnqx",
+        "id": "blk_xx7wt0b3",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16423,82 +16452,82 @@
         ]
       },
       {
-        "id": "blk_m39uyror",
+        "id": "blk_6kqxyugg",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_6rfu3t9h",
+        "id": "blk_ucg6o5m0",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_rbjz5qh0",
+        "id": "blk_q2s0aebo",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_j6ole2uf",
+        "id": "blk_2o05fg6r",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_1c4ksuzv",
+        "id": "blk_7jh45aba",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_odcbo5px",
+        "id": "blk_eyq5xkf9",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_va3ly5f3",
+        "id": "blk_1n0ditzj",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_xgtq92r4",
+        "id": "blk_o0nxv3sz",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_kx1ho7qq",
+        "id": "blk_uzwb1bfu",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_t2m2t3af",
+        "id": "blk_ho45u4l8",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_cwg2an2h",
+        "id": "blk_ck7vm5gx",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_gf2vrw9v",
+        "id": "blk_e1lli6yo",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_30ttbm17",
+        "id": "blk_fhidsmp5",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_376c1rxn",
+        "id": "blk_i51yaqbk",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16510,13 +16539,13 @@
         ]
       },
       {
-        "id": "blk_8qyj8dz5",
+        "id": "blk_z2kir3vp",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_dlmd5e2j",
+        "id": "blk_lp66u7lu",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16527,13 +16556,13 @@
         ]
       },
       {
-        "id": "blk_mwke37rv",
+        "id": "blk_sh97s0rt",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_yg1z2dlu",
+        "id": "blk_hdkkul7t",
         "type": "faq",
         "items": [
           {
@@ -16563,7 +16592,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-13",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -16586,23 +16615,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_ku5m9xy6",
+        "id": "blk_3tcnax2b",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_b2qjhc53",
+        "id": "blk_gors6kdo",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de détecter contenu généré par IA, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_m5vkj9nh",
+        "id": "blk_8n6wxw8q",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_uoqxg5rm",
+        "id": "blk_wconzm15",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16613,13 +16642,13 @@
         ]
       },
       {
-        "id": "blk_kn8ye7da",
+        "id": "blk_j801zex7",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_4fli5mj5",
+        "id": "blk_gxstkwjd",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16630,82 +16659,82 @@
         ]
       },
       {
-        "id": "blk_j1nc1f28",
+        "id": "blk_0ieb2yk1",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_syckapnb",
+        "id": "blk_qsdxtr9k",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_73n9do3e",
+        "id": "blk_qutcf8zj",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_15vglo4j",
+        "id": "blk_ad5mwsbd",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_63hfu8xd",
+        "id": "blk_f6em7wkz",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_r2fhqaad",
+        "id": "blk_vx164gma",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_rsdu4k8o",
+        "id": "blk_xhik0lrg",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_9xb24zvh",
+        "id": "blk_bc2dycno",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_452if8n8",
+        "id": "blk_knax54fh",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_7dy2mmmc",
+        "id": "blk_wyxask8z",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_8ep3obcf",
+        "id": "blk_yacrstb0",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_kwc0fgai",
+        "id": "blk_8jz47en6",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_frms3kuz",
+        "id": "blk_83seibjz",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_7qdp2x20",
+        "id": "blk_sxbdoexe",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16717,13 +16746,13 @@
         ]
       },
       {
-        "id": "blk_tb3u737x",
+        "id": "blk_dy52pmhx",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_75kbgdwt",
+        "id": "blk_6hhzm39h",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16734,13 +16763,13 @@
         ]
       },
       {
-        "id": "blk_bxz91zov",
+        "id": "blk_rlciwtx2",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_g01cffnt",
+        "id": "blk_9sjb1s41",
         "type": "faq",
         "items": [
           {
@@ -16770,7 +16799,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-12",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -16793,23 +16822,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_wrh518rx",
+        "id": "blk_qtcpxm72",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_79a2uqep",
+        "id": "blk_nq0k0585",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de IA et cybersécurité, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_9z5034ec",
+        "id": "blk_9zprgwzh",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_bujibbdx",
+        "id": "blk_ticc3sch",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16820,13 +16849,13 @@
         ]
       },
       {
-        "id": "blk_qcaevgrm",
+        "id": "blk_2w6nzpw2",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_9j246z5l",
+        "id": "blk_1nt8e1wk",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16837,82 +16866,82 @@
         ]
       },
       {
-        "id": "blk_ryu0d6ff",
+        "id": "blk_v60s1jxf",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_furhoyjm",
+        "id": "blk_i1l2l1nm",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_bsnoppg4",
+        "id": "blk_lx6lq5mu",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_ra44yn7n",
+        "id": "blk_x6mbsq86",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_c10ob80m",
+        "id": "blk_f5r1k82l",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_tj0kp0o8",
+        "id": "blk_v3yu5t28",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_s4220710",
+        "id": "blk_c3jpmlw8",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_2c62mxko",
+        "id": "blk_8wgvs2d4",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_jhg9062g",
+        "id": "blk_7ugmr8k3",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_n5o11lcl",
+        "id": "blk_l3e9fect",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_7tnpj0nc",
+        "id": "blk_8g1xk8cg",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_tgq8ckjp",
+        "id": "blk_1ipoaun0",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_aguulhvj",
+        "id": "blk_k1xgt4kd",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_2agygjeo",
+        "id": "blk_ih2b5co3",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16924,13 +16953,13 @@
         ]
       },
       {
-        "id": "blk_w4uxyomb",
+        "id": "blk_2faqtus0",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_s0oo2biu",
+        "id": "blk_qtlp30r6",
         "type": "list",
         "ordered": false,
         "items": [
@@ -16941,13 +16970,13 @@
         ]
       },
       {
-        "id": "blk_a1e6qlhm",
+        "id": "blk_uw2e12k8",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_ulltpw73",
+        "id": "blk_7iq5lakv",
         "type": "faq",
         "items": [
           {
@@ -16977,7 +17006,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-11",
-    "updatedAt": "2026-09-07T22:54:50.962Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -17000,23 +17029,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_9rk5pri5",
+        "id": "blk_0w8332jn",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_qimgen9g",
+        "id": "blk_eaup8qfd",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de automatisation avec IA, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_mjykj9t0",
+        "id": "blk_cmss1e5n",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_p9mhczty",
+        "id": "blk_mqdqdhkn",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17027,13 +17056,13 @@
         ]
       },
       {
-        "id": "blk_v9x1joml",
+        "id": "blk_h2sbjvbr",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_d3l0rkiy",
+        "id": "blk_52u6noci",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17044,82 +17073,82 @@
         ]
       },
       {
-        "id": "blk_vb64hmyy",
+        "id": "blk_4h5im49x",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_yr5nxym4",
+        "id": "blk_sl3oges5",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_axmqgl32",
+        "id": "blk_vrfk88vh",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_4wool2du",
+        "id": "blk_4a5krv1m",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_us0ecq18",
+        "id": "blk_5hh10rgi",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_tdni8eac",
+        "id": "blk_asqvc0dd",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_kw7en76n",
+        "id": "blk_8uvgz2dp",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_tj01jafz",
+        "id": "blk_f0bmmhkr",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_xoc6uc2u",
+        "id": "blk_y35eoue3",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_bw0i4fgj",
+        "id": "blk_7eb7ly02",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_9l3p8vf3",
+        "id": "blk_qn2ut5s4",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_4ygcai1s",
+        "id": "blk_btleodo3",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_89m0wfet",
+        "id": "blk_fptodx86",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_oqmc6rdo",
+        "id": "blk_o4rumggf",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17131,13 +17160,13 @@
         ]
       },
       {
-        "id": "blk_z4x6uvak",
+        "id": "blk_1mgd7ghe",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_7cax0kxi",
+        "id": "blk_1ik937ha",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17148,13 +17177,13 @@
         ]
       },
       {
-        "id": "blk_wopdga0f",
+        "id": "blk_2e767nj2",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_215hajks",
+        "id": "blk_37a94ic9",
         "type": "faq",
         "items": [
           {
@@ -17184,7 +17213,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-10",
-    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -17207,23 +17236,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_hrb8f3sa",
+        "id": "blk_8dfjux03",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_5rzc2yj9",
+        "id": "blk_4jd0eeok",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de métiers et intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_h1h2khd5",
+        "id": "blk_bu7po6vj",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_0c74p069",
+        "id": "blk_pvdpz8v0",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17234,13 +17263,13 @@
         ]
       },
       {
-        "id": "blk_xwn9d02x",
+        "id": "blk_hbyos8mm",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_0ammivur",
+        "id": "blk_5w9fnco6",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17251,82 +17280,82 @@
         ]
       },
       {
-        "id": "blk_b48bdj73",
+        "id": "blk_cnrl7okx",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_jzbyf4zx",
+        "id": "blk_b26eh4k9",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_v4cbnp6z",
+        "id": "blk_p7dc25tl",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_xg0ghl1d",
+        "id": "blk_gqbebyj5",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_68zvi8av",
+        "id": "blk_uef2kds4",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_5dri7m7h",
+        "id": "blk_wag31g88",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_id2l7psp",
+        "id": "blk_agzg551s",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_mgblslbb",
+        "id": "blk_jnv04ncx",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_7mdv3yr4",
+        "id": "blk_c7dndd6a",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_0aranr1r",
+        "id": "blk_7jf9qa6g",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_yll122c6",
+        "id": "blk_v8rnnj7y",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_cpturank",
+        "id": "blk_glno4wi8",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_ocs1m3j4",
+        "id": "blk_i63vk5lt",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_ec6lmu93",
+        "id": "blk_iqdfu8bs",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17338,13 +17367,13 @@
         ]
       },
       {
-        "id": "blk_npftklaa",
+        "id": "blk_xh1etmg7",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_v7cu96tr",
+        "id": "blk_wrrren3s",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17355,13 +17384,13 @@
         ]
       },
       {
-        "id": "blk_az75ipcf",
+        "id": "blk_dkhtbsmm",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_v0lu8k1z",
+        "id": "blk_pexffb9f",
         "type": "faq",
         "items": [
           {
@@ -17381,203 +17410,216 @@
     "tipId": 9019,
     "slug": "comment-creer-une-application-avec-l-aide-de-l-ia",
     "title": "Comment créer une application avec l’aide de l’IA",
-    "excerpt": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
+    "excerpt": "Une méthode concrète pour passer d’une idée à une petite application web en s’appuyant sur l’IA, sans perdre le contrôle du code.",
     "category": "IA",
     "tags": [
       "IA",
-      "Intelligence artificielle",
-      "Technologie",
-      "Développement"
+      "Programmation",
+      "Développement",
+      "Formation"
     ],
     "status": "published",
     "publishedAt": "2026-09-09",
-    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "updatedAt": "2026-09-07T23:30:00.081Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
-    "readMinutes": 7,
-    "difficulty": "Débutant",
+    "readMinutes": 10,
+    "difficulty": "Intermédiaire",
     "featured": false,
     "trending": true,
     "coverGradient": "from-[#0c1520] to-primary",
     "coverLabel": "IA #19",
-    "coverAlt": "Illustration moderne représentant créer une application avec IA",
-    "seoTitle": "Comment créer une application avec l’aide de l’IA",
-    "seoDescription": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
-    "ogTitle": "Comment créer une application avec l’aide de l’IA",
-    "ogDescription": "Découvrez comment utiliser l’intelligence artificielle pour transformer une idée en application, générer du code et accélérer certaines étapes du développement.",
+    "coverAlt": "Écran d’éditeur de code avec un assistant IA et un aperçu d’application",
+    "seoTitle": "Créer une app avec l’IA — méthode pas à pas",
+    "seoDescription": "Une méthode concrète pour passer d’une idée à une petite application web en s’appuyant sur l’IA, sans perdre le contrôle du code.",
+    "ogTitle": "De l’idée à l’app avec l’IA",
+    "ogDescription": "Cadrez, générez, testez, déployez — avec l’IA comme accélérateur, pas comme boîte noire.",
     "primaryKeyword": "créer une application avec IA",
     "secondaryKeywords": [
-      "développement avec IA",
-      "application IA",
-      "vibe coding"
+      "vibe coding",
+      "Cursor",
+      "app web IA"
     ],
     "blocks": [
       {
-        "id": "blk_f2836hjw",
+        "id": "blk_yvwqu0ie",
         "type": "paragraph",
-        "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
+        "content": "Créer une app « avec l’IA » ne veut pas dire cliquer un bouton et recevoir un SaaS. Cela veut dire : spécifier clairement, laisser l’assistant générer des briques, puis intégrer, tester et déployer comme un vrai projet."
       },
       {
-        "id": "blk_i428s4g2",
+        "id": "blk_q9euj0vl",
         "type": "paragraph",
-        "content": "Dans cet article, nous allons voir les principes essentiels de créer une application avec IA, avec une approche simple et pratique adaptée aux débutants."
+        "content": "Cette méthode convient aux débutants motivés et aux profils no-code qui veulent monter en compétence — exactement l’esprit formation BelKou."
       },
       {
-        "id": "blk_jqmqtxql",
+        "id": "blk_6g8hyb9o",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_p351p0jj",
+        "id": "blk_7jyhnm8r",
         "type": "list",
         "ordered": false,
         "items": [
-          "Comprendre plus facilement une technologie devenue courante.",
-          "Identifier des usages concrets de l’intelligence artificielle.",
-          "Gagner du temps grâce à une méthode structurée.",
-          "Éviter de considérer les réponses d’une IA comme automatiquement exactes."
+          "Transformer une idée vague en périmètre livrable",
+          "Aller plus vite sans abandonner la compréhension",
+          "Éviter les projets générés impossibles à maintenir",
+          "Préparer un portfolio démontrable"
         ]
       },
       {
-        "id": "blk_zq1ie6wr",
+        "id": "blk_168nk1gp",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_xjwfy87w",
+        "id": "blk_27kh5avq",
         "type": "list",
         "ordered": false,
         "items": [
-          "Un ordinateur, une tablette ou un smartphone.",
-          "Une connexion Internet pour les services d’IA en ligne.",
-          "Une idée claire de la tâche que vous souhaitez réaliser.",
-          "Un esprit critique pour vérifier les résultats produits."
+          "Un éditeur moderne (Cursor, VS Code + assistant…)",
+          "Notions HTML/CSS/JS ou volonté de les apprendre en parallèle",
+          "Un compte pour déployer (Vercel, Netlify, etc.) si vous visez le web",
+          "1 fonctionnalité cœur seulement pour la v1"
         ]
       },
       {
-        "id": "blk_pbhagqxr",
+        "id": "blk_zuzc9bqj",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_jzullabp",
+        "id": "blk_ly4ytyq3",
         "type": "heading",
         "level": 3,
-        "content": "Étape 1 — Donner le contexte nécessaire"
+        "content": "Étape 1 — Choisir une stack simple"
       },
       {
-        "id": "blk_91bb0lck",
+        "id": "blk_ur4q5giv",
         "type": "paragraph",
-        "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
+        "content": "Exemple débutant web : React ou HTML + JS, auth plus tard, base de données plus tard. Une stack exotique multiplie les hallucinations."
       },
       {
-        "id": "blk_opa3rh76",
+        "id": "blk_sa7dg8ir",
         "type": "heading",
         "level": 3,
-        "content": "Étape 2 — Formuler une demande claire"
+        "content": "Étape 2 — Faire générer l’ossature, pas le métier entier"
       },
       {
-        "id": "blk_4282qa8q",
+        "id": "blk_o49sx71x",
         "type": "paragraph",
-        "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
+        "content": "Demandez : structure de dossiers, page d’accueil, formulaire, état de chargement. Puis ajoutez la logique métier morceau par morceau."
       },
       {
-        "id": "blk_bavdigyq",
+        "id": "blk_jxcmrbl2",
         "type": "heading",
         "level": 3,
-        "content": "Étape 3 — Vérifier le résultat"
+        "content": "Étape 3 — Tester à chaque brique"
       },
       {
-        "id": "blk_o41m867f",
+        "id": "blk_376h7783",
         "type": "paragraph",
-        "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
+        "content": "Après chaque génération : lancer l’app, cliquer le parcours, noter les bugs, demander un correctif ciblé (« ne touche qu’à ce fichier »)."
       },
       {
-        "id": "blk_zkq5a30j",
+        "id": "blk_vpab5990",
         "type": "heading",
         "level": 3,
-        "content": "Étape 4 — Améliorer progressivement"
+        "content": "Étape 4 — Déployer une v1 visible"
       },
       {
-        "id": "blk_6n3e6o0v",
+        "id": "blk_74suxexi",
         "type": "paragraph",
-        "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
+        "content": "Même imparfaite, une URL publique bat dix démos locales. Documentez README : but, stack, comment lancer."
       },
       {
-        "id": "blk_plckn4d4",
+        "id": "blk_x8setwdo",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_o8r8b86d",
+        "id": "blk_98i9rdas",
         "type": "callout",
         "variant": "info",
         "title": "Note",
-        "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
+        "content": "Sur BelKou, suivez un parcours guidé (apps + IA) pour ne pas naviguer seul dans les choix de stack."
       },
       {
-        "id": "blk_3fxdibb3",
+        "id": "blk_75fx8gks",
         "type": "code",
-        "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
+        "content": "Brief : [utilisateur + problème + succès].\nStack imposée : [ex. Vite + React + TypeScript].\nv1 : [3 écrans max].\nHors scope : [paiements, multi-tenant, mobile natif].\nGénère : arborescence + page X + composant Y.\nContraintes : code commenté brièvement ; pas de lib inutiles.\nAprès génération : liste des commandes pour lancer en local.",
         "language": "text"
       },
       {
-        "id": "blk_9euxwvv7",
+        "id": "blk_z5ub8335",
+        "type": "paragraph",
+        "content": "Le hors scope protège contre le scope creep de l’IA"
+      },
+      {
+        "id": "blk_7frie8na",
+        "type": "paragraph",
+        "content": "Limiter les fichiers touchés facilite le review"
+      },
+      {
+        "id": "blk_tl2c9agv",
+        "type": "paragraph",
+        "content": "Les commandes de lancement évitent le « ça marche chez moi »"
+      },
+      {
+        "id": "blk_tva6esph",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_adpxaixv",
+        "id": "blk_v7ow3q5m",
         "type": "list",
         "ordered": false,
         "items": [
-          "Commencez par des demandes simples et précises.",
-          "Vérifiez les informations importantes avant de les utiliser.",
-          "Évitez de partager des données sensibles ou confidentielles.",
-          "Utilisez l’IA comme assistant plutôt que comme unique source d’information.",
-          "Pour un travail important, comparez les résultats avec des sources fiables."
+          "Versionnez avec Git dès le jour 1",
+          "Une feature = une branche / un commit clair",
+          "Demandez à l’IA un diagramme du flux utilisateur avant le code",
+          "Préférez un design simple et lisible à un UI « wow » fragile"
         ]
       },
       {
-        "id": "blk_dyse7zy0",
+        "id": "blk_b5vswe5y",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_928axzno",
+        "id": "blk_11lohbwi",
         "type": "list",
         "ordered": false,
         "items": [
-          "Demande trop vague : ajoutez un objectif et un contexte précis.",
-          "Confiance aveugle dans la réponse : vérifiez les informations importantes.",
-          "Trop de contraintes contradictoires : simplifiez et hiérarchisez vos instructions.",
-          "Absence de vérification : une réponse bien formulée peut malgré tout contenir des erreurs."
+          "Vouloir Uber + Netflix en week-end : réduisez",
+          "Coller du code sans lire : vous ne pourrez pas debugger",
+          "Ignorer l’accessibilité et le mobile : testez sur téléphone tôt"
         ]
       },
       {
-        "id": "blk_hhsfutv9",
+        "id": "blk_ktzj1rqn",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_cjqaziod",
+        "id": "blk_uw25l40a",
         "type": "faq",
         "items": [
           {
-            "q": "Faut-il être expert en informatique pour utiliser l’IA ?",
-            "a": "Non. De nombreux outils sont conçus pour être utilisés en langage naturel. Il est cependant utile de comprendre leurs limites et de savoir formuler une demande claire."
+            "q": "No-code ou code + IA ?",
+            "a": "No-code pour des outils internes simples. Code + IA dès que vous voulez personnaliser, posséder et faire évoluer le produit."
           },
           {
-            "q": "Peut-on utiliser l’IA pour tout faire ?",
-            "a": "Non. L’IA est un outil d’assistance, mais elle ne remplace pas systématiquement le jugement humain, la vérification des sources et l’expertise nécessaire dans certains domaines."
+            "q": "Combien de temps pour une v1 ?",
+            "a": "Souvent quelques jours pour un MVP étroit si le brief est clair — plus si auth, paiements ou données complexes entrent trop tôt."
           }
         ]
       }
@@ -17598,7 +17640,7 @@
     ],
     "status": "published",
     "publishedAt": "2026-09-08",
-    "updatedAt": "2026-09-07T22:54:50.963Z",
+    "updatedAt": "2026-09-07T23:30:00.082Z",
     "authorName": "Mackenson Lundi",
     "authorRole": "Fondateur BelKou",
     "authorInitials": "ML",
@@ -17621,23 +17663,23 @@
     ],
     "blocks": [
       {
-        "id": "blk_81bk4pwk",
+        "id": "blk_gpbjt904",
         "type": "paragraph",
         "content": "L’intelligence artificielle occupe une place croissante dans les outils numériques utilisés pour travailler, apprendre, créer et automatiser certaines tâches. Comprendre ses possibilités permet de l’utiliser de manière plus efficace et responsable."
       },
       {
-        "id": "blk_owfaw5q8",
+        "id": "blk_kpcuraqs",
         "type": "paragraph",
         "content": "Dans cet article, nous allons voir les principes essentiels de avenir de l’intelligence artificielle, avec une approche simple et pratique adaptée aux débutants."
       },
       {
-        "id": "blk_a110vyax",
+        "id": "blk_2wun1vvd",
         "type": "heading",
         "level": 2,
         "content": "Pourquoi cette astuce est utile ?"
       },
       {
-        "id": "blk_hlol6j2h",
+        "id": "blk_0hn43awa",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17648,13 +17690,13 @@
         ]
       },
       {
-        "id": "blk_iy64alxn",
+        "id": "blk_ip79ybxm",
         "type": "heading",
         "level": 2,
         "content": "Prérequis"
       },
       {
-        "id": "blk_sygfmpk3",
+        "id": "blk_uloy8zgv",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17665,82 +17707,82 @@
         ]
       },
       {
-        "id": "blk_egwzvh0e",
+        "id": "blk_bpweiipa",
         "type": "heading",
         "level": 2,
         "content": "Comment faire ?"
       },
       {
-        "id": "blk_br8quz4r",
+        "id": "blk_w07rb3ph",
         "type": "heading",
         "level": 3,
         "content": "Étape 1 — Donner le contexte nécessaire"
       },
       {
-        "id": "blk_soeowd99",
+        "id": "blk_6b2qug4a",
         "type": "paragraph",
         "content": "Indiquez les informations utiles : public visé, format souhaité, niveau de connaissance, contraintes et résultat attendu. Évitez toutefois de fournir des informations personnelles ou confidentielles inutiles."
       },
       {
-        "id": "blk_21ddyt7x",
+        "id": "blk_w7cevosy",
         "type": "heading",
         "level": 3,
         "content": "Étape 2 — Formuler une demande claire"
       },
       {
-        "id": "blk_ap9z2sxl",
+        "id": "blk_w1d1qh6k",
         "type": "paragraph",
         "content": "Utilisez des phrases directes et indiquez le format de réponse souhaité. Pour une tâche complexe, divisez votre demande en plusieurs étapes."
       },
       {
-        "id": "blk_dkdc3anw",
+        "id": "blk_kcehagre",
         "type": "heading",
         "level": 3,
         "content": "Étape 3 — Vérifier le résultat"
       },
       {
-        "id": "blk_fi0vxk8v",
+        "id": "blk_2mys39z6",
         "type": "paragraph",
         "content": "Relisez toujours la réponse. Une IA peut produire une information incorrecte, incomplète ou dépassée. Pour les informations importantes, vérifiez-les avec des sources fiables."
       },
       {
-        "id": "blk_7cflkpnv",
+        "id": "blk_k56c7ya1",
         "type": "heading",
         "level": 3,
         "content": "Étape 4 — Améliorer progressivement"
       },
       {
-        "id": "blk_awsk6bll",
+        "id": "blk_9dl38eb8",
         "type": "paragraph",
         "content": "Si le premier résultat ne convient pas, précisez votre demande au lieu de tout recommencer. Ajoutez les éléments qui manquaient et demandez une nouvelle version."
       },
       {
-        "id": "blk_3e1j2htv",
+        "id": "blk_dfnzpb7x",
         "type": "heading",
         "level": 2,
         "content": "Commande / Code"
       },
       {
-        "id": "blk_zvjnf7ke",
+        "id": "blk_tbn50unu",
         "type": "callout",
         "variant": "info",
         "title": "Note",
         "content": "Cet exemple est un modèle générique de consigne. Il peut être adapté à différents outils d’intelligence artificielle."
       },
       {
-        "id": "blk_84mlbdm4",
+        "id": "blk_gka6lkz0",
         "type": "code",
         "content": "Objectif : [décrire le résultat attendu]\nContexte : [donner les informations utiles]\nContraintes : [indiquer les limites ou règles]\nFormat : [préciser la forme de la réponse]",
         "language": "text"
       },
       {
-        "id": "blk_ej8lk4uc",
+        "id": "blk_jhu2bvem",
         "type": "heading",
         "level": 2,
         "content": "Conseils"
       },
       {
-        "id": "blk_taailm1f",
+        "id": "blk_68i2bq1b",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17752,13 +17794,13 @@
         ]
       },
       {
-        "id": "blk_zy5u64ud",
+        "id": "blk_t5hfqrtf",
         "type": "heading",
         "level": 2,
         "content": "Erreurs fréquentes"
       },
       {
-        "id": "blk_nlyg41mu",
+        "id": "blk_d43omtsp",
         "type": "list",
         "ordered": false,
         "items": [
@@ -17769,13 +17811,13 @@
         ]
       },
       {
-        "id": "blk_ggc72nnd",
+        "id": "blk_aiim23qx",
         "type": "heading",
         "level": 2,
         "content": "FAQ"
       },
       {
-        "id": "blk_ejghw8p3",
+        "id": "blk_kolpb6oq",
         "type": "faq",
         "items": [
           {
