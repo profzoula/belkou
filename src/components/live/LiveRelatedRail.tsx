@@ -4,19 +4,26 @@ import type { PublicLiveListItem } from "@/lib/live";
 export function LiveRelatedRail({
   sessions,
   currentId,
+  title = "Autres lives",
+  limit = 4,
 }: {
   sessions: PublicLiveListItem[];
-  currentId: string;
+  currentId?: string;
+  title?: string;
+  /** Rangée type Event1–Event4 sous le player. */
+  limit?: number;
 }) {
   const related = sessions
-    .filter((session) => session.id !== currentId && session.ticketPrice > 0)
-    .slice(0, 6);
+    .filter((session) => (currentId ? session.id !== currentId : true))
+    .slice(0, limit);
   if (related.length === 0) return null;
 
   return (
     <section>
-      <h2 className="font-display text-lg font-semibold tracking-tight">Autres lives</h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <h2 className="mb-4 text-sm font-semibold tracking-tight text-foreground sm:text-base">
+        {title}
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {related.map((session) => (
           <LiveVideoCard key={session.id} session={session} />
         ))}

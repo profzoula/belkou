@@ -6,6 +6,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { LiveChat } from "@/components/live/LiveChat";
 import { LiveInfoCard } from "@/components/live/LiveInfoCard";
+import { LiveRelatedRail } from "@/components/live/LiveRelatedRail";
 import { LiveStreamPlayer } from "@/components/live/LiveStreamPlayer";
 import { LiveVideoCard } from "@/components/live/LiveVideoCard";
 import { LiveWatchStage } from "@/components/live/LiveWatchStage";
@@ -137,6 +138,14 @@ export function LiveIndexPage({ initial }: { initial: LiveIndexData }) {
                   canComment={featuredFree.canComment}
                   live={featuredFree.status === "live"}
                   loggedIn={Boolean(session)}
+                />
+              }
+              events={
+                <LiveRelatedRail
+                  sessions={sessions}
+                  currentId={featuredFree.id}
+                  title="Événements"
+                  limit={4}
                 />
               }
             />

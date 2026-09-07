@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, Clock, Copy, ExternalLink, Share2 } from "lucide-react";
+import { ArrowLeft, Check, Clock, Copy, Share2 } from "lucide-react";
 import { useState } from "react";
 import { BlogBlockContent } from "@/components/blog/BlogBlockContent";
 import { BlogCard } from "@/components/blog/BlogCard";
@@ -41,43 +41,35 @@ function CoverBlock({ post }: { post: ArticlePost }) {
   );
 }
 
+function PopularThumb({ post }: { post: BlogPost }) {
+  if (post.coverImageUrl) {
+    return <img src={post.coverImageUrl} alt="" className="size-full object-cover" />;
+  }
+  return <div className={cn("size-full bg-gradient-to-br", post.coverGradient)} aria-hidden />;
+}
+
+/** Widget Facebook compact (cover + Follow Page), sans timeline. */
 function FacebookSidebar() {
   const facebookUrl = siteConfig.founder.facebookUrl;
   if (!facebookUrl) return null;
   const pluginSrc = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
     facebookUrl,
-  )}&tabs=timeline&width=340&height=420&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId`;
+  )}&tabs=&width=340&height=130&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false`;
 
   return (
-    <aside className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold tracking-tight text-foreground">Facebook</h2>
-      </div>
-      <div className="bg-elevated/40 p-2">
-        <iframe
-          title="Page Facebook BelKou"
-          src={pluginSrc}
-          width="100%"
-          height={420}
-          style={{ border: "none", overflow: "hidden" }}
-          scrolling="no"
-          allow="encrypted-media"
-          loading="lazy"
-          className="min-h-[420px] w-full"
-        />
-      </div>
-      <div className="border-t border-border px-4 py-3">
-        <a
-          href={facebookUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-        >
-          Ouvrir sur Facebook
-          <ExternalLink className="size-3.5" aria-hidden />
-        </a>
-      </div>
-    </aside>
+    <div className="overflow-hidden rounded-md border border-[#ddd] bg-white">
+      <iframe
+        title="Page Facebook BelKou"
+        src={pluginSrc}
+        width="100%"
+        height={130}
+        style={{ border: "none", overflow: "hidden", display: "block" }}
+        scrolling="no"
+        allow="encrypted-media"
+        loading="lazy"
+        className="w-full"
+      />
+    </div>
   );
 }
 
@@ -114,10 +106,10 @@ export function BlogArticlePage({
 
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] lg:items-start lg:gap-10">
             <div className="min-w-0 space-y-8">
-              <article className="overflow-hidden rounded-2xl border border-border bg-card">
+              <article>
                 <CoverBlock post={post} />
 
-                <header className="border-b border-border px-5 py-6 sm:px-8 sm:py-8">
+                <header className="border-b border-border py-6 sm:py-8">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
                     {post.category}
                   </p>
@@ -177,7 +169,7 @@ export function BlogArticlePage({
                   ) : null}
                 </header>
 
-                <div className="px-5 py-8 sm:px-8 sm:py-10">
+                <div className="py-8 sm:py-10">
                   {post.htmlBody ? (
                     <BlogBlockContent html={post.htmlBody} className="mx-0 max-w-none" />
                   ) : (
@@ -207,30 +199,41 @@ export function BlogArticlePage({
               ) : null}
             </div>
 
-            <aside className="space-y-6 lg:sticky lg:top-24">
+            <aside className="space-y-8 lg:sticky lg:top-24">
               {popular.length > 0 ? (
-                <section
-                  aria-labelledby="popular-heading"
-                  className="overflow-hidden rounded-2xl border border-border bg-card"
-                >
-                  <div className="border-b border-border px-4 py-3">
-                    <h2
-                      id="popular-heading"
-                      className="text-sm font-semibold tracking-tight text-foreground"
-                    >
-                      Articles populaires
-                    </h2>
-                  </div>
-                  <div className="divide-y divide-border p-2">
+                <section aria-labelledby="popular-heading">
+                  <h2
+                    id="popular-heading"
+                    className="mb-3 text-sm font-semibold tracking-tight text-foreground"
+                  >
+                    Articles populaires
+                  </h2>
+                  <ul className="space-y-4">
                     {popular.map((item) => (
-                      <BlogCard
-                        key={item.slug}
-                        post={item}
-                        variant="compact"
-                        className="rounded-xl border-0 shadow-none hover:bg-elevated/60"
-                      />
+                      <li key={item.slug}>
+                        <Link
+                          to="/blog/$slug"
+                          params={{ slug: item.slug }}
+                          className="group flex gap-3"
+                        >
+                          <span className="relative size-14 shrink-0 overflow-hidden rounded-md bg-elevated">
+                            <PopularThumb post={item} />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="text-[11px] font-semibold text-primary">
+                              {item.category}
+                            </span>
+                            <span className="mt-0.5 line-clamp-2 block text-sm font-medium leading-snug text-foreground group-hover:text-primary">
+                              {item.title}
+                            </span>
+                            <span className="mt-1 block text-xs text-muted-foreground">
+                              {formatBlogDate(item.publishedAt)} · {item.readMinutes} min
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </section>
               ) : null}
 

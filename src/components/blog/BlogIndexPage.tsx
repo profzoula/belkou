@@ -44,16 +44,10 @@ type BlogIndexPageProps = {
 
 export function BlogIndexPage({ posts }: BlogIndexPageProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [activeTag, setActiveTag] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const categories = useMemo(
     () => Array.from(new Set([...blogCategories, ...posts.map((post) => post.category)])),
-    [posts],
-  );
-
-  const tags = useMemo(
-    () => Array.from(new Set(posts.flatMap((post) => post.tags ?? []))).sort(),
     [posts],
   );
 
@@ -65,15 +59,14 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
       .toLowerCase();
     return posts.filter((post) => {
       const matchesCategory = activeCategory === "all" || post.category === activeCategory;
-      const matchesTag = activeTag === "all" || post.tags?.includes(activeTag);
       const searchable = [post.title, post.excerpt, post.category, ...(post.tags ?? [])]
         .join(" ")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase();
-      return matchesCategory && matchesTag && (!query || searchable.includes(query));
+      return matchesCategory && (!query || searchable.includes(query));
     });
-  }, [posts, activeCategory, activeTag, searchQuery]);
+  }, [posts, activeCategory, searchQuery]);
 
   const featured = filtered.find((post) => post.featured) ?? filtered[0];
   const side = filtered.filter((post) => post.slug !== featured?.slug).slice(0, 2);
@@ -164,41 +157,6 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                 </button>
               ))}
             </nav>
-            {tags.length ? (
-              <div
-                className="mt-3 flex flex-wrap items-center gap-2"
-                aria-label="Filtrer par étiquette"
-              >
-                <span className="mr-1 text-xs font-semibold text-muted-foreground">Sujets :</span>
-                <button
-                  type="button"
-                  onClick={() => setActiveTag("all")}
-                  className={cn(
-                    "rounded-full px-3 py-1 text-xs font-medium",
-                    activeTag === "all"
-                      ? "bg-foreground text-background"
-                      : "bg-muted text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  Tout
-                </button>
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setActiveTag(tag)}
-                    className={cn(
-                      "rounded-full px-3 py-1 text-xs font-medium",
-                      activeTag === tag
-                        ? "bg-foreground text-background"
-                        : "bg-muted text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            ) : null}
           </div>
         </section>
 

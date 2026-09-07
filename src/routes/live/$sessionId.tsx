@@ -203,10 +203,15 @@ function LiveSessionPage() {
                     loggedIn={Boolean(session)}
                   />
                 }
+                events={
+                  <LiveRelatedRail
+                    sessions={related}
+                    currentId={live.id}
+                    title="Événements"
+                    limit={4}
+                  />
+                }
               />
-            </div>
-            <div className="site-container space-y-4 py-8 pb-16">
-              <LiveRelatedRail sessions={related} currentId={live.id} />
             </div>
           </>
         ) : (
@@ -214,7 +219,7 @@ function LiveSessionPage() {
           <>
             <LiveEventPage live={live} loggedIn={Boolean(session)} />
             <div className="site-container space-y-4 pb-16">
-              <LiveRelatedRail sessions={related} currentId={live.id} />
+              <LiveRelatedRail sessions={related} currentId={live.id} title="Événements" limit={4} />
             </div>
           </>
         )}
