@@ -127,7 +127,7 @@ export function LiveChat({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-col overflow-hidden border-zinc-800 bg-zinc-950 text-zinc-100 lg:border-l",
+        "flex h-full min-h-0 flex-col overflow-hidden bg-zinc-950 text-zinc-100",
         className,
       )}
     >
@@ -145,7 +145,7 @@ export function LiveChat({
           role="log"
           aria-live="polite"
           aria-label="Messages du live"
-          className="h-full space-y-3 overflow-y-auto px-3 py-3"
+          className="absolute inset-0 space-y-3 overflow-y-auto overscroll-contain px-3 py-3"
         >
           {live ? (
             <p className="rounded-lg bg-zinc-900 px-3 py-2 text-xs leading-relaxed text-zinc-400">

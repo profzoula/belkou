@@ -28,8 +28,8 @@ async function exitNativeFullscreen() {
 }
 
 /**
- * Layout watch : [player | chat] à même hauteur, puis événements sous le player.
- * Topbar/Navbar restent hors de ce composant (Navbar parent).
+ * Layout watch : player 16:9 + chat à la même hauteur (scroll interne),
+ * puis caption / événements sous le player.
  */
 export function LiveWatchStage({ player, chat, caption, events }: LiveWatchStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -114,7 +114,7 @@ export function LiveWatchStage({ player, chat, caption, events }: LiveWatchStage
               <Minimize className="size-5" aria-hidden />
             </button>
           </div>
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-zinc-950 md:h-full md:w-[22.5rem] md:flex-none md:shrink-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-zinc-950 md:h-full md:w-[22.5rem] md:flex-none md:shrink-0">
             {chat}
           </div>
         </div>
@@ -125,52 +125,52 @@ export function LiveWatchStage({ player, chat, caption, events }: LiveWatchStage
   return (
     <div ref={stageRef} className="bg-zinc-950">
       <div className="site-container px-0 sm:px-4 lg:px-6">
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22.5rem)] lg:grid-rows-[auto_auto_auto] lg:items-stretch">
-          {/* Live streaming play */}
-          <div className="relative aspect-video w-full min-w-0 bg-black lg:col-start-1 lg:row-start-1">
-            {player}
-            {touchDevice ? null : (
-              <button
-                type="button"
-                onClick={toggle}
-                className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label="Plein écran"
-                title="Plein écran (F)"
-              >
-                <Maximize className="size-5" aria-hidden />
-              </button>
-            )}
+        {/*
+          Hauteur du bloc = player 16:9 seulement.
+          Chat en absolute à droite → ne peut plus allonger la page avec tous les messages.
+        */}
+        <div className="relative">
+          <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22.5rem)]">
+            <div className="relative aspect-video w-full min-w-0 overflow-hidden bg-black">
+              {player}
+              {touchDevice ? null : (
+                <button
+                  type="button"
+                  onClick={toggle}
+                  className="absolute bottom-14 right-3 z-20 grid size-11 place-items-center rounded-md bg-black/65 text-white shadow-sm backdrop-blur-sm transition-colors hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  aria-label="Plein écran"
+                  title="Plein écran (F)"
+                >
+                  <Maximize className="size-5" aria-hidden />
+                </button>
+              )}
+            </div>
+            {/* Réserve la colonne chat sur desktop (hauteur portée par le player). */}
+            <div className="hidden lg:block" aria-hidden />
           </div>
 
-          {/* Chat — même hauteur que le player (ligne 1 uniquement) */}
           <div
             className={cn(
-              "flex min-h-0 min-w-0 flex-col border-t border-white/10 bg-zinc-950",
-              "h-[min(50vh,24rem)] w-full",
-              "lg:col-start-2 lg:row-start-1 lg:h-auto lg:min-h-0 lg:border-t-0 lg:border-l lg:border-white/10",
+              "flex min-h-0 flex-col overflow-hidden border-t border-white/10 bg-zinc-950",
+              "h-[min(42vh,22rem)] w-full",
+              "lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[22.5rem] lg:border-l lg:border-t-0",
             )}
           >
             {chat}
           </div>
-
-          {caption ? (
-            <div className="border-t border-white/10 px-4 py-4 sm:px-5 lg:col-start-1 lg:row-start-2">
-              {caption}
-            </div>
-          ) : null}
-
-          {events ? (
-            <div
-              className={cn(
-                "border-t border-white/10 bg-background px-4 py-5 sm:px-5",
-                "lg:col-start-1 lg:row-start-3",
-                !caption && "lg:row-start-2",
-              )}
-            >
-              {events}
-            </div>
-          ) : null}
         </div>
+
+        {caption ? (
+          <div className="border-t border-white/10 px-4 py-4 sm:px-5 lg:pr-[calc(22.5rem+1px)]">
+            {caption}
+          </div>
+        ) : null}
+
+        {events ? (
+          <div className="border-t border-white/10 bg-background px-4 py-5 sm:px-5 lg:pr-[calc(22.5rem+1px)]">
+            {events}
+          </div>
+        ) : null}
       </div>
     </div>
   );
