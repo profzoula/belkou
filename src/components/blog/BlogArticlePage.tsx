@@ -48,26 +48,29 @@ function PopularThumb({ post }: { post: BlogPost }) {
   return <div className={cn("size-full bg-gradient-to-br", post.coverGradient)} aria-hidden />;
 }
 
-/** Widget Facebook compact (cover + Follow Page), sans timeline. */
+/** Widget Facebook compact (cover + Follow), dimensions stables pour éviter le clipping. */
 function FacebookSidebar() {
   const facebookUrl = siteConfig.founder.facebookUrl;
   if (!facebookUrl) return null;
+
+  // Largeur fixe = sidebar ; hauteur ≥ contenu cover + nom + barre Follow/Share.
+  const width = 280;
+  const height = 200;
   const pluginSrc = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(
     facebookUrl,
-  )}&tabs=&width=340&height=130&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false`;
+  )}&tabs=&width=${width}&height=${height}&small_header=false&adapt_container_width=false&hide_cover=false&show_facepile=false&locale=fr_FR`;
 
   return (
-    <div className="overflow-hidden rounded-md border border-[#ddd] bg-white">
+    <div className="mx-auto w-full max-w-[280px] overflow-hidden rounded-md border border-[#ddd] bg-white">
       <iframe
         title="Page Facebook BelKou"
         src={pluginSrc}
-        width="100%"
-        height={130}
-        style={{ border: "none", overflow: "hidden", display: "block" }}
+        width={width}
+        height={height}
+        style={{ border: "none", overflow: "hidden", display: "block", width: "100%" }}
         scrolling="no"
         allow="encrypted-media"
         loading="lazy"
-        className="w-full"
       />
     </div>
   );
