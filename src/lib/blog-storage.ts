@@ -273,7 +273,7 @@ export function withPostContentHtml(post: StoredBlogPost, html: string): StoredB
 }
 
 export function seedStoredPostsFromStatic(): StoredBlogPost[] {
-  // Blog BelKou : uniquement les 10 astuces (pas les anciens articles éditoriaux)
+  // Blog BelKou : pack seed (astuces Windows/Linux + articles IA)
   return loadAstucesSeed();
 }
 

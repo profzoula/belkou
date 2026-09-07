@@ -23,6 +23,7 @@ import {
   adminSaveBlogPost,
   getAdminBlogCategories,
   getAdminBlogPosts,
+  getAdminBlogSeedStatus,
 } from "@/lib/fns/admin";
 import {
   slugifyBlogCategoryId,
@@ -106,6 +107,14 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
   const [editing, setEditing] = useState<StoredBlogPost | null>(null);
   const [query, setQuery] = useState("");
   const [newCategory, setNewCategory] = useState("");
+  const [seedStatus, setSeedStatus] = useState<{
+    seedCount: number;
+    cmsCount: number;
+    inSync: boolean;
+    missingFromCms: number;
+    extraInCms: number;
+    lastImportedAt: string | null;
+  } | null>(null);
 
   const loadPostsFn = useServerFn(getAdminBlogPosts);
   const savePostFn = useServerFn(adminSaveBlogPost);
@@ -113,14 +122,20 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
   const mergeAstucesFn = useServerFn(adminMergeAstucesBlogSeed);
   const loadCatsFn = useServerFn(getAdminBlogCategories);
   const saveCatsFn = useServerFn(adminSaveBlogCategories);
+  const loadSeedStatusFn = useServerFn(getAdminBlogSeedStatus);
 
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [postsResult, catsResult] = await Promise.all([loadPostsFn(), loadCatsFn()]);
+      const [postsResult, catsResult, statusResult] = await Promise.all([
+        loadPostsFn(),
+        loadCatsFn(),
+        loadSeedStatusFn().catch(() => null),
+      ]);
       setPosts(postsResult.posts);
       setCategories(catsResult.categories);
       setDefaults(catsResult.defaults);
+      setSeedStatus(statusResult);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Chargement impossible");
     } finally {
@@ -198,7 +213,17 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
     try {
       const result = await mergeAstucesFn();
       setPosts(result.posts);
-      toast.success(`${result.imported} astuces publiées — les autres articles ont été retirés`);
+      setSeedStatus({
+        seedCount: result.imported,
+        cmsCount: result.posts.length,
+        inSync: true,
+        missingFromCms: 0,
+        extraInCms: 0,
+        lastImportedAt: result.importedAt,
+      });
+      toast.success(
+        `${result.imported} articles synchronisés dans Supabase — la liste ci-dessous = articles déjà publiés (pas une file d’attente).`,
+      );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Import impossible");
     } finally {
@@ -253,7 +278,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Articles"
-          description="Tous les articles du blog — Classic Editor, publication et brouillons."
+          description="Liste des articles déjà dans le CMS (pas une file d’attente d’import). Après sync seed, ils restent ici parce qu’ils sont publiés."
           actions={
             <div className="flex flex-wrap gap-2">
               <Button
@@ -263,7 +288,9 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
                 disabled={saving}
                 onClick={importAstuces}
               >
-                  Importer les 90 articles
+                {seedStatus?.inSync
+                  ? `Resynchroniser (${seedStatus.seedCount})`
+                  : `Synchroniser le seed (${seedStatus?.seedCount ?? 90})`}
               </Button>
               <Button type="button" className="rounded-full" onClick={startCreate}>
                 <Plus className="size-4" /> Nouvel article
@@ -521,17 +548,47 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
       />
       <div className="surface space-y-4 rounded-2xl p-5 sm:p-6">
         <div>
-          <h3 className="font-semibold text-foreground">Import d’astuces</h3>
+          <h3 className="font-semibold text-foreground">Seed blog (astuces + IA)</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Remplace tout le blog par les 90 articles (70 astuces Windows/Linux + 20 IA).
+            Ce n’est <strong>pas</strong> une file « articles à importer ». Un clic{" "}
+            <strong>remplace</strong> tout le blog CMS (Supabase) par le pack seed du code (
+            {seedStatus?.seedCount ?? 90} articles). Ensuite ils apparaissent dans{" "}
+            <em>Articles</em> comme déjà publiés.
           </p>
+          {seedStatus ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {seedStatus.inSync ? (
+                <>
+                  État : <span className="font-medium text-emerald-600">synchronisé</span> (
+                  {seedStatus.cmsCount}/{seedStatus.seedCount}
+                  {seedStatus.lastImportedAt
+                    ? ` · dernier sync ${new Date(seedStatus.lastImportedAt).toLocaleString("fr-FR")}`
+                    : ""}
+                  )
+                </>
+              ) : (
+                <>
+                  État : <span className="font-medium text-amber-600">à synchroniser</span> — CMS{" "}
+                  {seedStatus.cmsCount}, seed {seedStatus.seedCount}
+                  {seedStatus.missingFromCms
+                    ? ` · ${seedStatus.missingFromCms} manquant(s) dans le CMS`
+                    : ""}
+                  {seedStatus.extraInCms
+                    ? ` · ${seedStatus.extraInCms} hors seed dans le CMS`
+                    : ""}
+                </>
+              )}
+            </p>
+          ) : null}
           <Button
             type="button"
             className="mt-3 rounded-full"
             disabled={saving}
             onClick={importAstuces}
           >
-            Importer les 90 articles
+            {seedStatus?.inSync
+              ? `Resynchroniser les ${seedStatus.seedCount} articles`
+              : `Synchroniser les ${seedStatus?.seedCount ?? 90} articles du seed`}
           </Button>
         </div>
         <div className="border-t border-border pt-4">

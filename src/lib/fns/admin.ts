@@ -1539,9 +1539,19 @@ export const adminMergeAstucesBlogSeed = createServerFn({ method: "POST" }).hand
     if (!result.ok) {
       throw new Error(result.reason ?? "Import impossible");
     }
-    return { posts: result.posts, imported: result.posts.filter((p) => p.id.startsWith("astuce_")).length };
+    return {
+      posts: result.posts,
+      imported: result.importedCount ?? result.posts.length,
+      importedAt: result.importedAt ?? null,
+    };
   },
 );
+
+export const getAdminBlogSeedStatus = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+  const { getBlogSeedImportStatus } = await import("@/server/site-content");
+  return getBlogSeedImportStatus();
+});
 
 export const adminUploadBlogImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>

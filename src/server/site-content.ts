@@ -1096,7 +1096,9 @@ export async function getPublishedBlogPostBySlug(slug: string) {
   return posts.find((post) => post.slug === slug) ?? null;
 }
 
-/** Remplace tout le blog CMS par les 10 astuces seed (retire les autres articles). */
+const BLOG_SEED_IMPORT_META_KEY = "blog_seed_import_meta";
+
+/** Remplace tout le blog CMS par le seed (astuces + articles IA). */
 export async function mergeAstucesSeedPosts() {
   const { sanitizeStoredPost, seedStoredPostsFromStatic } = await import(
     "@/lib/blog-storage"
@@ -1107,7 +1109,46 @@ export async function mergeAstucesSeedPosts() {
   if (!tipSeeds.length) {
     return { ok: false as const, reason: "Aucune astuce seed disponible" };
   }
-  return saveStoredBlogPosts(tipSeeds);
+  const saved = await saveStoredBlogPosts(tipSeeds);
+  if (!saved.ok) return saved;
+  const importedAt = new Date().toISOString();
+  await writeJson(BLOG_SEED_IMPORT_META_KEY, {
+    importedAt,
+    count: saved.posts.length,
+    ids: saved.posts.map((p) => p.id),
+  });
+  return { ...saved, importedAt, importedCount: saved.posts.length };
+}
+
+export async function getBlogSeedImportStatus() {
+  const { seedStoredPostsFromStatic, sanitizeStoredPost } = await import(
+    "@/lib/blog-storage"
+  );
+  const seed = seedStoredPostsFromStatic()
+    .map((item) => sanitizeStoredPost(item))
+    .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
+  const posts = await getStoredBlogPosts();
+  const seedIds = new Set(seed.map((p) => p.id));
+  const cmsIds = new Set(posts.map((p) => p.id));
+  const missingFromCms = [...seedIds].filter((id) => !cmsIds.has(id));
+  const extraInCms = [...cmsIds].filter((id) => !seedIds.has(id));
+  const inSync =
+    missingFromCms.length === 0 &&
+    extraInCms.length === 0 &&
+    seed.length > 0 &&
+    seed.length === posts.length;
+  const meta = await readJson<{ importedAt?: string; count?: number } | null>(
+    BLOG_SEED_IMPORT_META_KEY,
+    null,
+  );
+  return {
+    seedCount: seed.length,
+    cmsCount: posts.length,
+    inSync,
+    missingFromCms: missingFromCms.length,
+    extraInCms: extraInCms.length,
+    lastImportedAt: meta?.importedAt ?? null,
+  };
 }
 
 const BLOG_CATEGORIES_KEY = "blog_categories";
