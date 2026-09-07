@@ -114,6 +114,19 @@ export function LiveIndexPage({ initial }: { initial: LiveIndexData }) {
   const showFreeStage = Boolean(featuredFree?.canWatch && featuredFree.playbackUrl);
   const hasPaid = paid.length > 0;
 
+  // Sous le player : jusqu’à 4 autres lives — exclus des listes du bas pour éviter les doublons.
+  const stageEventSessions = showFreeStage
+    ? sessions
+        .filter((item) => item.id !== featuredFree?.id)
+        .slice(0, 4)
+    : [];
+  const stageEventIds = new Set(stageEventSessions.map((item) => item.id));
+  const liveNowBelow = liveNow.filter((item) => !stageEventIds.has(item.id));
+  const upcomingBelow = upcoming.filter((item) => !stageEventIds.has(item.id));
+  const replaysBelow = replays.filter((item) => !stageEventIds.has(item.id));
+  const hasPaidBelow =
+    liveNowBelow.length > 0 || upcomingBelow.length > 0 || replaysBelow.length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -142,8 +155,8 @@ export function LiveIndexPage({ initial }: { initial: LiveIndexData }) {
               }
               events={
                 <LiveRelatedRail
-                  sessions={sessions}
-                  currentId={featuredFree.id}
+                  sessions={stageEventSessions}
+                  reservedIds={reservedIds}
                   title="Événements"
                   limit={4}
                 />
@@ -174,18 +187,24 @@ export function LiveIndexPage({ initial }: { initial: LiveIndexData }) {
             </header>
           )}
 
-          {hasPaid ? (
-            <div className={showFreeStage ? "space-y-10 pt-6" : "space-y-10"}>
-              {showFreeStage ? (
+          {showFreeStage ? (
+            hasPaidBelow ? (
+              <div className="space-y-10 pt-6">
                 <h2 className="font-display text-lg font-semibold tracking-tight sm:text-xl">
                   Lives payants
                 </h2>
-              ) : null}
+                <LiveSection title="En direct" sessions={liveNowBelow} reservedIds={reservedIds} />
+                <LiveSection title="À venir" sessions={upcomingBelow} reservedIds={reservedIds} />
+                <LiveSection title="Replays" sessions={replaysBelow} reservedIds={reservedIds} />
+              </div>
+            ) : null
+          ) : hasPaid ? (
+            <div className="space-y-10">
               <LiveSection title="En direct" sessions={liveNow} reservedIds={reservedIds} />
               <LiveSection title="À venir" sessions={upcoming} reservedIds={reservedIds} />
               <LiveSection title="Replays" sessions={replays} reservedIds={reservedIds} />
             </div>
-          ) : showFreeStage ? null : (
+          ) : (
             <EmptyState
               icon={Radio}
               title="Aucun live pour le moment"

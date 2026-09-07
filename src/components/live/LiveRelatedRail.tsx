@@ -4,11 +4,13 @@ import type { PublicLiveListItem } from "@/lib/live";
 export function LiveRelatedRail({
   sessions,
   currentId,
+  reservedIds,
   title = "Autres lives",
   limit = 4,
 }: {
   sessions: PublicLiveListItem[];
   currentId?: string;
+  reservedIds?: Set<string>;
   title?: string;
   /** Rangée type Event1–Event4 sous le player. */
   limit?: number;
@@ -25,7 +27,11 @@ export function LiveRelatedRail({
       </h2>
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {related.map((session) => (
-          <LiveVideoCard key={session.id} session={session} />
+          <LiveVideoCard
+            key={session.id}
+            session={session}
+            reserved={reservedIds?.has(session.id)}
+          />
         ))}
       </div>
     </section>
