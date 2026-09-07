@@ -7,8 +7,9 @@ export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = await loadBlogPost(params.slug);
     if (!post) throw notFound();
-    const related = (await loadBlogIndex())
-      .filter((item) => item.slug !== post.slug)
+    const index = await loadBlogIndex();
+    const others = index.filter((item) => item.slug !== post.slug);
+    const related = [...others]
       .sort((a, b) => {
         const score = (item: typeof a) =>
           (item.category === post.category ? 3 : 0) +
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/blog/$slug")({
         return score(b) - score(a);
       })
       .slice(0, 3);
-    return { post, related };
+    const popular = [...others]
+      .sort((a, b) => Number(Boolean(b.trending)) - Number(Boolean(a.trending)))
+      .slice(0, 5);
+    return { post, related, popular };
   },
   head: ({ loaderData }) =>
     seoHead({
@@ -32,6 +36,6 @@ export const Route = createFileRoute("/blog/$slug")({
 });
 
 function BlogArticleRoute() {
-  const { post, related } = Route.useLoaderData();
-  return <BlogArticlePage post={post} related={related} />;
+  const { post, related, popular } = Route.useLoaderData();
+  return <BlogArticlePage post={post} related={related} popular={popular} />;
 }
