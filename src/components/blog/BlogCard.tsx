@@ -37,7 +37,7 @@ function CoverMedia({
     return (
       <img
         src={post.coverImageUrl}
-        alt=""
+        alt={post.coverAlt || post.coverLabel || post.title}
         className={cn("absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.03]", className)}
       />
     );

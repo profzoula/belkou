@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Clock } from "lucide-react";
+import { ArrowLeft, Check, Clock, Copy, Share2 } from "lucide-react";
+import { useState } from "react";
 import { BlogBlockContent } from "@/components/blog/BlogBlockContent";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { Footer } from "@/components/site/Footer";
@@ -9,11 +10,24 @@ import { formatBlogDate, type BlogPost } from "@/lib/blog";
 import { cn } from "@/lib/utils";
 
 type BlogArticlePageProps = {
-  post: BlogPost & { htmlBody?: string; coverImageUrl?: string };
+  post: BlogPost & { htmlBody?: string; coverImageUrl?: string; coverAlt?: string };
   related?: BlogPost[];
 };
 
 export function BlogArticlePage({ post, related = [] }: BlogArticlePageProps) {
+  const [copied, setCopied] = useState(false);
+  const shareUrl = typeof window === "undefined" ? "" : window.location.href;
+  const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
+  const share = async () => {
+    const data = { title: post.title, text: post.excerpt, url: shareUrl };
+    if (canNativeShare) {
+      await navigator.share(data);
+      return;
+    }
+    await navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  };
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -54,14 +68,43 @@ export function BlogArticlePage({ post, related = [] }: BlogArticlePageProps) {
                   <Clock className="size-3.5" aria-hidden />
                   {post.readMinutes} min de lecture
                 </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="ml-auto rounded-full"
+                  onClick={() => void share()}
+                >
+                  {copied ? (
+                    <Check className="size-3.5" />
+                  ) : canNativeShare ? (
+                    <Share2 className="size-3.5" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
+                  {copied ? "Lien copié" : "Partager"}
+                </Button>
               </div>
+              {post.tags?.length ? (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to="/blog"
+                      className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </header>
 
           {post.coverImageUrl ? (
             <img
               src={post.coverImageUrl}
-              alt={post.coverLabel || post.title}
+              alt={post.coverAlt || post.coverLabel || post.title}
               className="mx-auto aspect-[21/9] max-h-[360px] w-full max-w-5xl object-cover sm:rounded-b-2xl"
             />
           ) : (

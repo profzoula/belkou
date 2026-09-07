@@ -153,19 +153,21 @@ function HlsLivePlayer({
       const hls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
-        // Stay 2 segments from the edge instead of the default 3 (~less delay).
-        liveSyncDurationCount: 2,
-        liveMaxLatencyDurationCount: 4,
-        maxLiveSyncPlaybackRate: 1.8,
+        backBufferLength: 0,
+        maxBufferLength: 6,
+        maxMaxBufferLength: 10,
+        liveSyncDurationCount: 1,
+        liveMaxLatencyDurationCount: 3,
         liveDurationInfinity: true,
-        backBufferLength: 8,
       });
       hlsRef.current = hls;
 
-      const jumpToLive = () => {
-        const edge = hls.liveSyncPosition;
-        if (edge == null || !Number.isFinite(video.currentTime)) return;
-        if (edge - video.currentTime > 3) video.currentTime = edge;
+      const snapToLive = () => {
+        const latency = hls.latency;
+        if (typeof latency !== "number" || latency < 8) return;
+        if (video.buffered.length === 0) return;
+        const edge = video.buffered.end(video.buffered.length - 1);
+        video.currentTime = Math.max(0, edge - 1.2);
       };
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -177,7 +179,7 @@ function HlsLivePlayer({
         );
         void video.play().catch(() => undefined);
       });
-      hls.on(Hls.Events.LEVEL_UPDATED, jumpToLive);
+      hls.on(Hls.Events.FRAG_BUFFERED, snapToLive);
       hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
         setAutoHeight(hls.levels[data.level]?.height ?? null);
       });
@@ -210,7 +212,6 @@ function HlsLivePlayer({
         controlsList={nativeFullscreen ? undefined : "nofullscreen"}
         playsInline
         autoPlay
-        preload="auto"
         title={title}
       />
       <HlsQualityMenu

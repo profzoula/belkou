@@ -100,7 +100,9 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
         parts.push(`<hr class="wp-block-separator is-style-${esc(block.style || "default")}" />`);
         break;
       case "spacer":
-        parts.push(`<div class="wp-block-spacer" style="height:${block.height}px" aria-hidden="true"></div>`);
+        parts.push(
+          `<div class="wp-block-spacer" style="height:${block.height}px" aria-hidden="true"></div>`,
+        );
         break;
       case "buttons":
         parts.push(
@@ -115,7 +117,10 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
       case "columns":
         parts.push(
           `<div class="wp-block-columns count-${block.count}">${block.columns
-            .map((col) => `<div class="wp-block-column"><p>${esc(col).replace(/\n/g, "<br>")}</p></div>`)
+            .map(
+              (col) =>
+                `<div class="wp-block-column"><p>${esc(col).replace(/\n/g, "<br>")}</p></div>`,
+            )
             .join("")}</div>`,
         );
         break;
@@ -159,7 +164,8 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
         }
         break;
       case "audio":
-        if (block.url) parts.push(`<audio class="wp-block-audio" controls src="${esc(block.url)}"></audio>`);
+        if (block.url)
+          parts.push(`<audio class="wp-block-audio" controls src="${esc(block.url)}"></audio>`);
         break;
       case "file":
         if (block.url)
@@ -177,8 +183,7 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
           `<div class="wp-block-faq">${block.items
             .filter((item) => item.q.trim())
             .map(
-              (item) =>
-                `<details><summary>${esc(item.q)}</summary><p>${esc(item.a)}</p></details>`,
+              (item) => `<details><summary>${esc(item.q)}</summary><p>${esc(item.a)}</p></details>`,
             )
             .join("")}</div>`,
         );
@@ -191,7 +196,10 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
         if (!headings.length) break;
         parts.push(
           `<nav class="wp-block-toc" aria-label="Sommaire"><ol>${headings
-            .map((h, i) => `<li class="level-${h.level}"><a href="#heading-${i}">${esc(h.content)}</a></li>`)
+            .map(
+              (h, i) =>
+                `<li class="level-${h.level}"><a href="#heading-${i}">${esc(h.content)}</a></li>`,
+            )
             .join("")}</ol></nav>`,
         );
         break;
@@ -331,9 +339,10 @@ export function sanitizeStoredPost(raw: unknown): StoredBlogPost | null {
   if (!raw || typeof raw !== "object") return null;
   const p = raw as Partial<StoredBlogPost>;
   if (!p.id || !p.slug || !p.title) return null;
-  const blocks = Array.isArray(p.blocks) && p.blocks.length
-    ? (p.blocks as BlogBlock[])
-    : [createEmptyBlock("paragraph")];
+  const blocks =
+    Array.isArray(p.blocks) && p.blocks.length
+      ? (p.blocks as BlogBlock[])
+      : [createEmptyBlock("paragraph")];
   return {
     id: String(p.id),
     slug: slugifyBlog(String(p.slug)) || `article-${String(p.id).slice(0, 8)}`,
@@ -377,6 +386,7 @@ export function sanitizeStoredPost(raw: unknown): StoredBlogPost | null {
 export function storedToPublicPost(post: StoredBlogPost): BlogPost & {
   htmlBody: string;
   coverImageUrl?: string;
+  coverAlt?: string;
 } {
   return {
     slug: post.slug,
@@ -403,5 +413,7 @@ export function storedToPublicPost(post: StoredBlogPost): BlogPost & {
         ? post.blocks[0].content
         : blocksToHtml(post.blocks),
     coverImageUrl: post.coverImageUrl,
+    coverAlt: post.coverAlt,
+    tags: post.tags,
   };
 }

@@ -21,12 +21,23 @@ Kontenè `belkou` = `ossrs/srs:6`.
 
 `8888` se pou MediaMTX. **Ou pa gen MediaMTX** — pa itilize 8888.
 
-### OBS
+### OBS (moins de délai)
 
 - Service : Custom…
 - Serveur : `rtmp://127.0.0.1:1935/live`
 - Clé : `stream`
+- **Sortie → Avancé :** intervalle d’image clé **1 seconde** (x264)
 - **Démarrer la diffusion**
+
+HLS + tunnel Cloudflare reste en général **5–15 s** de retard (pas du temps réel). Pour ~1 s il faudrait WebRTC.
+
+Relancer SRS avec fragments 1 s :
+
+```bat
+docker stop belkou
+docker rm belkou
+docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 -v C:\Project\belkou\deploy\srs-lowlatency.conf:/usr/local/srs/conf/srs.conf ossrs/srs:6
+```
 
 ### BelKou Admin → Live Free
 
@@ -36,15 +47,11 @@ Kontenè `belkou` = `ossrs/srs:6`.
 
 Pa kole `…:1935/…` — 1935 se RTMP, pa HLS.
 
-Lanse SRS (segman HLS 1s — mwens reta) :
+Lanse SRS si li pa la :
 
 ```bat
-docker stop belkou
-docker rm belkou
-docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 -v C:/Project/belkou/deploy/srs/srs.conf:/usr/local/srs/conf/srs.conf ossrs/srs:6
+docker run -d --name belkou -p 1935:1935 -p 1985:1985 -p 8081:8080 ossrs/srs:6
 ```
-
-Nan OBS → Sortie → Encodage : **Keyframe 1 seconde** (sinon HLS rete an reta).
 
 ## Altènatif MediaMTX
 

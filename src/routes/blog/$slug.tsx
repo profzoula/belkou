@@ -9,6 +9,12 @@ export const Route = createFileRoute("/blog/$slug")({
     if (!post) throw notFound();
     const related = (await loadBlogIndex())
       .filter((item) => item.slug !== post.slug)
+      .sort((a, b) => {
+        const score = (item: typeof a) =>
+          (item.category === post.category ? 3 : 0) +
+          (item.tags?.filter((tag) => post.tags?.includes(tag)).length ?? 0);
+        return score(b) - score(a);
+      })
       .slice(0, 3);
     return { post, related };
   },
@@ -20,6 +26,7 @@ export const Route = createFileRoute("/blog/$slug")({
       description:
         loaderData?.post?.seoDescription || loaderData?.post?.excerpt,
       path: loaderData?.post ? `/blog/${loaderData.post.slug}` : "/blog",
+      ogImage: loaderData?.post?.coverImageUrl,
     }),
   component: BlogArticleRoute,
 });

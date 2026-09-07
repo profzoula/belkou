@@ -7,6 +7,7 @@ export type PublicBlogPost = BlogPost & {
   coverImageUrl?: string;
   seoTitle?: string;
   seoDescription?: string;
+  tags?: string[];
 };
 
 export const getPublicBlogPosts = createServerFn({ method: "GET" }).handler(async () => {
@@ -27,9 +28,7 @@ export const getPublicBlogPosts = createServerFn({ method: "GET" }).handler(asyn
 });
 
 export const getPublicBlogPost = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) =>
-    z.object({ slug: z.string().min(1) }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1) }).parse(data))
   .handler(async ({ data }) => {
     const { getPublishedBlogPostBySlug } = await import("@/server/site-content");
     const { storedToPublicPost } = await import("@/lib/blog-storage");

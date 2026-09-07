@@ -31,6 +31,8 @@ export type BlogPost = {
   body: string[];
   htmlBody?: string;
   coverImageUrl?: string;
+  coverAlt?: string;
+  tags?: string[];
 };
 
 const founder: BlogAuthor = {

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { BlogCard, BlogFeaturedHero } from "@/components/blog/BlogCard";
 import { Footer } from "@/components/site/Footer";
 import { Navbar } from "@/components/site/Navbar";
@@ -44,19 +44,36 @@ type BlogIndexPageProps = {
 
 export function BlogIndexPage({ posts }: BlogIndexPageProps) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeTag, setActiveTag] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const categories = useMemo(
     () => Array.from(new Set([...blogCategories, ...posts.map((post) => post.category)])),
     [posts],
   );
 
-  const filtered = useMemo(
-    () =>
-      activeCategory === "all"
-        ? posts
-        : posts.filter((post) => post.category === activeCategory),
-    [posts, activeCategory],
+  const tags = useMemo(
+    () => Array.from(new Set(posts.flatMap((post) => post.tags ?? []))).sort(),
+    [posts],
   );
+
+  const filtered = useMemo(() => {
+    const query = searchQuery
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    return posts.filter((post) => {
+      const matchesCategory = activeCategory === "all" || post.category === activeCategory;
+      const matchesTag = activeTag === "all" || post.tags?.includes(activeTag);
+      const searchable = [post.title, post.excerpt, post.category, ...(post.tags ?? [])]
+        .join(" ")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      return matchesCategory && matchesTag && (!query || searchable.includes(query));
+    });
+  }, [posts, activeCategory, activeTag, searchQuery]);
 
   const featured = filtered.find((post) => post.featured) ?? filtered[0];
   const side = filtered.filter((post) => post.slug !== featured?.slug).slice(0, 2);
@@ -95,6 +112,29 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
             </p>
           </div>
           <div className="site-container border-t border-border py-4">
+            <div className="relative mb-4 max-w-xl">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Rechercher un article, un outil ou un sujet…"
+                className="h-10 rounded-xl pl-9 pr-10"
+                aria-label="Rechercher dans le blog"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Effacer la recherche"
+                >
+                  <X className="size-4" />
+                </button>
+              ) : null}
+            </div>
             <nav className="flex flex-wrap gap-2" aria-label="Filtrer par catégorie">
               <button
                 type="button"
@@ -124,6 +164,41 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                 </button>
               ))}
             </nav>
+            {tags.length ? (
+              <div
+                className="mt-3 flex flex-wrap items-center gap-2"
+                aria-label="Filtrer par étiquette"
+              >
+                <span className="mr-1 text-xs font-semibold text-muted-foreground">Sujets :</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTag("all")}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium",
+                    activeTag === "all"
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  Tout
+                </button>
+                {tags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setActiveTag(tag)}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium",
+                      activeTag === tag
+                        ? "bg-foreground text-background"
+                        : "bg-muted text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -214,8 +289,8 @@ export function BlogIndexPage({ posts }: BlogIndexPageProps) {
                 Restez à jour avec BelKou
               </h2>
               <p className="mt-2 text-sm text-background/75 sm:text-base">
-                Nouveaux articles, lives et conseils de formation — directement dans votre
-                boîte mail.
+                Nouveaux articles, lives et conseils de formation — directement dans votre boîte
+                mail.
               </p>
             </div>
             <form
