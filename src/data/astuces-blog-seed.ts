@@ -1,6 +1,6 @@
 import type { StoredBlogPost } from "@/lib/blog-blocks";
 
-export const astucesBlogSeed = [
+const astucesBlogSeed = [
   {
     "id": "astuce_0001",
     "tipId": 1,
@@ -172,7 +172,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0001.jpg"
   },
   {
     "id": "astuce_0002",
@@ -371,7 +372,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0002.jpg"
   },
   {
     "id": "astuce_0003",
@@ -555,7 +557,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0003.jpg"
   },
   {
     "id": "astuce_0004",
@@ -767,7 +770,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0004.jpg"
   },
   {
     "id": "astuce_0005",
@@ -940,7 +944,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0005.jpg"
   },
   {
     "id": "astuce_0006",
@@ -1140,7 +1145,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0006.jpg"
   },
   {
     "id": "astuce_0007",
@@ -1312,7 +1318,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0007.jpg"
   },
   {
     "id": "astuce_0008",
@@ -1531,7 +1538,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0008.jpg"
   },
   {
     "id": "astuce_0009",
@@ -1730,7 +1738,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0009.jpg"
   },
   {
     "id": "astuce_0010",
@@ -1940,7 +1949,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0010.jpg"
   },
   {
     "id": "astuce_0011",
@@ -2146,7 +2156,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0011.jpg"
   },
   {
     "id": "astuce_0012",
@@ -2351,7 +2362,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0012.jpg"
   },
   {
     "id": "astuce_0013",
@@ -2556,7 +2568,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0013.jpg"
   },
   {
     "id": "astuce_0014",
@@ -2728,7 +2741,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0014.jpg"
   },
   {
     "id": "astuce_0015",
@@ -2900,7 +2914,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0015.jpg"
   },
   {
     "id": "astuce_0016",
@@ -3105,7 +3120,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0016.jpg"
   },
   {
     "id": "astuce_0017",
@@ -3310,7 +3326,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0017.jpg"
   },
   {
     "id": "astuce_0018",
@@ -3514,7 +3531,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0018.jpg"
   },
   {
     "id": "astuce_0019",
@@ -3719,7 +3737,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0019.jpg"
   },
   {
     "id": "astuce_0020",
@@ -3892,7 +3911,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0020.jpg"
   },
   {
     "id": "astuce_0021",
@@ -4091,7 +4111,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0021.jpg"
   },
   {
     "id": "astuce_0022",
@@ -4291,7 +4312,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0022.jpg"
   },
   {
     "id": "astuce_0023",
@@ -4465,7 +4487,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0023.jpg"
   },
   {
     "id": "astuce_0024",
@@ -4637,7 +4660,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0024.jpg"
   },
   {
     "id": "astuce_0025",
@@ -4837,7 +4861,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0025.jpg"
   },
   {
     "id": "astuce_0026",
@@ -5036,7 +5061,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0026.jpg"
   },
   {
     "id": "astuce_0027",
@@ -5235,7 +5261,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0027.jpg"
   },
   {
     "id": "astuce_0028",
@@ -5428,7 +5455,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0028.jpg"
   },
   {
     "id": "astuce_0029",
@@ -5599,7 +5627,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0029.jpg"
   },
   {
     "id": "astuce_0030",
@@ -5772,7 +5801,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0030.jpg"
   },
   {
     "id": "astuce_0031",
@@ -5972,7 +6002,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0031.jpg"
   },
   {
     "id": "astuce_0032",
@@ -6176,7 +6207,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0032.jpg"
   },
   {
     "id": "astuce_0033",
@@ -6375,7 +6407,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0033.jpg"
   },
   {
     "id": "astuce_0034",
@@ -6574,7 +6607,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0034.jpg"
   },
   {
     "id": "astuce_0035",
@@ -6774,7 +6808,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0035.jpg"
   },
   {
     "id": "astuce_0036",
@@ -6973,7 +7008,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0036.jpg"
   },
   {
     "id": "astuce_0037",
@@ -7167,7 +7203,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0037.jpg"
   },
   {
     "id": "astuce_0038",
@@ -7362,7 +7399,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0038.jpg"
   },
   {
     "id": "astuce_0039",
@@ -7556,7 +7594,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0039.jpg"
   },
   {
     "id": "astuce_0040",
@@ -7750,7 +7789,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0040.jpg"
   },
   {
     "id": "astuce_0041",
@@ -7949,7 +7989,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0041.jpg"
   },
   {
     "id": "astuce_0042",
@@ -8148,7 +8189,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0042.jpg"
   },
   {
     "id": "astuce_0043",
@@ -8347,7 +8389,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0043.jpg"
   },
   {
     "id": "astuce_0044",
@@ -8546,7 +8589,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0044.jpg"
   },
   {
     "id": "astuce_0045",
@@ -8739,7 +8783,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0045.jpg"
   },
   {
     "id": "astuce_0046",
@@ -8937,7 +8982,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0046.jpg"
   },
   {
     "id": "astuce_0047",
@@ -9136,7 +9182,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0047.jpg"
   },
   {
     "id": "astuce_0048",
@@ -9335,7 +9382,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0048.jpg"
   },
   {
     "id": "astuce_0049",
@@ -9529,7 +9577,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0049.jpg"
   },
   {
     "id": "astuce_0050",
@@ -9724,7 +9773,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0050.jpg"
   },
   {
     "id": "astuce_0051",
@@ -9919,7 +9969,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0051.jpg"
   },
   {
     "id": "astuce_0052",
@@ -10118,7 +10169,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0052.jpg"
   },
   {
     "id": "astuce_0053",
@@ -10318,7 +10370,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0053.jpg"
   },
   {
     "id": "astuce_0054",
@@ -10517,7 +10570,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0054.jpg"
   },
   {
     "id": "astuce_0055",
@@ -10711,7 +10765,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0055.jpg"
   },
   {
     "id": "astuce_0056",
@@ -10904,7 +10959,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0056.jpg"
   },
   {
     "id": "astuce_0057",
@@ -11103,7 +11159,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0057.jpg"
   },
   {
     "id": "astuce_0058",
@@ -11302,7 +11359,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0058.jpg"
   },
   {
     "id": "astuce_0059",
@@ -11502,7 +11560,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0059.jpg"
   },
   {
     "id": "astuce_0060",
@@ -11702,7 +11761,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0060.jpg"
   },
   {
     "id": "astuce_0061",
@@ -11897,7 +11957,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0061.jpg"
   },
   {
     "id": "astuce_0062",
@@ -12099,7 +12160,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0062.jpg"
   },
   {
     "id": "astuce_0063",
@@ -12293,7 +12355,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0063.jpg"
   },
   {
     "id": "astuce_0064",
@@ -12488,7 +12551,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0064.jpg"
   },
   {
     "id": "astuce_0065",
@@ -12690,7 +12754,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0065.jpg"
   },
   {
     "id": "astuce_0066",
@@ -12885,7 +12950,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0066.jpg"
   },
   {
     "id": "astuce_0067",
@@ -13087,7 +13153,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0067.jpg"
   },
   {
     "id": "astuce_0068",
@@ -13281,7 +13348,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0068.jpg"
   },
   {
     "id": "astuce_0069",
@@ -13477,7 +13545,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0069.jpg"
   },
   {
     "id": "astuce_0070",
@@ -13650,7 +13719,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/astuce_0070.jpg"
   },
   {
     "id": "ia_0001",
@@ -13853,7 +13923,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0001.jpg"
   },
   {
     "id": "ia_0002",
@@ -14071,7 +14142,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0002.jpg"
   },
   {
     "id": "ia_0003",
@@ -14278,7 +14350,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0003.jpg"
   },
   {
     "id": "ia_0004",
@@ -14485,7 +14558,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0004.jpg"
   },
   {
     "id": "ia_0005",
@@ -14703,7 +14777,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0005.jpg"
   },
   {
     "id": "ia_0006",
@@ -14910,7 +14985,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0006.jpg"
   },
   {
     "id": "ia_0007",
@@ -15117,7 +15193,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0007.jpg"
   },
   {
     "id": "ia_0008",
@@ -15324,7 +15401,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0008.jpg"
   },
   {
     "id": "ia_0009",
@@ -15531,7 +15609,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0009.jpg"
   },
   {
     "id": "ia_0010",
@@ -15738,7 +15817,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0010.jpg"
   },
   {
     "id": "ia_0011",
@@ -15945,7 +16025,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0011.jpg"
   },
   {
     "id": "ia_0012",
@@ -16163,7 +16244,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0012.jpg"
   },
   {
     "id": "ia_0013",
@@ -16370,7 +16452,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0013.jpg"
   },
   {
     "id": "ia_0014",
@@ -16577,7 +16660,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0014.jpg"
   },
   {
     "id": "ia_0015",
@@ -16784,7 +16868,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0015.jpg"
   },
   {
     "id": "ia_0016",
@@ -16991,7 +17076,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0016.jpg"
   },
   {
     "id": "ia_0017",
@@ -17198,7 +17284,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0017.jpg"
   },
   {
     "id": "ia_0018",
@@ -17405,7 +17492,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0018.jpg"
   },
   {
     "id": "ia_0019",
@@ -17625,7 +17713,8 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0019.jpg"
   },
   {
     "id": "ia_0020",
@@ -17832,6 +17921,9 @@ export const astucesBlogSeed = [
           }
         ]
       }
-    ]
+    ],
+    "coverImageUrl": "/blog/covers/ia_0020.jpg"
   }
-] as unknown as StoredBlogPost[];
+] as StoredBlogPost[];
+
+export default astucesBlogSeed;
