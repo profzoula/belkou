@@ -167,7 +167,7 @@ export function LiveWatchStage({ player, chat, caption, events }: LiveWatchStage
         ) : null}
 
         {events ? (
-          <div className="border-t border-white/10 bg-background px-4 py-5 sm:px-5 lg:pr-[calc(22.5rem+1px)]">
+          <div className="border-t border-white/10 px-4 py-5 sm:px-5 lg:pr-[calc(22.5rem+1px)]">
             {events}
           </div>
         ) : null}

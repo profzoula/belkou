@@ -1,5 +1,6 @@
 import { LiveVideoCard } from "@/components/live/LiveVideoCard";
 import type { PublicLiveListItem } from "@/lib/live";
+import { cn } from "@/lib/utils";
 
 export function LiveRelatedRail({
   sessions,
@@ -7,6 +8,7 @@ export function LiveRelatedRail({
   reservedIds,
   title = "Autres lives",
   limit = 4,
+  tone = "default",
 }: {
   sessions: PublicLiveListItem[];
   currentId?: string;
@@ -14,6 +16,8 @@ export function LiveRelatedRail({
   title?: string;
   /** Rangée type Event1–Event4 sous le player. */
   limit?: number;
+  /** Sous le stage sombre (watch) vs pages claires. */
+  tone?: "default" | "onDark";
 }) {
   const related = sessions
     .filter((session) => (currentId ? session.id !== currentId : true))
@@ -22,7 +26,12 @@ export function LiveRelatedRail({
 
   return (
     <section>
-      <h2 className="mb-4 text-sm font-semibold tracking-tight text-foreground sm:text-base">
+      <h2
+        className={cn(
+          "mb-4 text-sm font-semibold tracking-tight sm:text-base",
+          tone === "onDark" ? "text-white" : "text-foreground",
+        )}
+      >
         {title}
       </h2>
       <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(240px,1fr))] sm:gap-4">

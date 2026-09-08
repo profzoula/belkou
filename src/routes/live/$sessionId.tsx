@@ -209,6 +209,7 @@ function LiveSessionPage() {
                     currentId={live.id}
                     title="Événements"
                     limit={4}
+                    tone="onDark"
                   />
                 }
               />

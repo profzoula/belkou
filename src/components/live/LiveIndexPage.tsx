@@ -159,6 +159,7 @@ export function LiveIndexPage({ initial }: { initial: LiveIndexData }) {
                   reservedIds={reservedIds}
                   title="Événements"
                   limit={4}
+                  tone="onDark"
                 />
               }
             />
