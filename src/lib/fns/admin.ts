@@ -1553,6 +1553,22 @@ export const getAdminBlogSeedStatus = createServerFn({ method: "GET" }).handler(
   return getBlogSeedImportStatus();
 });
 
+export const adminRecoverBlogImages = createServerFn({ method: "POST" }).handler(async () => {
+  await requireAdmin();
+  const { recoverBlogImagesFromStorage } = await import("@/server/site-content");
+  const result = await recoverBlogImagesFromStorage();
+  if (!result.ok) {
+    throw new Error(result.reason ?? "Récupération impossible");
+  }
+  return {
+    posts: result.posts,
+    foldersFound: result.foldersFound,
+    imagesFound: result.imagesFound,
+    coversRestored: result.coversRestored,
+    bodiesRestored: result.bodiesRestored,
+  };
+});
+
 export const adminUploadBlogImage = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z

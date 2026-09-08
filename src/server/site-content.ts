@@ -1098,26 +1098,129 @@ export async function getPublishedBlogPostBySlug(slug: string) {
 
 const BLOG_SEED_IMPORT_META_KEY = "blog_seed_import_meta";
 
-/** Remplace tout le blog CMS par le seed (astuces + articles IA). */
+function htmlLooksCmsCustomized(html: string): boolean {
+  if (!html.trim()) return false;
+  if (/\/storage\/v1\/object\/public\/blog-images\//i.test(html)) return true;
+  if (/<img\b/i.test(html)) return true;
+  return false;
+}
+
+/**
+ * Remplace le blog CMS par le seed, en préservant couvertures / HTML custom
+ * (images uploadées) et les articles hors seed déjà présents.
+ */
 export async function mergeAstucesSeedPosts() {
-  const { sanitizeStoredPost, seedStoredPostsFromStatic } = await import(
-    "@/lib/blog-storage"
-  );
+  const {
+    sanitizeStoredPost,
+    seedStoredPostsFromStatic,
+    getPostContentHtml,
+  } = await import("@/lib/blog-storage");
   const tipSeeds = seedStoredPostsFromStatic()
     .map((item) => sanitizeStoredPost(item))
     .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
   if (!tipSeeds.length) {
     return { ok: false as const, reason: "Aucune astuce seed disponible" };
   }
-  const saved = await saveStoredBlogPosts(tipSeeds);
+
+  const existing = await getStoredBlogPosts();
+  const existingById = new Map(existing.map((post) => [post.id, post]));
+  const seedIds = new Set(tipSeeds.map((post) => post.id));
+
+  const merged = tipSeeds.map((seed) => {
+    const prev = existingById.get(seed.id);
+    if (!prev) return seed;
+
+    const prevHtml = getPostContentHtml(prev);
+    const keepBlocks = htmlLooksCmsCustomized(prevHtml);
+    return sanitizeStoredPost({
+      ...seed,
+      coverImageUrl: prev.coverImageUrl || seed.coverImageUrl,
+      coverAlt: prev.coverAlt || seed.coverAlt,
+      blocks: keepBlocks ? prev.blocks : seed.blocks,
+      updatedAt: keepBlocks || prev.coverImageUrl ? prev.updatedAt : seed.updatedAt,
+    })!;
+  });
+
+  // Garder les articles créés à la main (hors pack seed).
+  for (const post of existing) {
+    if (!seedIds.has(post.id)) merged.push(post);
+  }
+
+  const saved = await saveStoredBlogPosts(merged);
   if (!saved.ok) return saved;
   const importedAt = new Date().toISOString();
   await writeJson(BLOG_SEED_IMPORT_META_KEY, {
     importedAt,
-    count: saved.posts.length,
-    ids: saved.posts.map((p) => p.id),
+    count: tipSeeds.length,
+    ids: tipSeeds.map((p) => p.id),
   });
-  return { ...saved, importedAt, importedCount: saved.posts.length };
+  return { ...saved, importedAt, importedCount: tipSeeds.length };
+}
+
+/** Réattache couvertures + images corps depuis le bucket blog-images. */
+export async function recoverBlogImagesFromStorage() {
+  const { listBlogStorageImages, isBlogStorageImageUrl } = await import(
+    "@/server/blog-image-storage"
+  );
+  const { getPostContentHtml, withPostContentHtml, sanitizeStoredPost } = await import(
+    "@/lib/blog-storage"
+  );
+
+  const listed = await listBlogStorageImages();
+  if (!listed.ok) {
+    return { ok: false as const, reason: listed.reason };
+  }
+
+  const byPost = new Map<string, typeof listed.images>();
+  for (const image of listed.images) {
+    const bucket = byPost.get(image.postId) ?? [];
+    bucket.push(image);
+    byPost.set(image.postId, bucket);
+  }
+
+  const posts = await getStoredBlogPosts();
+  let coversRestored = 0;
+  let bodiesRestored = 0;
+  const next = posts.map((post) => {
+    const folderKey = post.id.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+    const images = byPost.get(folderKey) ?? byPost.get(post.id) ?? [];
+    if (!images.length) return post;
+
+    let updated = post;
+    if (!updated.coverImageUrl) {
+      updated = { ...updated, coverImageUrl: images[0]!.publicUrl };
+      coversRestored += 1;
+    }
+
+    const html = getPostContentHtml(updated);
+    const hasAnyStorageImg = isBlogStorageImageUrl(html) || /blog-images\//i.test(html);
+    if (!hasAnyStorageImg) {
+      const bodyImages = images.filter((img) => img.publicUrl !== updated.coverImageUrl);
+      if (bodyImages.length) {
+        const figures = bodyImages
+          .map(
+            (img) =>
+              `<figure class="blog-media"><img src="${img.publicUrl}" alt="" loading="lazy" /></figure>`,
+          )
+          .join("\n");
+        updated = withPostContentHtml(updated, `${html.trim()}\n${figures}`);
+        bodiesRestored += 1;
+      }
+    }
+
+    return sanitizeStoredPost(updated) ?? post;
+  });
+
+  const saved = await saveStoredBlogPosts(next);
+  if (!saved.ok) return saved;
+  return {
+    ok: true as const,
+    posts: saved.posts,
+    foldersFound: byPost.size,
+    imagesFound: listed.images.length,
+    coversRestored,
+    bodiesRestored,
+  };
 }
 
 export async function getBlogSeedImportStatus() {
@@ -1132,11 +1235,7 @@ export async function getBlogSeedImportStatus() {
   const cmsIds = new Set(posts.map((p) => p.id));
   const missingFromCms = [...seedIds].filter((id) => !cmsIds.has(id));
   const extraInCms = [...cmsIds].filter((id) => !seedIds.has(id));
-  const inSync =
-    missingFromCms.length === 0 &&
-    extraInCms.length === 0 &&
-    seed.length > 0 &&
-    seed.length === posts.length;
+  const inSync = missingFromCms.length === 0 && seed.length > 0;
   const meta = await readJson<{ importedAt?: string; count?: number } | null>(
     BLOG_SEED_IMPORT_META_KEY,
     null,

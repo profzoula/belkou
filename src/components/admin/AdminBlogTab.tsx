@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import {
   adminDeleteBlogPost,
   adminMergeAstucesBlogSeed,
+  adminRecoverBlogImages,
   adminSaveBlogCategories,
   adminSaveBlogPost,
   getAdminBlogCategories,
@@ -120,6 +121,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
   const savePostFn = useServerFn(adminSaveBlogPost);
   const deletePostFn = useServerFn(adminDeleteBlogPost);
   const mergeAstucesFn = useServerFn(adminMergeAstucesBlogSeed);
+  const recoverImagesFn = useServerFn(adminRecoverBlogImages);
   const loadCatsFn = useServerFn(getAdminBlogCategories);
   const saveCatsFn = useServerFn(adminSaveBlogCategories);
   const loadSeedStatusFn = useServerFn(getAdminBlogSeedStatus);
@@ -218,14 +220,29 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         cmsCount: result.posts.length,
         inSync: true,
         missingFromCms: 0,
-        extraInCms: 0,
+        extraInCms: Math.max(0, result.posts.length - result.imported),
         lastImportedAt: result.importedAt,
       });
       toast.success(
-        `${result.imported} articles synchronisés dans Supabase — la liste ci-dessous = articles déjà publiés (pas une file d’attente).`,
+        `${result.imported} articles synchronisés — couvertures et images CMS sont conservées.`,
       );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Import impossible");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const recoverImages = async () => {
+    setSaving(true);
+    try {
+      const result = await recoverImagesFn();
+      setPosts(result.posts);
+      toast.success(
+        `Images restaurées : ${result.coversRestored} couverture(s), ${result.bodiesRestored} article(s) · ${result.imagesFound} fichier(s) trouvés`,
+      );
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Récupération impossible");
     } finally {
       setSaving(false);
     }
@@ -534,6 +551,20 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
             Prérequis Supabase : bucket public <code>blog-images</code> (
             <code>supabase/blog_images_storage.sql</code>).
           </p>
+          <div className="border-t border-border pt-3">
+            <p className="text-foreground">
+              Si un sync seed a effacé vos images : les fichiers restent souvent dans le bucket.
+              Reliez-les aux articles :
+            </p>
+            <Button
+              type="button"
+              className="mt-3 rounded-full"
+              disabled={saving}
+              onClick={recoverImages}
+            >
+              Restaurer les images depuis Supabase
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -550,10 +581,9 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <div>
           <h3 className="font-semibold text-foreground">Seed blog (astuces + IA)</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Ce n’est <strong>pas</strong> une file « articles à importer ». Un clic{" "}
-            <strong>remplace</strong> tout le blog CMS (Supabase) par le pack seed du code (
-            {seedStatus?.seedCount ?? 90} articles). Ensuite ils apparaissent dans{" "}
-            <em>Articles</em> comme déjà publiés.
+            Met à jour le texte depuis le pack seed ({seedStatus?.seedCount ?? 90} articles). Les{" "}
+            <strong>couvertures</strong> et le HTML avec images uploadées sont{" "}
+            <strong>conservés</strong>. Les articles hors seed restent aussi.
           </p>
           {seedStatus ? (
             <p className="mt-2 text-sm text-muted-foreground">
@@ -589,6 +619,15 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
             {seedStatus?.inSync
               ? `Resynchroniser les ${seedStatus.seedCount} articles`
               : `Synchroniser les ${seedStatus?.seedCount ?? 90} articles du seed`}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-3 ml-2 rounded-full"
+            disabled={saving}
+            onClick={recoverImages}
+          >
+            Restaurer images perdues
           </Button>
         </div>
         <div className="border-t border-border pt-4">
