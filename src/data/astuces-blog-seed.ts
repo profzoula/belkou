@@ -1,6 +1,6 @@
 import type { StoredBlogPost } from "@/lib/blog-blocks";
 
-const astucesBlogSeed = [
+export const astucesBlogSeed = [
   {
     "id": "astuce_0001",
     "tipId": 1,
@@ -17924,6 +17924,4 @@ const astucesBlogSeed = [
     ],
     "coverImageUrl": "/blog/covers/ia_0020.jpg"
   }
-] as StoredBlogPost[];
-
-export default astucesBlogSeed;
+] as unknown as StoredBlogPost[];
