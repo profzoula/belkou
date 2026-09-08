@@ -198,7 +198,7 @@ function writeSeed(posts) {
   fs.writeFileSync(SEED_JSON, `${JSON.stringify(posts, null, 2)}\n`, "utf8");
   fs.writeFileSync(
     SEED_TS,
-    `import type { StoredBlogPost } from "@/lib/blog-blocks";\n\nconst astucesBlogSeed = ${JSON.stringify(posts, null, 2)} as StoredBlogPost[];\n\nexport default astucesBlogSeed;\n`,
+    `import type { StoredBlogPost } from "@/lib/blog-blocks";\n\nexport const astucesBlogSeed = ${JSON.stringify(posts, null, 2)} as unknown as StoredBlogPost[];\n`,
     "utf8",
   );
 }
