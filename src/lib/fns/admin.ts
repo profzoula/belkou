@@ -1531,6 +1531,16 @@ export const getPublicBlogPost = createServerFn({ method: "GET" })
     };
   });
 
+export const adminClearAllBlogPosts = createServerFn({ method: "POST" }).handler(async () => {
+  await requireAdmin();
+  const { clearAllStoredBlogPosts } = await import("@/server/site-content");
+  const result = await clearAllStoredBlogPosts();
+  if (!result.ok) {
+    throw new Error(result.reason ?? "Suppression impossible");
+  }
+  return { posts: result.posts };
+});
+
 export const adminMergeAstucesBlogSeed = createServerFn({ method: "POST" }).handler(
   async () => {
     await requireAdmin();

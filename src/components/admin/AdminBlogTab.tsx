@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  adminClearAllBlogPosts,
   adminDeleteBlogPost,
   adminMergeAstucesBlogSeed,
   adminRecoverBlogImages,
@@ -121,6 +122,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
   const savePostFn = useServerFn(adminSaveBlogPost);
   const deletePostFn = useServerFn(adminDeleteBlogPost);
   const mergeAstucesFn = useServerFn(adminMergeAstucesBlogSeed);
+  const clearAllPostsFn = useServerFn(adminClearAllBlogPosts);
   const recoverImagesFn = useServerFn(adminRecoverBlogImages);
   const loadCatsFn = useServerFn(getAdminBlogCategories);
   const saveCatsFn = useServerFn(adminSaveBlogCategories);
@@ -233,6 +235,39 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
     }
   };
 
+  const clearAllPosts = async () => {
+    if (
+      !confirm(
+        "Supprimer TOUS les articles du blog CMS ? Cette action est irréversible (les images uploadées restent dans Supabase Storage).",
+      )
+    ) {
+      return;
+    }
+    setSaving(true);
+    try {
+      const result = await clearAllPostsFn();
+      setPosts(result.posts);
+      setEditing(null);
+      setSeedStatus((prev) =>
+        prev
+          ? {
+              ...prev,
+              cmsCount: 0,
+              inSync: prev.seedCount === 0,
+              missingFromCms: prev.seedCount,
+              extraInCms: 0,
+              lastImportedAt: new Date().toISOString(),
+            }
+          : prev,
+      );
+      toast.success("Tous les articles ont été effacés — créez-en de nouveaux.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Suppression impossible");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const recoverImages = async () => {
     setSaving(true);
     try {
@@ -295,20 +330,20 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Articles"
-          description="Liste des articles déjà dans le CMS (pas une file d’attente d’import). Après sync seed, ils restent ici parce qu’ils sont publiés."
+          description="Créez et publiez vos articles à la main (Classic Editor)."
           actions={
             <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full"
-                disabled={saving}
-                onClick={importAstuces}
-              >
-                {seedStatus?.inSync
-                  ? `Resynchroniser (${seedStatus.seedCount})`
-                  : `Synchroniser le seed (${seedStatus?.seedCount ?? 90})`}
-              </Button>
+              {posts.length > 0 ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full text-destructive"
+                  disabled={saving}
+                  onClick={clearAllPosts}
+                >
+                  Tout effacer
+                </Button>
+              ) : null}
               <Button type="button" className="rounded-full" onClick={startCreate}>
                 <Plus className="size-4" /> Nouvel article
               </Button>
@@ -579,56 +614,31 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
       />
       <div className="surface space-y-4 rounded-2xl p-5 sm:p-6">
         <div>
-          <h3 className="font-semibold text-foreground">Seed blog (astuces + IA)</h3>
+          <h3 className="font-semibold text-foreground">Articles CMS</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Met à jour le texte depuis le pack seed ({seedStatus?.seedCount ?? 90} articles). Les{" "}
-            <strong>couvertures</strong> et le HTML avec images uploadées sont{" "}
-            <strong>conservés</strong>. Les articles hors seed restent aussi.
+            Le blog se gère à la main : créez vos articles depuis l’onglet Articles. Le pack seed
+            code est vide{seedStatus ? ` · CMS : ${seedStatus.cmsCount} article(s)` : ""}.
           </p>
-          {seedStatus ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {seedStatus.inSync ? (
-                <>
-                  État : <span className="font-medium text-emerald-600">synchronisé</span> (
-                  {seedStatus.cmsCount}/{seedStatus.seedCount}
-                  {seedStatus.lastImportedAt
-                    ? ` · dernier sync ${new Date(seedStatus.lastImportedAt).toLocaleString("fr-FR")}`
-                    : ""}
-                  )
-                </>
-              ) : (
-                <>
-                  État : <span className="font-medium text-amber-600">à synchroniser</span> — CMS{" "}
-                  {seedStatus.cmsCount}, seed {seedStatus.seedCount}
-                  {seedStatus.missingFromCms
-                    ? ` · ${seedStatus.missingFromCms} manquant(s) dans le CMS`
-                    : ""}
-                  {seedStatus.extraInCms
-                    ? ` · ${seedStatus.extraInCms} hors seed dans le CMS`
-                    : ""}
-                </>
-              )}
-            </p>
-          ) : null}
           <Button
             type="button"
+            variant="destructive"
             className="mt-3 rounded-full"
-            disabled={saving}
-            onClick={importAstuces}
+            disabled={saving || posts.length === 0}
+            onClick={clearAllPosts}
           >
-            {seedStatus?.inSync
-              ? `Resynchroniser les ${seedStatus.seedCount} articles`
-              : `Synchroniser les ${seedStatus?.seedCount ?? 90} articles du seed`}
+            Effacer tous les articles du CMS
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3 ml-2 rounded-full"
-            disabled={saving}
-            onClick={recoverImages}
-          >
-            Restaurer images perdues
-          </Button>
+          {seedStatus && seedStatus.seedCount > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3 ml-2 rounded-full"
+              disabled={saving}
+              onClick={importAstuces}
+            >
+              Synchroniser le seed ({seedStatus.seedCount})
+            </Button>
+          ) : null}
         </div>
         <div className="border-t border-border pt-4">
           <h3 className="font-semibold text-foreground">Site public</h3>

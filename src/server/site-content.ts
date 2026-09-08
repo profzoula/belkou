@@ -997,6 +997,7 @@ export async function updateServiceBookingStatus(
 }
 
 const BLOG_POSTS_KEY = "blog_posts";
+const BLOG_SEED_IMPORT_META_KEY = "blog_seed_import_meta";
 
 export async function getStoredBlogPosts(): Promise<
   import("@/lib/blog-blocks").StoredBlogPost[]
@@ -1005,8 +1006,11 @@ export async function getStoredBlogPosts(): Promise<
     "@/lib/blog-storage"
   );
   const stored = await readJson<unknown>(BLOG_POSTS_KEY, null);
+  const seed = seedStoredPostsFromStatic();
+
+  // Seed vide = blog géré uniquement à la main (pas de re-remplissage auto).
   if (!Array.isArray(stored) || stored.length === 0) {
-    const seed = seedStoredPostsFromStatic();
+    if (!seed.length) return [];
     try {
       await writeJson(BLOG_POSTS_KEY, seed);
     } catch {
@@ -1018,7 +1022,7 @@ export async function getStoredBlogPosts(): Promise<
     .map((item) => sanitizeStoredPost(item))
     .filter((item): item is import("@/lib/blog-blocks").StoredBlogPost => Boolean(item));
   if (!cleaned.length) {
-    const seed = seedStoredPostsFromStatic();
+    if (!seed.length) return [];
     try {
       await writeJson(BLOG_POSTS_KEY, seed);
     } catch {
@@ -1027,6 +1031,19 @@ export async function getStoredBlogPosts(): Promise<
     return seed;
   }
   return cleaned;
+}
+
+/** Vide complètement le blog CMS (Supabase). */
+export async function clearAllStoredBlogPosts() {
+  const result = await saveStoredBlogPosts([]);
+  if (!result.ok) return result;
+  await writeJson(BLOG_SEED_IMPORT_META_KEY, {
+    importedAt: new Date().toISOString(),
+    count: 0,
+    ids: [],
+    cleared: true,
+  });
+  return { ok: true as const, posts: [] as import("@/lib/blog-blocks").StoredBlogPost[] };
 }
 
 export async function saveStoredBlogPosts(
@@ -1095,8 +1112,6 @@ export async function getPublishedBlogPostBySlug(slug: string) {
   const posts = await getPublishedBlogPosts();
   return posts.find((post) => post.slug === slug) ?? null;
 }
-
-const BLOG_SEED_IMPORT_META_KEY = "blog_seed_import_meta";
 
 function htmlLooksCmsCustomized(html: string): boolean {
   if (!html.trim()) return false;
