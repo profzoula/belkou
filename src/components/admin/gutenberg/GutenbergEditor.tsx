@@ -7,6 +7,7 @@ import {
   AppWindow,
   AudioLines,
   BadgeDollarSign,
+  Bold,
   Box,
   ChevronDown,
   ChevronUp,
@@ -29,7 +30,10 @@ import {
   Image,
   Images,
   Instagram,
+  Italic,
+  Link2,
   List,
+  ListOrdered,
   ListTree,
   Loader2,
   MapPin,
@@ -63,7 +67,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   BLOG_BLOCK_CATALOG,
   createEmptyBlock,
-  htmlToBlocks,
   slugifyBlog,
   type BlogBlock,
   type BlogBlockType,
@@ -78,6 +81,7 @@ import {
   type InserterGroup,
 } from "@/lib/blog-inserter";
 import { blogCategories } from "@/lib/blog";
+import { clipboardToHtml, sanitizeBlogHtml } from "@/lib/blog-html";
 import { adminUploadBlogImage } from "@/lib/fns/admin";
 import { cn } from "@/lib/utils";
 
@@ -213,7 +217,6 @@ export function GutenbergEditor({
   const [query, setQuery] = useState("");
   const [inserterTab, setInserterTab] = useState<"blocs" | "motifs" | "media">("blocs");
   const [tagsDraft, setTagsDraft] = useState(() => post.tags.join(", "));
-  const convertedId = useRef<string | null>(null);
   const blocksRef = useRef(post.blocks);
   const [dropOver, setDropOver] = useState(false);
   const [dropBusy, setDropBusy] = useState(false);
@@ -227,20 +230,19 @@ export function GutenbergEditor({
   }, [post.id]);
 
   useEffect(() => {
-    if (convertedId.current === post.id) return;
-    convertedId.current = post.id;
-    const onlyHtml = post.blocks.length === 1 && post.blocks[0]?.type === "html";
-    if (!onlyHtml) return;
-    const html = post.blocks[0].type === "html" ? post.blocks[0].content : "";
-    const blocks = htmlToBlocks(html);
-    onChange({
-      ...post,
-      blocks,
-      readMinutes: estimateReadMinutes(blocks),
-      updatedAt: new Date().toISOString(),
-    });
-    setSelectedId(blocks[0]?.id ?? null);
-    // Conversion one-shot per article — ignore subsequent parent identity changes.
+    const only = post.blocks[0];
+    if (
+      post.blocks.length === 1 &&
+      only?.type === "paragraph" &&
+      !only.content.trim()
+    ) {
+      onChange({
+        ...post,
+        blocks: [{ id: only.id, type: "html", content: "" }],
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    // One-shot: empty drafts keep a single classic writing area.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.id]);
 
@@ -405,6 +407,48 @@ export function GutenbergEditor({
     current.splice(index, 0, ...created);
     setBlocks(current);
     setSelectedId(created[0]!.id);
+  };
+
+  const applyClassicHtml = (html: string, replaceId?: string | null) => {
+    const cleaned = html.trim();
+    if (!cleaned) return;
+    const current = [...blocksRef.current];
+    const targetId = replaceId ?? selectedId;
+    if (targetId) {
+      const index = current.findIndex((block) => block.id === targetId);
+      const existing = index >= 0 ? current[index] : null;
+      if (existing?.type === "html") {
+        current[index] = {
+          ...existing,
+          content: existing.content.trim() ? `${existing.content}${cleaned}` : cleaned,
+        };
+        setBlocks(current);
+        setSelectedId(existing.id);
+        return;
+      }
+      if (existing?.type === "paragraph" && !existing.content.trim()) {
+        current[index] = { id: existing.id, type: "html", content: cleaned };
+        setBlocks(current);
+        setSelectedId(existing.id);
+        return;
+      }
+    }
+    const emptyClassic = current.findIndex(
+      (block) => block.type === "html" && !block.content.replace(/<[^>]+>/g, "").trim(),
+    );
+    if (emptyClassic >= 0) {
+      const existing = current[emptyClassic];
+      if (existing?.type === "html") {
+        current[emptyClassic] = { ...existing, content: cleaned };
+        setBlocks(current);
+        setSelectedId(existing.id);
+        return;
+      }
+    }
+    const block = { ...createEmptyBlock("html"), content: cleaned };
+    current.push(block);
+    setBlocks(current);
+    setSelectedId(block.id);
   };
 
   const ingestDroppedImages = async (
@@ -676,10 +720,21 @@ export function GutenbergEditor({
             );
           }}
           onPaste={(event) => {
+            if ((event.target as HTMLElement | null)?.closest("[contenteditable=true]")) {
+              return;
+            }
             const files = Array.from(event.clipboardData?.files ?? []).filter(isAllowedImageFile);
-            if (!files.length) return;
+            if (files.length) {
+              event.preventDefault();
+              void ingestDroppedImages(files);
+              return;
+            }
+            const html = event.clipboardData?.getData("text/html") ?? "";
+            const text = event.clipboardData?.getData("text/plain") ?? "";
+            const content = clipboardToHtml(html, text);
+            if (!content) return;
             event.preventDefault();
-            void ingestDroppedImages(files);
+            applyClassicHtml(content);
           }}
         >
           {dropOver || dropBusy ? (
@@ -707,7 +762,8 @@ export function GutenbergEditor({
             <div>
               {post.blocks.map((block, index) => {
                 const emptyParagraph =
-                  block.type === "paragraph" && !block.content.trim();
+                  (block.type === "paragraph" && !block.content.trim()) ||
+                  (block.type === "html" && !block.content.replace(/<[^>]+>/g, "").trim());
                 const selected = selectedId === block.id;
                 return (
                   <div key={block.id} className="group relative">
@@ -730,7 +786,9 @@ export function GutenbergEditor({
                     <div
                       className={cn(
                         "relative min-h-10 px-1 py-1",
-                        selected && "outline outline-2 outline-[#3858e9] -outline-offset-2",
+                        selected &&
+                          block.type !== "html" &&
+                          "outline outline-2 outline-[#3858e9] -outline-offset-2",
                       )}
                       onClick={() => {
                         setSelectedId(block.id);
@@ -755,6 +813,7 @@ export function GutenbergEditor({
                           ingestDroppedImages(files, null, index + 1, block.id)
                         }
                         onSlash={() => openInserter(index)}
+                        onPasteHtml={(html) => applyClassicHtml(html, block.id)}
                       />
                     </div>
                     {emptyParagraph || selected ? (
@@ -837,6 +896,107 @@ export function GutenbergEditor({
         ) : null}
       </div>
 
+    </div>
+  );
+}
+
+function ClassicBlockField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (html: string) => void;
+}) {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const lastEmitted = useRef(value);
+  const [hasText, setHasText] = useState(
+    Boolean(value.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim()),
+  );
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.innerHTML = value || "";
+    lastEmitted.current = value;
+  }, []);
+
+  const flush = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const html = sanitizeBlogHtml(editor.innerHTML);
+    setHasText(Boolean(html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim()));
+    if (html === lastEmitted.current) return;
+    lastEmitted.current = html;
+    onChange(html);
+  };
+
+  const run = (command: string, arg?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(command, false, arg);
+    flush();
+  };
+
+  return (
+    <div className="relative">
+      <div className="mb-2 flex flex-wrap items-center gap-0.5 border-b border-[#ddd] pb-1">
+        <IconBtn label="Gras" onClick={() => run("bold")}>
+          <Bold className="size-3.5" />
+        </IconBtn>
+        <IconBtn label="Italique" onClick={() => run("italic")}>
+          <Italic className="size-3.5" />
+        </IconBtn>
+        <IconBtn label="Titre 2" onClick={() => run("formatBlock", "h2")}>
+          <span className="text-[11px] font-semibold">H2</span>
+        </IconBtn>
+        <IconBtn label="Titre 3" onClick={() => run("formatBlock", "h3")}>
+          <span className="text-[11px] font-semibold">H3</span>
+        </IconBtn>
+        <IconBtn label="Liste" onClick={() => run("insertUnorderedList")}>
+          <List className="size-3.5" />
+        </IconBtn>
+        <IconBtn label="Liste numérotée" onClick={() => run("insertOrderedList")}>
+          <ListOrdered className="size-3.5" />
+        </IconBtn>
+        <IconBtn label="Citation" onClick={() => run("formatBlock", "blockquote")}>
+          <Quote className="size-3.5" />
+        </IconBtn>
+        <IconBtn
+          label="Lien"
+          onClick={() => {
+            const url = window.prompt("Adresse du lien", "https://");
+            if (url?.trim()) run("createLink", url.trim());
+          }}
+        >
+          <Link2 className="size-3.5" />
+        </IconBtn>
+      </div>
+      {!hasText ? (
+        <p className="pointer-events-none absolute top-[46px] left-0 text-base text-[#949494]">
+          Écrivez ou collez votre texte. Le format est conservé.
+        </p>
+      ) : null}
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline
+        aria-label="Contenu de l’article"
+        className="classic-block-field min-h-[280px] bg-transparent px-0 py-1 text-[16px] leading-7 text-[#1e1e1e] outline-none [&_a]:text-[#2271b1] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#c3c4c7] [&_blockquote]:pl-4 [&_blockquote]:italic [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-3 [&_pre]:overflow-x-auto [&_pre]:bg-[#f6f7f7] [&_pre]:p-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6"
+        onInput={flush}
+        onBlur={flush}
+        onPaste={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const html = clipboardToHtml(
+            event.clipboardData.getData("text/html"),
+            event.clipboardData.getData("text/plain"),
+          );
+          if (!html) return;
+          document.execCommand("insertHTML", false, html);
+          flush();
+        }}
+      />
     </div>
   );
 }
@@ -1480,20 +1640,28 @@ function BlockEditor({
   onUploadImage,
   onDropFiles,
   onSlash,
+  onPasteHtml,
 }: {
   block: BlogBlock;
   onChange: (block: BlogBlock) => void;
   onUploadImage: (file: File) => Promise<string | null>;
   onDropFiles?: (files: File[]) => Promise<void>;
   onSlash?: () => void;
+  onPasteHtml?: (html: string) => void;
 }) {
   switch (block.type) {
+    case "html":
+      return (
+        <ClassicBlockField
+          value={block.content}
+          onChange={(content) => onChange({ ...block, content })}
+        />
+      );
     case "paragraph":
     case "quote":
     case "pullquote":
     case "code":
     case "preformatted":
-    case "html":
       return (
         <Textarea
           rows={block.type === "paragraph" ? 2 : 5}
@@ -1503,11 +1671,21 @@ function BlockEditor({
           }
           className={cn(
             "min-h-10 resize-none border-0 bg-transparent px-0 py-1 text-base leading-7 text-[#1e1e1e] shadow-none placeholder:text-[#949494] focus-visible:ring-0",
-            block.type === "code" || block.type === "preformatted" || block.type === "html"
+            block.type === "code" || block.type === "preformatted"
               ? "font-mono text-sm"
               : "",
             block.type === "quote" || block.type === "pullquote" ? "italic" : "",
           )}
+          onPaste={(event) => {
+            if (block.type !== "paragraph") return;
+            const html = event.clipboardData.getData("text/html");
+            const text = event.clipboardData.getData("text/plain");
+            const content = clipboardToHtml(html, text);
+            if (!content) return;
+            event.preventDefault();
+            event.stopPropagation();
+            onPasteHtml?.(content);
+          }}
           onChange={(e) => {
             const value = e.target.value;
             if (block.type === "paragraph" && value === "/") {

@@ -367,8 +367,8 @@ export const BLOG_BLOCK_CATALOG: Array<{
   },
   {
     type: "html",
-    label: "HTML personnalisé",
-    description: "HTML libre (sanitisé à l’affichage)",
+    label: "Classique",
+    description: "Zone de texte comme l’éditeur classique",
     group: "widgets",
     keywords: ["html", "custom"],
   },
@@ -523,7 +523,7 @@ export function createEmptyBlock(type: BlogBlockType): BlogBlock {
         ],
       };
     case "html":
-      return { id, type, content: "<!-- HTML -->" };
+      return { id, type, content: "" };
     case "embed":
       return { id, type, url: "", caption: "", provider: "generic" };
     case "video":

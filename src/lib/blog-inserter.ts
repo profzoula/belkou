@@ -104,9 +104,10 @@ export const BLOG_INSERTER_ITEMS: BlogInserterItem[] = [
     id: "classic",
     type: "html",
     label: "Classique",
-    description: "HTML libre",
+    description: "Zone de texte comme l’éditeur classique",
     group: "texte",
-    keywords: ["classic", "html"],
+    keywords: ["classic", "html", "coller"],
+    seed: { type: "html", content: "" },
     icon: "file-text",
   },
   {
