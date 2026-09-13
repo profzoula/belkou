@@ -28,6 +28,19 @@ function youtubeId(url: string): string | null {
   return null;
 }
 
+function vimeoId(url: string): string | null {
+  const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/i);
+  return match?.[1] ?? null;
+}
+
+function embedIframe(src: string, title: string): string {
+  return `<figure class="wp-block-embed"><div class="ratio"><iframe src="${esc(src)}" title="${esc(title)}" loading="lazy" allowfullscreen></iframe></div></figure>`;
+}
+
+function embedFallback(url: string, caption?: string): string {
+  return `<p class="wp-block-embed"><a href="${esc(url)}" rel="noopener noreferrer" target="_blank">${esc(url)}</a>${caption ? `<br/><span>${esc(caption)}</span>` : ""}</p>`;
+}
+
 export function blocksToHtml(blocks: BlogBlock[]): string {
   const parts: string[] = [];
   for (const block of blocks) {
@@ -138,18 +151,75 @@ export function blocksToHtml(blocks: BlogBlock[]): string {
         parts.push(block.content);
         break;
       case "embed": {
-        const yt = youtubeId(block.url);
+        const url = block.url.trim();
+        if (!url) break;
+        const yt = youtubeId(url);
+        const vim = vimeoId(url);
         if (yt) {
+          parts.push(embedIframe(`https://www.youtube.com/embed/${yt}`, block.caption || "YouTube"));
+        } else if (vim) {
+          parts.push(embedIframe(`https://player.vimeo.com/video/${vim}`, block.caption || "Vimeo"));
+        } else if (/open\.spotify\.com/i.test(url)) {
           parts.push(
-            `<figure class="wp-block-embed"><div class="ratio"><iframe src="https://www.youtube.com/embed/${esc(yt)}" title="Vidéo" loading="lazy" allowfullscreen></iframe></div>${block.caption ? `<figcaption>${esc(block.caption)}</figcaption>` : ""}</figure>`,
+            embedIframe(url.replace("open.spotify.com", "open.spotify.com/embed"), "Spotify"),
           );
-        } else if (block.url) {
-          parts.push(
-            `<p class="wp-block-embed"><a href="${esc(block.url)}" rel="noopener noreferrer" target="_blank">${esc(block.url)}</a></p>`,
-          );
+        } else if (/google\.[^/]+\/maps|maps\.google/i.test(url)) {
+          parts.push(embedIframe(url, "Google Maps"));
+        } else {
+          parts.push(embedFallback(url, block.caption));
         }
         break;
       }
+      case "countdown":
+        parts.push(
+          `<div class="wp-block-countdown"><p><strong>${esc(block.label || "Compte à rebours")}</strong></p><time datetime="${esc(block.target)}">${esc(block.target.replace("T", " "))}</time></div>`,
+        );
+        break;
+      case "progress":
+        parts.push(
+          `<div class="wp-block-progress"><p>${esc(block.label || "Progression")} — ${Math.max(0, Math.min(100, block.value))}%</p><progress max="100" value="${Math.max(0, Math.min(100, block.value))}"></progress></div>`,
+        );
+        break;
+      case "tabs":
+        parts.push(
+          `<div class="wp-block-tabs">${block.items
+            .filter((item) => item.title.trim())
+            .map(
+              (item) =>
+                `<details><summary>${esc(item.title)}</summary><p>${esc(item.content)}</p></details>`,
+            )
+            .join("")}</div>`,
+        );
+        break;
+      case "testimonial":
+        parts.push(
+          `<blockquote class="wp-block-testimonial"><p>${esc(block.quote)}</p><cite>${esc(block.author)}${block.role ? ` — ${esc(block.role)}` : ""}</cite></blockquote>`,
+        );
+        break;
+      case "pricing":
+        parts.push(
+          `<div class="wp-block-pricing">${block.plans
+            .map(
+              (plan) =>
+                `<article><h3>${esc(plan.name)}</h3><p class="price">${esc(plan.price)}</p><ul>${plan.features
+                  .split("\n")
+                  .filter(Boolean)
+                  .map((f) => `<li>${esc(f)}</li>`)
+                  .join("")}</ul>${plan.url ? `<a href="${esc(plan.url)}">Choisir</a>` : ""}</article>`,
+            )
+            .join("")}</div>`,
+        );
+        break;
+      case "iconbox":
+        parts.push(
+          `<div class="wp-block-iconbox"><p class="icon">${esc(block.icon)}</p><h3>${esc(block.title)}</h3><p>${esc(block.content)}</p></div>`,
+        );
+        break;
+      case "numberbox":
+        parts.push(
+          `<div class="wp-block-numberbox"><p class="num">${esc(block.number)}</p><h3>${esc(block.title)}</h3><p>${esc(block.content)}</p></div>`,
+        );
+        break;
       case "video":
         if (!block.url) break;
         if (youtubeId(block.url)) {
@@ -233,6 +303,10 @@ export function estimateReadMinutes(blocks: BlogBlock[]): number {
       if ("content" in b && typeof b.content === "string") return b.content;
       if (b.type === "list") return b.items.join(" ");
       if (b.type === "faq") return b.items.map((i) => `${i.q} ${i.a}`).join(" ");
+      if (b.type === "tabs") return b.items.map((i) => `${i.title} ${i.content}`).join(" ");
+      if (b.type === "testimonial") return `${b.quote} ${b.author}`;
+      if (b.type === "pricing") return b.plans.map((p) => `${p.name} ${p.price} ${p.features}`).join(" ");
+      if (b.type === "iconbox" || b.type === "numberbox") return `${b.title} ${b.content}`;
       if (b.type === "columns") return b.columns.join(" ");
       if (b.type === "table") return b.rows.flat().join(" ");
       return "";

@@ -112,6 +112,7 @@ export type BlogBlock =
       type: "embed";
       url: string;
       caption?: string;
+      provider?: string;
     }
   | {
       id: string;
@@ -149,6 +150,49 @@ export type BlogBlock =
   | {
       id: string;
       type: "more";
+    }
+  | {
+      id: string;
+      type: "countdown";
+      target: string;
+      label?: string;
+    }
+  | {
+      id: string;
+      type: "progress";
+      value: number;
+      label?: string;
+    }
+  | {
+      id: string;
+      type: "tabs";
+      items: Array<{ title: string; content: string }>;
+    }
+  | {
+      id: string;
+      type: "testimonial";
+      quote: string;
+      author: string;
+      role?: string;
+    }
+  | {
+      id: string;
+      type: "pricing";
+      plans: Array<{ name: string; price: string; features: string; url?: string }>;
+    }
+  | {
+      id: string;
+      type: "iconbox";
+      icon: string;
+      title: string;
+      content: string;
+    }
+  | {
+      id: string;
+      type: "numberbox";
+      number: string;
+      title: string;
+      content: string;
     };
 
 export type BlogBlockType = BlogBlock["type"];
@@ -363,6 +407,55 @@ export const BLOG_BLOCK_CATALOG: Array<{
     group: "embed",
     keywords: ["embed", "iframe", "youtube"],
   },
+  {
+    type: "countdown",
+    label: "Compte à rebours",
+    description: "Date cible",
+    group: "widgets",
+    keywords: ["countdown", "timer"],
+  },
+  {
+    type: "progress",
+    label: "Progression",
+    description: "Barre de pourcentage",
+    group: "widgets",
+    keywords: ["progress", "barre"],
+  },
+  {
+    type: "tabs",
+    label: "Onglets",
+    description: "Contenu en onglets",
+    group: "widgets",
+    keywords: ["tabs", "onglets"],
+  },
+  {
+    type: "testimonial",
+    label: "Témoignage",
+    description: "Avis client",
+    group: "widgets",
+    keywords: ["testimonial", "avis"],
+  },
+  {
+    type: "pricing",
+    label: "Tarifs",
+    description: "Tableau de prix",
+    group: "widgets",
+    keywords: ["pricing", "prix"],
+  },
+  {
+    type: "iconbox",
+    label: "Boîte icône",
+    description: "Icône + titre + texte",
+    group: "widgets",
+    keywords: ["icon", "box"],
+  },
+  {
+    type: "numberbox",
+    label: "Boîte chiffre",
+    description: "Chiffre + titre + texte",
+    group: "widgets",
+    keywords: ["number", "stat"],
+  },
 ];
 
 export function newBlockId(): string {
@@ -432,7 +525,7 @@ export function createEmptyBlock(type: BlogBlockType): BlogBlock {
     case "html":
       return { id, type, content: "<!-- HTML -->" };
     case "embed":
-      return { id, type, url: "", caption: "" };
+      return { id, type, url: "", caption: "", provider: "generic" };
     case "video":
       return { id, type, url: "", caption: "" };
     case "audio":
@@ -454,6 +547,39 @@ export function createEmptyBlock(type: BlogBlockType): BlogBlock {
       return { id, type };
     case "more":
       return { id, type };
+    case "countdown":
+      return {
+        id,
+        type,
+        target: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+        label: "Compte à rebours",
+      };
+    case "progress":
+      return { id, type, value: 60, label: "Progression" };
+    case "tabs":
+      return {
+        id,
+        type,
+        items: [
+          { title: "Onglet 1", content: "Contenu…" },
+          { title: "Onglet 2", content: "" },
+        ],
+      };
+    case "testimonial":
+      return { id, type, quote: "Citation du client…", author: "Nom", role: "Rôle" };
+    case "pricing":
+      return {
+        id,
+        type,
+        plans: [
+          { name: "Essentiel", price: "0 €", features: "Fonction A\nFonction B", url: "#" },
+          { name: "Pro", price: "19 €", features: "Tout l’essentiel\nSupport", url: "#" },
+        ],
+      };
+    case "iconbox":
+      return { id, type, icon: "★", title: "Titre", content: "Description…" };
+    case "numberbox":
+      return { id, type, number: "01", title: "Titre", content: "Description…" };
   }
 }
 

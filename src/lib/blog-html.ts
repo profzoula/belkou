@@ -13,13 +13,21 @@ export function sanitizeBlogHtml(html: string): string {
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, (block) => {
-      if (/youtube\.com|youtube-nocookie\.com|player\.vimeo\.com/i.test(block)) {
+      if (
+        /youtube\.com|youtube-nocookie\.com|player\.vimeo\.com|open\.spotify\.com|google\.[^"' ]*\/maps|maps\.google/i.test(
+          block,
+        )
+      ) {
         return block;
       }
       return "";
     })
     .replace(/<iframe\b[^>]*\/?>/gi, (tag) => {
-      if (/youtube\.com|youtube-nocookie\.com|player\.vimeo\.com/i.test(tag)) {
+      if (
+        /youtube\.com|youtube-nocookie\.com|player\.vimeo\.com|open\.spotify\.com|google\.[^"' ]*\/maps|maps\.google/i.test(
+          tag,
+        )
+      ) {
         return tag;
       }
       return "";

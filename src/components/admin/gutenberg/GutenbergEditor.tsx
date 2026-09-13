@@ -1,20 +1,59 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  AppWindow,
+  AudioLines,
+  BadgeDollarSign,
+  Box,
   ChevronDown,
   ChevronUp,
+  Cloud,
+  Code,
+  Columns2,
+  Columns3,
   Copy,
   Eye,
+  Facebook,
+  File,
+  FileText,
+  Gauge,
+  Github,
+  Globe,
   GripVertical,
+  Group,
+  Hash,
+  Heading,
+  Image,
+  Images,
+  Instagram,
+  List,
   ListTree,
   Loader2,
+  MapPin,
+  MessageCircle,
+  Minus,
+  MoreHorizontal,
+  MoveVertical,
+  PanelBottomOpen,
+  PanelTop,
   Plus,
+  Quote,
+  RectangleHorizontal,
   Settings2,
+  Table,
+  TextQuote,
+  Timer,
   Trash2,
+  TriangleAlert,
+  Twitter,
   Upload,
+  Video,
+  Volume2,
+  Youtube,
+  type LucideIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,12 +70,95 @@ import {
   type StoredBlogPost,
 } from "@/lib/blog-blocks";
 import { estimateReadMinutes } from "@/lib/blog-storage";
+import {
+  BLOG_INSERTER_ITEMS,
+  createBlockFromInserter,
+  INSERTER_GROUP_LABELS,
+  type BlogInserterItem,
+  type InserterGroup,
+} from "@/lib/blog-inserter";
 import { blogCategories } from "@/lib/blog";
 import { adminUploadBlogImage } from "@/lib/fns/admin";
 import { cn } from "@/lib/utils";
 
+const INSERTER_ICONS: Record<string, LucideIcon> = {
+  heading: Heading,
+  "align-left": AlignLeft,
+  list: List,
+  quote: Quote,
+  "text-quote": TextQuote,
+  code: Code,
+  "file-text": FileText,
+  image: Image,
+  images: Images,
+  "panel-top": PanelTop,
+  video: Video,
+  "volume-2": Volume2,
+  file: File,
+  minus: Minus,
+  "move-vertical": MoveVertical,
+  "columns-2": Columns2,
+  "columns-3": Columns3,
+  "rectangle-horizontal": RectangleHorizontal,
+  table: Table,
+  group: Group,
+  timer: Timer,
+  gauge: Gauge,
+  "app-window": AppWindow,
+  "panel-bottom-open": PanelBottomOpen,
+  "triangle-alert": TriangleAlert,
+  box: Box,
+  hash: Hash,
+  "message-circle": MessageCircle,
+  "badge-dollar-sign": BadgeDollarSign,
+  "list-tree": ListTree,
+  "more-horizontal": MoreHorizontal,
+  youtube: Youtube,
+  instagram: Instagram,
+  twitter: Twitter,
+  facebook: Facebook,
+  "audio-lines": AudioLines,
+  cloud: Cloud,
+  globe: Globe,
+  "map-pin": MapPin,
+  github: Github,
+};
+
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function isAllowedImageFile(file: File) {
+  return (
+    ALLOWED_IMAGE_TYPES.has(file.type) || /\.(jpe?g|png|webp|gif)$/i.test(file.name)
+  );
+}
+
+function imageFilesFromDataTransfer(data: DataTransfer | null): File[] {
+  if (!data) return [];
+  const fromFiles = Array.from(data.files ?? []).filter(isAllowedImageFile);
+  if (fromFiles.length) return fromFiles;
+  return Array.from(data.items ?? [])
+    .filter((item) => item.kind === "file")
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => Boolean(file && isAllowedImageFile(file)));
+}
+
+function imageUrlFromDataTransfer(data: DataTransfer | null): string | null {
+  if (!data) return null;
+  const uri = (data.getData("text/uri-list") || data.getData("text/plain")).trim();
+  if (/^https?:\/\//i.test(uri) && /\.(jpe?g|png|webp|gif)(\?|#|$)/i.test(uri)) {
+    return uri;
+  }
+  const html = data.getData("text/html");
+  return html.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ?? null;
+}
+
+function preventImageDrag(event: DragEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+}
 
 function readFileAsBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -68,13 +190,7 @@ type GutenbergEditorProps = {
   categoryOptions?: string[];
 };
 
-const GROUP_LABELS = {
-  texte: "Texte",
-  media: "Médias",
-  "mise-en-page": "Mise en page",
-  widgets: "Widgets",
-  embed: "Embarqué",
-} as const;
+const GROUP_LABELS = INSERTER_GROUP_LABELS;
 
 export function GutenbergEditor({
   post,
@@ -91,12 +207,18 @@ export function GutenbergEditor({
   const [selectedId, setSelectedId] = useState<string | null>(post.blocks[0]?.id ?? null);
   const [inserterOpen, setInserterOpen] = useState(false);
   const [insertAt, setInsertAt] = useState<number | null>(null);
-  const [listView, setListView] = useState(true);
+  const [listView, setListView] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<"document" | "block">("document");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [query, setQuery] = useState("");
+  const [inserterTab, setInserterTab] = useState<"blocs" | "motifs" | "media">("blocs");
   const [tagsDraft, setTagsDraft] = useState(() => post.tags.join(", "));
   const convertedId = useRef<string | null>(null);
+  const blocksRef = useRef(post.blocks);
+  const [dropOver, setDropOver] = useState(false);
+  const [dropBusy, setDropBusy] = useState(false);
   const uploadImageFn = useServerFn(adminUploadBlogImage);
+  blocksRef.current = post.blocks;
 
   const selected = post.blocks.find((b) => b.id === selectedId) ?? null;
 
@@ -123,15 +245,20 @@ export function GutenbergEditor({
   }, [post.id]);
 
   const filteredCatalog = useMemo(() => {
+    if (inserterTab === "motifs") return [];
     const q = query.trim().toLowerCase();
-    if (!q) return BLOG_BLOCK_CATALOG;
-    return BLOG_BLOCK_CATALOG.filter(
+    const source =
+      inserterTab === "media"
+        ? BLOG_INSERTER_ITEMS.filter((item) => item.group === "media")
+        : BLOG_INSERTER_ITEMS;
+    if (!q) return source;
+    return source.filter(
       (item) =>
         item.label.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
         item.keywords.some((k) => k.includes(q)),
     );
-  }, [query]);
+  }, [query, inserterTab]);
 
   const patchPost = (patch: Partial<StoredBlogPost>) => {
     onChange({ ...post, ...patch, updatedAt: new Date().toISOString() });
@@ -174,11 +301,16 @@ export function GutenbergEditor({
     setBlocks(next);
   };
 
-  const insertBlock = (type: BlogBlockType) => {
-    const block = createEmptyBlock(type);
+  const insertBlock = (item: BlogInserterItem | BlogBlockType) => {
+    const block =
+      typeof item === "string" ? createEmptyBlock(item) : createBlockFromInserter(item);
     const at = insertAt ?? post.blocks.length;
     const next = [...post.blocks];
-    next.splice(at, 0, block);
+    const existing = next[at];
+    const replaceEmpty =
+      existing?.type === "paragraph" && !existing.content.trim();
+    if (replaceEmpty) next[at] = block;
+    else next.splice(at, 0, block);
     setBlocks(next);
     setSelectedId(block.id);
     setInserterOpen(false);
@@ -188,7 +320,9 @@ export function GutenbergEditor({
 
   const openInserter = (at: number) => {
     setInsertAt(at);
+    setListView(false);
     setInserterOpen(true);
+    setInserterTab("blocs");
     setQuery("");
   };
 
@@ -205,7 +339,7 @@ export function GutenbergEditor({
   };
 
   const uploadImageFile = async (file: File): Promise<string | null> => {
-    if (!IMAGE_ACCEPT.split(",").includes(file.type)) {
+    if (!isAllowedImageFile(file)) {
       toast.error("Format non supporté (JPG, PNG, WebP, GIF)");
       return null;
     }
@@ -215,44 +349,150 @@ export function GutenbergEditor({
     }
     const dataBase64 = await readFileAsBase64(file);
     const result = await uploadImageFn({
-      data: { postId: post.id, contentType: file.type, dataBase64 },
+      data: {
+        postId: post.id,
+        contentType: file.type || "image/jpeg",
+        dataBase64,
+      },
     });
     return result.publicUrl;
   };
 
+  const applyImageBlocks = (
+    incoming: Array<{ url: string; alt: string }>,
+    at?: number,
+    replaceId?: string,
+  ) => {
+    if (!incoming.length) return;
+    const current = [...blocksRef.current];
+    const created = incoming.map((item) => {
+      const block = createEmptyBlock("image");
+      return { ...block, url: item.url, alt: item.alt } as BlogBlock;
+    });
+
+    if (replaceId) {
+      const index = current.findIndex((block) => block.id === replaceId);
+      if (index >= 0) {
+        const existing = current[index];
+        if (existing?.type === "image") {
+          current[index] = {
+            ...existing,
+            url: incoming[0]!.url,
+            alt: existing.alt || incoming[0]!.alt,
+          };
+          const extras = created.slice(1);
+          if (extras.length) current.splice(index + 1, 0, ...extras);
+          setBlocks(current);
+          setSelectedId(current[index]!.id);
+          return;
+        }
+        if (existing?.type === "cover") {
+          current[index] = { ...existing, url: incoming[0]!.url };
+          setBlocks(current);
+          setSelectedId(existing.id);
+          return;
+        }
+        if (existing?.type === "paragraph" && !existing.content.trim()) {
+          current.splice(index, 1, ...created);
+          setBlocks(current);
+          setSelectedId(created[0]!.id);
+          return;
+        }
+      }
+    }
+
+    const index = Math.min(Math.max(at ?? current.length, 0), current.length);
+    current.splice(index, 0, ...created);
+    setBlocks(current);
+    setSelectedId(created[0]!.id);
+  };
+
+  const ingestDroppedImages = async (
+    files: File[],
+    url?: string | null,
+    at?: number,
+    replaceId?: string,
+  ) => {
+    if (!files.length && !url) return;
+    setDropBusy(true);
+    try {
+      const incoming: Array<{ url: string; alt: string }> = [];
+      for (const file of files) {
+        const publicUrl = await uploadImageFile(file);
+        if (publicUrl) {
+          incoming.push({ url: publicUrl, alt: file.name.replace(/\.[^.]+$/, "") });
+        }
+      }
+      if (!incoming.length && url) {
+        incoming.push({ url, alt: "" });
+      }
+      applyImageBlocks(incoming, at, replaceId);
+      if (incoming.length) {
+        toast.success(
+          incoming.length === 1 ? "Image ajoutée dans l’éditeur" : `${incoming.length} images ajoutées`,
+        );
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Import image impossible");
+    } finally {
+      setDropBusy(false);
+      setDropOver(false);
+    }
+  };
+
+  const inserterGroups = (Object.keys(GROUP_LABELS) as InserterGroup[]).filter((group) => {
+    if (inserterTab === "motifs") return false;
+    if (inserterTab === "media") return group === "media";
+    return true;
+  });
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f0f0f1] text-foreground dark:bg-background">
-      {/* Top bar — style Gutenberg */}
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-black/10 bg-white px-3 dark:border-border dark:bg-card">
-        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-          ← Articles
-        </Button>
-        <div className="hidden min-w-0 flex-1 sm:block">
-          <p className="truncate text-sm font-semibold">{post.title || "Sans titre"}</p>
-          <p className="text-[11px] text-muted-foreground">
-            Éditeur blocs ·{" "}
-            {post.status === "published"
-              ? "Publié"
-              : post.status === "scheduled"
-                ? "Planifié"
-                : post.status === "private"
-                  ? "Privé"
-                  : "Brouillon"}
-            {" · "}
-            {post.readMinutes} min de lecture
-          </p>
-        </div>
-        <Button
+    <div className="fixed inset-0 z-50 flex flex-col bg-white text-[#1e1e1e]">
+      <header className="flex h-14 shrink-0 items-center gap-1 border-b border-[#e0e0e0] bg-white px-2">
+        <button
           type="button"
-          variant={listView ? "default" : "outline"}
-          size="sm"
-          className="rounded-md"
-          onClick={() => setListView((v) => !v)}
+          className="grid size-9 place-items-center rounded-sm text-[#1e1e1e] hover:bg-[#f0f0f0]"
+          onClick={onClose}
+          aria-label="Retour aux articles"
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          title="Ajouter un bloc"
+          aria-pressed={inserterOpen}
+          className={cn(
+            "grid size-9 place-items-center rounded-sm hover:bg-[#f0f0f0]",
+            inserterOpen ? "bg-[#1e1e1e] text-white" : "text-[#1e1e1e]",
+          )}
+          onClick={() => {
+            setListView(false);
+            setInserterOpen((open) => !open);
+            setInsertAt(post.blocks.length);
+          }}
+        >
+          <Plus className="size-5" />
+        </button>
+        <button
+          type="button"
           title="Vue liste"
+          className={cn(
+            "grid size-9 place-items-center rounded-sm hover:bg-[#f0f0f0]",
+            listView && "bg-[#f0f0f0]",
+          )}
+          onClick={() => {
+            setInserterOpen(false);
+            setListView((v) => !v);
+          }}
         >
           <ListTree className="size-4" />
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="rounded-md" asChild>
+        </button>
+        <div className="flex min-w-0 flex-1 justify-center px-2">
+          <span className="max-w-md truncate rounded-full bg-[#f0f0f0] px-4 py-1 text-[13px] text-[#757575]">
+            {post.title || "Sans titre"}
+          </span>
+        </div>
+        <Button type="button" variant="ghost" size="sm" className="rounded-sm text-[#1e1e1e]" asChild>
           <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer">
             <Eye className="size-4" />
             <span className="hidden sm:inline">Aperçu</span>
@@ -260,9 +500,9 @@ export function GutenbergEditor({
         </Button>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="sm"
-          className="rounded-md"
+          className="rounded-sm"
           disabled={saving}
           onClick={() => handleSave("draft")}
         >
@@ -271,27 +511,121 @@ export function GutenbergEditor({
         <Button
           type="button"
           size="sm"
-          className="rounded-md bg-[#007cba] text-white hover:bg-[#006ba1]"
+          className="rounded-sm bg-[#3858e9] text-white hover:bg-[#2145e6]"
           disabled={saving}
           onClick={() => handleSave("published")}
         >
           {saving ? "…" : "Publier"}
         </Button>
+        <button
+          type="button"
+          title="Réglages"
+          aria-pressed={sidebarOpen}
+          className={cn(
+            "grid size-9 place-items-center rounded-sm hover:bg-[#f0f0f0]",
+            sidebarOpen && "bg-[#f0f0f0]",
+          )}
+          onClick={() => setSidebarOpen((open) => !open)}
+        >
+          <Settings2 className="size-4" />
+        </button>
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        {/* List view */}
-        {listView ? (
-          <aside className="hidden w-56 shrink-0 overflow-y-auto border-r border-black/10 bg-white p-3 dark:border-border dark:bg-card md:block">
-            <p className="mb-2 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+      <div className="relative flex min-h-0 flex-1">
+        {inserterOpen ? (
+          <aside className="absolute inset-y-0 left-0 z-30 flex w-full max-w-[350px] shrink-0 flex-col border-r border-[#ddd] bg-white shadow-lg md:static md:shadow-none">
+            <div className="flex items-stretch border-b border-[#ddd]">
+              {(
+                [
+                  ["blocs", "Blocs"],
+                  ["motifs", "Motifs"],
+                  ["media", "Médias"],
+                ] as const
+              ).map(([tab, label]) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={cn(
+                    "flex-1 px-2 py-3 text-[13px]",
+                    inserterTab === tab
+                      ? "border-b-2 border-[#1e1e1e] font-medium text-[#1e1e1e]"
+                      : "text-[#757575] hover:text-[#1e1e1e]",
+                  )}
+                  onClick={() => setInserterTab(tab)}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                aria-label="Fermer l’inserter"
+                className="grid w-10 place-items-center text-[#757575] hover:bg-[#f0f0f0]"
+                onClick={() => setInserterOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="border-b border-[#ddd] p-3">
+              <Input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Rechercher"
+                className="h-10 rounded-full border-[#ddd] bg-[#f0f0f0] px-4 text-[13px] shadow-none"
+              />
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+              {inserterTab === "motifs" ? (
+                <p className="py-10 text-center text-[13px] text-[#757575]">
+                  Aucun motif enregistré.
+                </p>
+              ) : (
+                inserterGroups.map((group) => {
+                  const items = filteredCatalog.filter((item) => item.group === group);
+                  if (!items.length) return null;
+                  return (
+                    <div key={group} className="mb-6">
+                      <p className="mb-3 text-[11px] font-semibold tracking-[0.08em] text-[#1e1e1e] uppercase">
+                        {GROUP_LABELS[group]}
+                      </p>
+                      <div className="grid grid-cols-3 gap-x-1 gap-y-4">
+                        {items.map((item) => {
+                          const Icon = INSERTER_ICONS[item.icon] ?? Plus;
+                          return (
+                            <button
+                              key={item.id}
+                              type="button"
+                              title={item.description}
+                              onClick={() => insertBlock(item)}
+                              className="flex flex-col items-center gap-1.5 rounded-sm px-1 py-2 text-center hover:bg-[#f0f0f0]"
+                            >
+                              <span className="grid size-9 place-items-center text-[#1e1e1e]">
+                                <Icon className="size-6 stroke-[1.4]" />
+                              </span>
+                              <span className="text-[12px] leading-tight text-[#1e1e1e]">
+                                {item.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </aside>
+        ) : listView ? (
+          <aside className="absolute inset-y-0 left-0 z-30 w-full max-w-[280px] shrink-0 overflow-y-auto border-r border-[#ddd] bg-white p-3 shadow-lg md:static md:shadow-none">
+            <p className="mb-2 px-1 text-[11px] font-semibold tracking-wide text-[#757575] uppercase">
               Structure
             </p>
-            <ul className="space-y-1">
+            <ul>
               {post.blocks.map((block, index) => {
                 const meta = BLOG_BLOCK_CATALOG.find((c) => c.type === block.type);
                 const label =
                   ("content" in block && block.content
-                    ? String(block.content).slice(0, 28)
+                    ? String(block.content).slice(0, 36)
                     : meta?.label) || block.type;
                 return (
                   <li key={block.id}>
@@ -302,13 +636,13 @@ export function GutenbergEditor({
                         setSidebarTab("block");
                       }}
                       className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs",
+                        "flex w-full items-center gap-2 px-2 py-2 text-left text-[13px]",
                         selectedId === block.id
-                          ? "bg-[#007cba]/10 text-[#007cba] font-semibold"
-                          : "hover:bg-muted",
+                          ? "bg-[#f0f0f0] font-medium"
+                          : "hover:bg-[#f6f6f6]",
                       )}
                     >
-                      <GripVertical className="size-3.5 shrink-0 opacity-40" />
+                      <GripVertical className="size-3.5 shrink-0 text-[#949494]" />
                       <span className="truncate">
                         {index + 1}. {label}
                       </span>
@@ -317,21 +651,45 @@ export function GutenbergEditor({
                 );
               })}
             </ul>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-3 w-full rounded-md"
-              onClick={() => openInserter(post.blocks.length)}
-            >
-              <Plus className="size-4" /> Ajouter
-            </Button>
           </aside>
         ) : null}
 
-        {/* Canvas */}
-        <div className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8">
+        <div
+          className={cn(
+            "relative min-w-0 flex-1 overflow-y-auto bg-white",
+            dropOver && "bg-[#f0f6fc]",
+          )}
+          onDragEnter={(event) => {
+            preventImageDrag(event);
+            setDropOver(true);
+          }}
+          onDragOver={preventImageDrag}
+          onDragLeave={(event) => {
+            if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+            setDropOver(false);
+          }}
+          onDrop={(event) => {
+            preventImageDrag(event);
+            void ingestDroppedImages(
+              imageFilesFromDataTransfer(event.dataTransfer),
+              imageUrlFromDataTransfer(event.dataTransfer),
+            );
+          }}
+          onPaste={(event) => {
+            const files = Array.from(event.clipboardData?.files ?? []).filter(isAllowedImageFile);
+            if (!files.length) return;
+            event.preventDefault();
+            void ingestDroppedImages(files);
+          }}
+        >
+          {dropOver || dropBusy ? (
+            <div className="pointer-events-none sticky top-3 z-20 mx-auto mb-2 max-w-[680px] px-6">
+              <p className="border border-dashed border-[#3858e9] bg-white px-3 py-2 text-center text-[13px] font-medium text-[#3858e9]">
+                {dropBusy ? "Import de l’image…" : "Déposez l’image ici pour l’ajouter"}
+              </p>
+            </div>
+          ) : null}
+          <div className="mx-auto max-w-[680px] px-6 py-16">
             <Input
               value={post.title}
               onChange={(e) => {
@@ -343,38 +701,18 @@ export function GutenbergEditor({
                 patchPost({ title, slug: autoSlug || post.slug });
               }}
               placeholder="Ajouter un titre"
-              className="mb-6 h-auto border-0 bg-transparent px-0 text-3xl font-bold shadow-none focus-visible:ring-0 sm:text-4xl"
+              className="mb-8 h-auto border-0 bg-transparent px-0 text-[42px] leading-[1.15] font-normal text-[#1e1e1e] shadow-none placeholder:text-[#ccc] focus-visible:ring-0"
             />
 
-            <div className="space-y-2">
-              {post.blocks.map((block, index) => (
-                <div key={block.id} className="group relative">
-                  <button
-                    type="button"
-                    aria-label="Ajouter un bloc ici"
-                    className="absolute -left-2 top-1/2 z-10 hidden size-7 -translate-x-full -translate-y-1/2 items-center justify-center rounded-full border border-border bg-white text-[#007cba] opacity-0 shadow-sm transition group-hover:opacity-100 hover:bg-[#007cba] hover:text-white md:flex dark:bg-card"
-                    onClick={() => openInserter(index)}
-                  >
-                    <Plus className="size-4" />
-                  </button>
-                  <div
-                    className={cn(
-                      "rounded-xl border bg-white p-3 transition dark:bg-card",
-                      selectedId === block.id
-                        ? "border-[#007cba] shadow-[0_0_0_1px_#007cba]"
-                        : "border-transparent hover:border-border",
-                    )}
-                    onClick={() => {
-                      setSelectedId(block.id);
-                      setSidebarTab("block");
-                    }}
-                  >
-                    <div className="mb-2 flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
-                        {BLOG_BLOCK_CATALOG.find((c) => c.type === block.type)?.label ??
-                          block.type}
-                      </span>
-                      <div className="flex gap-0.5 opacity-0 transition group-hover:opacity-100">
+            <div>
+              {post.blocks.map((block, index) => {
+                const emptyParagraph =
+                  block.type === "paragraph" && !block.content.trim();
+                const selected = selectedId === block.id;
+                return (
+                  <div key={block.id} className="group relative">
+                    {selected ? (
+                      <div className="absolute -top-9 left-0 z-10 flex items-center border border-[#ddd] bg-white shadow-sm">
                         <IconBtn label="Monter" onClick={() => moveBlock(block.id, -1)}>
                           <ChevronUp className="size-3.5" />
                         </IconBtn>
@@ -388,54 +726,91 @@ export function GutenbergEditor({
                           <Trash2 className="size-3.5" />
                         </IconBtn>
                       </div>
+                    ) : null}
+                    <div
+                      className={cn(
+                        "relative min-h-10 px-1 py-1",
+                        selected && "outline outline-2 outline-[#3858e9] -outline-offset-2",
+                      )}
+                      onClick={() => {
+                        setSelectedId(block.id);
+                        setSidebarTab("block");
+                      }}
+                      onDragOver={preventImageDrag}
+                      onDrop={(event) => {
+                        preventImageDrag(event);
+                        void ingestDroppedImages(
+                          imageFilesFromDataTransfer(event.dataTransfer),
+                          imageUrlFromDataTransfer(event.dataTransfer),
+                          index + 1,
+                          block.id,
+                        );
+                      }}
+                    >
+                      <BlockEditor
+                        block={block}
+                        onChange={(next) => updateBlock(block.id, next)}
+                        onUploadImage={uploadImageFile}
+                        onDropFiles={(files) =>
+                          ingestDroppedImages(files, null, index + 1, block.id)
+                        }
+                        onSlash={() => openInserter(index)}
+                      />
                     </div>
-                    <BlockEditor
-                      block={block}
-                      onChange={(next) => updateBlock(block.id, next)}
-                      onUploadImage={uploadImageFile}
-                    />
+                    {emptyParagraph || selected ? (
+                      <button
+                        type="button"
+                        aria-label="Ajouter un bloc"
+                        className="absolute top-1/2 right-0 z-10 hidden size-8 -translate-y-1/2 translate-x-12 items-center justify-center rounded-full border border-[#ddd] bg-white text-[#1e1e1e] shadow-sm hover:bg-[#f0f0f0] md:flex"
+                        onClick={() => openInserter(index)}
+                      >
+                        <Plus className="size-4" />
+                      </button>
+                    ) : null}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-4 w-full rounded-xl border-dashed py-6 text-[#007cba]"
-              onClick={() => openInserter(post.blocks.length)}
-            >
-              <Plus className="size-4" /> Ajouter un bloc
-            </Button>
           </div>
         </div>
 
-        {/* Sidebar */}
-        <aside className="hidden w-[300px] shrink-0 overflow-y-auto border-l border-black/10 bg-white dark:border-border dark:bg-card lg:block">
-          <div className="flex border-b border-border">
-            <button
-              type="button"
-              className={cn(
-                "flex-1 px-3 py-3 text-xs font-semibold",
-                sidebarTab === "document" ? "border-b-2 border-[#007cba] text-[#007cba]" : "text-muted-foreground",
-              )}
-              onClick={() => setSidebarTab("document")}
-            >
-              Article
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "flex-1 px-3 py-3 text-xs font-semibold",
-                sidebarTab === "block" ? "border-b-2 border-[#007cba] text-[#007cba]" : "text-muted-foreground",
-              )}
-              onClick={() => setSidebarTab("block")}
-            >
-              Bloc
-            </button>
-          </div>
+        {sidebarOpen ? (
+          <aside className="hidden w-[280px] shrink-0 overflow-y-auto border-l border-[#e0e0e0] bg-white text-[#1e1e1e] lg:block">
+            <div className="flex items-stretch border-b border-[#e0e0e0]">
+              <button
+                type="button"
+                className={cn(
+                  "flex-1 px-3 py-2.5 text-[13px] font-medium",
+                  sidebarTab === "document"
+                    ? "border-b-2 border-[#1e1e1e] text-[#1e1e1e]"
+                    : "text-[#757575] hover:text-[#1e1e1e]",
+                )}
+                onClick={() => setSidebarTab("document")}
+              >
+                Document
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "flex-1 px-3 py-2.5 text-[13px] font-medium",
+                  sidebarTab === "block"
+                    ? "border-b-2 border-[#1e1e1e] text-[#1e1e1e]"
+                    : "text-[#757575] hover:text-[#1e1e1e]",
+                )}
+                onClick={() => setSidebarTab("block")}
+              >
+                Bloc
+              </button>
+              <button
+                type="button"
+                aria-label="Fermer les réglages"
+                className="grid w-10 place-items-center text-[#757575] hover:bg-[#f0f0f0] hover:text-[#1e1e1e]"
+                onClick={() => setSidebarOpen(false)}
+              >
+                ×
+              </button>
+            </div>
 
-          <div className="space-y-4 p-4">
             {sidebarTab === "document" ? (
               <DocumentSettings
                 post={post}
@@ -446,64 +821,22 @@ export function GutenbergEditor({
                 onTagsCommit={() => patchPost({ tags: parsedTags() })}
                 onUploadImage={uploadImageFile}
               />
-            ) : selected ? (
-              <BlockSettings
-                block={selected}
-                onChange={(next) => updateBlock(selected.id, next)}
-              />
             ) : (
-              <p className="text-sm text-muted-foreground">Sélectionnez un bloc.</p>
+              <div className="p-4">
+                {selected ? (
+                  <BlockSettings
+                    block={selected}
+                    onChange={(next) => updateBlock(selected.id, next)}
+                  />
+                ) : (
+                  <p className="text-[13px] text-[#757575]">Sélectionnez un bloc.</p>
+                )}
+              </div>
             )}
-          </div>
-        </aside>
+          </aside>
+        ) : null}
       </div>
 
-      {/* Inserter modal */}
-      {inserterOpen ? (
-        <div className="fixed inset-0 z-[60] flex items-start justify-center bg-black/40 p-4 pt-[10vh]">
-          <div className="max-h-[80vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-card">
-            <div className="flex items-center gap-2 border-b border-border p-3">
-              <Plus className="size-4 text-[#007cba]" />
-              <Input
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Rechercher un bloc… (/, paragraphe, image, FAQ…)"
-                className="border-0 shadow-none focus-visible:ring-0"
-              />
-              <Button type="button" variant="ghost" size="sm" onClick={() => setInserterOpen(false)}>
-                Fermer
-              </Button>
-            </div>
-            <div className="max-h-[calc(80vh-56px)] overflow-y-auto p-3">
-              {(Object.keys(GROUP_LABELS) as Array<keyof typeof GROUP_LABELS>).map((group) => {
-                const items = filteredCatalog.filter((item) => item.group === group);
-                if (!items.length) return null;
-                return (
-                  <div key={group} className="mb-4">
-                    <p className="mb-2 px-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-                      {GROUP_LABELS[group]}
-                    </p>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {items.map((item) => (
-                        <button
-                          key={item.type}
-                          type="button"
-                          onClick={() => insertBlock(item.type)}
-                          className="rounded-xl border border-border p-3 text-left transition hover:border-[#007cba] hover:bg-[#007cba]/5"
-                        >
-                          <p className="text-sm font-semibold">{item.label}</p>
-                          <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -522,7 +855,7 @@ function IconBtn({
       type="button"
       title={label}
       aria-label={label}
-      className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+      className="grid size-8 place-items-center text-[#1e1e1e] hover:bg-[#f0f0f0]"
       onClick={(e) => {
         e.stopPropagation();
         onClick();
@@ -532,6 +865,53 @@ function IconBtn({
     </button>
   );
 }
+
+function SidebarPanel({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border-b border-[#e0e0e0]">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between px-4 py-3 text-left text-[13px] font-medium text-[#1e1e1e] hover:bg-[#f6f6f6]"
+        aria-expanded={open}
+        onClick={onToggle}
+      >
+        {title}
+        <ChevronDown
+          className={cn("size-4 text-[#757575] transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open ? <div className="space-y-3 px-4 pb-4">{children}</div> : null}
+    </section>
+  );
+}
+
+function SettingRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-[13px]">
+      <span className="shrink-0 text-[#757575]">{label}</span>
+      <div className="min-w-0 flex-1 text-right">{children}</div>
+    </div>
+  );
+}
+
+const wpControl =
+  "h-8 w-full rounded-sm border border-[#8c8f94] bg-white px-2 text-[13px] text-[#1e1e1e] shadow-none placeholder:text-[#757575] focus-visible:ring-[#007cba] focus-visible:shadow-[0_0_0_1px_#007cba]";
 
 function DocumentSettings({
   post,
@@ -550,64 +930,169 @@ function DocumentSettings({
   onTagsCommit: () => void;
   onUploadImage: (file: File) => Promise<string | null>;
 }) {
+  const [open, setOpen] = useState({
+    status: true,
+    permalink: false,
+    categories: false,
+    tags: false,
+    featured: false,
+    excerpt: false,
+    seo: false,
+    author: false,
+  });
+  const toggle = (key: keyof typeof open) =>
+    setOpen((current) => ({ ...current, [key]: !current[key] }));
+
+  const visibilityLabel =
+    post.status === "published"
+      ? "Public"
+      : post.status === "private"
+        ? "Privé"
+        : post.status === "scheduled"
+          ? "Planifié"
+          : "Brouillon";
+
   return (
-    <>
-      <Field label="État">
-        <select
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={post.status}
-          onChange={(e) =>
-            onChange({ status: e.target.value as StoredBlogPost["status"] })
-          }
-        >
-          <option value="draft">Brouillon</option>
-          <option value="published">Publié</option>
-          <option value="scheduled">Planifié</option>
-          <option value="private">Privé</option>
-        </select>
-      </Field>
-      {post.status === "scheduled" ? (
-        <Field label="Date de publication planifiée">
+    <div>
+      <SidebarPanel
+        title="État et visibilité"
+        open={open.status}
+        onToggle={() => toggle("status")}
+      >
+        <SettingRow label="Visibilité">
+          <select
+            className={cn(wpControl, "max-w-[148px]")}
+            value={post.status}
+            onChange={(e) =>
+              onChange({ status: e.target.value as StoredBlogPost["status"] })
+            }
+          >
+            <option value="published">Public</option>
+            <option value="private">Privé</option>
+            <option value="draft">Brouillon</option>
+            <option value="scheduled">Planifié</option>
+          </select>
+        </SettingRow>
+        <SettingRow label="Publication">
+          {post.status === "scheduled" ? (
+            <Input
+              type="datetime-local"
+              value={post.scheduledAt?.slice(0, 16) ?? ""}
+              onChange={(e) => onChange({ scheduledAt: e.target.value || null })}
+              className={cn(wpControl, "max-w-[148px]")}
+            />
+          ) : (
+            <button
+              type="button"
+              className="text-[13px] text-[#007cba] hover:underline"
+              onClick={() => onChange({ status: "scheduled" })}
+            >
+              Immédiatement
+            </button>
+          )}
+        </SettingRow>
+        <SettingRow label="Format">
+          <select
+            className={cn(wpControl, "max-w-[148px]")}
+            value={post.difficulty ?? "Débutant"}
+            onChange={(e) =>
+              onChange({
+                difficulty: e.target.value as StoredBlogPost["difficulty"],
+              })
+            }
+          >
+            <option>Débutant</option>
+            <option>Intermédiaire</option>
+            <option>Avancé</option>
+            <option>Expert</option>
+          </select>
+        </SettingRow>
+        <label className="flex items-center gap-2 text-[13px] text-[#1e1e1e]">
+          <input
+            type="checkbox"
+            checked={Boolean(post.sticky)}
+            onChange={(e) => onChange({ sticky: e.target.checked })}
+          />
+          Épingler en page d’accueil
+        </label>
+        <label className="flex items-center gap-2 text-[13px] text-[#1e1e1e]">
+          <input
+            type="checkbox"
+            checked={Boolean(post.featured)}
+            onChange={(e) => onChange({ featured: e.target.checked })}
+          />
+          Article à la une
+        </label>
+        <label className="flex items-center gap-2 text-[13px] text-[#1e1e1e]">
+          <input
+            type="checkbox"
+            checked={Boolean(post.trending)}
+            onChange={(e) => onChange({ trending: e.target.checked })}
+          />
+          Tendance
+        </label>
+        <SettingRow label="Auteur">
           <Input
-            type="datetime-local"
-            value={post.scheduledAt?.slice(0, 16) ?? ""}
-            onChange={(e) => onChange({ scheduledAt: e.target.value || null })}
+            value={post.authorName}
+            onChange={(e) => onChange({ authorName: e.target.value })}
+            className={cn(wpControl, "max-w-[148px]")}
+          />
+        </SettingRow>
+        <Field label="Date de publication">
+          <Input
+            type="date"
+            value={post.publishedAt.slice(0, 10)}
+            onChange={(e) => onChange({ publishedAt: e.target.value })}
+            className={wpControl}
           />
         </Field>
-      ) : null}
-      <Field label="Slug (URL)">
-        <Input
-          value={post.slug}
-          onChange={(e) => onChange({ slug: slugifyBlog(e.target.value) })}
-        />
-      </Field>
-      <Field label="Extrait">
-        <Textarea
-          rows={3}
-          value={post.excerpt}
-          onChange={(e) => onChange({ excerpt: e.target.value })}
-        />
-      </Field>
-      <Field label="Catégorie">
-        <select
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={post.category}
-          onChange={(e) => onChange({ category: e.target.value })}
-        >
+      </SidebarPanel>
+
+      <SidebarPanel title="Permalien" open={open.permalink} onToggle={() => toggle("permalink")}>
+        <p className="break-all text-[12px] text-[#757575]">/blog/{post.slug}</p>
+        <Field label="Slug">
+          <Input
+            value={post.slug}
+            onChange={(e) => onChange({ slug: slugifyBlog(e.target.value) })}
+            className={wpControl}
+          />
+        </Field>
+      </SidebarPanel>
+
+      <SidebarPanel
+        title="Catégories"
+        open={open.categories}
+        onToggle={() => toggle("categories")}
+      >
+        <ul className="max-h-40 space-y-1.5 overflow-y-auto">
           {categoryOptions.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
+            <li key={cat}>
+              <label className="flex items-center gap-2 text-[13px] text-[#1e1e1e]">
+                <input
+                  type="radio"
+                  name="blog-category"
+                  checked={post.category === cat}
+                  onChange={() => onChange({ category: cat })}
+                />
+                {cat}
+              </label>
+            </li>
           ))}
           {!categoryOptions.includes(post.category) ? (
-            <option value={post.category}>{post.category}</option>
+            <li>
+              <label className="flex items-center gap-2 text-[13px] text-[#1e1e1e]">
+                <input type="radio" name="blog-category" checked readOnly />
+                {post.category}
+              </label>
+            </li>
           ) : null}
-        </select>
-      </Field>
-      <Field label="Étiquettes (virgules)">
+        </ul>
+      </SidebarPanel>
+
+      <SidebarPanel title="Étiquettes" open={open.tags} onToggle={() => toggle("tags")}>
         <Input
           value={tagsDraft}
-          placeholder="windows, cmd, dism"
+          placeholder="Ajoutez des étiquettes, séparées par des virgules"
           onChange={(e) => onTagsDraftChange(e.target.value)}
           onBlur={onTagsCommit}
           onKeyDown={(e) => {
@@ -616,70 +1101,36 @@ function DocumentSettings({
               (e.target as HTMLInputElement).blur();
             }
           }}
+          className={wpControl}
         />
-      </Field>
-      <Field label="Date de publication">
-        <Input
-          type="date"
-          value={post.publishedAt.slice(0, 10)}
-          onChange={(e) => onChange({ publishedAt: e.target.value })}
-        />
-      </Field>
-      <Field label="Niveau">
-        <select
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          value={post.difficulty ?? "Débutant"}
-          onChange={(e) =>
-            onChange({
-              difficulty: e.target.value as StoredBlogPost["difficulty"],
-            })
-          }
-        >
-          <option>Débutant</option>
-          <option>Intermédiaire</option>
-          <option>Avancé</option>
-          <option>Expert</option>
-        </select>
-      </Field>
-      <div className="flex flex-wrap gap-3 text-sm">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={Boolean(post.featured)}
-            onChange={(e) => onChange({ featured: e.target.checked })}
-          />
-          À la une
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={Boolean(post.trending)}
-            onChange={(e) => onChange({ trending: e.target.checked })}
-          />
-          Tendance
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={Boolean(post.sticky)}
-            onChange={(e) => onChange({ sticky: e.target.checked })}
-          />
-          Épinglé
-        </label>
-      </div>
-      <div className="border-t border-border pt-4">
-        <p className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          <Settings2 className="size-3.5" /> Image à la une
-        </p>
+        {post.tags.length ? (
+          <div className="flex flex-wrap gap-1">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-sm bg-[#f0f0f0] px-1.5 py-0.5 text-[11px] text-[#1e1e1e]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </SidebarPanel>
+
+      <SidebarPanel
+        title="Image mise en avant"
+        open={open.featured}
+        onToggle={() => toggle("featured")}
+      >
         {post.coverImageUrl ? (
           <img
             src={post.coverImageUrl}
             alt={post.coverAlt || ""}
-            className="mb-2 h-28 w-full rounded-lg object-cover"
+            className="h-28 w-full rounded-sm object-cover"
           />
         ) : null}
         <DeviceImageButton
-          label={post.coverImageUrl ? "Changer (appareil)" : "Choisir sur l’appareil"}
+          label={post.coverImageUrl ? "Remplacer l’image" : "Définir l’image mise en avant"}
           onUpload={async (file) => {
             const url = await onUploadImage(file);
             if (!url) return;
@@ -690,40 +1141,48 @@ function DocumentSettings({
             toast.success("Image de couverture enregistrée");
           }}
         />
-        <Field label="URL image de couverture">
+        {post.coverImageUrl ? (
+          <button
+            type="button"
+            className="text-[13px] text-[#cc1818] hover:underline"
+            onClick={() => onChange({ coverImageUrl: undefined })}
+          >
+            Retirer l’image mise en avant
+          </button>
+        ) : null}
+        <Field label="Ou URL">
           <Input
             value={post.coverImageUrl ?? ""}
             onChange={(e) => onChange({ coverImageUrl: e.target.value })}
             placeholder="https://…"
+            className={wpControl}
           />
         </Field>
         <Field label="Texte alternatif">
           <Input
             value={post.coverAlt ?? ""}
             onChange={(e) => onChange({ coverAlt: e.target.value })}
+            className={wpControl}
           />
         </Field>
-        <Field label="Libellé couverture">
-          <Input
-            value={post.coverLabel}
-            onChange={(e) => onChange({ coverLabel: e.target.value })}
-          />
-        </Field>
-        <Field label="Gradient CSS (si pas d’image)">
-          <Input
-            value={post.coverGradient}
-            onChange={(e) => onChange({ coverGradient: e.target.value })}
-          />
-        </Field>
-      </div>
-      <div className="border-t border-border pt-4">
-        <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          SEO / Open Graph
-        </p>
-        <Field label="SEO Title">
+      </SidebarPanel>
+
+      <SidebarPanel title="Extrait" open={open.excerpt} onToggle={() => toggle("excerpt")}>
+        <Textarea
+          rows={4}
+          value={post.excerpt}
+          onChange={(e) => onChange({ excerpt: e.target.value })}
+          placeholder="Écrivez un extrait (facultatif)"
+          className={wpControl}
+        />
+      </SidebarPanel>
+
+      <SidebarPanel title="SEO" open={open.seo} onToggle={() => toggle("seo")}>
+        <Field label="Titre SEO">
           <Input
             value={post.seoTitle ?? ""}
             onChange={(e) => onChange({ seoTitle: e.target.value })}
+            className={wpControl}
           />
         </Field>
         <Field label="Meta description">
@@ -731,65 +1190,42 @@ function DocumentSettings({
             rows={3}
             value={post.seoDescription ?? ""}
             onChange={(e) => onChange({ seoDescription: e.target.value })}
+            className={wpControl}
           />
         </Field>
         <Field label="Mot-clé principal">
           <Input
             value={post.primaryKeyword ?? ""}
             onChange={(e) => onChange({ primaryKeyword: e.target.value })}
+            className={wpControl}
           />
         </Field>
-        <Field label="Mots-clés secondaires (virgules)">
-          <Input
-            value={(post.secondaryKeywords ?? []).join(", ")}
-            onChange={(e) =>
-              onChange({
-                secondaryKeywords: e.target.value
-                  .split(",")
-                  .map((t) => t.trim())
-                  .filter(Boolean),
-              })
-            }
-          />
-        </Field>
-        <Field label="OG Title">
-          <Input
-            value={post.ogTitle ?? ""}
-            onChange={(e) => onChange({ ogTitle: e.target.value })}
-          />
-        </Field>
-        <Field label="OG Description">
-          <Textarea
-            rows={2}
-            value={post.ogDescription ?? ""}
-            onChange={(e) => onChange({ ogDescription: e.target.value })}
-          />
-        </Field>
-      </div>
-      <div className="border-t border-border pt-4">
-        <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          Auteur
-        </p>
+      </SidebarPanel>
+
+      <SidebarPanel title="Auteur" open={open.author} onToggle={() => toggle("author")}>
         <Field label="Nom">
           <Input
             value={post.authorName}
             onChange={(e) => onChange({ authorName: e.target.value })}
+            className={wpControl}
           />
         </Field>
         <Field label="Rôle">
           <Input
             value={post.authorRole}
             onChange={(e) => onChange({ authorRole: e.target.value })}
+            className={wpControl}
           />
         </Field>
         <Field label="Initiales">
           <Input
             value={post.authorInitials}
             onChange={(e) => onChange({ authorInitials: e.target.value.slice(0, 3) })}
+            className={wpControl}
           />
         </Field>
-      </div>
-    </>
+      </SidebarPanel>
+    </div>
   );
 }
 
@@ -960,34 +1396,69 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function DeviceImageButton({
   label,
   onUpload,
+  onFiles,
 }: {
   label: string;
-  onUpload: (file: File) => Promise<void>;
+  onUpload?: (file: File) => Promise<void>;
+  onFiles?: (files: File[]) => Promise<void>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+
+  const take = async (files: File[]) => {
+    const images = files.filter(isAllowedImageFile);
+    if (!images.length) {
+      toast.error("Glissez une image JPG, PNG, WebP ou GIF");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (onFiles) await onFiles(images);
+      else if (onUpload) await onUpload(images[0]!);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload impossible");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
   return (
-    <div className="mb-2">
+    <div
+      className={cn(
+        "mb-2 rounded-md border border-dashed px-3 py-4 text-center transition",
+        over ? "border-[#007cba] bg-[#007cba]/5" : "border-[#c3c4c7] bg-[#f6f7f7]",
+      )}
+      onDragEnter={(event) => {
+        preventImageDrag(event);
+        setOver(true);
+      }}
+      onDragOver={preventImageDrag}
+      onDragLeave={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        setOver(false);
+      }}
+      onDrop={(event) => {
+        preventImageDrag(event);
+        setOver(false);
+        void take(imageFilesFromDataTransfer(event.dataTransfer));
+      }}
+    >
       <input
         ref={inputRef}
         type="file"
         accept={IMAGE_ACCEPT}
+        multiple={Boolean(onFiles)}
         className="hidden"
         disabled={busy}
         onChange={(event) => {
-          const file = event.target.files?.[0];
-          if (!file) return;
-          setBusy(true);
-          void onUpload(file)
-            .catch((error) => {
-              toast.error(error instanceof Error ? error.message : "Upload impossible");
-            })
-            .finally(() => {
-              setBusy(false);
-              if (inputRef.current) inputRef.current.value = "";
-            });
+          void take(Array.from(event.target.files ?? []));
         }}
       />
+      <p className="mb-2 text-[12px] text-[#757575]">
+        Glissez-déposez une image ici, ou cliquez pour en choisir une.
+      </p>
       <Button
         type="button"
         variant="outline"
@@ -1007,10 +1478,14 @@ function BlockEditor({
   block,
   onChange,
   onUploadImage,
+  onDropFiles,
+  onSlash,
 }: {
   block: BlogBlock;
   onChange: (block: BlogBlock) => void;
   onUploadImage: (file: File) => Promise<string | null>;
+  onDropFiles?: (files: File[]) => Promise<void>;
+  onSlash?: () => void;
 }) {
   switch (block.type) {
     case "paragraph":
@@ -1021,21 +1496,27 @@ function BlockEditor({
     case "html":
       return (
         <Textarea
-          rows={block.type === "paragraph" ? 3 : 5}
+          rows={block.type === "paragraph" ? 2 : 5}
           value={block.content}
           placeholder={
-            block.type === "paragraph"
-              ? "Écrivez votre paragraphe… Tapez / pour ajouter un bloc"
-              : undefined
+            block.type === "paragraph" ? "Tapez / pour choisir un bloc" : undefined
           }
           className={cn(
-            "border-0 bg-transparent shadow-none focus-visible:ring-0",
+            "min-h-10 resize-none border-0 bg-transparent px-0 py-1 text-base leading-7 text-[#1e1e1e] shadow-none placeholder:text-[#949494] focus-visible:ring-0",
             block.type === "code" || block.type === "preformatted" || block.type === "html"
               ? "font-mono text-sm"
               : "",
             block.type === "quote" || block.type === "pullquote" ? "italic" : "",
           )}
-          onChange={(e) => onChange({ ...block, content: e.target.value })}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (block.type === "paragraph" && value === "/") {
+              onChange({ ...block, content: "" });
+              onSlash?.();
+              return;
+            }
+            onChange({ ...block, content: value });
+          }}
         />
       );
     case "heading":
@@ -1073,6 +1554,7 @@ function BlockEditor({
         <div className="space-y-2">
           <DeviceImageButton
             label={block.url ? "Remplacer l’image" : "Choisir sur l’appareil"}
+            onFiles={onDropFiles}
             onUpload={async (file) => {
               const url = await onUploadImage(file);
               if (!url) return;
@@ -1245,8 +1727,17 @@ function BlockEditor({
     case "audio":
       return (
         <div className="space-y-2">
+          {block.type === "embed" && block.provider && block.provider !== "generic" ? (
+            <p className="text-[11px] font-medium uppercase tracking-wide text-[#757575]">
+              {block.provider}
+            </p>
+          ) : null}
           <Input
-            placeholder="URL"
+            placeholder={
+              block.type === "embed"
+                ? `URL ${block.provider && block.provider !== "generic" ? block.provider : "à embarquer"}`
+                : "URL"
+            }
             value={block.url}
             onChange={(e) => onChange({ ...block, url: e.target.value })}
           />
@@ -1306,6 +1797,130 @@ function BlockEditor({
             })
           }
         />
+      );
+    case "countdown":
+      return (
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Input
+            type="datetime-local"
+            value={block.target}
+            onChange={(e) => onChange({ ...block, target: e.target.value })}
+          />
+          <Input
+            placeholder="Libellé"
+            value={block.label ?? ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+          />
+        </div>
+      );
+    case "progress":
+      return (
+        <div className="space-y-2">
+          <Input
+            placeholder="Libellé"
+            value={block.label ?? ""}
+            onChange={(e) => onChange({ ...block, label: e.target.value })}
+          />
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={block.value}
+            onChange={(e) => onChange({ ...block, value: Number(e.target.value) })}
+          />
+        </div>
+      );
+    case "tabs":
+      return (
+        <Textarea
+          rows={6}
+          className="font-mono text-xs"
+          value={block.items.map((item) => `${item.title} || ${item.content}`).join("\n")}
+          placeholder="Titre || Contenu"
+          onChange={(e) =>
+            onChange({
+              ...block,
+              items: e.target.value.split("\n").map((line) => {
+                const [title, ...rest] = line.split("||");
+                return { title: title?.trim() ?? "", content: rest.join("||").trim() };
+              }),
+            })
+          }
+        />
+      );
+    case "testimonial":
+      return (
+        <div className="space-y-2">
+          <Textarea
+            rows={3}
+            value={block.quote}
+            onChange={(e) => onChange({ ...block, quote: e.target.value })}
+          />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input
+              placeholder="Auteur"
+              value={block.author}
+              onChange={(e) => onChange({ ...block, author: e.target.value })}
+            />
+            <Input
+              placeholder="Rôle"
+              value={block.role ?? ""}
+              onChange={(e) => onChange({ ...block, role: e.target.value })}
+            />
+          </div>
+        </div>
+      );
+    case "pricing":
+      return (
+        <Textarea
+          rows={6}
+          className="font-mono text-xs"
+          value={block.plans
+            .map((plan) => `${plan.name} | ${plan.price} | ${plan.features.replace(/\n/g, " / ")} | ${plan.url ?? ""}`)
+            .join("\n")}
+          placeholder="Nom | Prix | fonction / fonction | url"
+          onChange={(e) =>
+            onChange({
+              ...block,
+              plans: e.target.value.split("\n").map((line) => {
+                const [name, price, features, url] = line.split("|").map((p) => p.trim());
+                return {
+                  name: name ?? "",
+                  price: price ?? "",
+                  features: (features ?? "").replace(/ \/ /g, "\n"),
+                  url,
+                };
+              }),
+            })
+          }
+        />
+      );
+    case "iconbox":
+    case "numberbox":
+      return (
+        <div className="space-y-2">
+          <Input
+            placeholder={block.type === "iconbox" ? "Icône" : "Chiffre"}
+            value={block.type === "iconbox" ? block.icon : block.number}
+            onChange={(e) =>
+              onChange(
+                block.type === "iconbox"
+                  ? { ...block, icon: e.target.value }
+                  : { ...block, number: e.target.value },
+              )
+            }
+          />
+          <Input
+            placeholder="Titre"
+            value={block.title}
+            onChange={(e) => onChange({ ...block, title: e.target.value })}
+          />
+          <Textarea
+            rows={2}
+            value={block.content}
+            onChange={(e) => onChange({ ...block, content: e.target.value })}
+          />
+        </div>
       );
     case "toc":
       return (
