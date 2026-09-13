@@ -218,15 +218,18 @@ export function GutenbergEditor({
   const [inserterTab, setInserterTab] = useState<"blocs" | "motifs" | "media">("blocs");
   const [tagsDraft, setTagsDraft] = useState(() => post.tags.join(", "));
   const blocksRef = useRef(post.blocks);
+  const postRef = useRef(post);
   const [dropOver, setDropOver] = useState(false);
   const [dropBusy, setDropBusy] = useState(false);
   const uploadImageFn = useServerFn(adminUploadBlogImage);
-  blocksRef.current = post.blocks;
+  postRef.current = post;
 
   const selected = post.blocks.find((b) => b.id === selectedId) ?? null;
 
   useEffect(() => {
     setTagsDraft(post.tags.join(", "));
+    blocksRef.current = post.blocks;
+    postRef.current = post;
   }, [post.id]);
 
   useEffect(() => {
@@ -263,10 +266,15 @@ export function GutenbergEditor({
   }, [query, inserterTab]);
 
   const patchPost = (patch: Partial<StoredBlogPost>) => {
-    onChange({ ...post, ...patch, updatedAt: new Date().toISOString() });
+    const current = postRef.current;
+    const next = { ...current, ...patch, updatedAt: new Date().toISOString() };
+    postRef.current = next;
+    if (patch.blocks) blocksRef.current = patch.blocks;
+    onChange(next);
   };
 
   const setBlocks = (blocks: BlogBlock[]) => {
+    blocksRef.current = blocks;
     patchPost({
       blocks,
       readMinutes: estimateReadMinutes(blocks),
@@ -274,30 +282,32 @@ export function GutenbergEditor({
   };
 
   const updateBlock = (id: string, next: BlogBlock) => {
-    setBlocks(post.blocks.map((b) => (b.id === id ? next : b)));
+    setBlocks(blocksRef.current.map((b) => (b.id === id ? next : b)));
   };
 
   const removeBlock = (id: string) => {
-    const next = post.blocks.filter((b) => b.id !== id);
-    setBlocks(next.length ? next : [createEmptyBlock("paragraph")]);
+    const next = blocksRef.current.filter((b) => b.id !== id);
+    setBlocks(next.length ? next : [createEmptyBlock("html")]);
     if (selectedId === id) setSelectedId(next[0]?.id ?? null);
   };
 
   const duplicateBlock = (id: string) => {
-    const index = post.blocks.findIndex((b) => b.id === id);
+    const current = blocksRef.current;
+    const index = current.findIndex((b) => b.id === id);
     if (index < 0) return;
-    const copy = { ...structuredClone(post.blocks[index]), id: createEmptyBlock("paragraph").id };
-    const next = [...post.blocks];
+    const copy = { ...structuredClone(current[index]), id: createEmptyBlock("paragraph").id };
+    const next = [...current];
     next.splice(index + 1, 0, copy);
     setBlocks(next);
     setSelectedId(copy.id);
   };
 
   const moveBlock = (id: string, dir: -1 | 1) => {
-    const index = post.blocks.findIndex((b) => b.id === id);
+    const current = blocksRef.current;
+    const index = current.findIndex((b) => b.id === id);
     const target = index + dir;
-    if (index < 0 || target < 0 || target >= post.blocks.length) return;
-    const next = [...post.blocks];
+    if (index < 0 || target < 0 || target >= current.length) return;
+    const next = [...current];
     const [item] = next.splice(index, 1);
     next.splice(target, 0, item);
     setBlocks(next);
@@ -306,8 +316,15 @@ export function GutenbergEditor({
   const insertBlock = (item: BlogInserterItem | BlogBlockType) => {
     const block =
       typeof item === "string" ? createEmptyBlock(item) : createBlockFromInserter(item);
-    const at = insertAt ?? post.blocks.length;
-    const next = [...post.blocks];
+    const current = blocksRef.current;
+    const selectedIndex = selectedId
+      ? current.findIndex((b) => b.id === selectedId)
+      : -1;
+    const at = Math.min(
+      Math.max(insertAt ?? (selectedIndex >= 0 ? selectedIndex + 1 : current.length), 0),
+      current.length,
+    );
+    const next = [...current];
     const existing = next[at];
     const replaceEmpty =
       existing?.type === "paragraph" && !existing.content.trim();
@@ -315,9 +332,13 @@ export function GutenbergEditor({
     else next.splice(at, 0, block);
     setBlocks(next);
     setSelectedId(block.id);
-    setInserterOpen(false);
-    setInsertAt(null);
+    setInsertAt(replaceEmpty ? at + 1 : at + 1);
     setSidebarTab("block");
+    requestAnimationFrame(() => {
+      document
+        .querySelector(`[data-block-id="${block.id}"]`)
+        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
   };
 
   const openInserter = (at: number) => {
@@ -640,7 +661,10 @@ export function GutenbergEditor({
                               key={item.id}
                               type="button"
                               title={item.description}
-                              onClick={() => insertBlock(item)}
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                                insertBlock(item);
+                              }}
                               className="flex flex-col items-center gap-1.5 rounded-sm px-1 py-2 text-center hover:bg-[#f0f0f0]"
                             >
                               <span className="grid size-9 place-items-center text-[#1e1e1e]">
@@ -720,7 +744,8 @@ export function GutenbergEditor({
             );
           }}
           onPaste={(event) => {
-            if ((event.target as HTMLElement | null)?.closest("[contenteditable=true]")) {
+            const target = event.target as HTMLElement | null;
+            if (target?.closest("input, textarea, [contenteditable=true]")) {
               return;
             }
             const files = Array.from(event.clipboardData?.files ?? []).filter(isAllowedImageFile);
@@ -755,6 +780,30 @@ export function GutenbergEditor({
                     : post.slug;
                 patchPost({ title, slug: autoSlug || post.slug });
               }}
+              onCopy={(e) => e.stopPropagation()}
+              onCut={(e) => e.stopPropagation()}
+              onPaste={(e) => {
+                e.stopPropagation();
+                const text = (e.clipboardData?.getData("text/plain") ?? "").replace(
+                  /\s+/g,
+                  " ",
+                );
+                if (!text) return;
+                e.preventDefault();
+                const input = e.currentTarget;
+                const start = input.selectionStart ?? post.title.length;
+                const end = input.selectionEnd ?? start;
+                const title = `${post.title.slice(0, start)}${text}${post.title.slice(end)}`;
+                const autoSlug =
+                  !post.slug || post.slug.startsWith("nouvel-article")
+                    ? slugifyBlog(title)
+                    : post.slug;
+                patchPost({ title, slug: autoSlug || post.slug });
+                requestAnimationFrame(() => {
+                  const pos = start + text.length;
+                  input.setSelectionRange(pos, pos);
+                });
+              }}
               placeholder="Ajouter un titre"
               className="mb-8 h-auto border-0 bg-transparent px-0 text-[42px] leading-[1.15] font-normal text-[#1e1e1e] shadow-none placeholder:text-[#ccc] focus-visible:ring-0"
             />
@@ -766,7 +815,7 @@ export function GutenbergEditor({
                   (block.type === "html" && !block.content.replace(/<[^>]+>/g, "").trim());
                 const selected = selectedId === block.id;
                 return (
-                  <div key={block.id} className="group relative">
+                  <div key={block.id} data-block-id={block.id} className="group relative">
                     {selected ? (
                       <div className="absolute -top-9 left-0 z-10 flex items-center border border-[#ddd] bg-white shadow-sm">
                         <IconBtn label="Monter" onClick={() => moveBlock(block.id, -1)}>
@@ -787,7 +836,6 @@ export function GutenbergEditor({
                       className={cn(
                         "relative min-h-10 px-1 py-1",
                         selected &&
-                          block.type !== "html" &&
                           "outline outline-2 outline-[#3858e9] -outline-offset-2",
                       )}
                       onClick={() => {
