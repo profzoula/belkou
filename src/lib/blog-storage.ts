@@ -405,7 +405,7 @@ export function createBlankPost(): StoredBlogPost {
     coverAlt: "",
     seoTitle: "",
     seoDescription: "",
-    blocks: [{ id: `blk_${crypto.randomUUID().slice(0, 12)}`, type: "html", content: "" }],
+    blocks: [{ id: `blk_${crypto.randomUUID().slice(0, 12)}`, type: "paragraph", content: "" }],
   };
 }
 

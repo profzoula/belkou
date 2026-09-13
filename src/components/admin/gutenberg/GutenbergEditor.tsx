@@ -46,6 +46,7 @@ import {
   Plus,
   Quote,
   RectangleHorizontal,
+  Redo2,
   Settings2,
   Table,
   TextQuote,
@@ -53,6 +54,7 @@ import {
   Trash2,
   TriangleAlert,
   Twitter,
+  Undo2,
   Upload,
   Video,
   Volume2,
@@ -67,6 +69,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   BLOG_BLOCK_CATALOG,
   createEmptyBlock,
+  htmlToBlocks,
   slugifyBlog,
   type BlogBlock,
   type BlogBlockType,
@@ -230,24 +233,14 @@ export function GutenbergEditor({
     setTagsDraft(post.tags.join(", "));
     blocksRef.current = post.blocks;
     postRef.current = post;
+    historyRef.current = [];
+    futureRef.current = [];
+    setHistoryTick(0);
   }, [post.id]);
 
-  useEffect(() => {
-    const only = post.blocks[0];
-    if (
-      post.blocks.length === 1 &&
-      only?.type === "paragraph" &&
-      !only.content.trim()
-    ) {
-      onChange({
-        ...post,
-        blocks: [{ id: only.id, type: "html", content: "" }],
-        updatedAt: new Date().toISOString(),
-      });
-    }
-    // One-shot: empty drafts keep a single classic writing area.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.id]);
+  const historyRef = useRef<BlogBlock[][]>([]);
+  const futureRef = useRef<BlogBlock[][]>([]);
+  const [historyTick, setHistoryTick] = useState(0);
 
   const filteredCatalog = useMemo(() => {
     if (inserterTab === "motifs") return [];
@@ -273,7 +266,15 @@ export function GutenbergEditor({
     onChange(next);
   };
 
-  const setBlocks = (blocks: BlogBlock[]) => {
+  const recordHistory = () => {
+    historyRef.current.push(structuredClone(blocksRef.current));
+    if (historyRef.current.length > 40) historyRef.current.shift();
+    futureRef.current = [];
+    setHistoryTick((tick) => tick + 1);
+  };
+
+  const setBlocks = (blocks: BlogBlock[], record = true) => {
+    if (record) recordHistory();
     blocksRef.current = blocks;
     patchPost({
       blocks,
@@ -281,13 +282,32 @@ export function GutenbergEditor({
     });
   };
 
+  const undo = () => {
+    const prev = historyRef.current.pop();
+    if (!prev) return;
+    futureRef.current.push(structuredClone(blocksRef.current));
+    setBlocks(prev, false);
+    setHistoryTick((tick) => tick + 1);
+  };
+
+  const redo = () => {
+    const next = futureRef.current.pop();
+    if (!next) return;
+    historyRef.current.push(structuredClone(blocksRef.current));
+    setBlocks(next, false);
+    setHistoryTick((tick) => tick + 1);
+  };
+
   const updateBlock = (id: string, next: BlogBlock) => {
-    setBlocks(blocksRef.current.map((b) => (b.id === id ? next : b)));
+    setBlocks(
+      blocksRef.current.map((b) => (b.id === id ? next : b)),
+      false,
+    );
   };
 
   const removeBlock = (id: string) => {
     const next = blocksRef.current.filter((b) => b.id !== id);
-    setBlocks(next.length ? next : [createEmptyBlock("html")]);
+    setBlocks(next.length ? next : [createEmptyBlock("paragraph")]);
     if (selectedId === id) setSelectedId(next[0]?.id ?? null);
   };
 
@@ -333,6 +353,7 @@ export function GutenbergEditor({
     setBlocks(next);
     setSelectedId(block.id);
     setInsertAt(replaceEmpty ? at + 1 : at + 1);
+    setInserterOpen(false);
     setSidebarTab("block");
     requestAnimationFrame(() => {
       document
@@ -472,6 +493,38 @@ export function GutenbergEditor({
     setSelectedId(block.id);
   };
 
+  const applyPastedBlocks = (html: string, replaceId?: string | null) => {
+    const incoming = htmlToBlocks(html);
+    if (!incoming.length) return;
+    const current = [...blocksRef.current];
+    const targetId = replaceId ?? selectedId;
+    if (targetId) {
+      const index = current.findIndex((block) => block.id === targetId);
+      const existing = index >= 0 ? current[index] : null;
+      if (existing?.type === "html") {
+        applyClassicHtml(html, existing.id);
+        return;
+      }
+      const empty =
+        existing?.type === "paragraph" && !existing.content.trim();
+      if (index >= 0 && empty) {
+        current.splice(index, 1, ...incoming);
+        setBlocks(current);
+        setSelectedId(incoming[0]!.id);
+        return;
+      }
+      if (index >= 0) {
+        current.splice(index + 1, 0, ...incoming);
+        setBlocks(current);
+        setSelectedId(incoming[0]!.id);
+        return;
+      }
+    }
+    current.push(...incoming);
+    setBlocks(current);
+    setSelectedId(incoming[0]!.id);
+  };
+
   const ingestDroppedImages = async (
     files: File[],
     url?: string | null,
@@ -512,8 +565,24 @@ export function GutenbergEditor({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white text-[#1e1e1e]">
-      <header className="flex h-14 shrink-0 items-center gap-1 border-b border-[#e0e0e0] bg-white px-2">
+    <div
+      className="fixed inset-0 z-50 flex flex-col bg-white text-[#1e1e1e]"
+      onKeyDown={(event) => {
+        const key = event.key.toLowerCase();
+        if ((event.metaKey || event.ctrlKey) && key === "z" && !event.shiftKey) {
+          event.preventDefault();
+          undo();
+        }
+        if (
+          (event.metaKey || event.ctrlKey) &&
+          (key === "y" || (key === "z" && event.shiftKey))
+        ) {
+          event.preventDefault();
+          redo();
+        }
+      }}
+    >
+      <header className="flex h-14 shrink-0 items-center gap-0.5 border-b border-[#e0e0e0] bg-white px-2">
         <button
           type="button"
           className="grid size-9 place-items-center rounded-sm text-[#1e1e1e] hover:bg-[#f0f0f0]"
@@ -551,6 +620,25 @@ export function GutenbergEditor({
           }}
         >
           <ListTree className="size-4" />
+        </button>
+        <span className="mx-1 h-6 w-px bg-[#ddd]" aria-hidden />
+        <button
+          type="button"
+          title="Annuler"
+          disabled={historyTick < 0 || historyRef.current.length === 0}
+          className="grid size-9 place-items-center rounded-sm text-[#1e1e1e] hover:bg-[#f0f0f0] disabled:text-[#ccc]"
+          onClick={undo}
+        >
+          <Undo2 className="size-4" />
+        </button>
+        <button
+          type="button"
+          title="Rétablir"
+          disabled={futureRef.current.length === 0}
+          className="grid size-9 place-items-center rounded-sm text-[#1e1e1e] hover:bg-[#f0f0f0] disabled:text-[#ccc]"
+          onClick={redo}
+        >
+          <Redo2 className="size-4" />
         </button>
         <div className="flex min-w-0 flex-1 justify-center px-2">
           <span className="max-w-md truncate rounded-full bg-[#f0f0f0] px-4 py-1 text-[13px] text-[#757575]">
@@ -686,15 +774,16 @@ export function GutenbergEditor({
         ) : listView ? (
           <aside className="absolute inset-y-0 left-0 z-30 w-full max-w-[280px] shrink-0 overflow-y-auto border-r border-[#ddd] bg-white p-3 shadow-lg md:static md:shadow-none">
             <p className="mb-2 px-1 text-[11px] font-semibold tracking-wide text-[#757575] uppercase">
-              Structure
+              Vue liste
             </p>
             <ul>
               {post.blocks.map((block, index) => {
                 const meta = BLOG_BLOCK_CATALOG.find((c) => c.type === block.type);
-                const label =
-                  ("content" in block && block.content
-                    ? String(block.content).slice(0, 36)
-                    : meta?.label) || block.type;
+                const preview =
+                  "content" in block && block.content
+                    ? String(block.content).replace(/<[^>]+>/g, "").slice(0, 40)
+                    : "";
+                const label = meta?.label || block.type;
                 return (
                   <li key={block.id}>
                     <button
@@ -711,8 +800,11 @@ export function GutenbergEditor({
                       )}
                     >
                       <GripVertical className="size-3.5 shrink-0 text-[#949494]" />
-                      <span className="truncate">
-                        {index + 1}. {label}
+                      <span className="min-w-0 truncate">
+                        {label}
+                        {preview ? (
+                          <span className="text-[#949494]"> · {preview}</span>
+                        ) : null}
                       </span>
                     </button>
                   </li>
@@ -724,8 +816,8 @@ export function GutenbergEditor({
 
         <div
           className={cn(
-            "relative min-w-0 flex-1 overflow-y-auto bg-white",
-            dropOver && "bg-[#f0f6fc]",
+            "relative min-w-0 flex-1 overflow-y-auto bg-[#f0f0f1]",
+            dropOver && "bg-[#e7f1f8]",
           )}
           onDragEnter={(event) => {
             preventImageDrag(event);
@@ -759,7 +851,7 @@ export function GutenbergEditor({
             const content = clipboardToHtml(html, text);
             if (!content) return;
             event.preventDefault();
-            applyClassicHtml(content);
+            applyPastedBlocks(content);
           }}
         >
           {dropOver || dropBusy ? (
@@ -769,7 +861,7 @@ export function GutenbergEditor({
               </p>
             </div>
           ) : null}
-          <div className="mx-auto max-w-[680px] px-6 py-16">
+          <div className="mx-auto my-8 min-h-[calc(100%-4rem)] max-w-[840px] bg-white px-8 py-16 shadow-[0_0_0_1px_#ddd]">
             <Input
               value={post.title}
               onChange={(e) => {
@@ -818,6 +910,10 @@ export function GutenbergEditor({
                   <div key={block.id} data-block-id={block.id} className="group relative">
                     {selected ? (
                       <div className="absolute -top-9 left-0 z-10 flex items-center border border-[#ddd] bg-white shadow-sm">
+                        <span className="border-r border-[#ddd] px-2 text-[11px] font-medium whitespace-nowrap text-[#1e1e1e]">
+                          {BLOG_BLOCK_CATALOG.find((c) => c.type === block.type)?.label ??
+                            block.type}
+                        </span>
                         <IconBtn label="Monter" onClick={() => moveBlock(block.id, -1)}>
                           <ChevronUp className="size-3.5" />
                         </IconBtn>
@@ -861,7 +957,7 @@ export function GutenbergEditor({
                           ingestDroppedImages(files, null, index + 1, block.id)
                         }
                         onSlash={() => openInserter(index)}
-                        onPasteHtml={(html) => applyClassicHtml(html, block.id)}
+                        onPasteHtml={(html) => applyPastedBlocks(html, block.id)}
                       />
                     </div>
                     {emptyParagraph || selected ? (
@@ -877,6 +973,13 @@ export function GutenbergEditor({
                   </div>
                 );
               })}
+              <button
+                type="button"
+                className="mt-2 w-full py-3 text-left text-base text-[#949494]"
+                onClick={() => openInserter(post.blocks.length)}
+              >
+                Tapez / pour choisir un bloc
+              </button>
             </div>
           </div>
         </div>
@@ -894,7 +997,7 @@ export function GutenbergEditor({
                 )}
                 onClick={() => setSidebarTab("document")}
               >
-                Document
+                Article
               </button>
               <button
                 type="button"
