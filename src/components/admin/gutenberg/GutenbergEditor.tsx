@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   AlignCenter,
   AlignLeft,
@@ -9,10 +10,13 @@ import {
   Eye,
   GripVertical,
   ListTree,
+  Loader2,
   Plus,
   Settings2,
   Trash2,
+  Upload,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   BLOG_BLOCK_CATALOG,
   createEmptyBlock,
+  htmlToBlocks,
   slugifyBlog,
   type BlogBlock,
   type BlogBlockType,
@@ -27,12 +32,37 @@ import {
 } from "@/lib/blog-blocks";
 import { estimateReadMinutes } from "@/lib/blog-storage";
 import { blogCategories } from "@/lib/blog";
+import { adminUploadBlogImage } from "@/lib/fns/admin";
 import { cn } from "@/lib/utils";
+
+const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+function readFileAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result !== "string") {
+        reject(new Error("Lecture impossible"));
+        return;
+      }
+      const base64 = result.split(",")[1];
+      if (!base64) {
+        reject(new Error("Fichier invalide"));
+        return;
+      }
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error("Lecture impossible"));
+    reader.readAsDataURL(file);
+  });
+}
 
 type GutenbergEditorProps = {
   post: StoredBlogPost;
   onChange: (post: StoredBlogPost) => void;
-  onSave: (status?: StoredBlogPost["status"]) => void;
+  onSave: (status?: StoredBlogPost["status"], next?: StoredBlogPost) => void;
   onClose: () => void;
   saving?: boolean;
   categoryOptions?: string[];
@@ -64,8 +94,33 @@ export function GutenbergEditor({
   const [listView, setListView] = useState(true);
   const [sidebarTab, setSidebarTab] = useState<"document" | "block">("document");
   const [query, setQuery] = useState("");
+  const [tagsDraft, setTagsDraft] = useState(() => post.tags.join(", "));
+  const convertedId = useRef<string | null>(null);
+  const uploadImageFn = useServerFn(adminUploadBlogImage);
 
   const selected = post.blocks.find((b) => b.id === selectedId) ?? null;
+
+  useEffect(() => {
+    setTagsDraft(post.tags.join(", "));
+  }, [post.id]);
+
+  useEffect(() => {
+    if (convertedId.current === post.id) return;
+    convertedId.current = post.id;
+    const onlyHtml = post.blocks.length === 1 && post.blocks[0]?.type === "html";
+    if (!onlyHtml) return;
+    const html = post.blocks[0].type === "html" ? post.blocks[0].content : "";
+    const blocks = htmlToBlocks(html);
+    onChange({
+      ...post,
+      blocks,
+      readMinutes: estimateReadMinutes(blocks),
+      updatedAt: new Date().toISOString(),
+    });
+    setSelectedId(blocks[0]?.id ?? null);
+    // Conversion one-shot per article — ignore subsequent parent identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post.id]);
 
   const filteredCatalog = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -137,6 +192,34 @@ export function GutenbergEditor({
     setQuery("");
   };
 
+  const parsedTags = () =>
+    tagsDraft
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+  const handleSave = (status?: StoredBlogPost["status"]) => {
+    const tags = parsedTags();
+    setTagsDraft(tags.join(", "));
+    onSave(status, { ...post, tags, updatedAt: new Date().toISOString() });
+  };
+
+  const uploadImageFile = async (file: File): Promise<string | null> => {
+    if (!IMAGE_ACCEPT.split(",").includes(file.type)) {
+      toast.error("Format non supporté (JPG, PNG, WebP, GIF)");
+      return null;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast.error("Image trop volumineuse (max 5 Mo)");
+      return null;
+    }
+    const dataBase64 = await readFileAsBase64(file);
+    const result = await uploadImageFn({
+      data: { postId: post.id, contentType: file.type, dataBase64 },
+    });
+    return result.publicUrl;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#f0f0f1] text-foreground dark:bg-background">
       {/* Top bar — style Gutenberg */}
@@ -147,6 +230,7 @@ export function GutenbergEditor({
         <div className="hidden min-w-0 flex-1 sm:block">
           <p className="truncate text-sm font-semibold">{post.title || "Sans titre"}</p>
           <p className="text-[11px] text-muted-foreground">
+            Éditeur blocs ·{" "}
             {post.status === "published"
               ? "Publié"
               : post.status === "scheduled"
@@ -180,7 +264,7 @@ export function GutenbergEditor({
           size="sm"
           className="rounded-md"
           disabled={saving}
-          onClick={() => onSave("draft")}
+          onClick={() => handleSave("draft")}
         >
           Enregistrer
         </Button>
@@ -189,7 +273,7 @@ export function GutenbergEditor({
           size="sm"
           className="rounded-md bg-[#007cba] text-white hover:bg-[#006ba1]"
           disabled={saving}
-          onClick={() => onSave("published")}
+          onClick={() => handleSave("published")}
         >
           {saving ? "…" : "Publier"}
         </Button>
@@ -308,6 +392,7 @@ export function GutenbergEditor({
                     <BlockEditor
                       block={block}
                       onChange={(next) => updateBlock(block.id, next)}
+                      onUploadImage={uploadImageFile}
                     />
                   </div>
                 </div>
@@ -356,6 +441,10 @@ export function GutenbergEditor({
                 post={post}
                 onChange={patchPost}
                 categoryOptions={categories}
+                tagsDraft={tagsDraft}
+                onTagsDraftChange={setTagsDraft}
+                onTagsCommit={() => patchPost({ tags: parsedTags() })}
+                onUploadImage={uploadImageFile}
               />
             ) : selected ? (
               <BlockSettings
@@ -448,10 +537,18 @@ function DocumentSettings({
   post,
   onChange,
   categoryOptions,
+  tagsDraft,
+  onTagsDraftChange,
+  onTagsCommit,
+  onUploadImage,
 }: {
   post: StoredBlogPost;
   onChange: (patch: Partial<StoredBlogPost>) => void;
   categoryOptions: string[];
+  tagsDraft: string;
+  onTagsDraftChange: (value: string) => void;
+  onTagsCommit: () => void;
+  onUploadImage: (file: File) => Promise<string | null>;
 }) {
   return (
     <>
@@ -509,15 +606,16 @@ function DocumentSettings({
       </Field>
       <Field label="Étiquettes (virgules)">
         <Input
-          value={post.tags.join(", ")}
-          onChange={(e) =>
-            onChange({
-              tags: e.target.value
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean),
-            })
-          }
+          value={tagsDraft}
+          placeholder="windows, cmd, dism"
+          onChange={(e) => onTagsDraftChange(e.target.value)}
+          onBlur={onTagsCommit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
         />
       </Field>
       <Field label="Date de publication">
@@ -573,6 +671,25 @@ function DocumentSettings({
         <p className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
           <Settings2 className="size-3.5" /> Image à la une
         </p>
+        {post.coverImageUrl ? (
+          <img
+            src={post.coverImageUrl}
+            alt={post.coverAlt || ""}
+            className="mb-2 h-28 w-full rounded-lg object-cover"
+          />
+        ) : null}
+        <DeviceImageButton
+          label={post.coverImageUrl ? "Changer (appareil)" : "Choisir sur l’appareil"}
+          onUpload={async (file) => {
+            const url = await onUploadImage(file);
+            if (!url) return;
+            onChange({
+              coverImageUrl: url,
+              coverAlt: file.name.replace(/\.[^.]+$/, ""),
+            });
+            toast.success("Image de couverture enregistrée");
+          }}
+        />
         <Field label="URL image de couverture">
           <Input
             value={post.coverImageUrl ?? ""}
@@ -840,12 +957,60 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function DeviceImageButton({
+  label,
+  onUpload,
+}: {
+  label: string;
+  onUpload: (file: File) => Promise<void>;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="mb-2">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={IMAGE_ACCEPT}
+        className="hidden"
+        disabled={busy}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          setBusy(true);
+          void onUpload(file)
+            .catch((error) => {
+              toast.error(error instanceof Error ? error.message : "Upload impossible");
+            })
+            .finally(() => {
+              setBusy(false);
+              if (inputRef.current) inputRef.current.value = "";
+            });
+        }}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="rounded-md"
+        disabled={busy}
+        onClick={() => inputRef.current?.click()}
+      >
+        {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Upload className="size-3.5" />}
+        {busy ? "Envoi…" : label}
+      </Button>
+    </div>
+  );
+}
+
 function BlockEditor({
   block,
   onChange,
+  onUploadImage,
 }: {
   block: BlogBlock;
   onChange: (block: BlogBlock) => void;
+  onUploadImage: (file: File) => Promise<string | null>;
 }) {
   switch (block.type) {
     case "paragraph":
@@ -906,6 +1071,19 @@ function BlockEditor({
     case "image":
       return (
         <div className="space-y-2">
+          <DeviceImageButton
+            label={block.url ? "Remplacer l’image" : "Choisir sur l’appareil"}
+            onUpload={async (file) => {
+              const url = await onUploadImage(file);
+              if (!url) return;
+              onChange({
+                ...block,
+                url,
+                alt: block.alt || file.name.replace(/\.[^.]+$/, ""),
+              });
+              toast.success("Image ajoutée");
+            }}
+          />
           <Input
             placeholder="URL de l’image"
             value={block.url}

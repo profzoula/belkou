@@ -37,6 +37,8 @@ import { cn } from "@/lib/utils";
 
 const IMAGE_ACCEPT = "image/jpeg,image/png,image/webp,image/gif";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const lightField =
+  "border-[#8c8f94] bg-white text-[#1d2327] shadow-none placeholder:text-[#646970] focus-visible:ring-[#2271b1] focus-visible:shadow-[0_0_0_2px_#2271b1]";
 
 function readFileAsBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -62,7 +64,7 @@ function readFileAsBase64(file: File): Promise<string> {
 type ClassicBlogEditorProps = {
   post: StoredBlogPost;
   onChange: (post: StoredBlogPost) => void;
-  onSave: (status?: StoredBlogPost["status"]) => void;
+  onSave: (status?: StoredBlogPost["status"], next?: StoredBlogPost) => void;
   onClose: () => void;
   saving?: boolean;
   categoryOptions?: string[];
@@ -129,10 +131,13 @@ export function ClassicBlogEditor({
   const [distractionFree, setDistractionFree] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [imageMenu, setImageMenu] = useState(false);
+  const [tagsDraft, setTagsDraft] = useState(() => post.tags.join(", "));
   const editorRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
   const mediaInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const imageMenuRef = useRef<HTMLDivElement>(null);
   const lastHtml = useRef<string | null>(null);
   const contentHtml = getPostContentHtml(post);
   const uploadImageFn = useServerFn(adminUploadBlogImage);
@@ -144,6 +149,22 @@ export function ClassicBlogEditor({
     editor.innerHTML = contentHtml || "<p><br></p>";
     lastHtml.current = contentHtml;
   }, [contentHtml, mode]);
+
+  useEffect(() => {
+    setTagsDraft(post.tags.join(", "));
+  }, [post.id]);
+
+  useEffect(() => {
+    if (!imageMenu) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (target && !imageMenuRef.current?.contains(target)) {
+        setImageMenu(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [imageMenu]);
 
   const patchPost = (patch: Partial<StoredBlogPost>) => {
     onChange({ ...post, ...patch, updatedAt: new Date().toISOString() });
@@ -213,7 +234,26 @@ export function ClassicBlogEditor({
   };
 
   const insertMedia = () => {
+    setImageMenu(false);
     mediaInputRef.current?.click();
+  };
+
+  const insertMediaFromPrompt = () => {
+    setImageMenu(false);
+    const url = window.prompt("Collez une URL d’image (https://…)");
+    if (!url?.trim()) return;
+    const alt = window.prompt("Texte alternatif (alt)", "") ?? "";
+    insertMediaFromUrl(url.trim(), alt);
+  };
+
+  const parsedTags = () =>
+    tagsDraft
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+  const commitTags = () => {
+    patchPost({ tags: parsedTags() });
   };
 
   const handleMediaFile = async (file: File) => {
@@ -273,9 +313,17 @@ export function ClassicBlogEditor({
   };
 
   const handleSave = (status?: StoredBlogPost["status"]) => {
-    if (mode === "visual") flushVisual();
-    else if (textRef.current) setHtml(textRef.current.value);
-    onSave(status);
+    const tags = parsedTags();
+    setTagsDraft(tags.join(", "));
+    if (mode === "visual") {
+      const editor = editorRef.current;
+      const html = sanitizeBlogHtml(editor?.innerHTML ?? contentHtml);
+      lastHtml.current = html;
+      onSave(status, withPostContentHtml({ ...post, tags }, html));
+      return;
+    }
+    const html = sanitizeBlogHtml(textRef.current?.value ?? contentHtml);
+    onSave(status, withPostContentHtml({ ...post, tags }, html));
   };
 
   return (
@@ -334,11 +382,16 @@ export function ClassicBlogEditor({
       <div className="flex min-h-0 flex-1">
         <div
           className={cn(
-            "min-w-0 flex-1 overflow-y-auto p-4 sm:p-6",
+            "flex min-h-0 min-w-0 flex-1 flex-col p-4 sm:p-6",
             distractionFree && "mx-auto max-w-3xl",
           )}
         >
-          <div className={cn("mx-auto max-w-4xl space-y-4", distractionFree && "max-w-none")}>
+          <div
+            className={cn(
+              "mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-4",
+              distractionFree && "max-w-none",
+            )}
+          >
             {!distractionFree ? (
               <Input
                 value={post.title}
@@ -353,12 +406,14 @@ export function ClassicBlogEditor({
                   });
                 }}
                 placeholder="Ajouter un titre"
-                className="h-auto rounded-sm border-[#8c8f94] bg-white px-3 py-3 text-2xl font-normal shadow-none focus-visible:ring-[#2271b1]"
+                className={cn(
+                  "h-auto shrink-0 rounded-sm px-3 py-3 text-2xl font-normal",
+                  lightField,
+                )}
               />
             ) : null}
 
-            {/* Classic Editor chrome */}
-            <div className="overflow-hidden rounded-sm border border-[#8c8f94] bg-white shadow-sm">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-sm border border-[#8c8f94] bg-white shadow-sm">
               <input
                 ref={mediaInputRef}
                 type="file"
@@ -370,37 +425,7 @@ export function ClassicBlogEditor({
                   if (file) void handleMediaFile(file);
                 }}
               />
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#c3c4c7] bg-[#f6f7f7] px-2 py-1.5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-8 gap-1.5 rounded-sm border-[#8c8f94] bg-white text-xs font-medium"
-                    onClick={insertMedia}
-                    disabled={mode !== "visual" || uploadingMedia}
-                  >
-                    {uploadingMedia ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <ImageIcon className="size-3.5" />
-                    )}
-                    {uploadingMedia ? "Envoi…" : "Ajouter un média"}
-                  </Button>
-                  <button
-                    type="button"
-                    className="text-[11px] text-[#646970] underline-offset-2 hover:text-[#1d2327] hover:underline disabled:opacity-50"
-                    disabled={mode !== "visual" || uploadingMedia}
-                    onClick={() => {
-                      const url = window.prompt("Ou collez une URL d’image (https://…)");
-                      if (!url?.trim()) return;
-                      const alt = window.prompt("Texte alternatif (alt)", "") ?? "";
-                      insertMediaFromUrl(url.trim(), alt);
-                    }}
-                  >
-                    Coller une URL
-                  </button>
-                </div>
+              <div className="flex shrink-0 items-center justify-end border-b border-[#c3c4c7] bg-[#f6f7f7] px-2 py-1.5">
                 <div className="flex overflow-hidden rounded-sm border border-[#c3c4c7]">
                   <button
                     type="button"
@@ -430,10 +455,10 @@ export function ClassicBlogEditor({
               </div>
 
               {mode === "visual" ? (
-                <>
-                  <div className="flex flex-wrap items-center gap-0.5 border-b border-[#c3c4c7] bg-[#f6f7f7] px-1.5 py-1">
+                <div className="flex min-h-0 flex-1 flex-col">
+                  <div className="flex shrink-0 flex-wrap items-center gap-0.5 border-b border-[#c3c4c7] bg-[#f6f7f7] px-1.5 py-1">
                     <select
-                      className="mr-1 h-8 rounded-sm border border-[#8c8f94] bg-white px-2 text-xs"
+                      className="mr-1 h-8 rounded-sm border border-[#8c8f94] bg-white px-2 text-xs text-[#1d2327]"
                       defaultValue="p"
                       onChange={(e) => applyBlockFormat(e.target.value)}
                       aria-label="Format"
@@ -474,6 +499,43 @@ export function ClassicBlogEditor({
                       <AlignRight className="size-3.5" />
                     </ToolbarButton>
                     <ToolbarDivider />
+                    <div className="relative" ref={imageMenuRef}>
+                      <ToolbarButton
+                        label="Insérer une image"
+                        onClick={() => setImageMenu((open) => !open)}
+                        active={imageMenu || uploadingMedia}
+                      >
+                        {uploadingMedia ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <ImageIcon className="size-3.5" />
+                        )}
+                      </ToolbarButton>
+                      {imageMenu ? (
+                        <div className="absolute left-0 top-full z-30 mt-1 w-48 overflow-hidden rounded-sm border border-[#c3c4c7] bg-white py-1 shadow-md">
+                          <button
+                            type="button"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#1d2327] hover:bg-[#f0f0f1]"
+                            disabled={mode !== "visual" || uploadingMedia}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={insertMedia}
+                          >
+                            <Upload className="size-3.5" />
+                            Depuis l’appareil
+                          </button>
+                          <button
+                            type="button"
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#1d2327] hover:bg-[#f0f0f1]"
+                            disabled={mode !== "visual" || uploadingMedia}
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={insertMediaFromPrompt}
+                          >
+                            <Link2 className="size-3.5" />
+                            Coller une URL
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
                     <ToolbarButton label="Insérer/modifier un lien" onClick={insertLink}>
                       <Link2 className="size-3.5" />
                     </ToolbarButton>
@@ -500,7 +562,7 @@ export function ClassicBlogEditor({
                   </div>
 
                   {kitchenSink ? (
-                    <div className="flex flex-wrap items-center gap-0.5 border-b border-[#c3c4c7] bg-[#f6f7f7] px-1.5 py-1">
+                    <div className="flex shrink-0 flex-wrap items-center gap-0.5 border-b border-[#c3c4c7] bg-[#f6f7f7] px-1.5 py-1">
                       <ToolbarButton label="Souligner" onClick={() => exec("underline")}>
                         <span className="text-xs font-semibold underline">U</span>
                       </ToolbarButton>
@@ -546,7 +608,7 @@ export function ClassicBlogEditor({
                     role="textbox"
                     aria-multiline
                     aria-label="Contenu de l’article"
-                    className="classic-blog-editor min-h-[420px] bg-white px-4 py-3 text-[15px] leading-7 outline-none sm:px-6 sm:py-5 [&_a]:text-[#2271b1] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#c3c4c7] [&_blockquote]:pl-4 [&_blockquote]:italic [&_figure]:my-4 [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_img]:max-w-full [&_img]:rounded-sm [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-3 [&_pre]:overflow-x-auto [&_pre]:rounded-sm [&_pre]:bg-[#f6f7f7] [&_pre]:p-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6"
+                    className="classic-blog-editor min-h-0 flex-1 overflow-y-auto bg-white px-4 py-3 text-[15px] leading-7 outline-none sm:px-6 sm:py-5 [&_a]:text-[#2271b1] [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-[#c3c4c7] [&_blockquote]:pl-4 [&_blockquote]:italic [&_figure]:my-4 [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:text-xl [&_h3]:font-semibold [&_img]:max-w-full [&_img]:rounded-sm [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-3 [&_pre]:overflow-x-auto [&_pre]:rounded-sm [&_pre]:bg-[#f6f7f7] [&_pre]:p-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6"
                     onInput={flushVisual}
                     onBlur={flushVisual}
                     onPaste={(event) => {
@@ -561,14 +623,14 @@ export function ClassicBlogEditor({
                       flushVisual();
                     }}
                   />
-                </>
+                </div>
               ) : (
                 <Textarea
                   ref={textRef}
                   defaultValue={contentHtml}
                   key={`text-${post.id}-${mode}`}
                   onChange={(e) => setHtml(e.target.value)}
-                  className="min-h-[420px] resize-y rounded-none border-0 bg-white font-mono text-[13px] leading-6 shadow-none focus-visible:ring-0"
+                  className="min-h-0 flex-1 resize-none rounded-none border-0 bg-white font-mono text-[13px] leading-6 text-[#1d2327] shadow-none focus-visible:ring-0"
                   spellCheck={false}
                   aria-label="HTML de l’article"
                 />
@@ -585,7 +647,7 @@ export function ClassicBlogEditor({
             <div className="space-y-4">
               <Field label="État">
                 <select
-                  className="flex h-9 w-full rounded-sm border border-[#8c8f94] bg-white px-2 text-sm"
+                  className="flex h-9 w-full rounded-sm border border-[#8c8f94] bg-white px-2 text-sm text-[#1d2327]"
                   value={post.status}
                   onChange={(e) =>
                     patchPost({ status: e.target.value as StoredBlogPost["status"] })
@@ -603,7 +665,7 @@ export function ClassicBlogEditor({
                     type="datetime-local"
                     value={post.scheduledAt?.slice(0, 16) ?? ""}
                     onChange={(e) => patchPost({ scheduledAt: e.target.value || null })}
-                    className="rounded-sm"
+                    className={cn("rounded-sm", lightField)}
                   />
                 </Field>
               ) : null}
@@ -611,7 +673,7 @@ export function ClassicBlogEditor({
                 <Input
                   value={post.slug}
                   onChange={(e) => patchPost({ slug: slugifyBlog(e.target.value) })}
-                  className="rounded-sm"
+                  className={cn("rounded-sm", lightField)}
                 />
               </Field>
               <Field label="Extrait">
@@ -619,12 +681,12 @@ export function ClassicBlogEditor({
                   rows={3}
                   value={post.excerpt}
                   onChange={(e) => patchPost({ excerpt: e.target.value })}
-                  className="rounded-sm"
+                  className={cn("rounded-sm", lightField)}
                 />
               </Field>
               <Field label="Catégorie">
                 <select
-                  className="flex h-9 w-full rounded-sm border border-[#8c8f94] bg-white px-2 text-sm"
+                  className="flex h-9 w-full rounded-sm border border-[#8c8f94] bg-white px-2 text-sm text-[#1d2327]"
                   value={post.category}
                   onChange={(e) => patchPost({ category: e.target.value })}
                 >
@@ -640,16 +702,17 @@ export function ClassicBlogEditor({
               </Field>
               <Field label="Étiquettes (virgules)">
                 <Input
-                  value={post.tags.join(", ")}
-                  onChange={(e) =>
-                    patchPost({
-                      tags: e.target.value
-                        .split(",")
-                        .map((t) => t.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  className="rounded-sm"
+                  value={tagsDraft}
+                  onChange={(e) => setTagsDraft(e.target.value)}
+                  onBlur={commitTags}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                  placeholder="windows, cmd, dism"
+                  className={cn("rounded-sm", lightField)}
                 />
               </Field>
               <Field label="Image de couverture">
@@ -710,7 +773,7 @@ export function ClassicBlogEditor({
                   onChange={(e) =>
                     patchPost({ coverImageUrl: e.target.value.trim() || undefined })
                   }
-                  className="mt-2 rounded-sm"
+                  className={cn("mt-2 rounded-sm", lightField)}
                   placeholder="Ou collez une URL https://…"
                 />
               </Field>
@@ -718,7 +781,7 @@ export function ClassicBlogEditor({
                 <Input
                   value={post.seoTitle ?? ""}
                   onChange={(e) => patchPost({ seoTitle: e.target.value })}
-                  className="rounded-sm"
+                  className={cn("rounded-sm", lightField)}
                 />
               </Field>
               <Field label="SEO — description">
@@ -726,7 +789,7 @@ export function ClassicBlogEditor({
                   rows={3}
                   value={post.seoDescription ?? ""}
                   onChange={(e) => patchPost({ seoDescription: e.target.value })}
-                  className="rounded-sm"
+                  className={cn("rounded-sm", lightField)}
                 />
               </Field>
               <label className="flex items-center gap-2 text-sm">

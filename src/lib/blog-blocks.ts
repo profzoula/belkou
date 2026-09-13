@@ -457,6 +457,120 @@ export function createEmptyBlock(type: BlogBlockType): BlogBlock {
   }
 }
 
+function elementText(el: Element | null): string {
+  return (el?.textContent ?? "").replace(/\u00a0/g, " ").trim();
+}
+
+/** Convertit un HTML Classic Editor en blocs Gutenberg éditables. */
+export function htmlToBlocks(html: string): BlogBlock[] {
+  const cleaned = String(html ?? "").trim();
+  if (!cleaned) return [createEmptyBlock("paragraph")];
+  if (typeof DOMParser === "undefined") {
+    return [{ id: newBlockId(), type: "html", content: cleaned }];
+  }
+
+  const doc = new DOMParser().parseFromString(`<div id="bk-root">${cleaned}</div>`, "text/html");
+  const root = doc.getElementById("bk-root") ?? doc.body;
+  const blocks: BlogBlock[] = [];
+
+  const pushImage = (img: Element, caption = "") => {
+    const url = img.getAttribute("src")?.trim() ?? "";
+    if (!url) return;
+    blocks.push({
+      id: newBlockId(),
+      type: "image",
+      url,
+      alt: img.getAttribute("alt")?.trim() ?? "",
+      caption,
+      size: "default",
+    });
+  };
+
+  const consume = (node: ChildNode) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = (node.textContent ?? "").replace(/\u00a0/g, " ").trim();
+      if (text) blocks.push({ id: newBlockId(), type: "paragraph", content: text });
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const el = node as HTMLElement;
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "h1" || tag === "h2" || tag === "h3" || tag === "h4") {
+      blocks.push({
+        id: newBlockId(),
+        type: "heading",
+        level: Number(tag.slice(1)) as 1 | 2 | 3 | 4,
+        content: elementText(el),
+      });
+      return;
+    }
+    if (tag === "p") {
+      const imgs = Array.from(el.querySelectorAll("img"));
+      if (imgs.length && !elementText(el)) {
+        imgs.forEach((img) => pushImage(img));
+        return;
+      }
+      const text = elementText(el);
+      if (text) blocks.push({ id: newBlockId(), type: "paragraph", content: text });
+      imgs.forEach((img) => pushImage(img));
+      return;
+    }
+    if (tag === "ul" || tag === "ol") {
+      const items = Array.from(el.querySelectorAll(":scope > li")).map((li) => elementText(li));
+      blocks.push({
+        id: newBlockId(),
+        type: "list",
+        ordered: tag === "ol",
+        items: items.length ? items : [""],
+      });
+      return;
+    }
+    if (tag === "blockquote") {
+      blocks.push({
+        id: newBlockId(),
+        type: "quote",
+        content: elementText(el.querySelector("p") ?? el),
+        citation: elementText(el.querySelector("cite")),
+      });
+      return;
+    }
+    if (tag === "pre") {
+      blocks.push({
+        id: newBlockId(),
+        type: "code",
+        content: el.textContent ?? "",
+        language: "text",
+      });
+      return;
+    }
+    if (tag === "figure") {
+      const img = el.querySelector("img");
+      if (img) {
+        pushImage(img, elementText(el.querySelector("figcaption")));
+        return;
+      }
+    }
+    if (tag === "img") {
+      pushImage(el);
+      return;
+    }
+    if (tag === "hr") {
+      blocks.push({ id: newBlockId(), type: "separator", style: "default" });
+      return;
+    }
+    if (tag === "div" || tag === "section" || tag === "article") {
+      Array.from(el.childNodes).forEach(consume);
+      return;
+    }
+    const inner = el.innerHTML.trim();
+    if (inner) blocks.push({ id: newBlockId(), type: "html", content: inner });
+  };
+
+  Array.from(root.childNodes).forEach(consume);
+  return blocks.length ? blocks : [createEmptyBlock("paragraph")];
+}
+
 export function paragraphsToBlocks(paragraphs: string[]): BlogBlock[] {
   if (!paragraphs.length) return [createEmptyBlock("paragraph")];
   return paragraphs.map((content) => ({

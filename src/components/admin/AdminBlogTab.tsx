@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
-import { ClassicBlogEditor } from "@/components/admin/ClassicBlogEditor";
+import { GutenbergEditor } from "@/components/admin/gutenberg/GutenbergEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -180,13 +180,14 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
 
   const startCreate = () => setEditing(createBlankPost());
 
-  const saveEditing = async (status?: StoredBlogPost["status"]) => {
-    if (!editing) return;
+  const saveEditing = async (status?: StoredBlogPost["status"], next?: StoredBlogPost) => {
+    const current = next ?? editing;
+    if (!current) return;
     setSaving(true);
     try {
       const payload = {
-        ...editing,
-        status: status ?? editing.status,
+        ...current,
+        status: status ?? current.status,
         updatedAt: new Date().toISOString(),
       };
       const result = await savePostFn({ data: { post: payload } });
@@ -302,7 +303,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
 
   if (editing) {
     return (
-      <ClassicBlogEditor
+      <GutenbergEditor
         post={editing}
         onChange={setEditing}
         onSave={saveEditing}
@@ -330,7 +331,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Articles"
-          description="Créez et publiez vos articles à la main (Classic Editor)."
+          description="Créez et publiez vos articles à la main (éditeur blocs)."
           actions={
             <div className="flex flex-wrap gap-2">
               {posts.length > 0 ? (
@@ -572,7 +573,7 @@ export function AdminBlogTab({ panel, onEditingChange }: AdminBlogTabProps) {
         <AdminPageHeader
           eyebrow="Blog"
           title="Médias"
-          description="Uploadez des images depuis votre appareil dans l’éditeur (Ajouter un média) ou en image de couverture."
+          description="Uploadez des images depuis votre appareil dans un bloc Image, ou en image de couverture."
         />
         <div className="surface space-y-3 rounded-2xl p-5 text-sm text-muted-foreground sm:p-6">
           <p>
