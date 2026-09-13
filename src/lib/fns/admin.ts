@@ -185,18 +185,61 @@ export const getAdminOverview = createServerFn({ method: "GET" }).handler(async 
 
   const totalIncomeUsd = registrations.reduce((sum, reg) => sum + estimatePaidAmount(reg), 0);
 
+  const dayMs = 24 * 60 * 60 * 1000;
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+  const dailyIncome = Array.from({ length: 90 }, (_, index) => {
+    const date = new Date(today.getTime() - (89 - index) * dayMs);
+    const key = date.toISOString().slice(0, 10);
+    return { date: key, value: 0 };
+  });
+  const dailyByDate = new Map(dailyIncome.map((row) => [row.date, row]));
+  for (const reg of registrations) {
+    const amount = estimatePaidAmount(reg);
+    if (!amount) continue;
+    const key = String(reg.created_at ?? "").slice(0, 10);
+    const bucket = dailyByDate.get(key);
+    if (bucket) bucket.value += amount;
+  }
+
+  const paidRegs = registrations.filter((reg) => reg.payment_status === "paid");
+  const studentCount = new Set(paidRegs.map((reg) => reg.email.trim().toLowerCase())).size;
+  const vipMemberCount = new Set(
+    paidRegs
+      .filter((reg) => reg.plan === "vip")
+      .map((reg) => reg.email.trim().toLowerCase()),
+  ).size;
+
+  const purchasedCourses = courses
+    .map((course) => {
+      const bought = paidRegs.filter((reg) => reg.course_slug === course.slug);
+      return {
+        slug: course.slug,
+        title: course.title,
+        count: bought.length,
+        revenueUsd: bought.reduce((sum, reg) => sum + estimatePaidAmount(reg), 0),
+      };
+    })
+    .filter((course) => course.count > 0)
+    .sort((a, b) => b.count - a.count || b.revenueUsd - a.revenueUsd)
+    .slice(0, 8);
+
   return {
     stats: {
       total: stats.total,
       paid: stats.paid,
       pending: stats.pending + stats.manual_pending,
       vip: stats.vip,
+      studentCount,
+      vipMemberCount,
     },
     finance: {
       totalIncomeUsd,
       totalCommissionUsd: affiliateSummary.totalCommissionUsd,
       paidRegistrations: stats.paid,
     },
+    dailyIncome,
+    purchasedCourses,
     affiliate: {
       affiliateCount: affiliateSummary.affiliateCount,
       pendingWithdrawals: affiliateSummary.pendingWithdrawals,

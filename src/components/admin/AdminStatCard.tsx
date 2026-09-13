@@ -12,6 +12,7 @@ type AdminStatCardProps = {
   manageLabel?: string;
   hint?: string;
   delta?: string;
+  className?: string;
 };
 
 export function AdminStatCard({
@@ -23,6 +24,7 @@ export function AdminStatCard({
   manageLabel = "Ouvrir",
   hint,
   delta,
+  className,
 }: AdminStatCardProps) {
   return (
     <div
@@ -31,6 +33,7 @@ export function AdminStatCard({
         highlight
           ? "bg-primary text-primary-foreground shadow-[0_18px_40px_rgb(0_70_213_/_0.28)]"
           : "bg-white shadow-[0_4px_24px_rgb(15_23_42_/_0.05)] dark:border dark:border-border dark:bg-card",
+        className,
       )}
     >
       <div className="flex items-start justify-between gap-3">

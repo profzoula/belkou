@@ -163,7 +163,9 @@ function AdminDashboardPage() {
         <AdminRegistrationsTab
           key={tabEpoch.inscriptions ?? 0}
           onStatsLoaded={(stats) =>
-            setOverview((current) => (current ? { ...current, stats } : current))
+            setOverview((current) =>
+              current ? { ...current, stats: { ...current.stats, ...stats } } : current,
+            )
           }
         />,
       )}
